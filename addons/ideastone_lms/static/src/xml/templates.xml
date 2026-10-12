@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="ideastone_lms.LmsFrame">
+    <div class="o_ideastone_lms_frame d-flex flex-column h-100">
+      <div class="o_ideastone_lms_bar d-flex align-items-center px-3 py-1 border-bottom bg-white">
+        <i class="fa fa-laptop me-2 text-muted"/>
+        <span class="fw-bold">Learning platform</span>
+        <span class="text-muted ms-2 small">OpenOlat · same login (SSO)</span>
+        <button class="btn btn-sm btn-link ms-auto" t-on-click="openInNewTab"><i class="fa fa-external-link me-1"/>Open in new tab</button>
+      </div>
+      <div class="flex-grow-1 position-relative">
+        <div t-if="!state.loaded" class="position-absolute top-50 start-50 translate-middle text-muted">
+          <i class="fa fa-circle-o-notch fa-spin me-2"/>Loading learning platform…
+        </div>
+        <iframe t-att-src="state.url" t-on-load="onLoad" class="w-100 h-100 border-0" title="Learning platform" allow="fullscreen; camera; microphone"/>
+      </div>
+    </div>
+  </t>
+
+  <t t-name="ideastone_lms.CampusHome">
+    <div class="o_ideastone_home p-4">
+      <div class="d-flex align-items-end flex-wrap mb-4">
+        <div>
+          <div class="text-muted small text-uppercase" style="letter-spacing:.06em">Ideastone Campus</div>
+          <h2 class="mb-0 fw-bold" t-esc="state.company"/>
+        </div>
+        <div class="ms-auto d-flex gap-4">
+          <div class="text-center"><div class="h3 mb-0 fw-bold" t-esc="state.stats.students"/><div class="text-muted small">students</div></div>
+          <div class="text-center"><div class="h3 mb-0 fw-bold" t-esc="state.stats.faculty"/><div class="text-muted small">faculty</div></div>
+          <div class="text-center"><div class="h3 mb-0 fw-bold" t-esc="state.stats.courses"/><div class="text-muted small">programmes</div></div>
+        </div>
+      </div>
+      <div class="o_ideastone_tiles">
+        <t t-foreach="tiles" t-as="tile" t-key="tile.key">
+          <div class="o_ideastone_tile" t-on-click="() => this.open(tile)" role="button">
+            <div class="o_ideastone_tile_icon" t-attf-style="background:{{tile.color}}"><i t-attf-class="fa {{tile.icon}}"/></div>
+            <div class="fw-bold mt-2" t-esc="tile.label"/>
+            <div class="text-muted small" t-esc="tile.help"/>
+          </div>
+        </t>
+      </div>
+    </div>
+  </t>
+
+</templates>

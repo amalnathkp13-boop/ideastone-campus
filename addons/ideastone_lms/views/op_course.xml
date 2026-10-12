@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_op_course_form_lms" model="ir.ui.view">
+    <field name="name">op.course.form.lms</field>
+    <field name="model">op.course</field>
+    <field name="inherit_id" ref="openeducat_core.view_op_course_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='code']" position="after">
+        <field name="lms_course_key" placeholder="e.g. 1234567 (OpenOlat → Course → Administration → Settings)"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>

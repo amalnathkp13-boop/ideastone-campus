@@ -2,10 +2,10 @@
 
 ```
                  ┌──────────────────────┐
-   browser ────► │  nginx (port 80)     │
+   browser ────► │  nginx (one domain)  │
                  └──┬─────────┬───────┬─┘
                     │         │       │
-        campus.local│  lms.campus.local│  sso.campus.local
+                  /          /lms/   /sso/
                     ▼         ▼       ▼
           ┌──────────────┐ ┌────────────┐ ┌──────────┐
           │ Odoo 17      │ │ OpenOlat   │ │ Keycloak │
@@ -57,12 +57,9 @@ addons/ideastone_hostel/
 
 Add it to the install list in `odoo/entrypoint-campus.sh` (`-i ideastone_campus,ideastone_hostel`) if it should be installed on first boot.
 
-## ERP ↔ LMS sync (phase 2)
+## ERP ↔ LMS (implemented in `ideastone_lms`)
 
-Planned as a small service (`services/lms-sync/`, Python) that:
-
-1. Listens to Odoo (automated action / webhook on `op.student` create, `op.student.course` enrolment).
-2. Calls OpenOlat REST (`/restapi/users`, `/restapi/repo/courses/{id}/members`) to create the user and enrol them in the course mapped to their programme/semester.
-3. Pulls assessment results back into OpenEduCat exam records on a schedule.
-
-A mapping table (Odoo student id ↔ OpenOlat identity key, Odoo subject ↔ OpenOlat course resource id) keeps the sync idempotent. See `docs/sso.md` for the identity side.
+* **UI**: `ideastone_lms.lms_frame` client action embeds `/lms/` in an iframe; nginx strips `X-Frame-Options` from OpenOlat and sets `frame-ancestors 'self'`, so it only frames on our own domain.
+* **Identity**: both apps trust Keycloak; a user signed in to the ERP is signed in to the LMS in the frame.
+* **Provisioning** (`models/lms_client.py`): `GET /restapi/users?login="x"` → `PUT /restapi/users` → `PUT /restapi/repo/courses/{key}/participants/{identityKey}`. Each student/faculty stores `lms_login`, `lms_identity_key`, `lms_synced_on`, `lms_sync_error`; `op.course.lms_course_key` maps a programme to an OpenOlat course. Runs from the record button, a list action, or the nightly cron (`ideastone.lms_auto_provision`).
+* **Phase 3 (open)**: pull assessment results back from OpenOlat into OpenEduCat exam records.

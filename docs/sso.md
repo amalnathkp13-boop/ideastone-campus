@@ -2,18 +2,9 @@
 
 The `campus` realm is imported automatically on first start from `keycloak/campus-realm.json`, with two OpenID Connect clients (`odoo`, `openolat`) and three demo users (`demo.admin`, `demo.faculty`, `demo.student`, password `demo1234`).
 
-## Odoo side
+## Odoo side — already done by `ideastone_campus`
 
-1. Apps → install **OAuth2 authentication** (`auth_oauth`).
-2. Settings → Integrations → OAuth Providers → *New*:
-   * Provider name: `Ideastone SSO`
-   * Client ID: `odoo`
-   * Authorization URL: `http://localhost:8080/realms/campus/protocol/openid-connect/auth`
-   * Scope: `openid email profile`
-   * Validation URL: `http://localhost:8080/realms/campus/protocol/openid-connect/userinfo`
-   * Data endpoint: same as validation URL
-   * Allowed: ✓
-3. Log out — the login page now shows **Log in with Ideastone SSO**.
+The module creates the *Ideastone SSO* provider on install and points it at `CAMPUS_PUBLIC_URL/sso/realms/campus/...` (browser) and `KEYCLOAK_INTERNAL_URL/realms/campus/.../userinfo` (server-side validation). Nothing to configure; the login page shows **Log in with Ideastone SSO**. To change the URLs later: Settings → Integrations → OAuth Providers.
 
 Odoo CE matches users by e-mail on first login; create the Odoo user (or let `auth_signup` do it) with the same e-mail as in Keycloak.
 
@@ -21,9 +12,9 @@ Odoo CE matches users by e-mail on first login; create the Odoo user (or let `au
 
 1. Log in as `administrator` → Administration → Login → **OpenID Connect**.
 2. Enable, then add provider:
-   * Name: `Ideastone SSO`, Issuer: `http://localhost:8080/realms/campus`
+   * Name: `Ideastone SSO`, Issuer: `http://localhost/sso/realms/campus`
    * Client ID: `openolat`, Client secret: value of `secret` in `campus-realm.json` (change it!)
-   * Discovery / endpoints: `http://localhost:8080/realms/campus/.well-known/openid-configuration`
+   * Discovery / endpoints: `http://localhost/sso/realms/campus/.well-known/openid-configuration`
    * Attribute mapping: `preferred_username` → username, `email`, `given_name`, `family_name`
 3. Optionally enable *Create user on first login*.
 

@@ -7,7 +7,9 @@ College ERP + LMS for Indian engineering and arts colleges, built by **Ideastone
 | ERP | [Odoo 17 Community](https://github.com/odoo/odoo) + [OpenEduCat 17.0](https://github.com/openeducat/openeducat_erp) | LGPL-3 | Admissions, students, faculty, fees & receipts, timetable, attendance, exams, library, parents portal, accounting, HR |
 | LMS | [OpenOlat 21](https://www.openolat.com) | Apache-2.0 | Course content, SCORM, assessments, question banks, forums, e-portfolios |
 | SSO | [Keycloak 26](https://www.keycloak.org) | Apache-2.0 | One login (OpenID Connect) for ERP and LMS |
-| Ours | `addons/ideastone_campus` | Proprietary (Ideastone) | Branding, Indian-college fields & master data, localisation, client customisations |
+| Ours | `addons/ideastone_campus`, `addons/ideastone_lms` | Proprietary (Ideastone) | Branding, Indian-college fields & master data, SSO wiring, LMS embedded in the ERP, user provisioning |
+
+**One platform, one address, one login.** nginx serves everything from a single domain — `/` is the ERP, `/lms/` is the LMS, `/sso/` is the identity server — and Keycloak signs users in to both. The LMS opens *inside* the ERP's "Learning" app; students and faculty created in the ERP get their LMS accounts automatically.
 
 ![Ideastone Campus home](docs/screenshots/02-home.png)
 
@@ -20,12 +22,13 @@ cp .env.example .env            # change passwords for anything beyond local dem
 docker compose up -d --build    # first start takes ~5 min: installs OpenEduCat + demo data
 ```
 
-| Service | URL | Login |
+| What | URL | Login |
 |---|---|---|
-| ERP (Odoo + OpenEduCat) | http://localhost:8069 | `admin` / `admin` |
-| LMS (OpenOlat) | http://localhost:8088 | `administrator` / `openolat` (change on first login) |
-| SSO (Keycloak admin) | http://localhost:8080 | `admin` / `admin` |
-| Everything via nginx | http://campus.local, http://lms.campus.local, http://sso.campus.local | add to `/etc/hosts` → `127.0.0.1` |
+| **Ideastone Campus** (everything) | http://localhost | `admin` / `admin`, or **Log in with Ideastone SSO** → `demo.admin` / `demo1234` |
+| Learning platform (OpenOlat) | http://localhost/lms/ — also inside the ERP under **Learning** | SSO, or `administrator` / `openolat` (change on first login) |
+| Identity server (Keycloak admin console) | http://localhost/sso/admin/ | `admin` / `admin` |
+
+Set `CAMPUS_DOMAIN` / `CAMPUS_PUBLIC_URL` in `.env` to the real hostname before deploying for a college.
 
 `ODOO_DEMO=true` (default) loads OpenEduCat's demo students, courses and fees so the system is presentable immediately. Set it to `false` in `.env` before the first start for a clean production database.
 
@@ -46,7 +49,15 @@ python ../odoo/odoo-bin -c dev/odoo-dev.conf -d campus -i ideastone_campus
 
 Then open http://localhost:8069 (admin / admin).
 
-## What `ideastone_campus` adds
+## What the Ideastone modules add
+
+`ideastone_lms`
+* **Campus home** — one launcher screen with a tile per module (Admissions, Students, Faculty, Fees, Attendance, Exams, Timetable, Library, Learning).
+* **Learning** app — OpenOlat embedded inside the Ideastone Campus UI (iframe on the same domain, same SSO session), plus "Open in new tab".
+* **LMS accounts** — *Create LMS account* on every student/faculty record (and a list action for bulk), nightly cron for automatic provisioning, OpenOlat course key on each programme so students are enrolled on sync. Settings under *Ideastone Campus → Settings*.
+
+`ideastone_campus`
+* **Single sign-on** — Keycloak OIDC provider pre-configured; the login page shows *Log in with Ideastone SSO*. New SSO users get an Odoo account on first login.
 
 * **Ideastone Campus** top-level menu grouping the office's daily screens: Admissions, Students, Faculty, Fee terms, Attendance sheets, Exams.
 * Student record: **university register no** (unique), **admission quota** (Govt / Management / NRI), **community** (for scholarships), **hosteller**, **college bus**, Aadhaar last-4; list/search filters for these.
@@ -65,7 +76,8 @@ Everything the client asks for goes into this module (or a new sibling module un
 ## Repository layout
 
 ```
-addons/ideastone_campus/   our Odoo module (models, views, data, assets)
+addons/ideastone_campus/   our Odoo module: branding, Indian-college fields, master data, SSO
+addons/ideastone_lms/      our Odoo module: Campus home, embedded LMS, OpenOlat provisioning
 vendor/openeducat_erp/     OpenEduCat 17.0 – git submodule, unmodified
 odoo/                      Odoo image build, config, first-boot installer
 openolat/                  OpenOlat on Tomcat 10.1 – image build + config templates

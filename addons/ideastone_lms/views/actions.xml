@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Client actions rendered by OWL components (static/src/js) -->
+  <record id="action_campus_home" model="ir.actions.client">
+    <field name="name">Campus home</field>
+    <field name="tag">ideastone_lms.campus_home</field>
+  </record>
+  <record id="action_lms_frame" model="ir.actions.client">
+    <field name="name">Learning</field>
+    <field name="tag">ideastone_lms.lms_frame</field>
+  </record>
+</odoo>
