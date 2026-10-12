@@ -5,7 +5,7 @@ FROM tomcat:10.1-jre17-temurin
 
 ARG OPENOLAT_VERSION
 ENV CATALINA_BASE=/home/openolat \
-    OLAT_DOMAIN=localhost OLAT_PORT=8088 \
+    OLAT_DOMAIN=localhost OLAT_PUBLIC_PORT=80 OLAT_CONTEXT=/lms \
     DB_HOST=db DB_NAME=openolat DB_USER=campus DB_PASSWORD=campus
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl unzip gettext-base \

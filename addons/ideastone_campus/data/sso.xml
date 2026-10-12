@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+    <!-- Keycloak (realm "campus") as the single sign-on provider. URLs are rewritten
+         at install time by hooks.post_init_hook from CAMPUS_PUBLIC_URL / KEYCLOAK_INTERNAL_URL. -->
+    <record id="provider_keycloak" model="auth.oauth.provider">
+      <field name="name">Ideastone SSO</field>
+      <field name="client_id">odoo</field>
+      <field name="auth_endpoint">http://localhost/sso/realms/campus/protocol/openid-connect/auth</field>
+      <field name="scope">openid profile email</field>
+      <field name="validation_endpoint">http://keycloak:8080/sso/realms/campus/protocol/openid-connect/userinfo</field>
+      <field name="css_class">fa fa-fw fa-id-badge text-primary</field>
+      <field name="body">Log in with Ideastone SSO</field>
+      <field name="enabled" eval="True"/>
+      <field name="sequence">1</field>
+    </record>
+    <!-- Hide the stock providers so the login page shows only ours -->
+    <record id="auth_oauth.provider_openerp" model="auth.oauth.provider"><field name="enabled" eval="False"/></record>
+    <record id="auth_oauth.provider_google" model="auth.oauth.provider"><field name="enabled" eval="False"/></record>
+    <record id="auth_oauth.provider_facebook" model="auth.oauth.provider"><field name="enabled" eval="False"/></record>
+
+    <record id="param_lms_url" model="ir.config_parameter">
+      <field name="key">ideastone.lms_url</field>
+      <field name="value">/lms/</field>
+    </record>
+  </data>
+</odoo>

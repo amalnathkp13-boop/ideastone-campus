@@ -14,6 +14,7 @@ timetable, attendance, exams, library, parents portal) and layers on:
 * Indian engineering-college master data (departments, B.E./B.Tech programmes,
   academic year with two semesters) loaded as reference data
 * Indian localisation defaults (INR, Asia/Kolkata, en_IN)
+* Single sign-on: Keycloak OpenID Connect provider pre-configured ("Log in with Ideastone SSO")
 * Menu "Ideastone Campus" that groups the daily-use screens for college office staff
 """,
     "version": "17.0.1.0.0",
@@ -29,10 +30,13 @@ timetable, attendance, exams, library, parents portal) and layers on:
         "openeducat_activity",
         "openeducat_facility",
         "web",
+        "auth_oauth",
+        "auth_signup",
     ],
     "data": [
         "data/branding.xml",
         "data/master_data.xml",
+        "data/sso.xml",
         "views/webclient_templates.xml",
         "views/menus.xml",
     ],

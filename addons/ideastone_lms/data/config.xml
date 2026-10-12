@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+    <record id="param_lms_internal" model="ir.config_parameter"><field name="key">ideastone.lms_internal_url</field><field name="value">http://openolat:8088/lms</field></record>
+    <record id="param_lms_api_user" model="ir.config_parameter"><field name="key">ideastone.lms_api_user</field><field name="value">administrator</field></record>
+    <record id="param_lms_api_password" model="ir.config_parameter"><field name="key">ideastone.lms_api_password</field><field name="value">openolat</field></record>
+    <record id="param_lms_auto" model="ir.config_parameter"><field name="key">ideastone.lms_auto_provision</field><field name="value">False</field></record>
+  </data>
+</odoo>

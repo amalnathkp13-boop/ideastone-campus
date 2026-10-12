@@ -7,10 +7,20 @@
   "sslRequired": "none",
   "roles": {
     "realm": [
-      {"name": "admin", "description": "College administration"},
-      {"name": "faculty", "description": "Teaching staff"},
-      {"name": "student"},
-      {"name": "parent"}
+      {
+        "name": "admin",
+        "description": "College administration"
+      },
+      {
+        "name": "faculty",
+        "description": "Teaching staff"
+      },
+      {
+        "name": "student"
+      },
+      {
+        "name": "parent"
+      }
     ]
   },
   "clients": [
@@ -22,8 +32,18 @@
       "publicClient": true,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": true,
-      "redirectUris": ["http://localhost:8069/*", "http://campus.local/*"],
-      "webOrigins": ["+"]
+      "redirectUris": [
+        "http://localhost/*",
+        "http://localhost:8069/*",
+        "http://campus.local/*",
+        "*"
+      ],
+      "webOrigins": [
+        "+"
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "+"
+      }
     },
     {
       "clientId": "openolat",
@@ -33,28 +53,70 @@
       "publicClient": false,
       "secret": "change-me-openolat-secret",
       "standardFlowEnabled": true,
-      "redirectUris": ["http://localhost:8088/*", "http://lms.campus.local/*"],
-      "webOrigins": ["+"]
+      "redirectUris": [
+        "http://localhost/lms/*",
+        "http://campus.local/lms/*",
+        "*"
+      ],
+      "webOrigins": [
+        "+"
+      ]
     }
   ],
   "users": [
     {
-      "username": "demo.admin", "enabled": true, "firstName": "Campus", "lastName": "Admin",
-      "email": "admin@campus.local", "emailVerified": true,
-      "credentials": [{"type": "password", "value": "demo1234", "temporary": false}],
-      "realmRoles": ["admin"]
+      "username": "demo.admin",
+      "enabled": true,
+      "firstName": "Campus",
+      "lastName": "Admin",
+      "email": "admin@campus.local",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "admin"
+      ]
     },
     {
-      "username": "demo.faculty", "enabled": true, "firstName": "Priya", "lastName": "Raman",
-      "email": "faculty@campus.local", "emailVerified": true,
-      "credentials": [{"type": "password", "value": "demo1234", "temporary": false}],
-      "realmRoles": ["faculty"]
+      "username": "demo.faculty",
+      "enabled": true,
+      "firstName": "Priya",
+      "lastName": "Raman",
+      "email": "faculty@campus.local",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "faculty"
+      ]
     },
     {
-      "username": "demo.student", "enabled": true, "firstName": "Arun", "lastName": "Kumar",
-      "email": "student@campus.local", "emailVerified": true,
-      "credentials": [{"type": "password", "value": "demo1234", "temporary": false}],
-      "realmRoles": ["student"]
+      "username": "demo.student",
+      "enabled": true,
+      "firstName": "Arun",
+      "lastName": "Kumar",
+      "email": "student@campus.local",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "student"
+      ]
     }
   ]
 }

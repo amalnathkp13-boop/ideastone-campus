@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="res_config_settings_view_form_lms" model="ir.ui.view">
+    <field name="name">res.config.settings.form.ideastone.lms</field>
+    <field name="model">res.config.settings</field>
+    <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//form" position="inside">
+        <app data-string="Ideastone Campus" string="Ideastone Campus" name="ideastone_lms" logo="/ideastone_campus/static/description/icon.png">
+          <block title="Learning platform (OpenOlat)" name="lms_block">
+            <setting string="Where the Learning app opens" help="Same-domain path /lms/ keeps ERP and LMS under one address and one SSO session.">
+              <field name="lms_public_url"/>
+            </setting>
+            <setting string="REST API connection" help="Used to create LMS accounts and enrol students. The API user needs OpenOlat's User manager role; enable the REST API under OpenOlat → Administration → Core functions.">
+              <div class="row mt8"><label for="lms_internal_url" class="col-lg-4 o_light_label"/><field name="lms_internal_url"/></div>
+              <div class="row"><label for="lms_api_user" class="col-lg-4 o_light_label"/><field name="lms_api_user"/></div>
+              <div class="row"><label for="lms_api_password" class="col-lg-4 o_light_label"/><field name="lms_api_password" password="True"/></div>
+            </setting>
+            <setting string="Automatic provisioning" help="Nightly job creates LMS accounts for every active student and faculty member that does not have one yet.">
+              <field name="lms_auto_provision"/>
+              <div class="row mt8"><label for="lms_default_password" class="col-lg-4 o_light_label"/><field name="lms_default_password" password="True"/></div>
+            </setting>
+          </block>
+        </app>
+      </xpath>
+    </field>
+  </record>
+  <record id="action_lms_settings" model="ir.actions.act_window">
+    <field name="name">Ideastone Campus settings</field>
+    <field name="res_model">res.config.settings</field>
+    <field name="view_mode">form</field>
+    <field name="target">inline</field>
+    <field name="context">{'module': 'ideastone_lms'}</field>
+  </record>
+  <menuitem id="menu_lms_settings" name="Settings" parent="ideastone_campus.menu_ideastone_root" sequence="99" action="action_lms_settings" groups="base.group_system"/>
+</odoo>

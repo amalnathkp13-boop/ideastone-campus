@@ -6,9 +6,9 @@ log.dir=/home/openolat/logs
 tomcat.id=1
 
 server.domainname=${OLAT_DOMAIN}
-server.port=${OLAT_PORT}
+server.port=${OLAT_PUBLIC_PORT}
 server.port.ssl=0
-server.contextpath=/
+server.contextpath=${OLAT_CONTEXT}
 
 db.source=jndi
 db.jndi=java:comp/env/jdbc/openolatDS

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Campus home becomes the first entry of the Ideastone Campus app -->
+  <menuitem id="menu_campus_home" name="Campus home" parent="ideastone_campus.menu_ideastone_root" sequence="1" action="action_campus_home"/>
+  <!-- Learning (LMS) inside the Ideastone Campus app and as its own app in the switcher -->
+  <menuitem id="menu_lms_inline" name="Learning (LMS)" parent="ideastone_campus.menu_ideastone_root" sequence="70" action="action_lms_frame"/>
+  <menuitem id="menu_lms_root" name="Learning" sequence="2" action="action_lms_frame" web_icon="ideastone_lms,static/description/icon.png"/>
+</odoo>

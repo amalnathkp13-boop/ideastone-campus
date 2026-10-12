@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_op_faculty_form_lms" model="ir.ui.view">
+    <field name="name">op.faculty.form.lms</field>
+    <field name="model">op.faculty</field>
+    <field name="inherit_id" ref="openeducat_core.view_op_faculty_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//div[@name='button_box']" position="inside">
+        <button class="oe_stat_button" type="object" name="action_open_lms" icon="fa-graduation-cap" invisible="not lms_identity_key">
+          <div class="o_stat_info"><span class="o_stat_text">Learning</span><span class="o_stat_text">account ✓</span></div>
+        </button>
+        <button class="oe_stat_button" type="object" name="action_provision_lms" icon="fa-plus-circle" invisible="lms_identity_key">
+          <div class="o_stat_info"><span class="o_stat_text">Create</span><span class="o_stat_text">LMS account</span></div>
+        </button>
+      </xpath>
+      <xpath expr="//notebook" position="inside">
+        <page name="lms" string="Learning (LMS)">
+          <group>
+            <group><field name="lms_login"/><field name="lms_identity_key"/></group>
+            <group><field name="lms_synced_on"/><field name="lms_sync_error" invisible="not lms_sync_error" class="text-danger"/></group>
+          </group>
+        </page>
+      </xpath>
+    </field>
+  </record>
+  <record id="action_faculty_provision_lms" model="ir.actions.server">
+    <field name="name">Create LMS accounts</field>
+    <field name="model_id" ref="openeducat_core.model_op_faculty"/>
+    <field name="binding_model_id" ref="openeducat_core.model_op_faculty"/>
+    <field name="binding_view_types">list</field>
+    <field name="state">code</field>
+    <field name="code">records.action_provision_lms()</field>
+  </record>
+</odoo>
