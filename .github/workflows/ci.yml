@@ -17,9 +17,7 @@ jobs:
       - run: pip install ruff
       - run: ruff check addons/
       - name: Validate XML
-        run: |
-          sudo apt-get install -y -q libxml2-utils
-          find addons -name "*.xml" -print0 | xargs -0 -n1 xmllint --noout
+        run: python -c "import glob,xml.etree.ElementTree as E; [E.parse(f) for f in glob.glob('addons/**/*.xml', recursive=True)]; print('xml ok')"
       - name: Validate compose file
         run: docker compose config -q
 
