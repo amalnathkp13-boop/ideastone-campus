@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+    <!-- Departments typical of a Tamil Nadu engineering college -->
+    <record id="dept_cse" model="op.department"><field name="name">Computer Science and Engineering</field><field name="code">CSE</field></record>
+    <record id="dept_ece" model="op.department"><field name="name">Electronics and Communication Engineering</field><field name="code">ECE</field></record>
+    <record id="dept_eee" model="op.department"><field name="name">Electrical and Electronics Engineering</field><field name="code">EEE</field></record>
+    <record id="dept_mech" model="op.department"><field name="name">Mechanical Engineering</field><field name="code">MECH</field></record>
+    <record id="dept_civil" model="op.department"><field name="name">Civil Engineering</field><field name="code">CIVIL</field></record>
+    <record id="dept_bme" model="op.department"><field name="name">Biomedical Engineering</field><field name="code">BME</field></record>
+    <record id="dept_it" model="op.department"><field name="name">Information Technology</field><field name="code">IT</field></record>
+    <record id="dept_sh" model="op.department"><field name="name">Science and Humanities</field><field name="code">S&amp;H</field></record>
+
+    <!-- Programmes (OpenEduCat "courses") -->
+    <record id="course_be_cse" model="op.course"><field name="name">B.E. Computer Science and Engineering</field><field name="code">BE-CSE</field><field name="department_id" ref="dept_cse"/><field name="evaluation_type">GPA</field></record>
+    <record id="course_be_ece" model="op.course"><field name="name">B.E. Electronics and Communication Engineering</field><field name="code">BE-ECE</field><field name="department_id" ref="dept_ece"/><field name="evaluation_type">GPA</field></record>
+    <record id="course_be_eee" model="op.course"><field name="name">B.E. Electrical and Electronics Engineering</field><field name="code">BE-EEE</field><field name="department_id" ref="dept_eee"/><field name="evaluation_type">GPA</field></record>
+    <record id="course_be_mech" model="op.course"><field name="name">B.E. Mechanical Engineering</field><field name="code">BE-MECH</field><field name="department_id" ref="dept_mech"/><field name="evaluation_type">GPA</field></record>
+    <record id="course_be_civil" model="op.course"><field name="name">B.E. Civil Engineering</field><field name="code">BE-CIVIL</field><field name="department_id" ref="dept_civil"/><field name="evaluation_type">GPA</field></record>
+    <record id="course_be_bme" model="op.course"><field name="name">B.E. Biomedical Engineering</field><field name="code">BE-BME</field><field name="department_id" ref="dept_bme"/><field name="evaluation_type">GPA</field></record>
+    <record id="course_btech_it" model="op.course"><field name="name">B.Tech. Information Technology</field><field name="code">BTECH-IT</field><field name="department_id" ref="dept_it"/><field name="evaluation_type">GPA</field></record>
+    <record id="course_me_cse" model="op.course"><field name="name">M.E. Computer Science and Engineering</field><field name="code">ME-CSE</field><field name="department_id" ref="dept_cse"/><field name="evaluation_type">GPA</field></record>
+    <record id="course_mba" model="op.course"><field name="name">MBA</field><field name="code">MBA-GEN</field><field name="evaluation_type">GPA</field></record>
+
+    <!-- Current batches for the 2026 intake -->
+    <record id="batch_cse_2026" model="op.batch"><field name="name">2026–2030</field><field name="code">CSE-2026</field><field name="course_id" ref="course_be_cse"/><field name="start_date">2026-08-01</field><field name="end_date">2030-05-31</field></record>
+    <record id="batch_ece_2026" model="op.batch"><field name="name">2026–2030</field><field name="code">ECE-2026</field><field name="course_id" ref="course_be_ece"/><field name="start_date">2026-08-01</field><field name="end_date">2030-05-31</field></record>
+    <record id="batch_mech_2026" model="op.batch"><field name="name">2026–2030</field><field name="code">MECH-2026</field><field name="course_id" ref="course_be_mech"/><field name="start_date">2026-08-01</field><field name="end_date">2030-05-31</field></record>
+    <record id="batch_bme_2026" model="op.batch"><field name="name">2026–2030</field><field name="code">BME-2026</field><field name="course_id" ref="course_be_bme"/><field name="start_date">2026-08-01</field><field name="end_date">2030-05-31</field></record>
+
+    <!-- Academic year with odd/even semesters -->
+    <record id="ay_2026_27" model="op.academic.year">
+      <field name="name">2026-27</field>
+      <field name="start_date">2026-07-01</field>
+      <field name="end_date">2027-06-30</field>
+      <field name="term_structure">two_sem</field>
+    </record>
+    <record id="term_odd_2026" model="op.academic.term">
+      <field name="name">Odd semester 2026-27</field>
+      <field name="academic_year_id" ref="ay_2026_27"/>
+      <field name="term_start_date">2026-07-01</field>
+      <field name="term_end_date">2026-12-31</field>
+    </record>
+    <record id="term_even_2027" model="op.academic.term">
+      <field name="name">Even semester 2026-27</field>
+      <field name="academic_year_id" ref="ay_2026_27"/>
+      <field name="term_start_date">2027-01-01</field>
+      <field name="term_end_date">2027-06-30</field>
+    </record>
+  </data>
+</odoo>

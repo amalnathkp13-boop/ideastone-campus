@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Login page: Ideastone Campus heading and tagline above the form -->
+  <template id="login_ideastone" inherit_id="web.login" name="Ideastone Campus login">
+    <xpath expr="//form" position="before">
+      <div class="text-center mb-3">
+        <div class="h4 fw-bold mb-0">Ideastone Campus</div>
+        <div class="ideastone-login-tagline">College ERP · <t t-esc="request.env.company.name"/></div>
+      </div>
+    </xpath>
+  </template>
+
+  <!-- Replace the "Powered by Odoo" footer with our own -->
+  <template id="brand_promotion_ideastone" inherit_id="web.brand_promotion_message" name="Ideastone brand footer">
+    <xpath expr="//t[@t-out]" position="replace">
+      <span>Ideastone Campus · <a target="_blank" href="https://github.com/ideastone" class="text-muted">Ideastone Technologies</a></span>
+    </xpath>
+  </template>
+</odoo>

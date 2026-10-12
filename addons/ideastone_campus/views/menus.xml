@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Student form: Indian-college fields -->
+  <record id="view_op_student_form_ideastone" model="ir.ui.view">
+    <field name="name">op.student.form.ideastone</field>
+    <field name="model">op.student</field>
+    <field name="inherit_id" ref="openeducat_core.view_op_student_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='gender']" position="before">
+        <field name="register_no"/>
+        <field name="admission_quota"/>
+        <field name="community"/>
+      </xpath>
+      <xpath expr="//field[@name='birth_date']" position="after">
+        <field name="is_hosteller"/>
+        <field name="uses_transport"/>
+        <field name="aadhaar_last4"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_op_student_tree_ideastone" model="ir.ui.view">
+    <field name="name">op.student.tree.ideastone</field>
+    <field name="model">op.student</field>
+    <field name="inherit_id" ref="openeducat_core.view_op_student_tree"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='name']" position="before">
+        <field name="register_no" optional="show"/>
+      </xpath>
+      <xpath expr="//field[@name='name']" position="after">
+        <field name="admission_quota" optional="hide"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_op_student_search_ideastone" model="ir.ui.view">
+    <field name="name">op.student.search.ideastone</field>
+    <field name="model">op.student</field>
+    <field name="inherit_id" ref="openeducat_core.view_op_student_search"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='name']" position="after">
+        <field name="register_no"/>
+      </xpath>
+      <filter name="inactive" position="before">
+        <filter name="hostellers" string="Hostellers" domain="[('is_hosteller', '=', True)]"/>
+        <filter name="bus" string="College bus" domain="[('uses_transport', '=', True)]"/>
+        <separator/>
+      </filter>
+    </field>
+  </record>
+
+  <!-- Company form: affiliation / approval -->
+  <record id="view_company_form_ideastone" model="ir.ui.view">
+    <field name="name">res.company.form.ideastone</field>
+    <field name="model">res.company</field>
+    <field name="inherit_id" ref="openeducat_core.view_company_form_openeducat_core"/>
+    <field name="arch" type="xml">
+      <xpath expr="//page[@name='institute_detail']" position="inside">
+        <group string="Ideastone Campus">
+          <field name="campus_affiliation"/>
+          <field name="campus_approval"/>
+          <field name="campus_naac_grade"/>
+          <field name="campus_code"/>
+        </group>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- "Ideastone Campus" top-level menu: the office staff's daily screens in one place -->
+  <menuitem id="menu_ideastone_root" name="Ideastone Campus" sequence="1" web_icon="ideastone_campus,static/description/icon.png"/>
+  <menuitem id="menu_ideastone_admissions" name="Admissions" parent="menu_ideastone_root" sequence="10" action="openeducat_admission.act_open_op_admission_view"/>
+  <menuitem id="menu_ideastone_students" name="Students" parent="menu_ideastone_root" sequence="20" action="openeducat_core.act_open_op_student_view"/>
+  <menuitem id="menu_ideastone_faculty" name="Faculty" parent="menu_ideastone_root" sequence="30" action="openeducat_core.act_open_op_faculty_view"/>
+  <menuitem id="menu_ideastone_fees" name="Fee terms" parent="menu_ideastone_root" sequence="40" action="openeducat_fees.act_open_fees_terms_view"/>
+  <menuitem id="menu_ideastone_attendance" name="Attendance sheets" parent="menu_ideastone_root" sequence="50" action="openeducat_attendance.act_open_op_attendance_sheet_view"/>
+  <menuitem id="menu_ideastone_exams" name="Exams" parent="menu_ideastone_root" sequence="60" action="openeducat_exam.act_open_op_exam_view"/>
+</odoo>

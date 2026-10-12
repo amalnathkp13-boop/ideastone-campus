@@ -1,0 +1,11 @@
+[options]
+; Local development without Docker. Copy to dev/odoo-dev.conf and adjust paths.
+addons_path = ./addons,./vendor/openeducat_erp,../odoo/addons
+data_dir = ./dev/data
+db_host = 127.0.0.1
+db_port = 5432
+db_user = odoo
+db_password = odoo
+admin_passwd = master
+http_port = 8069
+dev_mode = reload,qweb,xml

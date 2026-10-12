@@ -1,0 +1,15 @@
+// Ideastone Campus brand accents — layered over Odoo's default theme.
+$ideastone-teal: #14856e;
+$ideastone-navy: #0f172a;
+
+.o_main_navbar { background-color: $ideastone-navy !important; }
+.o_main_navbar .o_menu_brand { font-weight: 600; letter-spacing: .2px; }
+.btn-primary, .o_form_button_save, .o_list_button_add {
+  background-color: $ideastone-teal !important; border-color: $ideastone-teal !important;
+}
+.o_statusbar_status .o_arrow_button.o_arrow_button_current { background-color: $ideastone-teal !important; border-color: $ideastone-teal !important; }
+a, .o_form_uri, .o_field_widget.o_field_many2one .o_external_button { color: $ideastone-teal; }
+
+// Login page
+.o_login_auth_card, .oe_login_form .card { border-top: 4px solid $ideastone-teal; }
+.ideastone-login-tagline { color: #64748b; font-size: .9rem; margin-top: .25rem; }

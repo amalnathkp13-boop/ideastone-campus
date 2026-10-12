@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install ruff
+      - run: ruff check addons/
+      - name: Validate XML
+        run: |
+          sudo apt-get install -y -q libxml2-utils
+          find addons -name "*.xml" -print0 | xargs -0 -n1 xmllint --noout
+      - name: Validate compose file
+        run: docker compose config -q
+
+  install:
+    name: install
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:16
+        env: { POSTGRES_USER: odoo, POSTGRES_PASSWORD: odoo, POSTGRES_DB: postgres }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U odoo" --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - name: Install ideastone_campus on Odoo 17 (real install, with demo data)
+        run: |
+          docker run --rm --network host \
+            -v "$PWD/addons:/mnt/ideastone-addons:ro" \
+            -v "$PWD/vendor/openeducat_erp:/mnt/openeducat:ro" \
+            odoo:17.0 \
+            odoo --db_host=127.0.0.1 --db_user=odoo --db_password=odoo -d ci \
+                 --addons-path=/mnt/ideastone-addons,/mnt/openeducat,/usr/lib/python3/dist-packages/odoo/addons \
+                 -i ideastone_campus --stop-after-init --log-level=warn 2>&1 | tee install.log
+          ! grep -E "ERROR|CRITICAL" install.log

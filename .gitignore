@@ -1,0 +1,10 @@
+.env
+*.pyc
+__pycache__/
+.venv/
+dev/odoo-dev.conf
+dev/data/
+*.log
+.DS_Store
+.idea/
+.vscode/

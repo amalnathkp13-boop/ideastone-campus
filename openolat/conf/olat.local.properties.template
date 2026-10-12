@@ -1,0 +1,22 @@
+# OpenOlat local configuration — rendered by start.sh (envsubst)
+# Reference: https://docs.openolat.org/manual_admin/installation/installGuide
+installation.dir=/home/openolat
+userdata.dir=/home/openolat/olatdata
+log.dir=/home/openolat/logs
+tomcat.id=1
+
+server.domainname=${OLAT_DOMAIN}
+server.port=${OLAT_PORT}
+server.port.ssl=0
+server.contextpath=/
+
+db.source=jndi
+db.jndi=java:comp/env/jdbc/openolatDS
+db.vendor=postgresql
+
+smtp.host=disabled
+
+# Branding
+olat.application.name=Ideastone Campus LMS
+defaultlang=en
+enabledLanguages=en,de

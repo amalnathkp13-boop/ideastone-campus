@@ -1,0 +1,4 @@
+[submodule "vendor/openeducat_erp"]
+	path = vendor/openeducat_erp
+	url = https://github.com/openeducat/openeducat_erp.git
+	branch = 17.0
