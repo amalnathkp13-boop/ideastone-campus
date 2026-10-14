@@ -11,7 +11,9 @@ ENV CATALINA_BASE=/home/openolat \
 RUN apt-get update && apt-get install -y --no-install-recommends curl unzip gettext-base \
  && rm -rf /var/lib/apt/lists/* \
  && useradd -m -d /home/openolat openolat \
- && mkdir -p /home/openolat/{bin,conf/Catalina/localhost,lib,logs,run,webapp,olatdata,temp,work} \
+ && mkdir -p /home/openolat/bin /home/openolat/conf/Catalina/localhost \
+             /home/openolat/lib /home/openolat/logs /home/openolat/run \
+             /home/openolat/webapp /home/openolat/olatdata /home/openolat/temp /home/openolat/work \
  && curl -fsSL "https://www.openolat.com/fileadmin/downloads/releases/openolat_${OPENOLAT_VERSION}.war" -o /tmp/openolat.war \
  && unzip -q /tmp/openolat.war -d /home/openolat/webapp && rm /tmp/openolat.war \
  && curl -fsSL https://jdbc.postgresql.org/download/postgresql-42.7.4.jar -o /home/openolat/lib/postgresql.jar

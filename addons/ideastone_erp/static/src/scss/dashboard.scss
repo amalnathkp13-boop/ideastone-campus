@@ -1,0 +1,38 @@
+.campus_sidebar {
+    position: fixed; inset: 0 auto 0 0; z-index: 100; width: 222px;
+    background: linear-gradient(165deg, #062841, #082e4b 48%, #05223c);
+    color: #eff7ff; display: flex; flex-direction: column; padding: 18px 10px 14px;
+    nav { flex: 1; overflow-y: auto; min-height: 0; }
+}
+.campus_brand { border: 0; background: transparent; color: #c9dce9; text-align: left; padding: 4px 7px 18px; font-size: 11px; }
+.campus_brand_crop { display: block; width: 184px; height: 49px; overflow: hidden; background: white; border-radius: 7px; margin-bottom: 8px; img { height: 49px; max-width: none; } }
+.campus_nav_search { border: 1px solid #32607c; background: #0b3554; color: #fff; padding: 10px; border-radius: 7px; margin-bottom: 12px; width: 100%; &::placeholder { color: #c9dce9; } }
+.campus_nav_heading { color: #c9dce9; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; padding: 19px 13px 7px; }
+.campus_nav_link { width: 100%; border: 0; background: transparent; color: #e2edf7; text-align: left; padding: 11px 13px; border-radius: 7px; font-weight: 560; font-size: 13px; min-height: 43px; &:hover { background: rgba(255,255,255,.09); } }
+.campus_home_link { background: #f0f6ff; color: #123665; box-shadow: inset 3px 0 #3981f1; font-weight: 700; }
+.campus_self_service { color: #eff7ff; padding: 12px 8px 0; margin-top: 12px; border-top: 1px solid #32607c; font-size: 12px; &:hover { color: #fff; } }
+.o_web_client { > .o_main_navbar, > .o_action_manager { margin-left: 222px; } }
+.campus_dashboard { padding: 22px 23px 55px; width: 100%; height: 100%; overflow-y: auto; background: var(--campus-body); color: var(--campus-ink); }
+.campus_crumb { color: #6682a6; font-size: 12px; margin-bottom: 15px; }
+.campus_page_heading, .campus_module_heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 19px; h1 { font-size: 25px; margin-bottom: 6px; } p { color: var(--campus-muted); margin: 0; } }
+.campus_stats { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 13px; margin-bottom: 28px; }
+.campus_stat { background: white; border: 1px solid var(--campus-line); border-radius: 12px; box-shadow: var(--campus-shadow); padding: 22px 18px; display: flex; gap: 14px; align-items: center; strong { display: block; font-size: 25px; } span { font-size: 12px; } }
+.campus_stat_icon, .campus_module_icon { display: grid; place-items: center; border-radius: 10px; background: #eaf4ff; color: #0666e7; width: 42px; height: 42px; flex-shrink: 0; }
+.campus_module_search { font-size: 12px; min-width: 220px; input { margin-top: 5px; } }
+.campus_module_group { margin-top: 22px; h3 { font-size: 15.5px; margin-bottom: 12px; } }
+.campus_modules { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 13px; }
+.campus_module { text-align: left; display: flex; align-items: center; gap: 12px; background: white; border: 1px solid var(--campus-line); border-radius: 12px; box-shadow: var(--campus-shadow); color: var(--campus-ink); padding: 18px; min-height: 80px; font-weight: 650; &:hover { border-color: #3981f1; background: #fbfdff; } }
+.campus_mobile_toggle { display: none; }
+.campus_nav_backdrop { position: fixed; inset: 0; background: rgba(6,39,67,.5); z-index: 99; border: 0; }
+@media(max-width: 1100px) { .campus_modules { grid-template-columns: repeat(2,minmax(0,1fr)); } .campus_stats { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width: 767px) {
+    .campus_sidebar { transform: translateX(-100%); transition: transform .2s; &.is-open { transform: translateX(0); } }
+    .o_web_client { > .o_main_navbar, > .o_action_manager { margin-left: 0; } > .o_main_navbar { padding-left: 42px; } }
+    .campus_mobile_toggle { display: block; position: fixed; left: 5px; top: 4px; z-index: 101; width: 36px; height: 40px; background: #062743; color: white; border: 0; border-radius: 7px; }
+    .campus_dashboard { padding: 18px 14px 36px; }
+    .campus_page_heading, .campus_module_heading { align-items: flex-start; flex-wrap: wrap; }
+    .campus_module_search { width: 100%; }
+    .campus_modules { grid-template-columns: 1fr; }
+}
+@media(max-width: 440px) { .campus_stats { grid-template-columns: 1fr; } }
+@media print { .campus_sidebar, .campus_mobile_toggle { display: none; } .o_web_client > .o_action_manager { margin-left: 0; } }

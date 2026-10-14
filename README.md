@@ -148,6 +148,27 @@ git checkout -b feature/<short-name>    # or fix/…, client/<college>-<topic>
 git push -u origin feature/<short-name> # then open a PR on GitHub
 ```
 
+## Campus Operations extension
+
+`ideastone_erp` adds PostgreSQL-backed teaching plans, staff qualification and document registers,
+hostel capacity and allocations, transport, gate and visitor registers, counseling, circulars,
+feedback, service requests, placement, alumni, procurement reviews, goods inspections, asset custody,
+attendance imports and configurable payroll. It connects existing OpenEduCat/Odoo screens through a
+permission-aware workspace and persistent VCET navigation.
+
+For an existing database, back it up and run:
+
+```bash
+docker compose exec odoo odoo -c /etc/odoo/odoo.conf -d campus -u ideastone_campus -i ideastone_erp --stop-after-init
+docker compose restart odoo
+```
+
+Assign Campus Operations roles in Settings → Users. Student/parent self-service is at `/my/campus`;
+catalogue and restricted digital downloads are at `/my/campus/library`. See
+[the discovery inventory](docs/erp-module-inventory.md), [coverage and limitations](docs/erp-implementation.md),
+and [design and setup](docs/erp-design-setup.md). The coverage matrix distinguishes delivered workflows
+from advanced reference features and external integrations that still require implementation or configuration.
+
 ## Roadmap
 
 - [x] Unified platform: one domain, one login, LMS inside the ERP, automatic LMS accounts

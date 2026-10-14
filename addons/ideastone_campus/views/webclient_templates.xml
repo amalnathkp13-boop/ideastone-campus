@@ -4,6 +4,7 @@
   <template id="login_ideastone" inherit_id="web.login" name="Ideastone Campus login">
     <xpath expr="//form" position="before">
       <div class="text-center mb-3">
+        <img src="/ideastone_campus/static/src/img/vcet-logo.png" class="img-fluid mb-3" alt="Velalar College of Engineering and Technology"/>
         <div class="h4 fw-bold mb-0">Ideastone Campus</div>
         <div class="ideastone-login-tagline">College ERP · <t t-esc="request.env.company.name"/></div>
       </div>

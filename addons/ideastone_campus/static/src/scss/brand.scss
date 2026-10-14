@@ -1,15 +1,44 @@
-// Ideastone Campus brand accents — layered over Odoo's default theme.
-$ideastone-teal: #14856e;
-$ideastone-navy: #0f172a;
-
-.o_main_navbar { background-color: $ideastone-navy !important; }
-.o_main_navbar .o_menu_brand { font-weight: 600; letter-spacing: .2px; }
-.btn-primary, .o_form_button_save, .o_list_button_add {
-  background-color: $ideastone-teal !important; border-color: $ideastone-teal !important;
+// Tokens extracted from Logo/VCET_Staff_Profile_Complete.html.
+:root {
+  --campus-navy: #062743;
+  --campus-navy-secondary: #0b3554;
+  --campus-ink: #102b50;
+  --campus-muted: #697c96;
+  --campus-blue: #0666e7;
+  --campus-blue-dark: #0655cf;
+  --campus-line: #e4ebf4;
+  --campus-body: #f4f8fc;
+  --campus-green: #159d55;
+  --campus-amber: #e99612;
+  --campus-red: #e54856;
+  --campus-shadow: 0 5px 20px rgba(15,50,91,.045);
+  --campus-radius: 12px;
 }
-.o_statusbar_status .o_arrow_button.o_arrow_button_current { background-color: $ideastone-teal !important; border-color: $ideastone-teal !important; }
-a, .o_form_uri, .o_field_widget.o_field_many2one .o_external_button { color: $ideastone-teal; }
-
-// Login page
-.o_login_auth_card, .oe_login_form .card { border-top: 4px solid $ideastone-teal; }
-.ideastone-login-tagline { color: #64748b; font-size: .9rem; margin-top: .25rem; }
+.o_web_client, .campus_portal {
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  color: var(--campus-ink); background: var(--campus-body); font-size: 13px;
+}
+.o_main_navbar {
+  background: #fff !important; border-bottom: 1px solid var(--campus-line);
+  color: var(--campus-ink); box-shadow: 0 1px 9px rgba(23,59,104,.025);
+  .o_menu_brand, .o_menu_sections button, .o_nav_entry, .o-dropdown, .dropdown-toggle { color: var(--campus-ink) !important; }
+  .o_menu_brand { font-weight: 650; }
+}
+.btn-primary, .o_form_button_save, .o_list_button_add {
+  background: var(--campus-blue) !important; border-color: var(--campus-blue) !important; color: white !important;
+  &:hover { background: var(--campus-blue-dark) !important; }
+}
+.btn { border-radius: 7px; min-height: 37px; }
+.o_control_panel { background: #fff; border-bottom-color: var(--campus-line); }
+.o_form_view .o_form_sheet_bg { background: var(--campus-body); }
+.o_form_view .o_form_sheet { border: 1px solid var(--campus-line); border-radius: var(--campus-radius); box-shadow: var(--campus-shadow); }
+.o_list_renderer { overflow-x: auto; }
+.o_list_table { th { background: #f0f6fd; color: var(--campus-ink); } td { padding-top: 11px; padding-bottom: 11px; border-bottom-color: var(--campus-line); } }
+.o_field_widget .o_input, .form-control, .form-select { border-color: #dce6f2; border-radius: 7px; }
+.o_statusbar_status .o_arrow_button.o_arrow_button_current { color: var(--campus-blue); background: #eaf3ff !important; border-color: #dce8f6 !important; }
+a, .o_form_uri, .o_field_widget.o_field_many2one .o_external_button { color: var(--campus-blue-dark); }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 3px solid #9ecbff; outline-offset: 2px; }
+.o_login_auth_card, .oe_login_form .card { border-top: 4px solid var(--campus-blue); }
+.ideastone-login-tagline { color: var(--campus-muted); font-size: .9rem; margin-top: .25rem; }
+.campus_portal { padding: 25px 16px 50px; h1 { font-size: 25px; } .card { border: 1px solid var(--campus-line); border-radius: 12px; box-shadow: var(--campus-shadow); margin-bottom: 18px; } .table-responsive { border-radius: 8px; } th { background: #f0f6fd; } td, th { padding: 11px; } }
+@media(max-width: 767px) { .o_form_view .o_form_sheet { min-width: 0; margin: 8px; } .o_control_panel { flex-wrap: wrap; } }

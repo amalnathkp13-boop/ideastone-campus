@@ -1,0 +1,33 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.Navigation">
+    <div class="campus_navigation">
+      <button class="campus_mobile_toggle" t-on-click="() => state.open = !state.open" t-att-aria-expanded="state.open" aria-controls="campus_sidebar" aria-label="Toggle campus navigation"><i class="fa fa-bars"/></button>
+      <button t-if="state.open" class="campus_nav_backdrop" t-on-click="() => state.open = false" aria-label="Close campus navigation"/>
+      <aside id="campus_sidebar" class="campus_sidebar" t-att-class="{ 'is-open': state.open }" aria-label="Campus navigation">
+        <button class="campus_brand" t-on-click="home" aria-label="Campus overview"><span class="campus_brand_crop"><img src="/ideastone_campus/static/src/img/vcet-logo.png" alt="VCET"/></span><span>Campus ERP</span></button>
+        <label for="campus_nav_search" class="visually-hidden">Find a module</label><input id="campus_nav_search" class="campus_nav_search" type="search" placeholder="Find a module…" t-model="state.filter"/>
+        <nav>
+          <button class="campus_nav_link campus_home_link" t-on-click="home"><i class="fa fa-home"/> Campus overview</button>
+          <p t-if="state.loading" role="status" class="px-3">Loading navigation…</p>
+          <div t-if="state.error" class="px-3" role="alert"><p t-esc="state.error"/><button class="btn btn-sm btn-light" t-on-click="load">Retry</button></div>
+          <t t-foreach="groups" t-as="group" t-key="group.label"><div class="campus_nav_heading" t-esc="group.label"/><t t-foreach="group.items" t-as="item" t-key="item.action"><button class="campus_nav_link" t-on-click="() => this.open(item)" t-esc="item.label"/></t></t>
+        </nav>
+        <a class="campus_self_service" href="/my/campus">My campus self-service <i class="fa fa-external-link"/></a>
+      </aside>
+    </div>
+  </t>
+  <t t-name="ideastone_erp.Dashboard">
+    <main class="campus_dashboard">
+      <div class="campus_crumb">Campus / Overview</div>
+      <header class="campus_page_heading"><div><h1>Campus overview</h1><p t-esc="state.company"/></div><button class="btn btn-outline-primary" t-on-click="load" t-att-disabled="state.loading"><i class="fa fa-refresh me-2"/>Refresh</button></header>
+      <div t-if="state.error" class="alert alert-danger" role="alert"><span t-esc="state.error"/><button class="btn btn-sm btn-outline-danger ms-2" t-on-click="load">Retry</button></div>
+      <p t-if="state.loading" role="status"><i class="fa fa-spinner fa-spin me-2"/>Loading your campus…</p>
+      <t t-else="">
+        <section class="campus_stats" aria-label="Campus summary"><t t-foreach="state.stats" t-as="stat" t-key="stat.label"><article class="campus_stat"><span class="campus_stat_icon"><i class="fa fa-bar-chart"/></span><div><strong t-esc="stat.value"/><span t-esc="stat.label"/></div></article></t></section>
+        <div class="campus_module_heading"><div><h2>Your workspace</h2><p>Open a module to manage its records and reports.</p></div><label class="campus_module_search">Find a module<input type="search" class="form-control" placeholder="Search modules…" t-model="state.filter"/></label></div>
+        <p t-if="!groups.length" role="status">No modules match your search.</p>
+        <t t-foreach="groups" t-as="group" t-key="group.label"><section class="campus_module_group"><h3 t-esc="group.label"/><div class="campus_modules"><t t-foreach="group.items" t-as="item" t-key="item.action"><button class="campus_module" t-on-click="() => this.open(item)"><span class="campus_module_icon"><i class="fa fa-th-large"/></span><span t-esc="item.label"/><i class="fa fa-angle-right ms-auto"/></button></t></div></section></t>
+      </t>
+    </main>
+  </t>
+</templates>

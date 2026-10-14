@@ -1,0 +1,15 @@
+<odoo>
+  <record id="faculty_profile" model="ir.ui.view">
+    <field name="name">op.faculty.campus.profile</field><field name="model">op.faculty</field>
+    <field name="inherit_id" ref="openeducat_core.view_op_faculty_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//notebook" position="inside">
+        <page string="Staff profile"><group string="Identity and employment"><field name="campus_staff_code"/><field name="campus_designation"/><field name="campus_category"/><field name="campus_service_type"/><field name="campus_joining_date"/><field name="campus_community"/><field name="campus_marital_status"/></group><group string="Contact and reporting"><field name="campus_alternate_email"/><field name="campus_communication_address"/><field name="campus_reporting_id"/><field name="campus_work_location"/><field name="campus_travel_mode"/></group><group string="Previous education and organization"><field name="campus_previous_education"/><field name="campus_notes"/></group></page>
+        <page string="Personal and contact details"><group><field name="campus_caste"/><field name="campus_caste_certificate_name"/><field name="campus_religion"/><field name="campus_blood_donor"/><field name="campus_anniversary"/><field name="campus_alternate_mobile"/><field name="campus_residence_location"/><field name="campus_emergency_phone"/><field name="campus_father_name"/><field name="campus_mother_name"/><field name="campus_spouse_name"/><field name="campus_registration_reference"/></group></page>
+        <page string="HR identifiers" groups="ideastone_erp.group_people"><group><field name="campus_pan_reference"/><field name="campus_aadhaar_last4"/><field name="campus_passport_reference"/><field name="campus_pf_reference"/><field name="campus_esi_reference"/><field name="campus_identification_marks"/></group></page>
+        <page string="Qualifications and compliance"><field name="campus_detail_ids"><tree><field name="kind"/><field name="name"/><field name="institution"/><field name="year"/><field name="verification"/></tree></field></page>
+      </xpath>
+    </field>
+  </record>
+  <record id="picking_inspection" model="ir.ui.view"><field name="name">stock.picking.campus.inspection</field><field name="model">stock.picking</field><field name="inherit_id" ref="stock.view_picking_form"/><field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Campus inspection"><field name="campus_inspection_required"/><field name="campus_inspection_ids"><tree><field name="product_id"/><field name="received_quantity"/><field name="accepted_quantity"/><field name="state"/></tree></field></page></xpath></field></record>
+</odoo>
