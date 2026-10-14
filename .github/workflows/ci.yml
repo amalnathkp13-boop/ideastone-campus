@@ -37,11 +37,11 @@ jobs:
       - name: Install all campus modules and test critical workflows on Odoo 17
         shell: bash
         run: |
-          docker run --rm --network host \
+          docker run --rm --network host --entrypoint odoo \
             -v "$PWD/addons:/mnt/ideastone-addons:ro" \
             -v "$PWD/vendor/openeducat_erp:/mnt/openeducat:ro" \
             odoo:17.0 \
-            odoo --db_host=127.0.0.1 --db_user=odoo --db_password=odoo -d ci \
+            --db_host=127.0.0.1 --db_user=odoo --db_password=odoo -d ci \
                  --addons-path=/mnt/ideastone-addons,/mnt/openeducat,/usr/lib/python3/dist-packages/odoo/addons \
                  -i ideastone_campus,ideastone_lms,ideastone_erp --test-enable --test-tags=/ideastone_erp \
                  --stop-after-init --workers=0 --max-cron-threads=0 --log-level=test 2>&1 | tee install.log
