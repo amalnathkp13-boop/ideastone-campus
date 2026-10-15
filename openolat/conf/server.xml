@@ -4,7 +4,7 @@
     <Connector port="8088" protocol="HTTP/1.1" connectionTimeout="20000"
                URIEncoding="UTF-8" maxHttpHeaderSize="16384" maxPostSize="-1"/>
     <Engine name="Catalina" defaultHost="localhost">
-      <Host name="localhost" appBase="webapps" unpackWARs="false" autoDeploy="false" deployOnStartup="false">
+      <Host name="localhost" appBase="webapps" unpackWARs="false" autoDeploy="false" deployOnStartup="true">
         <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
                prefix="access" suffix=".log" pattern="%h %l %u %t &quot;%r&quot; %s %b %D"/>
       </Host>

@@ -1,0 +1,170 @@
+[
+  {
+    "model": "campus.digital.resource",
+    "label": "Digital library",
+    "group": "Academics",
+    "action": "ideastone_erp.action_digital_resource"
+  },
+  {
+    "model": "campus.teaching.plan",
+    "label": "Lesson plans",
+    "group": "Academics",
+    "action": "ideastone_erp.action_teaching_plan"
+  },
+  {
+    "model": "campus.faculty.detail",
+    "label": "Staff qualifications and documents",
+    "group": "Staff",
+    "action": "ideastone_erp.action_faculty_detail"
+  },
+  {
+    "model": "campus.faculty.achievement",
+    "label": "Faculty development and appraisal",
+    "group": "Staff",
+    "action": "ideastone_erp.action_faculty_achievement"
+  },
+  {
+    "model": "campus.hostel.room",
+    "label": "Hostel rooms",
+    "group": "Campus services",
+    "action": "ideastone_erp.action_hostel_room"
+  },
+  {
+    "model": "campus.hostel.allocation",
+    "label": "Hostel residents",
+    "group": "Campus services",
+    "action": "ideastone_erp.action_hostel_allocation"
+  },
+  {
+    "model": "campus.hostel.attendance",
+    "label": "Hostel attendance",
+    "group": "Campus services",
+    "action": "ideastone_erp.action_hostel_attendance"
+  },
+  {
+    "model": "campus.gate.entry",
+    "label": "Hostel and library gate",
+    "group": "Campus services",
+    "action": "ideastone_erp.action_gate_entry"
+  },
+  {
+    "model": "campus.transport.route",
+    "label": "Bus routes",
+    "group": "Campus services",
+    "action": "ideastone_erp.action_transport_route"
+  },
+  {
+    "model": "campus.transport.stop",
+    "label": "Boarding points",
+    "group": "Campus services",
+    "action": "ideastone_erp.action_transport_stop"
+  },
+  {
+    "model": "campus.transport.allocation",
+    "label": "Transport allocations",
+    "group": "Campus services",
+    "action": "ideastone_erp.action_transport_allocation"
+  },
+  {
+    "model": "campus.transport.trip",
+    "label": "Trips and fuel",
+    "group": "Campus services",
+    "action": "ideastone_erp.action_transport_trip"
+  },
+  {
+    "model": "campus.visitor",
+    "label": "Visitor register",
+    "group": "Campus services",
+    "action": "ideastone_erp.action_visitor"
+  },
+  {
+    "model": "campus.counseling",
+    "label": "Mentor counseling",
+    "group": "Academics",
+    "action": "ideastone_erp.action_counseling"
+  },
+  {
+    "model": "campus.circular",
+    "label": "Circulars",
+    "group": "Academics",
+    "action": "ideastone_erp.action_circular"
+  },
+  {
+    "model": "campus.feedback",
+    "label": "Institutional feedback",
+    "group": "Engagement",
+    "action": "ideastone_erp.action_feedback"
+  },
+  {
+    "model": "campus.service.request",
+    "label": "Service requests",
+    "group": "Campus services",
+    "action": "ideastone_erp.action_service_request"
+  },
+  {
+    "model": "campus.placement.drive",
+    "label": "Recruitment drives",
+    "group": "Engagement",
+    "action": "ideastone_erp.action_placement_drive"
+  },
+  {
+    "model": "campus.placement.candidate",
+    "label": "Placement candidates",
+    "group": "Engagement",
+    "action": "ideastone_erp.action_placement_candidate"
+  },
+  {
+    "model": "campus.alumni.chapter",
+    "label": "Alumni chapters",
+    "group": "Engagement",
+    "action": "ideastone_erp.action_alumni_chapter"
+  },
+  {
+    "model": "campus.alumni",
+    "label": "Alumni profiles",
+    "group": "Engagement",
+    "action": "ideastone_erp.action_alumni"
+  },
+  {
+    "model": "campus.asset",
+    "label": "Fixed asset register",
+    "group": "Purchase and accounts",
+    "action": "ideastone_erp.action_asset"
+  },
+  {
+    "model": "campus.purchase.request",
+    "label": "Purchase indents",
+    "group": "Purchase and accounts",
+    "action": "ideastone_erp.action_purchase_request"
+  },
+  {
+    "model": "campus.stock.inspection",
+    "label": "Goods receipt inspections",
+    "group": "Purchase and accounts",
+    "action": "ideastone_erp.action_stock_inspection"
+  },
+  {
+    "model": "campus.salary.agreement",
+    "label": "Salary agreements",
+    "group": "Staff",
+    "action": "ideastone_erp.action_salary_agreement"
+  },
+  {
+    "model": "campus.payslip",
+    "label": "Monthly payroll",
+    "group": "Staff",
+    "action": "ideastone_erp.action_payslip"
+  },
+  {
+    "model": "campus.biometric.event",
+    "label": "Device attendance imports",
+    "group": "Staff",
+    "action": "ideastone_erp.action_biometric_event"
+  },
+  {
+    "model": "campus.exam.review",
+    "label": "Mark reviews and revaluation",
+    "group": "Academics",
+    "action": "ideastone_erp.action_exam_review"
+  }
+]
