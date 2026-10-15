@@ -1,29 +1,50 @@
 name: CI
 
+# Runs automatically — nobody has to start it:
+#   * every pull request (opened, new commits pushed, reopened)
+#   * every push to main (i.e. after each merge)
+#   * every night at 02:00 IST, also against the newest upstream OpenEduCat 17.0
+#   * manually from the Actions tab ("Run workflow") when needed
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
+  schedule:
+    - cron: "30 20 * * *"   # 20:30 UTC = 02:00 IST
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to the same PR cancels the run that is still going for the old commit.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint:
     name: lint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
+        with: { python-version: "3.12", cache: pip }
       - run: pip install ruff
-      - run: ruff check addons/
+      - name: Ruff
+        run: ruff check addons/ scripts/ --output-format=github
       - name: Validate XML
         run: python -c "import glob,xml.etree.ElementTree as E; [E.parse(f) for f in glob.glob('addons/**/*.xml', recursive=True)]; print('xml ok')"
+      - name: Validate shell scripts
+        run: for f in odoo/*.sh openolat/*.sh scripts/*.sh; do bash -n "$f"; done
       - name: Validate compose file
         run: docker compose config -q
 
   install:
     name: install
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     services:
       db:
         image: postgres:16
@@ -34,7 +55,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { submodules: recursive }
-      - name: Install all campus modules and test critical workflows on Odoo 17
+      - name: Use newest upstream OpenEduCat (nightly only)
+        if: github.event_name == 'schedule'
+        run: |
+          git -C vendor/openeducat_erp fetch --depth 1 origin 17.0
+          git -C vendor/openeducat_erp checkout -q FETCH_HEAD
+          echo "Testing against OpenEduCat $(git -C vendor/openeducat_erp rev-parse --short HEAD)"
+      - name: Install all campus modules and run tests on Odoo 17
         shell: bash
         run: |
           docker run --rm --network host --entrypoint odoo \
@@ -46,9 +73,42 @@ jobs:
                  -i ideastone_campus,ideastone_lms,ideastone_erp --test-enable --test-tags=/ideastone_erp \
                  --stop-after-init --workers=0 --max-cron-threads=0 --log-level=test 2>&1 | tee install.log
           ! grep -E "^[0-9-]+ [0-9:,]+ [0-9]+ (ERROR|CRITICAL)" install.log
+      - name: Test summary
+        if: always()
+        run: |
+          {
+            echo "### Odoo install & tests"
+            grep -E "odoo.tests.result|odoo.tests.stats" install.log | sed 's/^.*INFO [^ ]* //' || echo "no test summary found"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Preserve install and test diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: campus-install-tests
           path: install.log
+          retention-days: 14
+
+  images:
+    name: docker images
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: recursive }
+      - uses: docker/setup-buildx-action@v3
+      - name: Build Odoo image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./odoo
+          push: false
+          tags: ideastone-campus/odoo:ci
+          cache-from: type=gha,scope=odoo
+          cache-to: type=gha,mode=max,scope=odoo
+      - name: Build OpenOlat image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./openolat
+          push: false
+          tags: ideastone-campus/openolat:ci
+          cache-from: type=gha,scope=openolat
+          cache-to: type=gha,mode=max,scope=openolat

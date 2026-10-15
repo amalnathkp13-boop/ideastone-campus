@@ -1,0 +1,27 @@
+# Opens update pull requests automatically every Monday. They go through the
+# same CI and code-owner review as any other PR.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly, day: monday, time: "06:00", timezone: Asia/Kolkata }
+    commit-message: { prefix: "ci" }
+    labels: [dependencies]
+
+  - package-ecosystem: gitsubmodule      # OpenEduCat (vendor/openeducat_erp)
+    directory: /
+    schedule: { interval: weekly, day: monday, time: "06:00", timezone: Asia/Kolkata }
+    commit-message: { prefix: "vendor" }
+    labels: [dependencies]
+
+  - package-ecosystem: docker
+    directory: /odoo
+    schedule: { interval: weekly, day: monday, time: "06:00", timezone: Asia/Kolkata }
+    commit-message: { prefix: "docker" }
+    labels: [dependencies]
+
+  - package-ecosystem: docker
+    directory: /openolat
+    schedule: { interval: weekly, day: monday, time: "06:00", timezone: Asia/Kolkata }
+    commit-message: { prefix: "docker" }
+    labels: [dependencies]
