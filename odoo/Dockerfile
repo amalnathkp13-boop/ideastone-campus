@@ -1,7 +1,7 @@
 # Odoo 17 Community + OpenEduCat + Ideastone customisations.
 # OpenEduCat (LGPL-3) is mounted/copied unmodified from the git submodule;
 # all Ideastone-specific code lives in ../addons (separate modules, our IP).
-FROM odoo:17.0
+FROM odoo:20.0
 
 USER root
 COPY entrypoint-campus.sh /usr/local/bin/entrypoint-campus.sh
