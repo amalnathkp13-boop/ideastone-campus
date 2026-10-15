@@ -2,15 +2,27 @@
 
 ## Branch & PR workflow
 
-1. **Never commit to `main` directly.** `main` is always deployable.
-2. Create a branch from `main`:
-   `feature/<short-name>` for new features, `fix/<short-name>` for bug fixes, `client/<college>-<topic>` for client-specific customisation.
-3. Commit in small, logical steps. Message format: `area: what changed` — e.g. `student: add scholarship category field`.
-4. Push and open a **pull request** against `main`. Fill in the PR template (what / why / how tested / screenshots for UI changes).
-5. CI runs automatically: lint + a real install of `ideastone_campus` on Odoo 17. Fix anything red.
-6. At least **one reviewer approves**, then **squash-merge**. Delete the branch.
+**Teammates open pull requests; the maintainer (@amalnathkp13-boop) reviews and merges.** Nobody pushes to `main` directly.
 
-Set this up once on GitHub → Settings → Branches → *Add rule* for `main`: require a pull request, require 1 approval, require status checks (`lint`, `install`) to pass.
+1. Update your local `main`: `git checkout main && git pull`.
+2. Create a branch: `feature/<short-name>`, `fix/<short-name>` or `client/<college>-<topic>`.
+3. Commit in small, logical steps. Message format: `area: what changed` — e.g. `student: add scholarship category field`.
+4. Push the branch and open a **pull request** against `main`. Fill in the template (what / why / how tested / screenshots).
+5. CI must be green (`lint` + `install`). Fix anything red by pushing more commits to the same branch.
+6. The maintainer is requested automatically (CODEOWNERS), reviews, and either **approves and merges** or **requests changes**.
+7. If changes are requested, push fixes to the same branch — the earlier approval is dismissed and the PR is reviewed again.
+8. After merge, delete your branch and pull `main` before starting the next task.
+
+What GitHub enforces on `main`:
+
+| Rule | Effect |
+|---|---|
+| Pull request required | No direct pushes to `main` |
+| 1 approval from a code owner | Only the maintainer's approval unlocks the merge button |
+| Stale approvals dismissed | New commits after approval need a fresh review |
+| Approval of the latest push | The person who pushed last cannot be the one who approves it |
+| `lint` + `install` checks required, branch up to date | Nothing broken or stale reaches `main` |
+| Conversations resolved | All review comments must be addressed |
 
 ## Where code goes
 
