@@ -24,6 +24,23 @@ What GitHub enforces on `main`:
 | `lint` + `install` checks required, branch up to date | Nothing broken or stale reaches `main` |
 | Conversations resolved | All review comments must be addressed |
 
+## Automatic checks (CI)
+
+You never start CI by hand. GitHub Actions runs it:
+
+| When | What runs |
+|---|---|
+| A PR is opened, or new commits are pushed to it | `lint`, `install`, `docker images` |
+| Something is merged to `main` | the same, on the merged code |
+| Every night, 02:00 IST | the same, plus a test against the newest upstream OpenEduCat 17.0 — catches upstream breakage early |
+| Every Monday | Dependabot opens PRs to update GitHub Actions, OpenEduCat and base Docker images |
+
+* `lint` — ruff, XML and shell syntax, docker-compose config.
+* `install` — real install of `ideastone_campus`, `ideastone_lms`, `ideastone_erp` on Odoo 17 + PostgreSQL 16 and the module tests. A summary appears on the run page; the full log is downloadable as an artifact.
+* `docker images` — builds the Odoo and OpenOlat images so a broken Dockerfile is caught before deployment.
+
+Pushing again to a PR cancels the run for the older commit. `lint` and `install` must be green before the merge button unlocks. To re-run manually: Actions → CI → *Run workflow*.
+
 ## Where code goes
 
 | Change | Location |
