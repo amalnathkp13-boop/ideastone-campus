@@ -97,7 +97,7 @@ jobs:
         with: { submodules: recursive }
       - uses: docker/setup-buildx-action@v3
       - name: Build Odoo image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./odoo
           push: false
@@ -105,7 +105,7 @@ jobs:
           cache-from: type=gha,scope=odoo
           cache-to: type=gha,mode=max,scope=odoo
       - name: Build OpenOlat image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./openolat
           push: false
