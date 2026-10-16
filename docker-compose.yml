@@ -35,6 +35,7 @@ services:
       ODOO_DB: ${ODOO_DB:-campus}
       ODOO_ADMIN_PASSWORD: ${ODOO_ADMIN_PASSWORD:-admin}
       ODOO_DEMO: ${ODOO_DEMO:-true}
+      CAMPUS_AUTO_UPGRADE: ${CAMPUS_AUTO_UPGRADE:-true}
       CAMPUS_PUBLIC_URL: ${CAMPUS_PUBLIC_URL:-http://localhost}
       KEYCLOAK_INTERNAL_URL: http://keycloak:8080/sso
       LMS_INTERNAL_URL: http://openolat:8088/lms

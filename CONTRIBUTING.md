@@ -11,7 +11,7 @@
 5. CI must be green (`lint` + `install`). Fix anything red by pushing more commits to the same branch.
 6. The maintainer is requested automatically (CODEOWNERS), reviews, and either **approves and merges** or **requests changes**.
 7. If changes are requested, push fixes to the same branch — the earlier approval is dismissed and the PR is reviewed again.
-8. After merge, delete your branch and pull `main` before starting the next task.
+8. After merge, delete your branch and run `./scripts/update.sh` — it pulls `main` and restarts the stack, and Odoo upgrades the modules automatically. Merging alone does not change anyone's running copy.
 
 What GitHub enforces on `main`:
 
