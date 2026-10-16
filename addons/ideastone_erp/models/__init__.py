@@ -27,3 +27,5 @@ from . import biometric_event
 from . import exam_review
 from . import dashboard
 from . import digital_resource
+from . import responsibility, library_desk, attendance_export
+from . import academic_security

@@ -1,3 +1,6 @@
+import re
+from urllib.parse import urlsplit
+
 from odoo.tests import HttpCase, new_test_user, tagged
 
 
@@ -9,6 +12,11 @@ class TestCampusPortal(HttpCase):
         cls.env = cls.env(context=dict(cls.env.context, no_reset_password=True, mail_create_nosubscribe=True))
         cls.portal_user = new_test_user(cls.env, login="qa_http_portal", groups="base.group_portal", password="qa-http-fixture")
         cls.manager = new_test_user(cls.env, login="qa_http_manager", groups="ideastone_erp.group_manager")
+        cls.student_user = new_test_user(cls.env, login="qa_http_student", groups="base.group_portal", password="qa-http-fixture")
+        cls.parent_user = new_test_user(cls.env, login="qa_http_parent", groups="base.group_portal", password="qa-http-fixture")
+        cls.linked_student = cls.env["op.student"].create({"first_name": "QA", "last_name": "Linked", "gender": "o", "user_id": cls.student_user.id, "partner_id": cls.env["res.partner"].create({"name": "QA-LINKED-STUDENT", "user_id": cls.student_user.id, "company_id": cls.env.company.id}).id})
+        cls.unrelated_student = cls.env["op.student"].create({"first_name": "QA", "last_name": "Unrelated", "gender": "o", "partner_id": cls.env["res.partner"].create({"name": "QA-UNRELATED-PRIVATE", "company_id": cls.env.company.id}).id})
+        cls.parent_user.write({"child_ids": [(6, 0, cls.student_user.ids)]})
 
     def test_authentication_required(self):
         response = self.url_open("/my/campus", allow_redirects=False)
@@ -30,3 +38,30 @@ class TestCampusPortal(HttpCase):
         self.authenticate("qa_http_portal", "qa-http-fixture")
         response = self.url_open(f"/my/campus/resource/{resource.id}")
         self.assertEqual(response.status_code, 404)
+
+    def test_parent_cannot_select_unrelated_student(self):
+        self.authenticate("qa_http_parent", "qa-http-fixture")
+        response = self.url_open("/my/campus")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Parent workspace", response.text)
+        self.assertIn("QA-LINKED-STUDENT", response.text)
+        response = self.url_open(f"/my/campus?student={self.unrelated_student.id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("QA-UNRELATED-PRIVATE", response.text)
+        self.assertIn("Your account has no linked student record", response.text)
+
+    def test_student_workspace_uses_own_identity(self):
+        self.authenticate("qa_http_student", "qa-http-fixture")
+        response = self.url_open("/my/campus?campus_role=Admin")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Student workspace", response.text)
+        self.assertNotIn("QA-UNRELATED-PRIVATE", response.text)
+
+    def test_portal_login_lands_on_campus(self):
+        response = self.url_open("/web/login")
+        token = re.search(r'name="csrf_token" value="([^"]+)"', response.text).group(1)
+        response = self.url_open("/web/login", data={"login": "qa_http_student", "password": "qa-http-fixture", "csrf_token": token}, allow_redirects=False)
+        self.assertIn(response.status_code, (302, 303))
+        self.assertEqual(urlsplit(response.headers["Location"]).path, "/my/campus")
+        response = self.url_open("/my")
+        self.assertIn('href="/my/campus"', response.text)

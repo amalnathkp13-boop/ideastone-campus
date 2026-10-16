@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-  <!-- Login page: Ideastone Campus heading and tagline above the form -->
-  <template id="login_ideastone" inherit_id="web.login" name="Ideastone Campus login">
-    <xpath expr="//form" position="before">
-      <div class="text-center mb-3">
-        <img src="/ideastone_campus/static/src/img/vcet-logo.png" class="img-fluid mb-3" alt="Velalar College of Engineering and Technology"/>
-        <div class="h4 fw-bold mb-0">Ideastone Campus</div>
-        <div class="ideastone-login-tagline">College ERP · <t t-esc="request.env.company.name"/></div>
-      </div>
-    </xpath>
+  <template id="campus_login_layout" name="VCET campus login layout">
+    <t t-call="web.frontend_layout">
+      <t t-set="body_classname" t-value="'vcet_login_body'"/><t t-set="no_header" t-value="True"/><t t-set="no_footer" t-value="True"/>
+      <div class="vcet_login"><section class="vcet_login_left">
+        <img class="vcet_login_logo" src="/ideastone_campus/static/src/img/vcet-wordmark.png" alt="Velalar College of Engineering and Technology"/>
+        <div class="vcet_login_main"><span class="vcet_eyebrow">A CONNECTED CAMPUS</span><h1>Welcome to<br/>VCET Campus ERP</h1><p>One secure workspace for admissions, academics, attendance, examinations, fees and learning.</p><t t-out="0"/>
+        <p class="vcet_login_notice">Use your college account. Your assigned permissions determine the workspace and records available after sign-in.</p></div>
+        <p class="vcet_login_foot">Velalar College of Engineering and Technology · Powered by Ideastone</p>
+      </section><aside class="vcet_login_visual" aria-label="VCET campus photograph"><div><p>VELALAR COLLEGE OF ENGINEERING AND TECHNOLOGY</p><h2>One campus.<br/>One intelligent workspace.</h2><p>A connected experience for students, faculty, parents and college administration.</p></div><div class="vcet_login_features"><strong>Institutional workspaces</strong><div><span>Admissions</span><span>Academics</span><span>Attendance</span><span>Examinations</span><span>Finance &amp; fees</span><span>Student support</span></div></div></aside></div>
+    </t>
+  </template>
+  <template id="login_ideastone" inherit_id="web.login" name="VCET Campus login">
+    <xpath expr="//t[@t-call='web.login_layout']" position="attributes"><attribute name="t-call">ideastone_campus.campus_login_layout</attribute></xpath>
+    <xpath expr="//div[contains(@class,'field-login')]" position="before"><fieldset class="vcet_login_roles"><legend>One sign-in for every campus role</legend><span><i class="fa fa-graduation-cap" aria-hidden="true"/>Student</span><span><i class="fa fa-book" aria-hidden="true"/>Faculty</span><span><i class="fa fa-users" aria-hidden="true"/>Parent</span><span><i class="fa fa-shield" aria-hidden="true"/>Admin</span></fieldset></xpath>
+    <xpath expr="//label[@for='login']" position="replace"><label for="login" class="form-label">College ID / Email</label></xpath>
+    <xpath expr="//input[@name='login']" position="attributes"><attribute name="placeholder">Your college ID or email</attribute></xpath>
   </template>
 
   <!-- Replace the "Powered by Odoo" footer with our own -->
