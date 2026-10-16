@@ -1,0 +1,69 @@
+{
+  "generated_utc": "2026-10-16T15:48:31.547918+00:00",
+  "code_commit": "988befbb286a71784fcad6745d5de77c4ba21c73",
+  "base": "5fb695b",
+  "runtime": "Odoo 17 / PostgreSQL 16 / pinned OpenEduCat 27c27c8eeda1f455b026fad8b4fdf2523daf2ab8",
+  "automated": {
+    "clean_install": {
+      "tests": 24,
+      "failed": 0,
+      "errors": 0,
+      "summary": "0 failed, 0 error(s) of 24 tests when loading database 'vcet_acceptance' ",
+      "log_sha256": "4754b920ab79f97b6829f083a9ab4e10561be820d2fb5bb03b7705e1c8e214a7",
+      "database": "vcet_acceptance"
+    },
+    "upgrade": {
+      "tests": 24,
+      "failed": 0,
+      "errors": 0,
+      "summary": "0 failed, 0 error(s) of 24 tests when loading database 'campus' ",
+      "log_sha256": "3e7ae2632363950ca95c042002584c18572b670c40bb14d7d0297d42e2a93ec1",
+      "database": "campus"
+    }
+  },
+  "static_checks": {
+    "ruff": "passed",
+    "xml_files": 25,
+    "shell_syntax": "passed",
+    "compose_config": "passed",
+    "diff_whitespace": "passed"
+  },
+  "browser_checks": [
+    "Administrator module search and empty state",
+    "Governance ledger opens",
+    "PDF exported through the actual wizard, rendered and inspected",
+    "Spreadsheet button returns attachment response with metadata/checksum; page remains navigable",
+    "Faculty scoped copy/title and borrower-card search, persisted issue and return",
+    "Student and Parent sign-in routes to linked campus records",
+    "390, 768, 1440, 1728px layout checks; no document overflow",
+    "Actual Escape key closes mobile drawer after capture-listener fix",
+    "No JavaScript console errors during final circulation flow"
+  ],
+  "geometry_review": {
+    "captured_widths": [
+      390,
+      1440,
+      1728
+    ],
+    "status": "completed; triaged",
+    "exceptions": "Retained Odoo utility-menu padding and clipped locally-scrollable table descendants; see BUG-REPORT.md. No geometry-score approval claim."
+  },
+  "cleanup": {
+    "disposable_databases_removed": [
+      "vcet_final",
+      "vcet_ci",
+      "vcet_acceptance"
+    ],
+    "matching_test_filestores_removed": true,
+    "browser_fixture_users_in_campus": 0,
+    "old_checkout_and_preexisting_volumes": "preserved"
+  },
+  "limits": [
+    "No production deployment or IMPRES import",
+    "Full SSO/MFA/LMS stack not acceptance tested",
+    "Fourteen additional blueprint reports and other delegation templates remain future work",
+    "Existing library college attribution and unscheduled attendance require migration review",
+    "Other existing MVP modules are reused; their entire business logic is not claimed audited by this change"
+  ],
+  "preview": "http://localhost:8070/web/login"
+}
