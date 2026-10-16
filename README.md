@@ -82,6 +82,18 @@ For a real college set `CAMPUS_DOMAIN` and `CAMPUS_PUBLIC_URL` in `.env` to the 
 4. **LMS link** — in OpenOlat enable the REST API (Administration → Core functions) and OpenID Connect (Administration → Login) as described in [docs/sso.md](docs/sso.md); then in the ERP go to Ideastone Campus → Settings, enter the API user/key and tick *Create LMS accounts automatically*.
 5. **Users** — create staff in Keycloak (or connect the college's LDAP/AD); they sign in to everything with that one account.
 
+### Updating to the latest version
+
+After PRs are merged, every running copy (laptops, demo or college servers) updates with one command:
+
+```bash
+./scripts/update.sh        # = git pull + submodule update + docker compose up -d --build
+```
+
+On restart Odoo notices the add-on code changed and **upgrades the Ideastone modules automatically** (log line `campus: code changed since last start — upgrading …`). Then hard-refresh the browser (Ctrl+Shift+R). Merging a PR on GitHub alone does not change a running system — it has to pull the new code.
+
+Set `CAMPUS_AUTO_UPGRADE=false` in `.env` to switch the automatic upgrade off (e.g. on production, if upgrades should be done in a maintenance window).
+
 ## Running without Docker (development)
 
 Tested on Ubuntu 24.04 / Python 3.12 / PostgreSQL 16:
