@@ -1,0 +1,104 @@
+[
+  {
+    "module": "ideastone_lms",
+    "version": "17.0.1.0.0",
+    "license": "OPL-1",
+    "source": "addons/ideastone_lms/__manifest__.py"
+  },
+  {
+    "module": "ideastone_campus",
+    "version": "17.0.1.0.2",
+    "license": "OPL-1",
+    "source": "addons/ideastone_campus/__manifest__.py"
+  },
+  {
+    "module": "ideastone_erp",
+    "version": "17.0.1.0.1",
+    "license": "OPL-1",
+    "source": "addons/ideastone_erp/__manifest__.py"
+  },
+  {
+    "module": "openeducat_exam",
+    "version": "17.0.1.0",
+    "license": "LGPL-3",
+    "source": "vendor/openeducat_erp/openeducat_exam/__manifest__.py"
+  },
+  {
+    "module": "openeducat_facility",
+    "version": "17.0.1.0",
+    "license": "LGPL-3",
+    "source": "vendor/openeducat_erp/openeducat_facility/__manifest__.py"
+  },
+  {
+    "module": "openeducat_admission",
+    "version": "17.0.1.0",
+    "license": "LGPL-3",
+    "source": "vendor/openeducat_erp/openeducat_admission/__manifest__.py"
+  },
+  {
+    "module": "openeducat_erp",
+    "version": "17.0.1.0",
+    "license": "LGPL-3",
+    "source": "vendor/openeducat_erp/openeducat_erp/__manifest__.py"
+  },
+  {
+    "module": "openeducat_classroom",
+    "version": "17.0.1.0",
+    "license": "LGPL-3",
+    "source": "vendor/openeducat_erp/openeducat_classroom/__manifest__.py"
+  },
+  {
+    "module": "openeducat_attendance",
+    "version": "17.0.1.0",
+    "license": "LGPL-3",
+    "source": "vendor/openeducat_erp/openeducat_attendance/__manifest__.py"
+  },
+  {
+    "module": "openeducat_library",
+    "version": "17.0.1.0",
+    "license": "LGPL-3",
+    "source": "vendor/openeducat_erp/openeducat_library/__manifest__.py"
+  },
+  {
+    "module": "openeducat_parent",
+    "version": "17.0.1.0",
+    "license": "LGPL-3",
+    "source": "vendor/openeducat_erp/openeducat_parent/__manifest__.py"
+  },
+  {
+    "module": "openeducat_assignment",
+    "version": "17.0.1.0",
+    "license": "LGPL-3",
+    "source": "vendor/openeducat_erp/openeducat_assignment/__manifest__.py"
+  },
+  {
+    "module": "openeducat_timetable",
+    "version": "17.0.1.0",
+    "license": "LGPL-3",
+    "source": "vendor/openeducat_erp/openeducat_timetable/__manifest__.py"
+  },
+  {
+    "module": "web_openeducat",
+    "version": "17.0.1.0",
+    "license": "LGPL-3",
+    "source": "vendor/openeducat_erp/web_openeducat/__manifest__.py"
+  },
+  {
+    "module": "openeducat_activity",
+    "version": "17.0.1.0",
+    "license": "LGPL-3",
+    "source": "vendor/openeducat_erp/openeducat_activity/__manifest__.py"
+  },
+  {
+    "module": "openeducat_core",
+    "version": "17.0.1.0",
+    "license": "LGPL-3",
+    "source": "vendor/openeducat_erp/openeducat_core/__manifest__.py"
+  },
+  {
+    "module": "openeducat_fees",
+    "version": "17.0.1.0",
+    "license": "LGPL-3",
+    "source": "vendor/openeducat_erp/openeducat_fees/__manifest__.py"
+  }
+]

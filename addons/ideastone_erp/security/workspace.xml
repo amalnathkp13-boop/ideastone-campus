@@ -1,0 +1,104 @@
+<odoo>
+  <record id="group_college_admin" model="res.groups">
+    <field name="name">College administrator</field>
+    <field name="category_id" ref="ideastone_erp.category_campus" />
+    <field name="implied_ids" eval="[(4,ref('ideastone_erp.group_directory'))]" />
+    <field name="users" eval="[(4,ref('base.user_admin'))]" />
+  </record>
+  <record id="group_role_approver" model="res.groups">
+    <field name="name">Responsibility approver</field>
+    <field name="category_id" ref="ideastone_erp.category_campus" />
+    <field name="implied_ids" eval="[(4,ref('ideastone_erp.group_directory'))]" />
+    <field name="users" eval="[(4,ref('base.user_admin'))]" />
+  </record>
+  <record id="acl_responsibility_group_college_admin" model="ir.model.access">
+    <field name="name">responsibility_group_college_admin</field>
+    <field name="model_id" ref="model_campus_responsibility" />
+    <field name="group_id" ref="group_college_admin" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="True" />
+  </record>
+  <record id="acl_responsibility_group_manager" model="ir.model.access">
+    <field name="name">responsibility_group_manager</field>
+    <field name="model_id" ref="model_campus_responsibility" />
+    <field name="group_id" ref="group_manager" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="True" />
+  </record>
+  <record id="acl_responsibility_group_role_approver" model="ir.model.access">
+    <field name="name">responsibility_group_role_approver</field>
+    <field name="model_id" ref="model_campus_responsibility" />
+    <field name="group_id" ref="group_role_approver" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="acl_responsibility_openeducat_core_group_op_faculty" model="ir.model.access">
+    <field name="name">responsibility_openeducat_core_group_op_faculty</field>
+    <field name="model_id" ref="model_campus_responsibility" />
+    <field name="group_id" ref="openeducat_core.group_op_faculty" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="acl_attendance_export_wizard_base_group_user" model="ir.model.access">
+    <field name="name">attendance_export_wizard_base_group_user</field>
+    <field name="model_id" ref="model_campus_attendance_export_wizard" />
+    <field name="group_id" ref="base.group_user" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="True" />
+  </record>
+  <record id="acl_attendance_export_base_group_user" model="ir.model.access">
+    <field name="name">attendance_export_base_group_user</field>
+    <field name="model_id" ref="model_campus_attendance_export" />
+    <field name="group_id" ref="base.group_user" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="rule_responsibility_company" model="ir.rule">
+    <field name="name">Responsibility college boundary</field>
+    <field name="model_id" ref="model_campus_responsibility" />
+    <field name="domain_force">[('company_id','in',company_ids)]</field>
+  </record>
+  <record id="rule_responsibility_group_college_admin" model="ir.rule">
+    <field name="name">Appointment governance</field>
+    <field name="model_id" ref="model_campus_responsibility" />
+    <field name="groups" eval="[(4,ref('group_college_admin'))]" />
+    <field name="domain_force">[(1,'=',1)]</field>
+  </record>
+  <record id="rule_responsibility_group_manager" model="ir.rule">
+    <field name="name">Appointment governance</field>
+    <field name="model_id" ref="model_campus_responsibility" />
+    <field name="groups" eval="[(4,ref('group_manager'))]" />
+    <field name="domain_force">[(1,'=',1)]</field>
+  </record>
+  <record id="rule_responsibility_group_role_approver" model="ir.rule">
+    <field name="name">Appointment governance</field>
+    <field name="model_id" ref="model_campus_responsibility" />
+    <field name="groups" eval="[(4,ref('group_role_approver'))]" />
+    <field name="domain_force">[(1,'=',1)]</field>
+  </record>
+  <record id="rule_responsibility_faculty" model="ir.rule">
+    <field name="name">Own appointments</field>
+    <field name="model_id" ref="model_campus_responsibility" />
+    <field name="groups" eval="[(4,ref('openeducat_core.group_op_faculty'))]" />
+    <field name="domain_force">[('faculty_id.user_id','=',user.id)]</field>
+  </record>
+  <record id="rule_export_owner" model="ir.rule">
+    <field name="name">Own college report exports</field>
+    <field name="model_id" ref="model_campus_attendance_export" />
+    <field name="domain_force">[('company_id','in',company_ids),('user_id','=',user.id)]</field>
+  </record>
+  <record id="rule_faculty_assigned_sheets" model="ir.rule"><field name="name">Faculty assigned attendance sheets</field><field name="model_id" ref="openeducat_attendance.model_op_attendance_sheet"/><field name="domain_force">[(1,'=',1)] if user.has_group('openeducat_attendance.group_op_attendance_manager') or not user.has_group('openeducat_core.group_op_faculty') else [('faculty_id.user_id','=',user.id)]</field></record>
+  <record id="rule_faculty_assigned_lines" model="ir.rule"><field name="name">Faculty assigned attendance lines</field><field name="model_id" ref="openeducat_attendance.model_op_attendance_line"/><field name="domain_force">[(1,'=',1)] if user.has_group('openeducat_attendance.group_op_attendance_manager') or not user.has_group('openeducat_core.group_op_faculty') else [('attendance_id.faculty_id.user_id','=',user.id)]</field></record>
+</odoo>

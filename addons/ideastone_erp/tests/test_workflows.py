@@ -182,8 +182,10 @@ class TestCampusWorkflows(TransactionCase):
         for item in dashboard["navigation"]:
             action = self.env.ref(item["action"])
             self.assertTrue(action.exists())
-            if action._name == "ir.actions.act_window":
+            if item["allowed"] and action._name == "ir.actions.act_window":
                 self.env[action.res_model].with_user(self.manager).get_views([(False, "form"), (False, "tree")])
+            if not item["allowed"]:
+                self.assertFalse(self.env[item["model"]].with_user(self.manager).check_access_rights("read", raise_exception=False))
         with self.assertRaises(AccessError):
             portal_user = new_test_user(self.env, login="qa_portal", groups="base.group_portal")
             self.env["campus.dashboard"].with_user(portal_user).get_overview()

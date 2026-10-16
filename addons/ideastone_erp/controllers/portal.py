@@ -1,9 +1,21 @@
 import base64
 from urllib.parse import urlencode
 
+from odoo.addons.openeducat_core.controllers.app_main import OpeneducatHome
+from odoo.addons.web.controllers.utils import is_user_internal
 from odoo.http import content_disposition, request
 
 from odoo import fields, http
+
+
+class CampusHome(OpeneducatHome):
+    @http.route()
+    def web_login(self, redirect=None, *args, **kw):
+        response = super().web_login(redirect, *args, **kw)
+        # OpenEduCat replaces the normal login redirect after authentication.
+        if not redirect and request.params.get("login_success") and request.session.uid and not is_user_internal(request.session.uid):
+            return request.redirect("/my/campus")
+        return response
 
 
 class CampusPortal(http.Controller):
@@ -43,6 +55,8 @@ class CampusPortal(http.Controller):
         faculty = request.env["op.faculty"].sudo().search([("user_id", "=", request.env.uid)], limit=1)
         if faculty:
             audiences.append("faculty")
+        values["workspace_role"] = "Parent" if selected and selected.user_id != request.env.user else "Student" if selected else "Faculty" if faculty else "Campus"
+        values["timetable"] = []
         values["circulars"] = request.env["campus.circular"].sudo().search([
             ("company_id", "=", company.id), ("state", "=", "approved"),
             ("audience", "in", audiences), ("date_from", "<=", today),
@@ -51,8 +65,9 @@ class CampusPortal(http.Controller):
         if selected:
             lines = request.env["op.attendance.line"].sudo()
             own = [("student_id", "=", selected.id)]
-            values["attendance_count"] = lines.search_count(own)
-            values["attendance_present"] = lines.search_count(own + [("present", "=", True)])
+            attendance_domain = own + [("attendance_id.state", "=", "done")]
+            values["attendance_count"] = lines.search_count(attendance_domain)
+            values["attendance_present"] = lines.search_count(attendance_domain + [("present", "=", True)])
             result_model = request.env["op.result.line"].sudo()
             # Publish only finalized exam results; raw evaluator marks stay private.
             result_domain = own + [("exam_id.state", "=", "done")]
@@ -67,6 +82,10 @@ class CampusPortal(http.Controller):
                 ("requester_id", "=", request.env.uid), ("company_id", "=", company.id),
             ], limit=20, order="id desc")
             batches = selected.course_detail_ids.batch_id.ids
+            values["timetable"] = request.env["op.session"].sudo().search([
+                ("company_id", "=", company.id), ("batch_id", "in", batches),
+                ("state", "=", "confirm"), ("start_datetime", ">=", fields.Datetime.now()),
+            ], limit=20, order="start_datetime")
             values["lessons"] = request.env["campus.teaching.plan"].sudo().search([
                 ("company_id", "=", company.id), ("batch_id", "in", batches),
             ], limit=20)
