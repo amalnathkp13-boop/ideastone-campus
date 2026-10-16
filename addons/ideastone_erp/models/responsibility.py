@@ -31,7 +31,8 @@ class Responsibility(models.Model):
         today = fields.Date.context_today(self)
         for rec in self:
             rec.effective = bool(rec.state == "approved" and rec.active and rec.faculty_id.active
-                                 and rec.faculty_id.user_id.active and rec.date_from <= today <= rec.date_to)
+                                 and rec.account_id.active and rec.account_id == rec.faculty_id.user_id
+                                 and rec.date_from <= today <= rec.date_to)
 
     @api.constrains("faculty_id", "company_id", "date_from", "date_to", "media_type_ids", "justification")
     def _check_scope(self):
@@ -61,6 +62,8 @@ class Responsibility(models.Model):
             raise AccessError(_("Use the responsibility approval workflow."))
         if any(rec.state != "draft" for rec in self):
             raise ValidationError(_("Submitted appointments are immutable. Revoke and create a new appointment."))
+        if "faculty_id" in vals:
+            vals = dict(vals, account_id=self.env["op.faculty"].browse(vals["faculty_id"]).user_id.id)
         return super().write(vals)
 
     def action_request(self):

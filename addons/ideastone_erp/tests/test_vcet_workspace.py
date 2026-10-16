@@ -44,6 +44,10 @@ class TestVcetWorkspace(TransactionCase):
         with self.assertRaises(AccessError):
             self.appointment(state="approved")
         rec = self.appointment()
+        other_faculty = self.faculty.copy({"partner_id": self.env["res.partner"].create({"name": "QA draft nominee", "user_id": self.other_teacher.id, "company_id": self.env.company.id}).id})
+        rec.write({"faculty_id": other_faculty.id})
+        self.assertEqual(rec.account_id, self.other_teacher)
+        rec.write({"faculty_id": self.faculty.id})
         rec.action_request()
         with self.assertRaises(AccessError):
             rec.action_approve()
