@@ -52,7 +52,9 @@ private.action_campus_publish()
 resource = env["campus.digital.resource"].create({"name": "Programming foundations — course guide", "subject_id": subject.id, "batch_ids": [(6, 0, placement.batch_id.ids)],
     "document": base64.b64encode(b"Synthetic approved course guide for student portal QA."), "filename": "course-guide.txt"})
 resource.action_submit()
-resource.action_approve()
+publisher = new_test_user(env, login="student.materials.qa", name="QA Materials Publisher", password=os.environ["STUDENT_QA_PASSWORD"],
+    company_id=company.id, company_ids=[(6, 0, company.ids)], groups="ideastone_erp.group_manager")
+resource.with_user(publisher).action_approve()
 requirement = env["campus.admission.requirement"].create({"name": "QA admission confirmation"})
 admission = env["op.admission"].search([("student_id", "=", student.id)], limit=1)
 env["campus.admission.document"].create({"admission_id": admission.id, "requirement_id": requirement.id, "filename": "admission-confirmation.txt", "file": base64.b64encode(b"Synthetic admission confirmation.")})

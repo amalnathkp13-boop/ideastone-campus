@@ -183,9 +183,10 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
 
     def test_material_publication_and_college_download_scope(self):
         model = self.env["campus.digital.resource"]
+        publisher = new_test_user(self.env, login="student_material_publisher", groups="ideastone_erp.group_manager")
         own = model.create({"name": "Student published guide", "document": base64.b64encode(b"QA guide"), "filename": "guide.txt"})
         own.action_submit()
-        own.with_user(self.owner).action_approve()
+        own.with_user(publisher).action_approve()
         draft = model.create({"name": "PRIVATE draft guide", "document": base64.b64encode(b"Private"), "filename": "draft.txt"})
         company = self.env["res.company"].create({"name": "Other college student privacy QA"})
         operator = new_test_user(self.env, login="student_other_college_operator", groups="ideastone_erp.group_manager", company_id=company.id, company_ids=[(6, 0, company.ids)])
