@@ -128,7 +128,8 @@ class CampusBase extends Component {
         } catch (error) { this.notification.add(error.data?.message || "The source register is unavailable.", {type: "danger"}); }
     }
     chartWidth(value, rows, field = "value") {
-        const maximum = Math.max(1, ...rows.map(row => Math.abs(Number(row[field]) || 0)));
+        const keys = Array.isArray(field) ? field : [field];
+        const maximum = Math.max(1, ...rows.flatMap(row => keys.map(key => Math.abs(Number(row[key]) || 0))));
         return `${Math.abs(Number(value) || 0) / maximum * 100}%`;
     }
     number(value) { return new Intl.NumberFormat(undefined, {maximumFractionDigits: 2}).format(value); }
