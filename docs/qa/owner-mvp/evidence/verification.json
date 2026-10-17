@@ -145,49 +145,49 @@
       {
         "id": 156,
         "name": "Fee payment recorded",
-        "when": "2026-10-17 08:37:08.605571",
+        "when": "2026-10-17 08:44:57.539980",
         "actor": "College Owner"
       },
       {
         "id": 155,
         "name": "Applicant converted to student",
-        "when": "2026-10-17 08:37:07.850766",
+        "when": "2026-10-17 08:44:57.199195",
         "actor": "College Owner"
       },
       {
         "id": 154,
         "name": "Notice published",
-        "when": "2026-10-17 08:36:58.089142",
+        "when": "2026-10-17 08:44:45.555326",
         "actor": "College Owner"
       },
       {
         "id": 153,
         "name": "Attendance submitted",
-        "when": "2026-10-17 08:36:58.089142",
+        "when": "2026-10-17 08:44:45.555326",
         "actor": "College Owner"
       },
       {
         "id": 152,
         "name": "Fee payment recorded",
-        "when": "2026-10-17 08:36:58.089142",
+        "when": "2026-10-17 08:44:45.555326",
         "actor": "College Owner"
       },
       {
         "id": 151,
         "name": "Student fee invoice created",
-        "when": "2026-10-17 08:36:58.089142",
+        "when": "2026-10-17 08:44:45.555326",
         "actor": "College Owner"
       },
       {
         "id": 150,
         "name": "Fee structure assigned",
-        "when": "2026-10-17 08:36:58.089142",
+        "when": "2026-10-17 08:44:45.555326",
         "actor": "College Owner"
       },
       {
         "id": 149,
         "name": "Admission: Approved",
-        "when": "2026-10-17 08:36:58.089142",
+        "when": "2026-10-17 08:44:45.555326",
         "actor": "College Owner"
       }
     ],

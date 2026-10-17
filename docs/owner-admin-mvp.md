@@ -33,7 +33,7 @@ The new branch starts from the tested faculty workspace (PR #14), preserving tha
 
 Local Docker Desktop reports “unable to start”; real database/runtime checks executed on the repository's disposable CI Odoo/PostgreSQL environment. Local ruff, XML and JavaScript syntax checks also passed.
 
-Verified application commit: `5517110a15f4663abd61f572cc8604463ab1fdcf`. [Full passing CI run](https://github.com/amalnathkp13-boop/ideastone-campus/actions/runs/39017755544).
+Verified application commit: `298d1bb746213ae8d631d36a701d2ea65db79671`. [Full passing CI run](https://github.com/amalnathkp13-boop/ideastone-campus/actions/runs/39018245482).
 
 - Clean Odoo 17/PostgreSQL 16 install: **48 tests, 0 failures, 0 errors**, including all existing faculty/security/portal regressions and twelve new Owner workflow tests.
 - Faculty Playwright regression: real task/assessment persistence and existing responsive/navigation checks passed.
