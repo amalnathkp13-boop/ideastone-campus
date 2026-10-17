@@ -67,6 +67,8 @@ class AttendanceSheet(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        vals_list = [dict(v, campus_managed=True) if self.env["op.session"].browse(v.get("session_id")).campus_year_id or
+                     self.env["op.attendance.register"].browse(v.get("register_id")).batch_id.campus_year_id else v for v in vals_list]
         if any(set(v).intersection({"campus_submitted_by", "campus_submitted_on"}) or v.get("campus_managed") and v.get("state", "draft") != "draft" for v in vals_list):
             raise AccessError(_("New attendance starts in draft; use Submit attendance."))
         records = super().create(vals_list)

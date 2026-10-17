@@ -134,9 +134,12 @@ class Enrolment(models.Model):
                 raise ValidationError(_("Enrolment semester must match its academic year."))
 
     def write(self, vals):
-        if {"student_id", "course_id", "batch_id", "academic_years_id", "academic_term_id"}.intersection(vals):
+        if {"student_id", "course_id", "batch_id", "academic_years_id", "academic_term_id", "campus_date_from"}.intersection(vals):
             for rec in self.filtered("academic_years_id"):
-                if rec.env["op.attendance.line"].sudo().search_count([("student_id", "=", rec.student_id.id), ("batch_id", "=", rec.batch_id.id)]):
+                referenced = rec.env["op.attendance.line"].sudo().search_count([("student_id", "=", rec.student_id.id), ("batch_id", "=", rec.batch_id.id)])
+                referenced += rec.env["op.result.line"].sudo().search_count([("campus_enrolment_id", "=", rec.id)])
+                referenced += rec.env["op.student.fees.details"].sudo().search_count([("student_id", "=", rec.student_id.id), ("batch_id", "=", rec.batch_id.id)])
+                if referenced:
                     raise ValidationError(_("Retain this historic enrolment. Finish it and create a new placement with an effective date."))
         if vals.get("state") == "finished" and any(rec.academic_years_id for rec in self) and not (vals.get("campus_reason") or all(rec.campus_reason for rec in self)):
             raise ValidationError(_("Record a reason before finishing or transferring an enrolment."))
@@ -144,3 +147,8 @@ class Enrolment(models.Model):
         if {"state", "batch_id", "course_id"}.intersection(vals):
             self._mvp_log("Enrolment updated", details={k: str(v) for k, v in vals.items()})
         return result
+
+    def unlink(self):
+        if self.filtered("academic_years_id"):
+            raise ValidationError(_("Retain term-specific enrolments. Finish them with a reason instead of deleting history."))
+        return super().unlink()

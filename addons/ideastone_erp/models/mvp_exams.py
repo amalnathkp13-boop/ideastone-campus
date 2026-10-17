@@ -41,6 +41,7 @@ class Exam(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        vals_list = [dict(v, campus_managed=True) if self.env["op.exam.session"].browse(v.get("session_id")).campus_year_id else v for v in vals_list]
         protected = {"campus_state", "campus_published_by", "campus_published_on"}
         if any(protected.intersection(v) or v.get("campus_managed") and v.get("state", "draft") != "draft" for v in vals_list):
             raise AccessError(_("Create exams in draft and use the result publication workflow."))

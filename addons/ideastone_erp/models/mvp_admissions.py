@@ -24,6 +24,21 @@ class Enquiry(models.Model):
     campus_year_id = fields.Many2one("op.academic.year", string="Academic year")
     campus_contacted = fields.Boolean(string="Contacted", tracking=True)
 
+    def _check_campus_enquiry_permission(self):
+        if not self.env.su and not any(self.env.user.has_group(g) for g in ADMISSION_ROLES):
+            raise AccessError(_("Admissions permission is required for college enquiries."))
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        if self.env.context.get("default_campus_enquiry") or any(v.get("campus_enquiry") for v in vals_list):
+            self._check_campus_enquiry_permission()
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if self.filtered("campus_enquiry") or vals.get("campus_enquiry"):
+            self._check_campus_enquiry_permission()
+        return super().write(vals)
+
     def action_campus_application(self):
         self.ensure_one()
         if not any(self.env.user.has_group(g) for g in ADMISSION_ROLES) and not self.env.su:

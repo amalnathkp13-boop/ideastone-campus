@@ -201,12 +201,18 @@ class OwnerDashboard(models.AbstractModel):
         if self.env.user.has_group("ideastone_erp.group_mvp_registrar"):
             for title, model, action in [("Academic year", "op.academic.year", "mvp_years"), ("Department", "op.department", "mvp_departments"), ("Programme", "op.course", "mvp_programmes"), ("Section", "op.batch", "mvp_sections"), ("Subject", "op.subject", "mvp_subjects")]:
                 setup.append({"label": title, "ready": bool(self.env[model].search_count([("company_id", "=", self.env.company.id)])), "action": "ideastone_erp." + action})
+        upcoming_domain = [("company_id", "=", self.env.company.id), ("state", "!=", "cancel"), ("start_time", ">=", fields.Datetime.now()), ("start_time", "<", fields.Datetime.now() + timedelta(days=30))]
+        if f["year_id"]:
+            upcoming_domain.append(("campus_year_id", "=", f["year_id"]))
+        upcoming = self._mvp_records("op.exam", upcoming_domain).sorted("start_time")[:8]
         return {"stats": cards, "years": [{"id": y.id, "name": y.name} for y in years],
                 "funnel": funnel, "programmes": [{"label": k, "value": v} for k, v in sorted(programme.items())],
                 "collection": [{"label": k, **v} for k, v in sorted(collection.items())],
                 "trend": [{"label": k, "value": round(v[0] * 100 / v[1], 2)} for k, v in sorted(trend.items())],
                 "recent": [{"id": a.id, "name": a.name, "when": str(a.create_date), "actor": a.actor_id.name} for a in audits[:8]],
-                "setup": setup, "notices": self.env["campus.circular"]._mvp_notices()}
+                "setup": setup, "notices": self.env["campus.circular"]._mvp_notices(),
+                "upcoming": [{"id": e.id, "name": e.name, "when": str(e.start_time)} for e in upcoming],
+                "due_dates": sorted(due_rows, key=lambda r: r["due"])[:8]}
 
     def _mvp_money(self, amount):
         return f"{self.env.company.currency_id.symbol} {amount:,.2f}"
