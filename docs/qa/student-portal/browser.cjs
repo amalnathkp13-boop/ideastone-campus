@@ -17,7 +17,8 @@ async function login(page, name) {
     await page.goto(base+'/web/login?db=ci');
     await page.locator('input[name=login]').fill(name);
     await page.locator('input[name=password]').fill(process.env.STUDENT_QA_PASSWORD);
-    await page.locator('button[type=submit]').click();
+    // Wait for the login POST to finish before navigating elsewhere; navigating early cancels it.
+    await Promise.all([page.waitForURL(url=>!url.pathname.startsWith('/web/login')), page.locator('button[type=submit]').click()]);
 }
 async function visit(page, section) {
     await page.locator(`.student_sidebar a[href*="/student/${section}"]`).click();
