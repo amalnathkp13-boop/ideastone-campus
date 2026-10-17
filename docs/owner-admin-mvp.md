@@ -31,7 +31,17 @@ The new branch starts from the tested faculty workspace (PR #14), preserving tha
 
 ## Verification environment
 
-Local Docker Desktop reports “unable to start”; database/runtime checks must execute on the repository's disposable CI Odoo/PostgreSQL environment. Local syntax, lint and XML checks are available. Actual results and remaining limitations will be recorded after implementation, without treating static checks as runtime proof.
+Local Docker Desktop reports “unable to start”; real database/runtime checks executed on the repository's disposable CI Odoo/PostgreSQL environment. Local ruff, XML and JavaScript syntax checks also passed.
+
+Verified application commit: `5517110a15f4663abd61f572cc8604463ab1fdcf`. [Full passing CI run](https://github.com/amalnathkp13-boop/ideastone-campus/actions/runs/39017755544).
+
+- Clean Odoo 17/PostgreSQL 16 install: **48 tests, 0 failures, 0 errors**, including all existing faculty/security/portal regressions and twelve new Owner workflow tests.
+- Faculty Playwright regression: real task/assessment persistence and existing responsive/navigation checks passed.
+- Owner Playwright: twelve modules, **43 submodule views**, seven real CSV exports, form save/reload, live KPI reconciliation, simultaneous conversion and payment retries, native receipt PDF, shared chart scale, 1024px desktop and 390px mobile drawer/overflow checks passed. Browser console errors: **0**.
+- Upgrade of the installed/seeded database passed. Odoo and OpenOlat image builds, ruff/XML/shell/compose validation passed.
+- Visually inspected desktop overview, charts, native subject form, mobile screen and rendered receipt PDF. Verified evidence and source provenance are under [`qa/owner-mvp/evidence`](qa/owner-mvp/evidence). Dashboard screenshots show the initial three-student ₹300/₹200 fixture; final verification records show four students and ₹400/₹100 after the concurrent workflow checks.
+
+No known blocking failure remains for the specified Owner MVP. The operational boundaries below remain explicit; production deployment was not performed. This evidence-only documentation commit does not alter the verified application code.
 
 ## Changed files and responsibilities
 
