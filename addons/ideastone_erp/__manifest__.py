@@ -15,7 +15,7 @@
         "views/operations.xml", "views/faculty.xml", "views/menus.xml", "views/portal.xml", "views/reports.xml",
         "security/workspace.xml", "views/workspace.xml", "views/faculty_workspace.xml",
         "security/faculty_tools.xml", "views/faculty_tools.xml", "views/student_leave.xml", "views/faculty_reports.xml",
-        "security/mvp.xml", "data/mvp.xml", "views/mvp.xml", "views/mvp_reports.xml",
+        "security/mvp.xml", "data/mvp.xml", "views/mvp.xml", "views/mvp_search.xml", "views/mvp_reports.xml",
     ],
     "assets": {
         "web.assets_backend": [

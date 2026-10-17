@@ -245,6 +245,8 @@ class TestOwnerMVP(TransactionCase):
         fee = self.fee(app.student_id)
         fee.action_campus_post()
         self.payment(fee.invoice_id, 300)
+        with self.assertRaises(ValidationError):
+            fee.invoice_id.invoice_line_ids.write({"price_unit": 1})
         dash = self.env["campus.dashboard"].with_user(self.owner)
         filters = {"date_from": str(self.today), "date_to": str(self.today), "year_id": self.year.id}
         metrics = dash.get_owner_metrics(filters)

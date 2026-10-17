@@ -42,6 +42,20 @@ async function markup(page) {
         await page.screenshot({path:path.join(out,'owner-dashboard-1440.png'),fullPage:true});
         const modules = await page.locator('.campus_sidebar nav .campus_nav_link').allTextContents();
         if(modules.length!==12) throw Error('Owner sidebar does not contain the 12 functional MVP modules');
+        const overview=await rpc(page,'campus.dashboard','get_overview');
+        let checkedViews=0;
+        for(const module of overview.faculty_modules) {
+            for(const item of module.items.filter(item=>item.action)) {
+                const action=await rpc(page,'campus.dashboard','get_owner_action',[item.action]);
+                const views=action.views || action.view_mode.split(',').map(mode=>[false,mode]);
+                await rpc(page,action.res_model,'get_views',[views],{options:{toolbar:false,load_filters:false},context:action.context || {}});
+                checkedViews++;
+            }
+        }
+        for(const kind of ['admissions','students','attendance','collection','dues','results','faculty']) {
+            const report=await rpc(page,'campus.mvp.report','create',[{kind}]);
+            await rpc(page,'campus.mvp.report','action_csv',[[report]]);
+        }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Academics',exact:true}).click();
         await page.getByRole('heading',{name:'Academics',exact:true,level:1}).waitFor();
         await page.screenshot({path:path.join(out,'owner-academics-1440.png')});
@@ -93,7 +107,7 @@ async function markup(page) {
         if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)) throw Error('Owner dashboard overflows the mobile viewport');
         await page.screenshot({path:path.join(out,'owner-mobile-390.png')});
         if(errors.length) throw Error(errors.join('\n'));
-        await fs.writeFile(path.join(out,'verification.json'),JSON.stringify({passed:true,checks:['12 owner modules','faculty shell reused','live KPI reconciliation','real subject form save and reload','concurrent admission conversion','concurrent payment posting','receipt PDF','1024 desktop','390 mobile drawer and overflow','browser console'],metrics,errors},null,2));
+        await fs.writeFile(path.join(out,'verification.json'),JSON.stringify({passed:true,checkedViews,checks:['12 owner modules','all permitted submodule views','7 real CSV exports','faculty shell reused','live KPI reconciliation','real subject form save and reload','concurrent admission conversion','concurrent payment posting','receipt PDF','1024 desktop','390 mobile drawer and overflow','browser console'],metrics,errors},null,2));
     } catch(error) {
         await page.screenshot({path:path.join(out,'failure.png'),fullPage:true}).catch(()=>{});
         await fs.writeFile(path.join(out,'failure-dom.html'),await markup(page));

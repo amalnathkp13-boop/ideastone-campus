@@ -123,9 +123,11 @@ class OwnerDashboard(models.AbstractModel):
         if f["status"] and kind in {"admissions", "students"}:
             domain.append(("campus_stage" if kind == "admissions" else "campus_status", "=", f["status"]))
         if kind == "attendance":
-            for key, path in [("student_id", "student_id"), ("faculty_id", "attendance_id.faculty_id"), ("subject_id", "attendance_id.campus_subject_id")]:
+            for key, path in [("student_id", "student_id"), ("faculty_id", "attendance_id.faculty_id")]:
                 if f[key]:
                     domain.append((path, "=", f[key]))
+            if f["subject_id"]:
+                domain += ["|", ("attendance_id.campus_subject_id", "=", f["subject_id"]), ("attendance_id.campus_manual_subject_id", "=", f["subject_id"])]
         if kind == "collection":
             if f["method"]:
                 domain.append(("campus_method", "=", f["method"]))
@@ -256,9 +258,12 @@ class OwnerDashboard(models.AbstractModel):
             if f["year_id"]:
                 domain.append(("campus_year_id", "=", f["year_id"]))
         elif kind == "dues":
-            domain += [("amount_residual", ">", 0)]
+            records = self._mvp_records(model, domain)
+            domain += [("id", "in", [r["id"] for r in self._mvp_report_rows("dues", f, records)])]
         self.env[model].check_access_rights("read")
-        return {"type": "ir.actions.act_window", "name": kind.title(), "res_model": model, "view_mode": "tree,form", "domain": domain}
+        action_name = {"op.student": "mvp_students", "op.admission": "mvp_applications", "op.faculty": "mvp_faculty", "op.exam": "mvp_exams", "op.result.line": "mvp_results"}.get(model)
+        action = self.get_owner_action("ideastone_erp." + action_name) if action_name else {"type": "ir.actions.act_window", "view_mode": "tree,form", "res_model": model}
+        return dict(action, name=kind.title(), domain=domain)
 
     @api.model
     def get_owner_action(self, xmlid):
@@ -292,7 +297,7 @@ class OwnerDashboard(models.AbstractModel):
             if kind == "admissions":
                 rows.append({"application": rec.application_number, "name": rec.name, "programme": rec.course_id.name, "stage": rec.campus_stage, "source": rec.campus_source_id.name or "", "date": str(rec.application_date), "student_number": rec.student_id.gr_no or ""})
             elif kind == "students":
-                for e in rec.course_detail_ids.filtered(lambda e: not f["year_id"] or e.academic_years_id.id == f["year_id"]):
+                for e in rec.course_detail_ids.filtered(lambda e: (not f["year_id"] or e.academic_years_id.id == f["year_id"]) and (not f["course_id"] or e.course_id.id == f["course_id"]) and (not f["batch_id"] or e.batch_id.id == f["batch_id"])):
                     rows.append({"number": rec.gr_no or "", "student": rec.name, "programme": e.course_id.name, "section": e.batch_id.name, "year": e.academic_years_id.name, "semester": e.academic_term_id.name, "status": rec.campus_status})
             elif kind == "collection":
                 base = {"receipt": rec.campus_receipt_number, "student": rec.campus_invoice_id.campus_student_id.name, "invoice": rec.campus_invoice_id.name, "method": rec.campus_method, "cashier": rec.campus_cashier_id.name}
@@ -311,13 +316,16 @@ class OwnerDashboard(models.AbstractModel):
                     balance = max(0, rec.amount_total - net)
                 if balance > 0:
                     due = rec.invoice_date_due or rec.invoice_date
-                    rows.append({"invoice": rec.name, "student": rec.campus_student_id.name, "programme": rec.campus_course_id.name, "gross": rec.amount_total, "paid": rec.amount_total - balance, "balance": balance, "due": str(due), "days_overdue": max(0, (f["date_to"] - due).days)})
+                    rows.append({"id": rec.id, "invoice": rec.name, "student": rec.campus_student_id.name, "programme": rec.campus_course_id.name, "gross": rec.amount_total, "paid": rec.amount_total - balance, "balance": balance, "due": str(due), "days_overdue": max(0, (f["date_to"] - due).days)})
             elif kind == "results":
                 rows.append({"exam": rec.exam_id.name, "subject": rec.exam_id.subject_id.name, "student": rec.student_id.name, "marks": rec.marks if rec.campus_entered else "Missing", "maximum": rec.exam_id.total_marks, "percentage": rec.campus_percentage if rec.campus_entered else "", "grade": rec.grade or "", "result": rec.status or "Missing", "publication": rec.exam_id.campus_state})
             elif kind == "faculty":
                 domain = [("faculty_id", "=", rec.id), ("company_id", "=", self.env.company.id), ("state", "!=", "cancel"), ("start_datetime", ">=", f["date_from"]), ("start_datetime", "<", f["date_to"] + timedelta(days=1))]
                 if f["year_id"]:
                     domain.append(("campus_year_id", "=", f["year_id"]))
+                for key, path in [("course_id", "course_id"), ("batch_id", "batch_id"), ("subject_id", "subject_id")]:
+                    if f[key]:
+                        domain.append((path, "=", f[key]))
                 sessions = self._mvp_records("op.session", domain)
                 rows.append({"staff_id": rec.campus_staff_code or "", "staff": rec.name, "department": rec.main_department_id.name or "", "designation": rec.campus_designation or "", "subjects": len(sessions.subject_id), "sections": len(sessions.batch_id), "sessions": len(sessions)})
         return rows

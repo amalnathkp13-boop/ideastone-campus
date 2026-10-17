@@ -1,0 +1,63 @@
+<odoo>
+  <record id="mvp_student_search" model="ir.ui.view">
+    <field name="name">mvp.student.search</field><field name="model">op.student</field>
+    <field name="arch" type="xml"><search>
+      <field name="name" string="Name, ID or phone" filter_domain="['|','|','|',('name','ilike',self),('gr_no','ilike',self),('register_no','ilike',self),('phone','ilike',self)]"/>
+      <field name="campus_status"/><field name="campus_admission_date"/>
+      <filter name="current" string="Active students" domain="[('campus_status','=','active')]"/>
+      <filter name="archived" string="Archived" domain="[('active','=',False)]"/>
+      <group string="Group by"><filter name="status" string="Student status" context="{'group_by':'campus_status'}"/><filter name="admitted" string="Admission year" context="{'group_by':'campus_admission_date:year'}"/></group>
+    </search></field>
+  </record>
+  <record id="mvp_students" model="ir.actions.act_window"><field name="search_view_id" ref="mvp_student_search"/></record>
+  <record id="mvp_admission_search" model="ir.ui.view">
+    <field name="name">mvp.admission.search</field><field name="model">op.admission</field>
+    <field name="arch" type="xml"><search>
+      <field name="name"/><field name="application_number"/><field name="register_id"/><field name="campus_year_id"/><field name="course_id"/><field name="batch_id"/><field name="campus_stage"/><field name="campus_source_id"/>
+      <filter name="review" string="Awaiting review" domain="[('campus_stage','in',['submitted','documents','review'])]"/>
+      <filter name="enrolled" string="Enrolled" domain="[('campus_stage','=','enrolled')]"/>
+      <group string="Group by"><filter name="stage" string="Decision stage" context="{'group_by':'campus_stage'}"/><filter name="programme" string="Programme" context="{'group_by':'course_id'}"/></group>
+    </search></field>
+  </record>
+  <record id="mvp_applications" model="ir.actions.act_window"><field name="search_view_id" ref="mvp_admission_search"/></record>
+  <record id="mvp_enrolment_search" model="ir.ui.view">
+    <field name="name">mvp.enrolment.search</field><field name="model">op.student.course</field>
+    <field name="arch" type="xml"><search>
+      <field name="student_id"/><field name="course_id"/><field name="academic_years_id"/><field name="academic_term_id"/><field name="batch_id"/>
+      <filter name="running" string="Current placements" domain="[('state','=','running')]"/>
+      <group string="Group by"><filter name="section" string="Section" context="{'group_by':'batch_id'}"/><filter name="year" string="Academic year" context="{'group_by':'academic_years_id'}"/></group>
+    </search></field>
+  </record>
+  <record id="mvp_enrolments" model="ir.actions.act_window"><field name="search_view_id" ref="mvp_enrolment_search"/></record>
+  <record id="mvp_attendance_search" model="ir.ui.view">
+    <field name="name">mvp.attendance.search</field><field name="model">op.attendance.sheet</field>
+    <field name="arch" type="xml"><search>
+      <field name="register_id"/><field name="faculty_id"/><field name="attendance_date"/><field name="campus_manual_subject_id"/>
+      <filter name="submitted" string="Submitted" domain="[('state','=','done')]"/>
+      <filter name="draft" string="Draft" domain="[('state','=','draft')]"/>
+      <group string="Group by"><filter name="faculty" string="Faculty" context="{'group_by':'faculty_id'}"/><filter name="date" string="Date" context="{'group_by':'attendance_date:day'}"/></group>
+    </search></field>
+  </record>
+  <record id="mvp_attendance" model="ir.actions.act_window"><field name="search_view_id" ref="mvp_attendance_search"/></record>
+  <record id="mvp_fee_search" model="ir.ui.view">
+    <field name="name">mvp.fee.search</field><field name="model">op.student.fees.details</field>
+    <field name="arch" type="xml"><search>
+      <field name="student_id"/><field name="course_id"/><field name="campus_year_id"/><field name="product_id"/>
+      <filter name="unpaid" string="Unpaid balance" domain="[('campus_balance','&gt;',0)]"/>
+      <filter name="partial" string="Partially paid" domain="[('campus_payment_state','=','partial')]"/>
+      <filter name="overdue" string="Overdue" domain="[('campus_balance','&gt;',0),('date','&lt;',context_today().strftime('%Y-%m-%d'))]"/>
+      <group string="Group by"><filter name="year" string="Academic year" context="{'group_by':'campus_year_id'}"/><filter name="programme" string="Programme" context="{'group_by':'course_id'}"/></group>
+    </search></field>
+  </record>
+  <record id="mvp_fees" model="ir.actions.act_window"><field name="search_view_id" ref="mvp_fee_search"/></record>
+  <record id="mvp_result_search" model="ir.ui.view">
+    <field name="name">mvp.result.search</field><field name="model">op.result.line</field>
+    <field name="arch" type="xml"><search>
+      <field name="exam_id"/><field name="student_id"/>
+      <filter name="missing" string="Missing marks" domain="[('campus_entered','=',False)]"/>
+      <filter name="published" string="Published" domain="[('exam_id.campus_state','=','published')]"/>
+      <group string="Group by"><filter name="exam" string="Examination" context="{'group_by':'exam_id'}"/></group>
+    </search></field>
+  </record>
+  <record id="mvp_results" model="ir.actions.act_window"><field name="search_view_id" ref="mvp_result_search"/></record>
+</odoo>

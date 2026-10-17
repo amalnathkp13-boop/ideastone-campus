@@ -195,6 +195,8 @@ class FeeInvoice(models.Model):
         posted = self.filtered(lambda r: r.campus_student_id and r.state == "posted")
         if posted and ({"invoice_line_ids", "partner_id", "currency_id", "company_id", "campus_student_id", "campus_year_id", "campus_course_id"}.intersection(vals) or vals.get("state") == "draft"):
             raise ValidationError(_("Posted college invoices are retained unchanged. Use a credit note or reversal for corrections."))
+        if vals.get("state") == "draft" and self.filtered(lambda r: r.payment_id.campus_receipt_number):
+            raise ValidationError(_("A college receipt journal entry must be reversed, never reset to draft."))
         return super().write(vals)
 
     @api.constrains("campus_student_id", "campus_year_id", "campus_course_id", "company_id", "currency_id")
@@ -209,6 +211,16 @@ class FeeInvoice(models.Model):
         if self.filtered("campus_student_id"):
             raise ValidationError(_("College invoices must be cancelled or reversed and retained."))
         return super().unlink()
+
+
+class FeeInvoiceLine(models.Model):
+    _inherit = "account.move.line"
+
+    def write(self, vals):
+        financial_fields = {"price_unit", "quantity", "discount", "account_id", "tax_ids", "debit", "credit", "balance", "amount_currency", "partner_id", "currency_id", "move_id"}
+        if financial_fields.intersection(vals) and self.filtered(lambda r: r.move_id.state == "posted" and (r.move_id.campus_student_id or r.move_id.payment_id.campus_receipt_number)):
+            raise ValidationError(_("Posted college invoice and receipt lines cannot be overwritten. Use the documented reversal or credit note workflow."))
+        return super().write(vals)
 
 
 class FeePaymentWizard(models.TransientModel):
