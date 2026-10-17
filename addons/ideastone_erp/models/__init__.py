@@ -33,3 +33,6 @@ from . import faculty_task
 from . import faculty_activity, faculty_document, faculty_assessment
 from . import student_leave
 from . import student_education
+from . import mvp_audit
+from . import mvp_academics, mvp_admissions, mvp_attendance, mvp_fees, mvp_exams
+from . import mvp_dashboard, mvp_communication, mvp_import

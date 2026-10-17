@@ -113,7 +113,7 @@ class OpFaculty(models.Model):
                 raise ValidationError(_("A staff member cannot report to themselves."))
 
     def write(self, vals):
-        privileged = self.env.su or self.env.user.has_group("ideastone_erp.group_people") or self.env.user.has_group("openeducat_core.group_op_back_office_admin")
+        privileged = self.env.su or self.env.user.has_group("ideastone_erp.group_people") or self.env.user.has_group("openeducat_core.group_op_back_office_admin") or self.env.user.has_group("ideastone_erp.group_mvp_registrar")
         if not privileged:
             editable = {
                 "campus_alternate_email", "campus_communication_address", "campus_travel_mode",

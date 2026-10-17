@@ -19,7 +19,7 @@ class AttendanceExportWizard(models.TransientModel):
     batch_id = fields.Many2one("op.batch")
     academic_year = fields.Char(required=True)
     semester = fields.Char(required=True)
-    threshold = fields.Float(required=True, default=75)
+    threshold = fields.Float(required=True, default=lambda self: self.env.company.campus_attendance_threshold)
 
     def _snapshot(self):
         self.ensure_one()
@@ -34,6 +34,7 @@ class AttendanceExportWizard(models.TransientModel):
         domain = [
             ("attendance_date", ">=", self.date_from), ("attendance_date", "<=", self.date_to),
             ("attendance_id.state", "=", "done"), ("student_id.company_id", "=", self.env.company.id),
+            "|", ("attendance_id.session_id", "=", False), ("attendance_id.session_id.state", "!=", "cancel"),
         ]
         if not (self.env.user.has_group("ideastone_erp.group_manager") or
                 self.env.user.has_group("openeducat_attendance.group_op_attendance_manager")):
@@ -46,11 +47,13 @@ class AttendanceExportWizard(models.TransientModel):
             raise ValidationError(_("Select a shorter period or one programme (maximum 50,000 attendance lines)."))
         rows = {}
         for line in lines.search(domain, order="student_id, id"):
+            if line.excused and self.env.company.campus_excused_policy == "exclude":
+                continue
             key = line.student_id.id
             row = rows.setdefault(key, {"id": key, "register": line.student_id.gr_no or str(key),
                                         "name": line.student_id.name, "sessions": 0, "present": 0})
             row["sessions"] += 1
-            row["present"] += int(line.present)
+            row["present"] += int(line.present or line.late or line.excused and self.env.company.campus_excused_policy == "present")
         for row in rows.values():
             row["rate"] = round(row["present"] * 100 / row["sessions"], 1)
             # Compare the actual ratio, so rounding cannot move a student across the threshold.

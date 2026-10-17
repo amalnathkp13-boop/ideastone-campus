@@ -1,0 +1,251 @@
+{
+  "passed": true,
+  "checkedViews": 43,
+  "checks": [
+    "12 owner modules",
+    "all permitted submodule views",
+    "7 real CSV exports",
+    "faculty shell reused",
+    "live KPI reconciliation",
+    "real subject form save and reload",
+    "concurrent admission conversion",
+    "concurrent payment posting",
+    "receipt PDF",
+    "1024 desktop",
+    "390 mobile drawer and overflow",
+    "browser console"
+  ],
+  "metrics": {
+    "stats": [
+      {
+        "label": "Active students",
+        "value": 4,
+        "detail": "Current status in selected academic year",
+        "kind": "active_students",
+        "allowed": true
+      },
+      {
+        "label": "Applications",
+        "value": 5,
+        "detail": "Submitted in selected date range",
+        "kind": "admissions",
+        "allowed": true
+      },
+      {
+        "label": "Awaiting review",
+        "value": 1,
+        "detail": "Selected range · awaiting a decision",
+        "kind": "review",
+        "allowed": true
+      },
+      {
+        "label": "Attendance rate",
+        "value": "66.7%",
+        "detail": "Completed sessions · selected range",
+        "kind": "attendance",
+        "allowed": true
+      },
+      {
+        "label": "Net fees collected",
+        "value": "₹ 400.00",
+        "detail": "Receipts less reversals in selected range",
+        "kind": "collection",
+        "allowed": true
+      },
+      {
+        "label": "Outstanding fees",
+        "value": "₹ 100.00",
+        "detail": "As of 2026-10-17",
+        "kind": "dues",
+        "allowed": true
+      },
+      {
+        "label": "Upcoming exams",
+        "value": 1,
+        "detail": "Next 30 days · selected academic year",
+        "kind": "upcoming",
+        "allowed": true
+      },
+      {
+        "label": "Active faculty / staff",
+        "value": 1,
+        "detail": "Current active staff directory",
+        "kind": "faculty",
+        "allowed": true
+      }
+    ],
+    "years": [
+      {
+        "id": 7,
+        "name": "2026 Academic Year"
+      }
+    ],
+    "funnel": [
+      {
+        "label": "New",
+        "value": 0
+      },
+      {
+        "label": "Contacted",
+        "value": 0
+      },
+      {
+        "label": "Application started",
+        "value": 0
+      },
+      {
+        "label": "Submitted",
+        "value": 0
+      },
+      {
+        "label": "Documents pending",
+        "value": 0
+      },
+      {
+        "label": "Under review",
+        "value": 1
+      },
+      {
+        "label": "Approved",
+        "value": 0
+      },
+      {
+        "label": "Rejected",
+        "value": 0
+      },
+      {
+        "label": "Waitlisted",
+        "value": 0
+      },
+      {
+        "label": "Enrolled",
+        "value": 4
+      }
+    ],
+    "programmes": [
+      {
+        "label": "B.E. Computer Science",
+        "value": 4
+      }
+    ],
+    "collection": [
+      {
+        "label": "2026-10",
+        "collected": 400,
+        "dues": 100
+      }
+    ],
+    "trend": [
+      {
+        "label": "2026-10-17",
+        "value": 66.67
+      }
+    ],
+    "recent": [
+      {
+        "id": 156,
+        "name": "Fee payment recorded",
+        "when": "2026-10-17 08:44:57.539980",
+        "actor": "College Owner"
+      },
+      {
+        "id": 155,
+        "name": "Applicant converted to student",
+        "when": "2026-10-17 08:44:57.199195",
+        "actor": "College Owner"
+      },
+      {
+        "id": 154,
+        "name": "Notice published",
+        "when": "2026-10-17 08:44:45.555326",
+        "actor": "College Owner"
+      },
+      {
+        "id": 153,
+        "name": "Attendance submitted",
+        "when": "2026-10-17 08:44:45.555326",
+        "actor": "College Owner"
+      },
+      {
+        "id": 152,
+        "name": "Fee payment recorded",
+        "when": "2026-10-17 08:44:45.555326",
+        "actor": "College Owner"
+      },
+      {
+        "id": 151,
+        "name": "Student fee invoice created",
+        "when": "2026-10-17 08:44:45.555326",
+        "actor": "College Owner"
+      },
+      {
+        "id": 150,
+        "name": "Fee structure assigned",
+        "when": "2026-10-17 08:44:45.555326",
+        "actor": "College Owner"
+      },
+      {
+        "id": 149,
+        "name": "Admission: Approved",
+        "when": "2026-10-17 08:44:45.555326",
+        "actor": "College Owner"
+      }
+    ],
+    "setup": [
+      {
+        "label": "Academic year",
+        "ready": true,
+        "action": "ideastone_erp.mvp_years"
+      },
+      {
+        "label": "Department",
+        "ready": true,
+        "action": "ideastone_erp.mvp_departments"
+      },
+      {
+        "label": "Programme",
+        "ready": true,
+        "action": "ideastone_erp.mvp_programmes"
+      },
+      {
+        "label": "Section",
+        "ready": true,
+        "action": "ideastone_erp.mvp_sections"
+      },
+      {
+        "label": "Subject",
+        "ready": true,
+        "action": "ideastone_erp.mvp_subjects"
+      }
+    ],
+    "notices": [
+      {
+        "id": 4,
+        "name": "Welcome to the new academic year",
+        "date": "2026-10-17",
+        "audience": "all"
+      }
+    ],
+    "upcoming": [
+      {
+        "id": 17,
+        "name": "Programming internal assessment",
+        "when": "2026-10-24 14:00:00"
+      }
+    ],
+    "due_dates": [
+      {
+        "id": 32,
+        "invoice": "QAS/2026/00001",
+        "student": "QA Arun",
+        "programme": "B.E. Computer Science",
+        "gross": 500,
+        "paid": 400,
+        "balance": 100,
+        "due": "2026-10-24",
+        "days_overdue": 0
+      }
+    ]
+  },
+  "errors": []
+}

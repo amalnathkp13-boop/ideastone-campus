@@ -1,0 +1,1329 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+  <record id="group_mvp_admissions" model="res.groups">
+    <field name="name">MVP Admissions officer</field>
+    <field name="category_id" ref="ideastone_erp.category_campus" />
+    <field name="implied_ids" eval="[(4,ref('ideastone_erp.group_directory')),(4,ref('base.group_partner_manager'))]" />
+  </record>
+  <record id="group_mvp_accountant" model="res.groups">
+    <field name="name">MVP Fee accountant</field>
+    <field name="category_id" ref="ideastone_erp.category_campus" />
+    <field name="implied_ids" eval="[(4,ref('ideastone_erp.group_directory')),(4,ref('account.group_account_invoice'))]" />
+  </record>
+  <record id="group_mvp_exams" model="res.groups">
+    <field name="name">MVP Examination officer</field>
+    <field name="category_id" ref="ideastone_erp.category_campus" />
+    <field name="implied_ids" eval="[(4,ref('ideastone_erp.group_directory'))]" />
+  </record>
+  <record id="group_mvp_hod" model="res.groups">
+    <field name="name">MVP Department head (read only)</field>
+    <field name="category_id" ref="ideastone_erp.category_campus" />
+    <field name="implied_ids" eval="[(4,ref('base.group_user'))]" />
+  </record>
+  <record id="group_mvp_readonly" model="res.groups">
+    <field name="name">MVP Management reporting (read only)</field>
+    <field name="category_id" ref="ideastone_erp.category_campus" />
+    <field name="implied_ids" eval="[(4,ref('base.group_user'))]" />
+  </record>
+  <record id="group_mvp_concession" model="res.groups">
+    <field name="name">MVP Concession approver</field>
+    <field name="category_id" ref="ideastone_erp.category_campus" />
+    <field name="implied_ids" eval="[(4,ref('base.group_user'))]" />
+  </record>
+  <record id="group_mvp_registrar" model="res.groups">
+    <field name="name">MVP College admin / Registrar</field>
+    <field name="category_id" ref="ideastone_erp.category_campus" />
+    <field name="implied_ids" eval="[(4,ref('ideastone_erp.group_mvp_admissions')),(4,ref('ideastone_erp.group_college_admin'))]" />
+  </record>
+  <record id="group_mvp_owner" model="res.groups">
+    <field name="name">MVP Owner</field>
+    <field name="category_id" ref="ideastone_erp.category_campus" />
+    <field name="implied_ids" eval="[(4,ref('ideastone_erp.group_mvp_registrar')),(4,ref('ideastone_erp.group_mvp_accountant')),(4,ref('ideastone_erp.group_mvp_exams')),(4,ref('ideastone_erp.group_mvp_concession')),(4,ref('base.group_system'))]" />
+    <field name="users" eval="[(4,ref('base.user_admin'))]" />
+  </record>
+  <record id="mvp_acl_op_academic_year_registrar" model="ir.model.access">
+    <field name="name">MVP op.academic.year registrar</field>
+    <field name="model_id" ref="openeducat_core.model_op_academic_year" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_academic_term_registrar" model="ir.model.access">
+    <field name="name">MVP op.academic.term registrar</field>
+    <field name="model_id" ref="openeducat_core.model_op_academic_term" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_department_registrar" model="ir.model.access">
+    <field name="name">MVP op.department registrar</field>
+    <field name="model_id" ref="openeducat_core.model_op_department" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_course_registrar" model="ir.model.access">
+    <field name="name">MVP op.course registrar</field>
+    <field name="model_id" ref="openeducat_core.model_op_course" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_batch_registrar" model="ir.model.access">
+    <field name="name">MVP op.batch registrar</field>
+    <field name="model_id" ref="openeducat_core.model_op_batch" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_subject_registrar" model="ir.model.access">
+    <field name="name">MVP op.subject registrar</field>
+    <field name="model_id" ref="openeducat_core.model_op_subject" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_student_registrar" model="ir.model.access">
+    <field name="name">MVP op.student registrar</field>
+    <field name="model_id" ref="openeducat_core.model_op_student" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_student_course_registrar" model="ir.model.access">
+    <field name="name">MVP op.student.course registrar</field>
+    <field name="model_id" ref="openeducat_core.model_op_student_course" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_faculty_registrar" model="ir.model.access">
+    <field name="name">MVP op.faculty registrar</field>
+    <field name="model_id" ref="openeducat_core.model_op_faculty" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_session_registrar" model="ir.model.access">
+    <field name="name">MVP op.session registrar</field>
+    <field name="model_id" ref="openeducat_timetable.model_op_session" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_attendance_register_registrar" model="ir.model.access">
+    <field name="name">MVP op.attendance.register registrar</field>
+    <field name="model_id" ref="openeducat_attendance.model_op_attendance_register" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_attendance_sheet_registrar" model="ir.model.access">
+    <field name="name">MVP op.attendance.sheet registrar</field>
+    <field name="model_id" ref="openeducat_attendance.model_op_attendance_sheet" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_attendance_line_registrar" model="ir.model.access">
+    <field name="name">MVP op.attendance.line registrar</field>
+    <field name="model_id" ref="openeducat_attendance.model_op_attendance_line" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_classroom_registrar" model="ir.model.access">
+    <field name="name">MVP op.classroom registrar</field>
+    <field name="model_id" ref="openeducat_classroom.model_op_classroom" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_admission_admissions" model="ir.model.access">
+    <field name="name">MVP op.admission admissions</field>
+    <field name="model_id" ref="openeducat_admission.model_op_admission" />
+    <field name="group_id" ref="group_mvp_admissions" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_admission_register_admissions" model="ir.model.access">
+    <field name="name">MVP op.admission.register admissions</field>
+    <field name="model_id" ref="openeducat_admission.model_op_admission_register" />
+    <field name="group_id" ref="group_mvp_admissions" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_admission_requirement_admissions" model="ir.model.access">
+    <field name="name">MVP campus.admission.requirement admissions</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_admission_requirement" />
+    <field name="group_id" ref="group_mvp_admissions" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_admission_document_admissions" model="ir.model.access">
+    <field name="name">MVP campus.admission.document admissions</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_admission_document" />
+    <field name="group_id" ref="group_mvp_admissions" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_crm_lead_admissions" model="ir.model.access">
+    <field name="name">MVP crm.lead admissions</field>
+    <field name="model_id" ref="crm.model_crm_lead" />
+    <field name="group_id" ref="group_mvp_admissions" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_student_admissions" model="ir.model.access">
+    <field name="name">MVP op.student admissions</field>
+    <field name="model_id" ref="openeducat_core.model_op_student" />
+    <field name="group_id" ref="group_mvp_admissions" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_student_course_admissions" model="ir.model.access">
+    <field name="name">MVP op.student.course admissions</field>
+    <field name="model_id" ref="openeducat_core.model_op_student_course" />
+    <field name="group_id" ref="group_mvp_admissions" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_fees_terms_accountant" model="ir.model.access">
+    <field name="name">MVP op.fees.terms accountant</field>
+    <field name="model_id" ref="openeducat_fees.model_op_fees_terms" />
+    <field name="group_id" ref="group_mvp_accountant" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_fees_terms_line_accountant" model="ir.model.access">
+    <field name="name">MVP op.fees.terms.line accountant</field>
+    <field name="model_id" ref="openeducat_fees.model_op_fees_terms_line" />
+    <field name="group_id" ref="group_mvp_accountant" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_fees_element_accountant" model="ir.model.access">
+    <field name="name">MVP op.fees.element accountant</field>
+    <field name="model_id" ref="openeducat_fees.model_op_fees_element" />
+    <field name="group_id" ref="group_mvp_accountant" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_student_fees_details_accountant" model="ir.model.access">
+    <field name="name">MVP op.student.fees.details accountant</field>
+    <field name="model_id" ref="openeducat_fees.model_op_student_fees_details" />
+    <field name="group_id" ref="group_mvp_accountant" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_fee_assignment_wizard_accountant" model="ir.model.access">
+    <field name="name">MVP campus.fee.assignment.wizard accountant</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_fee_assignment_wizard" />
+    <field name="group_id" ref="group_mvp_accountant" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_fee_payment_wizard_accountant" model="ir.model.access">
+    <field name="name">MVP campus.fee.payment.wizard accountant</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_fee_payment_wizard" />
+    <field name="group_id" ref="group_mvp_accountant" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_product_template_accountant" model="ir.model.access">
+    <field name="name">MVP product.template accountant</field>
+    <field name="model_id" ref="product.model_product_template" />
+    <field name="group_id" ref="group_mvp_accountant" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_product_product_accountant" model="ir.model.access">
+    <field name="name">MVP product.product accountant</field>
+    <field name="model_id" ref="product.model_product_product" />
+    <field name="group_id" ref="group_mvp_accountant" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_exam_exams" model="ir.model.access">
+    <field name="name">MVP op.exam exams</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam" />
+    <field name="group_id" ref="group_mvp_exams" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_exam_session_exams" model="ir.model.access">
+    <field name="name">MVP op.exam.session exams</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam_session" />
+    <field name="group_id" ref="group_mvp_exams" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_exam_type_exams" model="ir.model.access">
+    <field name="name">MVP op.exam.type exams</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam_type" />
+    <field name="group_id" ref="group_mvp_exams" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_result_line_exams" model="ir.model.access">
+    <field name="name">MVP op.result.line exams</field>
+    <field name="model_id" ref="openeducat_exam.model_op_result_line" />
+    <field name="group_id" ref="group_mvp_exams" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_grade_configuration_exams" model="ir.model.access">
+    <field name="name">MVP op.grade.configuration exams</field>
+    <field name="model_id" ref="openeducat_exam.model_op_grade_configuration" />
+    <field name="group_id" ref="group_mvp_exams" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_academic_year_readonly" model="ir.model.access">
+    <field name="name">MVP op.academic.year readonly</field>
+    <field name="model_id" ref="openeducat_core.model_op_academic_year" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_academic_term_readonly" model="ir.model.access">
+    <field name="name">MVP op.academic.term readonly</field>
+    <field name="model_id" ref="openeducat_core.model_op_academic_term" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_department_readonly" model="ir.model.access">
+    <field name="name">MVP op.department readonly</field>
+    <field name="model_id" ref="openeducat_core.model_op_department" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_course_readonly" model="ir.model.access">
+    <field name="name">MVP op.course readonly</field>
+    <field name="model_id" ref="openeducat_core.model_op_course" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_batch_readonly" model="ir.model.access">
+    <field name="name">MVP op.batch readonly</field>
+    <field name="model_id" ref="openeducat_core.model_op_batch" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_subject_readonly" model="ir.model.access">
+    <field name="name">MVP op.subject readonly</field>
+    <field name="model_id" ref="openeducat_core.model_op_subject" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_student_readonly" model="ir.model.access">
+    <field name="name">MVP op.student readonly</field>
+    <field name="model_id" ref="openeducat_core.model_op_student" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_student_course_readonly" model="ir.model.access">
+    <field name="name">MVP op.student.course readonly</field>
+    <field name="model_id" ref="openeducat_core.model_op_student_course" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_faculty_readonly" model="ir.model.access">
+    <field name="name">MVP op.faculty readonly</field>
+    <field name="model_id" ref="openeducat_core.model_op_faculty" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_session_readonly" model="ir.model.access">
+    <field name="name">MVP op.session readonly</field>
+    <field name="model_id" ref="openeducat_timetable.model_op_session" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_attendance_register_readonly" model="ir.model.access">
+    <field name="name">MVP op.attendance.register readonly</field>
+    <field name="model_id" ref="openeducat_attendance.model_op_attendance_register" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_attendance_sheet_readonly" model="ir.model.access">
+    <field name="name">MVP op.attendance.sheet readonly</field>
+    <field name="model_id" ref="openeducat_attendance.model_op_attendance_sheet" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_attendance_line_readonly" model="ir.model.access">
+    <field name="name">MVP op.attendance.line readonly</field>
+    <field name="model_id" ref="openeducat_attendance.model_op_attendance_line" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_classroom_readonly" model="ir.model.access">
+    <field name="name">MVP op.classroom readonly</field>
+    <field name="model_id" ref="openeducat_classroom.model_op_classroom" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_exam_readonly" model="ir.model.access">
+    <field name="name">MVP op.exam readonly</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_exam_session_readonly" model="ir.model.access">
+    <field name="name">MVP op.exam.session readonly</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam_session" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_exam_type_readonly" model="ir.model.access">
+    <field name="name">MVP op.exam.type readonly</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam_type" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_result_line_readonly" model="ir.model.access">
+    <field name="name">MVP op.result.line readonly</field>
+    <field name="model_id" ref="openeducat_exam.model_op_result_line" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_grade_configuration_readonly" model="ir.model.access">
+    <field name="name">MVP op.grade.configuration readonly</field>
+    <field name="model_id" ref="openeducat_exam.model_op_grade_configuration" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_admission_readonly" model="ir.model.access">
+    <field name="name">MVP op.admission readonly</field>
+    <field name="model_id" ref="openeducat_admission.model_op_admission" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_admission_register_readonly" model="ir.model.access">
+    <field name="name">MVP op.admission.register readonly</field>
+    <field name="model_id" ref="openeducat_admission.model_op_admission_register" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_admission_requirement_readonly" model="ir.model.access">
+    <field name="name">MVP campus.admission.requirement readonly</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_admission_requirement" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_admission_document_readonly" model="ir.model.access">
+    <field name="name">MVP campus.admission.document readonly</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_admission_document" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_crm_lead_readonly" model="ir.model.access">
+    <field name="name">MVP crm.lead readonly</field>
+    <field name="model_id" ref="crm.model_crm_lead" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_fees_terms_readonly" model="ir.model.access">
+    <field name="name">MVP op.fees.terms readonly</field>
+    <field name="model_id" ref="openeducat_fees.model_op_fees_terms" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_fees_terms_line_readonly" model="ir.model.access">
+    <field name="name">MVP op.fees.terms.line readonly</field>
+    <field name="model_id" ref="openeducat_fees.model_op_fees_terms_line" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_fees_element_readonly" model="ir.model.access">
+    <field name="name">MVP op.fees.element readonly</field>
+    <field name="model_id" ref="openeducat_fees.model_op_fees_element" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_student_fees_details_readonly" model="ir.model.access">
+    <field name="name">MVP op.student.fees.details readonly</field>
+    <field name="model_id" ref="openeducat_fees.model_op_student_fees_details" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_mvp_audit_readonly" model="ir.model.access">
+    <field name="name">MVP campus.mvp.audit readonly</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_mvp_audit" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_academic_year_hod" model="ir.model.access">
+    <field name="name">MVP op.academic.year hod</field>
+    <field name="model_id" ref="openeducat_core.model_op_academic_year" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_academic_term_hod" model="ir.model.access">
+    <field name="name">MVP op.academic.term hod</field>
+    <field name="model_id" ref="openeducat_core.model_op_academic_term" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_department_hod" model="ir.model.access">
+    <field name="name">MVP op.department hod</field>
+    <field name="model_id" ref="openeducat_core.model_op_department" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_course_hod" model="ir.model.access">
+    <field name="name">MVP op.course hod</field>
+    <field name="model_id" ref="openeducat_core.model_op_course" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_batch_hod" model="ir.model.access">
+    <field name="name">MVP op.batch hod</field>
+    <field name="model_id" ref="openeducat_core.model_op_batch" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_subject_hod" model="ir.model.access">
+    <field name="name">MVP op.subject hod</field>
+    <field name="model_id" ref="openeducat_core.model_op_subject" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_student_hod" model="ir.model.access">
+    <field name="name">MVP op.student hod</field>
+    <field name="model_id" ref="openeducat_core.model_op_student" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_student_course_hod" model="ir.model.access">
+    <field name="name">MVP op.student.course hod</field>
+    <field name="model_id" ref="openeducat_core.model_op_student_course" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_faculty_hod" model="ir.model.access">
+    <field name="name">MVP op.faculty hod</field>
+    <field name="model_id" ref="openeducat_core.model_op_faculty" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_session_hod" model="ir.model.access">
+    <field name="name">MVP op.session hod</field>
+    <field name="model_id" ref="openeducat_timetable.model_op_session" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_attendance_register_hod" model="ir.model.access">
+    <field name="name">MVP op.attendance.register hod</field>
+    <field name="model_id" ref="openeducat_attendance.model_op_attendance_register" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_attendance_sheet_hod" model="ir.model.access">
+    <field name="name">MVP op.attendance.sheet hod</field>
+    <field name="model_id" ref="openeducat_attendance.model_op_attendance_sheet" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_attendance_line_hod" model="ir.model.access">
+    <field name="name">MVP op.attendance.line hod</field>
+    <field name="model_id" ref="openeducat_attendance.model_op_attendance_line" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_classroom_hod" model="ir.model.access">
+    <field name="name">MVP op.classroom hod</field>
+    <field name="model_id" ref="openeducat_classroom.model_op_classroom" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_exam_hod" model="ir.model.access">
+    <field name="name">MVP op.exam hod</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_exam_session_hod" model="ir.model.access">
+    <field name="name">MVP op.exam.session hod</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam_session" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_exam_type_hod" model="ir.model.access">
+    <field name="name">MVP op.exam.type hod</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam_type" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_result_line_hod" model="ir.model.access">
+    <field name="name">MVP op.result.line hod</field>
+    <field name="model_id" ref="openeducat_exam.model_op_result_line" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_grade_configuration_hod" model="ir.model.access">
+    <field name="name">MVP op.grade.configuration hod</field>
+    <field name="model_id" ref="openeducat_exam.model_op_grade_configuration" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_admission_hod" model="ir.model.access">
+    <field name="name">MVP op.admission hod</field>
+    <field name="model_id" ref="openeducat_admission.model_op_admission" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_admission_register_hod" model="ir.model.access">
+    <field name="name">MVP op.admission.register hod</field>
+    <field name="model_id" ref="openeducat_admission.model_op_admission_register" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_admission_requirement_hod" model="ir.model.access">
+    <field name="name">MVP campus.admission.requirement hod</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_admission_requirement" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_crm_lead_hod" model="ir.model.access">
+    <field name="name">MVP crm.lead hod</field>
+    <field name="model_id" ref="crm.model_crm_lead" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_fees_terms_hod" model="ir.model.access">
+    <field name="name">MVP op.fees.terms hod</field>
+    <field name="model_id" ref="openeducat_fees.model_op_fees_terms" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_fees_terms_line_hod" model="ir.model.access">
+    <field name="name">MVP op.fees.terms.line hod</field>
+    <field name="model_id" ref="openeducat_fees.model_op_fees_terms_line" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_fees_element_hod" model="ir.model.access">
+    <field name="name">MVP op.fees.element hod</field>
+    <field name="model_id" ref="openeducat_fees.model_op_fees_element" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_student_fees_details_hod" model="ir.model.access">
+    <field name="name">MVP op.student.fees.details hod</field>
+    <field name="model_id" ref="openeducat_fees.model_op_student_fees_details" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_mvp_audit_registrar" model="ir.model.access">
+    <field name="name">MVP campus.mvp.audit registrar</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_mvp_audit" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_mvp_audit_exams" model="ir.model.access">
+    <field name="name">MVP campus.mvp.audit exams</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_mvp_audit" />
+    <field name="group_id" ref="group_mvp_exams" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_mvp_audit_accountant" model="ir.model.access">
+    <field name="name">MVP campus.mvp.audit accountant</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_mvp_audit" />
+    <field name="group_id" ref="group_mvp_accountant" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_exam_registrar" model="ir.model.access">
+    <field name="name">MVP op.exam registrar</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_exam_session_registrar" model="ir.model.access">
+    <field name="name">MVP op.exam.session registrar</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam_session" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_exam_type_registrar" model="ir.model.access">
+    <field name="name">MVP op.exam.type registrar</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam_type" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_result_line_registrar" model="ir.model.access">
+    <field name="name">MVP op.result.line registrar</field>
+    <field name="model_id" ref="openeducat_exam.model_op_result_line" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_op_grade_configuration_registrar" model="ir.model.access">
+    <field name="name">MVP op.grade.configuration registrar</field>
+    <field name="model_id" ref="openeducat_exam.model_op_grade_configuration" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_circular_registrar" model="ir.model.access">
+    <field name="name">MVP campus.circular registrar</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_circular" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_circular_readonly" model="ir.model.access">
+    <field name="name">MVP campus.circular readonly</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_circular" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_circular_hod" model="ir.model.access">
+    <field name="name">MVP campus.circular hod</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_circular" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_company_op_academic_year" model="ir.rule">
+    <field name="name">MVP college boundary: op.academic.year</field>
+    <field name="model_id" ref="openeducat_core.model_op_academic_year" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_academic_term" model="ir.rule">
+    <field name="name">MVP college boundary: op.academic.term</field>
+    <field name="model_id" ref="openeducat_core.model_op_academic_term" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_department" model="ir.rule">
+    <field name="name">MVP college boundary: op.department</field>
+    <field name="model_id" ref="openeducat_core.model_op_department" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_course" model="ir.rule">
+    <field name="name">MVP college boundary: op.course</field>
+    <field name="model_id" ref="openeducat_core.model_op_course" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_batch" model="ir.rule">
+    <field name="name">MVP college boundary: op.batch</field>
+    <field name="model_id" ref="openeducat_core.model_op_batch" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_subject" model="ir.rule">
+    <field name="name">MVP college boundary: op.subject</field>
+    <field name="model_id" ref="openeducat_core.model_op_subject" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_student" model="ir.rule">
+    <field name="name">MVP college boundary: op.student</field>
+    <field name="model_id" ref="openeducat_core.model_op_student" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_student_course" model="ir.rule">
+    <field name="name">MVP college boundary: op.student.course</field>
+    <field name="model_id" ref="openeducat_core.model_op_student_course" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_faculty" model="ir.rule">
+    <field name="name">MVP college boundary: op.faculty</field>
+    <field name="model_id" ref="openeducat_core.model_op_faculty" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_session" model="ir.rule">
+    <field name="name">MVP college boundary: op.session</field>
+    <field name="model_id" ref="openeducat_timetable.model_op_session" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_attendance_register" model="ir.rule">
+    <field name="name">MVP college boundary: op.attendance.register</field>
+    <field name="model_id" ref="openeducat_attendance.model_op_attendance_register" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_attendance_sheet" model="ir.rule">
+    <field name="name">MVP college boundary: op.attendance.sheet</field>
+    <field name="model_id" ref="openeducat_attendance.model_op_attendance_sheet" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_attendance_line" model="ir.rule">
+    <field name="name">MVP college boundary: op.attendance.line</field>
+    <field name="model_id" ref="openeducat_attendance.model_op_attendance_line" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_classroom" model="ir.rule">
+    <field name="name">MVP college boundary: op.classroom</field>
+    <field name="model_id" ref="openeducat_classroom.model_op_classroom" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_exam" model="ir.rule">
+    <field name="name">MVP college boundary: op.exam</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_exam_session" model="ir.rule">
+    <field name="name">MVP college boundary: op.exam.session</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam_session" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_exam_type" model="ir.rule">
+    <field name="name">MVP college boundary: op.exam.type</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam_type" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_result_line" model="ir.rule">
+    <field name="name">MVP college boundary: op.result.line</field>
+    <field name="model_id" ref="openeducat_exam.model_op_result_line" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_grade_configuration" model="ir.rule">
+    <field name="name">MVP college boundary: op.grade.configuration</field>
+    <field name="model_id" ref="openeducat_exam.model_op_grade_configuration" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_admission" model="ir.rule">
+    <field name="name">MVP college boundary: op.admission</field>
+    <field name="model_id" ref="openeducat_admission.model_op_admission" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_admission_register" model="ir.rule">
+    <field name="name">MVP college boundary: op.admission.register</field>
+    <field name="model_id" ref="openeducat_admission.model_op_admission_register" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_campus_admission_requirement" model="ir.rule">
+    <field name="name">MVP college boundary: campus.admission.requirement</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_admission_requirement" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_campus_admission_document" model="ir.rule">
+    <field name="name">MVP college boundary: campus.admission.document</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_admission_document" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_fees_terms" model="ir.rule">
+    <field name="name">MVP college boundary: op.fees.terms</field>
+    <field name="model_id" ref="openeducat_fees.model_op_fees_terms" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_fees_terms_line" model="ir.rule">
+    <field name="name">MVP college boundary: op.fees.terms.line</field>
+    <field name="model_id" ref="openeducat_fees.model_op_fees_terms_line" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_fees_element" model="ir.rule">
+    <field name="name">MVP college boundary: op.fees.element</field>
+    <field name="model_id" ref="openeducat_fees.model_op_fees_element" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_op_student_fees_details" model="ir.rule">
+    <field name="name">MVP college boundary: op.student.fees.details</field>
+    <field name="model_id" ref="openeducat_fees.model_op_student_fees_details" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_company_campus_mvp_audit" model="ir.rule">
+    <field name="name">MVP college boundary: campus.mvp.audit</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_mvp_audit" />
+    <field name="domain_force">['|',('company_id','=',False),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="mvp_hod_op_student" model="ir.rule">
+    <field name="name">Department head scope: op.student</field>
+    <field name="model_id" ref="openeducat_core.model_op_student" />
+    <field name="domain_force">([('course_detail_ids.course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_hod_op_student_course" model="ir.rule">
+    <field name="name">Department head scope: op.student.course</field>
+    <field name="model_id" ref="openeducat_core.model_op_student_course" />
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_hod_op_faculty" model="ir.rule">
+    <field name="name">Department head scope: op.faculty</field>
+    <field name="model_id" ref="openeducat_core.model_op_faculty" />
+    <field name="domain_force">([('main_department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_hod_op_course" model="ir.rule">
+    <field name="name">Department head scope: op.course</field>
+    <field name="model_id" ref="openeducat_core.model_op_course" />
+    <field name="domain_force">([('department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_hod_op_batch" model="ir.rule">
+    <field name="name">Department head scope: op.batch</field>
+    <field name="model_id" ref="openeducat_core.model_op_batch" />
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_hod_op_subject" model="ir.rule">
+    <field name="name">Department head scope: op.subject</field>
+    <field name="model_id" ref="openeducat_core.model_op_subject" />
+    <field name="domain_force">([('department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_hod_op_session" model="ir.rule">
+    <field name="name">Department head scope: op.session</field>
+    <field name="model_id" ref="openeducat_timetable.model_op_session" />
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_hod_op_attendance_sheet" model="ir.rule">
+    <field name="name">Department head scope: op.attendance.sheet</field>
+    <field name="model_id" ref="openeducat_attendance.model_op_attendance_sheet" />
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_hod_op_attendance_line" model="ir.rule">
+    <field name="name">Department head scope: op.attendance.line</field>
+    <field name="model_id" ref="openeducat_attendance.model_op_attendance_line" />
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_hod_op_attendance_register" model="ir.rule">
+    <field name="name">Department head scope: op.attendance.register</field>
+    <field name="model_id" ref="openeducat_attendance.model_op_attendance_register" />
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_hod_op_exam" model="ir.rule">
+    <field name="name">Department head scope: op.exam</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam" />
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_hod_op_exam_session" model="ir.rule">
+    <field name="name">Department head scope: op.exam.session</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam_session" />
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_hod_op_result_line" model="ir.rule">
+    <field name="name">Department head scope: op.result.line</field>
+    <field name="model_id" ref="openeducat_exam.model_op_result_line" />
+    <field name="domain_force">([('exam_id.course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_hod_op_admission" model="ir.rule">
+    <field name="name">Department head scope: op.admission</field>
+    <field name="model_id" ref="openeducat_admission.model_op_admission" />
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_hod_op_admission_register" model="ir.rule">
+    <field name="name">Department head scope: op.admission.register</field>
+    <field name="model_id" ref="openeducat_admission.model_op_admission_register" />
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_hod_op_student_fees_details" model="ir.rule">
+    <field name="name">Department head scope: op.student.fees.details</field>
+    <field name="model_id" ref="openeducat_fees.model_op_student_fees_details" />
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_acl_campus_mvp_report_owner" model="ir.model.access">
+    <field name="name">MVP campus.mvp.report owner</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_mvp_report" />
+    <field name="group_id" ref="group_mvp_owner" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_mvp_report_registrar" model="ir.model.access">
+    <field name="name">MVP campus.mvp.report registrar</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_mvp_report" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_mvp_report_admissions" model="ir.model.access">
+    <field name="name">MVP campus.mvp.report admissions</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_mvp_report" />
+    <field name="group_id" ref="group_mvp_admissions" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_mvp_report_accountant" model="ir.model.access">
+    <field name="name">MVP campus.mvp.report accountant</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_mvp_report" />
+    <field name="group_id" ref="group_mvp_accountant" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_mvp_report_exams" model="ir.model.access">
+    <field name="name">MVP campus.mvp.report exams</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_mvp_report" />
+    <field name="group_id" ref="group_mvp_exams" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_mvp_report_readonly" model="ir.model.access">
+    <field name="name">MVP campus.mvp.report readonly</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_mvp_report" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_mvp_report_hod" model="ir.model.access">
+    <field name="name">MVP campus.mvp.report hod</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_mvp_report" />
+    <field name="group_id" ref="group_mvp_hod" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_campus_student_import_registrar" model="ir.model.access">
+    <field name="name">MVP campus.student.import registrar</field>
+    <field name="model_id" ref="ideastone_erp.model_campus_student_import" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_account_move_readonly" model="ir.model.access">
+    <field name="name">MVP account.move readonly</field>
+    <field name="model_id" ref="account.model_account_move" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_account_payment_readonly" model="ir.model.access">
+    <field name="name">MVP account.payment readonly</field>
+    <field name="model_id" ref="account.model_account_payment" />
+    <field name="group_id" ref="group_mvp_readonly" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_account_move_registrar" model="ir.model.access">
+    <field name="name">MVP account.move registrar</field>
+    <field name="model_id" ref="account.model_account_move" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_acl_account_payment_registrar" model="ir.model.access">
+    <field name="name">MVP account.payment registrar</field>
+    <field name="model_id" ref="account.model_account_payment" />
+    <field name="group_id" ref="group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="mvp_read_enrolment_accountant" model="ir.model.access">
+    <field name="name">MVP enrolment reader accountant</field>
+    <field name="model_id" ref="openeducat_core.model_op_student_course" />
+    <field name="group_id" ref="group_mvp_accountant" />
+    <field name="perm_read" eval="True" />
+  </record>
+  <record id="mvp_read_enrolment_exams" model="ir.model.access">
+    <field name="name">MVP enrolment reader exams</field>
+    <field name="model_id" ref="openeducat_core.model_op_student_course" />
+    <field name="group_id" ref="group_mvp_exams" />
+    <field name="perm_read" eval="True" />
+  </record>
+  <record id="mvp_faculty_exam_read_scope" model="ir.rule">
+    <field name="name">mvp faculty exam read scope</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam" />
+    <field name="domain_force">['|',('campus_managed','=',False),('responsible_id.user_id','=',user.id)] if user.has_group('openeducat_core.group_op_faculty') and not (user.has_group('ideastone_erp.group_mvp_exams') or user.has_group('ideastone_erp.group_mvp_registrar') or user.has_group('ideastone_erp.group_mvp_readonly') or user.has_group('ideastone_erp.group_mvp_hod') or user.has_group('openeducat_exam.group_op_exam_admin')) else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_faculty_result_read_scope" model="ir.rule">
+    <field name="name">mvp faculty result read scope</field>
+    <field name="model_id" ref="openeducat_exam.model_op_result_line" />
+    <field name="domain_force">['|',('exam_id.campus_managed','=',False),('exam_id.responsible_id.user_id','=',user.id)] if user.has_group('openeducat_core.group_op_faculty') and not (user.has_group('ideastone_erp.group_mvp_exams') or user.has_group('ideastone_erp.group_mvp_registrar') or user.has_group('ideastone_erp.group_mvp_readonly') or user.has_group('ideastone_erp.group_mvp_hod') or user.has_group('openeducat_exam.group_op_exam_admin')) else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_faculty_student_read_scope" model="ir.rule">
+    <field name="name">mvp faculty student read scope</field>
+    <field name="model_id" ref="openeducat_core.model_op_student" />
+    <field name="domain_force">['|','|','|',('course_detail_ids','=',False),('course_detail_ids.batch_id.campus_year_id','=',False),('course_detail_ids.batch_id.campus_session_ids.faculty_id.user_id','=',user.id),('course_detail_ids.batch_id.campus_exam_ids.responsible_id.user_id','=',user.id)] if user.has_group('openeducat_core.group_op_faculty') and not (user.has_group('ideastone_erp.group_mvp_exams') or user.has_group('ideastone_erp.group_mvp_registrar') or user.has_group('ideastone_erp.group_mvp_readonly') or user.has_group('ideastone_erp.group_mvp_hod') or user.has_group('openeducat_exam.group_op_exam_admin') or user.has_group('ideastone_erp.group_mvp_admissions') or user.has_group('ideastone_erp.group_mvp_accountant')) else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_faculty_enrolment_read_scope" model="ir.rule">
+    <field name="name">mvp faculty enrolment read scope</field>
+    <field name="model_id" ref="openeducat_core.model_op_student_course" />
+    <field name="domain_force">['|','|',('batch_id.campus_year_id','=',False),('batch_id.campus_session_ids.faculty_id.user_id','=',user.id),('batch_id.campus_exam_ids.responsible_id.user_id','=',user.id)] if user.has_group('openeducat_core.group_op_faculty') and not (user.has_group('ideastone_erp.group_mvp_exams') or user.has_group('ideastone_erp.group_mvp_registrar') or user.has_group('ideastone_erp.group_mvp_readonly') or user.has_group('ideastone_erp.group_mvp_hod') or user.has_group('openeducat_exam.group_op_exam_admin') or user.has_group('ideastone_erp.group_mvp_admissions') or user.has_group('ideastone_erp.group_mvp_accountant')) else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_audit_role_scope" model="ir.rule">
+    <field name="name">mvp audit role scope</field>
+    <field name="model_id" ref="model_campus_mvp_audit" />
+    <field name="domain_force">[(1,'=',1)] if user.has_group('ideastone_erp.group_mvp_registrar') or user.has_group('ideastone_erp.group_mvp_readonly') else [('model_name','in',['account.payment','account.move','op.student.fees.details','campus.fee.assignment.wizard','campus.fee.payment.wizard'])] if user.has_group('ideastone_erp.group_mvp_accountant') else [('model_name','in',['op.exam','op.result.line','op.grade.configuration'])] if user.has_group('ideastone_erp.group_mvp_exams') else [('id','=',0)]</field>
+  </record>
+  <record id="mvp_notice_audience" model="ir.rule">
+    <field name="name">Managed notices: published audience and teaching allocation</field>
+    <field name="model_id" ref="model_campus_circular" />
+    <field name="domain_force">[(1,'=',1)] if user.has_group('ideastone_erp.group_mvp_registrar') or user.has_group('ideastone_erp.group_mvp_readonly') or user.has_group('ideastone_erp.group_manager') else ['|',('campus_managed','=',False),'&amp;','&amp;','&amp;','&amp;','&amp;','&amp;',('campus_status','=','published'),('audience','in',['all','faculty']),'|',('campus_group_id','=',False),('campus_group_id','in',user.groups_id.ids),'|','|',('campus_course_id','=',False),('campus_course_id.campus_section_ids.campus_session_ids.faculty_id.user_id','=',user.id),('campus_course_id.department_id','=',user.dept_id.id if user.has_group('ideastone_erp.group_mvp_hod') and user.dept_id else 0),'|','|',('campus_batch_id','=',False),('campus_batch_id.campus_session_ids.faculty_id.user_id','=',user.id),('campus_batch_id.course_id.department_id','=',user.dept_id.id if user.has_group('ideastone_erp.group_mvp_hod') and user.dept_id else 0),('date_from','&lt;=',time.strftime('%Y-%m-%d')),'|',('date_to','=',False),('date_to','&gt;=',time.strftime('%Y-%m-%d'))]</field>
+  </record>
+  <record id="mvp_notice_staff_reader" model="ir.model.access">
+    <field name="name">Published college notices for internal staff</field>
+    <field name="model_id" ref="model_campus_circular" />
+    <field name="group_id" ref="base.group_user" />
+    <field name="perm_read" eval="True" />
+  </record>
+</odoo>

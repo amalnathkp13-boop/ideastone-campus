@@ -8,7 +8,7 @@
   <record id="rule_faculty_timetable_boundary" model="ir.rule">
     <field name="name">Faculty timetable allocation boundary</field>
     <field name="model_id" ref="openeducat_timetable.model_op_session"/>
-    <field name="domain_force">[(1,'=',1)] if user.has_group('openeducat_timetable.group_op_timetable_manager') or not user.has_group('openeducat_core.group_op_faculty') else [('faculty_id.user_id','=',user.id)]</field>
+    <field name="domain_force">[(1,'=',1)] if user.has_group('openeducat_timetable.group_op_timetable_manager') or user.has_group('ideastone_erp.group_mvp_registrar') or not user.has_group('openeducat_core.group_op_faculty') else [('faculty_id.user_id','=',user.id)]</field>
   </record>
   <record id="rule_faculty_timetable_college" model="ir.rule">
     <field name="name">Timetable college boundary</field>
