@@ -80,12 +80,59 @@ jobs:
             echo "### Odoo install & tests"
             grep -E "odoo.tests.result|odoo.tests.stats" install.log | sed 's/^.*INFO [^ ]* //' || echo "no test summary found"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Faculty UI on disposable Odoo
+        shell: bash
+        run: |
+          set -euo pipefail
+          export FACULTY_QA_PASSWORD=$(openssl rand -hex 20)
+          export FACULTY_QA_OUT="$RUNNER_TEMP/faculty-ui-proof"
+          mkdir -p "$FACULTY_QA_OUT"
+          mounts=(-v "$PWD/addons:/mnt/ideastone-addons:ro" -v "$PWD/vendor/openeducat_erp:/mnt/openeducat:ro")
+          odoo_args=(--db_host=127.0.0.1 --db_user=odoo --db_password=odoo -d ci --addons-path=/mnt/ideastone-addons,/mnt/openeducat,/usr/lib/python3/dist-packages/odoo/addons --workers=0 --max-cron-threads=0)
+          docker run --rm -i --network host --entrypoint odoo "${mounts[@]}" -e FACULTY_QA_PASSWORD odoo:17.0 shell "${odoo_args[@]}" --no-http < docs/qa/faculty-workspace/seed.py
+          docker run -d --name faculty-ui-ci --network host --entrypoint odoo "${mounts[@]}" odoo:17.0 "${odoo_args[@]}" --http-port=18069 --db-filter='^ci$'
+          for i in $(seq 1 90); do
+            if curl -fsS http://127.0.0.1:18069/web/login >/dev/null; then break; fi
+            sleep 2
+          done
+          npm install --prefix "$RUNNER_TEMP/faculty-ui-tools" playwright
+          "$RUNNER_TEMP/faculty-ui-tools/node_modules/.bin/playwright" install --with-deps chromium
+          export NODE_PATH="$RUNNER_TEMP/faculty-ui-tools/node_modules"
+          node docs/qa/faculty-workspace/browser.cjs
+      - name: Upgrade installed campus modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker rm -f faculty-ui-ci
+          docker run --rm --network host --entrypoint odoo \
+            -v "$PWD/addons:/mnt/ideastone-addons:ro" \
+            -v "$PWD/vendor/openeducat_erp:/mnt/openeducat:ro" \
+            odoo:17.0 --db_host=127.0.0.1 --db_user=odoo --db_password=odoo -d ci \
+            --addons-path=/mnt/ideastone-addons,/mnt/openeducat,/usr/lib/python3/dist-packages/odoo/addons \
+            -u ideastone_campus,ideastone_lms,ideastone_erp --stop-after-init --workers=0 --max-cron-threads=0 2>&1 | tee upgrade.log
+          ! grep -E "^[0-9-]+ [0-9:,]+ [0-9]+ (ERROR|CRITICAL)" upgrade.log
+      - name: Faculty UI diagnostics and teardown
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/faculty-ui-proof"
+          docker logs faculty-ui-ci > "$RUNNER_TEMP/faculty-ui-proof/odoo.log" 2>&1 || true
+          docker rm -f faculty-ui-ci || true
+      - name: Preserve faculty UI evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: faculty-ui-proof
+          path: ${{ runner.temp }}/faculty-ui-proof
+          retention-days: 14
       - name: Preserve install and test diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: campus-install-tests
-          path: install.log
+          path: |
+            install.log
+            upgrade.log
           retention-days: 14
 
   images:

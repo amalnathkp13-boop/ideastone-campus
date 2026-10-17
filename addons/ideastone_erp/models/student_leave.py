@@ -35,7 +35,7 @@ class StudentLeave(models.Model):
     _inherit = "campus.faculty.task"
 
     routing_id = fields.Many2one("campus.student.leave.routing", required=True, ondelete="restrict")
-    student_id = fields.Many2one(related="routing_id.student_id", store=True)
+    student_id = fields.Many2one("op.student", required=True, readonly=True, ondelete="restrict")
     advisor_id = fields.Many2one("res.users", readonly=True)
     hod_id = fields.Many2one("res.users", readonly=True)
     principal_id = fields.Many2one("res.users", readonly=True)
@@ -63,12 +63,12 @@ class StudentLeave(models.Model):
                 raise AccessError(_("An active college-managed advisor routing is required."))
             if vals.get("state", "draft") != "draft" or vals.get("decision_log"):
                 raise AccessError(_("Leave requests must start as drafts."))
-            vals.update(advisor_id=route.advisor_id.id, hod_id=route.hod_id.id,
+            vals.update(student_id=route.student_id.id, advisor_id=route.advisor_id.id, hod_id=route.hod_id.id,
                         principal_id=route.principal_id.id, company_id=route.company_id.id)
         return super().create(vals_list)
 
     def write(self, vals):
-        if {"routing_id", "advisor_id", "hod_id", "principal_id", "decision_log"} & vals.keys():
+        if {"student_id", "routing_id", "advisor_id", "hod_id", "principal_id", "decision_log"} & vals.keys():
             raise AccessError(_("Approval routing and decision evidence cannot be changed on a request."))
         if "state" not in vals:
             for rec in self:

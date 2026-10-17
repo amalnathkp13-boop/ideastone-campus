@@ -187,3 +187,143 @@ class TestVcetWorkspace(TransactionCase):
             task.write({"user_id": self.other_teacher.id})
         with self.assertRaises(ValidationError), self.cr.savepoint():
             tasks.create({"name": "Invalid dates", "date": "2026-10-17", "deadline": "2026-10-16"})
+
+    def faculty_class_fixture(self):
+        course = self.env["op.course"].search([], limit=1)
+        batch = self.env["op.batch"].create({"name": "Faculty tools QA", "code": "FAC-TOOLS-QA", "course_id": course.id, "end_date": "2035-12-31"})
+        subject = self.env["op.subject"].create({"name": "Faculty tools QA", "code": "FAC-TOOLS-QA"})
+        self.env["op.session"].create({"course_id": course.id, "batch_id": batch.id, "faculty_id": self.faculty.id,
+                                       "subject_id": subject.id, "start_datetime": "2035-01-01 10:00:00", "end_datetime": "2035-01-01 11:00:00"})
+        self.env["op.student.course"].create({"student_id": self.student.id, "course_id": course.id, "batch_id": batch.id})
+        return batch, subject
+
+    def test_weighted_assessment_and_class_scope(self):
+        _batch, subject = self.faculty_class_fixture()
+        assessments = self.env["campus.faculty.assessment"].with_user(self.teacher)
+        vals = {"name": "QA internal marks", "student_id": self.student.id, "subject_id": subject.id,
+                "academic_year": "2035-36", "semester": "I", "output_maximum": 25,
+                "component_ids": [(0, 0, {"name": "Test", "score": 75, "maximum": 100, "weight": 40}),
+                                  (0, 0, {"name": "Practical", "score": 45, "maximum": 50, "weight": 60})]}
+        record = assessments.create(vals)
+        self.assertAlmostEqual(record.total, 21)
+        record.write({"state": "done"})
+        with self.assertRaises(AccessError):
+            record.with_user(self.other_teacher).read(["total"])
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            assessments.with_user(self.other_teacher).create(vals)
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            record.component_ids[0].unlink()
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            record.write({"output_maximum": 50})
+        record.write({"state": "planned"})
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            record.component_ids[0].write({"score": 101})
+
+    def test_activity_attendance_and_document_privacy(self):
+        batch, _subject = self.faculty_class_fixture()
+        activity = self.env["campus.faculty.activity"].with_user(self.teacher).create({"name": "QA SDP", "kind": "sdp", "batch_id": batch.id,
+                    "attendance_ids": [(0, 0, {"student_id": self.student.id, "forenoon": True})]})
+        self.assertTrue(activity.attendance_ids.forenoon)
+        with self.assertRaises(AccessError):
+            activity.attendance_ids.with_user(self.other_teacher).read(["student_id"])
+        document = self.env["campus.faculty.document"].with_user(self.teacher).create({"name": "QA question paper", "kind": "question", "document": "UUE=", "filename": "qa.txt"})
+        with self.assertRaises(AccessError):
+            document.with_user(self.other_teacher).read(["document"])
+
+    def test_student_leave_review_chain_and_evidence(self):
+        route = self.env["campus.student.leave.routing"].create({"name": "QA student advisor", "student_id": self.student.id,
+                    "advisor_id": self.teacher.id, "hod_id": self.other_teacher.id})
+        leave = self.env["campus.student.leave"].with_user(self.teacher).create({"name": "QA student leave", "routing_id": route.id, "reason": "QA medical leave"})
+        with self.assertRaises(AccessError):
+            leave.write({"state": "approved"})
+        leave.action_submit()
+        with self.assertRaises(AccessError):
+            leave.with_user(self.other_teacher).action_approve()
+        leave.action_approve()
+        self.assertEqual(leave.state, "hod")
+        with self.assertRaises(AccessError):
+            leave.action_approve()
+        leave.with_user(self.other_teacher).action_approve()
+        self.assertEqual(leave.state, "approved")
+        self.assertIn("hod -> approved", leave.decision_log)
+        original_student = leave.student_id
+        other_student = self.student.copy({"partner_id": self.env["res.partner"].create({"name": "Other routed student", "company_id": self.env.company.id}).id, "gr_no": "ROUTE-QA"})
+        route.write({"student_id": other_student.id})
+        self.assertEqual(leave.student_id, original_student, "Existing leave retains its student snapshot when routing changes")
+        with self.assertRaises(AccessError):
+            leave.write({"decision_log": "Forged"})
+        with self.assertRaises(AccessError):
+            route.with_user(self.teacher).write({"hod_id": self.teacher.id})
+
+    def test_faculty_tools_views_and_report_domains(self):
+        self.faculty_class_fixture()
+        dashboard = self.env["campus.dashboard"].with_user(self.teacher)
+        overview = dashboard.get_overview()
+        for module in overview["faculty_modules"]:
+            for item in module["items"]:
+                if not item.get("tool"):
+                    continue
+                action = dashboard.get_faculty_action(item["tool"])
+                model = self.env[action["res_model"]].with_user(self.teacher).with_context(action["context"])
+                model.search(action["domain"], limit=1)
+                model.get_views(action["views"], {"toolbar": True})
+        photos = dashboard.get_faculty_action("report_photos")
+        self.assertEqual(photos["views"][0][1], "kanban")
+        self.assertIn(self.student.id, self.env["op.student"].with_user(self.teacher).search(photos["domain"]).ids)
+        with self.assertRaises(AccessError):
+            dashboard.get_faculty_action("arbitrary_model")
+
+    def test_previous_academic_records_scope_and_scores(self):
+        self.faculty_class_fixture()
+        model = self.env["campus.student.education"].with_user(self.teacher)
+        vals = {"name": "QA previous education", "student_id": self.student.id, "qualification": "Higher secondary",
+                "institution": "QA school", "completion_year": 2025, "score": 450, "maximum": 500}
+        record = model.create(vals)
+        self.assertEqual(record.percentage, 90)
+        with self.assertRaises(AccessError):
+            record.with_user(self.other_teacher).read(["score"])
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            record.write({"score": 501})
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            model.with_user(self.other_teacher).create(vals)
+
+    def test_lesson_review_is_independent_and_preserves_delivery(self):
+        batch, subject = self.faculty_class_fixture()
+        term = self.env["op.academic.term"].search([], limit=1)
+        reviewer = new_test_user(self.env, login="qa_lesson_reviewer", groups="ideastone_erp.group_academic")
+        plan = self.env["campus.teaching.plan"].with_user(self.teacher).create({
+            "name": "QA lesson review", "faculty_id": self.faculty.id, "subject_id": subject.id,
+            "batch_id": batch.id, "term_id": term.id, "planned_date": fields.Date.today(),
+            "unit": "I", "topic": "QA lesson", "planned_hours": 1,
+        })
+        plan.action_submit_review()
+        with self.assertRaises(AccessError):
+            plan.action_approve_review()
+        with self.assertRaises(ValidationError):
+            plan.write({"topic": "Silently replaced"})
+        plan.with_user(reviewer).action_approve_review()
+        self.assertEqual(plan.reviewed_by, reviewer)
+        plan.write({"execution_date": fields.Date.today(), "actual_hours": 1, "notes": "Delivered"})
+        self.assertEqual(plan.variance, 0)
+        with self.assertRaises(AccessError):
+            plan.write({"reviewed_by": self.teacher.id})
+        with self.assertRaises(ValidationError):
+            plan.unlink()
+
+    def test_personal_payroll_is_read_only_and_own_only(self):
+        employee = self.env["hr.employee"].create({"name": "QA payroll faculty", "user_id": self.teacher.id})
+        agreement = self.env["campus.salary.agreement"].create({"name": "QA pay agreement", "employee_id": employee.id,
+                     "date_from": "2035-01-01", "basic": 1000})
+        agreement.action_submit()
+        agreement.action_approve()
+        slip = self.env["campus.payslip"].create({"name": "QA own payslip", "agreement_id": agreement.id,
+                    "date_from": "2035-01-01", "date_to": "2035-01-31", "working_days": 20})
+        slip.action_compute()
+        slip.action_submit()
+        slip.action_approve()
+        self.assertEqual(slip.with_user(self.teacher).read(["name"])[0]["name"], slip.name)
+        with self.assertRaises(AccessError):
+            slip.with_user(self.other_teacher).read(["net"])
+        with self.assertRaises(AccessError):
+            slip.with_user(self.teacher).write({"payment_reference": "Forged"})
+        self.env["campus.payslip"].with_user(self.teacher).get_views([(False, "form")], {"toolbar": True})

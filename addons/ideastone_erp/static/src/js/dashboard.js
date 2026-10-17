@@ -11,7 +11,7 @@ class CampusBase extends Component {
         this.toggleRef = useRef("navToggle");
         this.state = useState({ loading: true, error: "", navigation: [], stats: [], pages: [], queues: [], quick: [], appointments: [],
             company: "", user: "", filter: "", open: false, page: this.props.action?.context?.campus_page || "overview",
-            faculty_modules: [], module: this.props.action?.context?.campus_module || "home", activeAction: 0, activeTool: "",
+            faculty_modules: [], faculty_tasks: [], faculty_schedule: [], module: this.props.action?.context?.campus_module || "home", activeAction: 0, activeTool: "",
             busy: false, query: "", cardQuery: "", unit: "", card: "", loanPage: 0, desk: { units: [], cards: [], loans: [], next: false } });
         // Handle the drawer before Odoo's global Escape shortcut consumes the key.
         useExternalListener(window, "keydown", (event) => {
@@ -44,6 +44,7 @@ class CampusBase extends Component {
     get pageTitle() {
         if (this.state.page === "faculty-module") return this.facultyModule?.label || "Faculty workspace";
         if (this.state.page === "help") return "Faculty guide";
+        if (this.state.page === "analytics") return "My teaching dashboard";
         if (this.state.page === "overview") return this.state.is_admin ? "Institution overview" : "Your faculty workspace";
         if (this.state.page === "modules") return this.state.is_admin ? "All college modules" : "Your authorized modules";
         return this.state.page === "library" ? "Library circulation desk" : "Reports & exports";

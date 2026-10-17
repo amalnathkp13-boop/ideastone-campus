@@ -15,11 +15,12 @@ class FacultyActivity(models.Model):
     venue = fields.Char()
     attendance_ids = fields.One2many("campus.faculty.activity.attendance", "activity_id", string="Participants")
 
-    @api.constrains("batch_id", "user_id")
+    @api.constrains("batch_id", "user_id", "company_id")
     def _check_batch(self):
         for activity in self:
             if not self.env["op.session"].search_count([
                 ("faculty_id.user_id", "=", activity.user_id.id), ("batch_id", "=", activity.batch_id.id),
+                ("company_id", "=", activity.company_id.id), ("state", "!=", "cancel"),
             ]):
                 raise AccessError(_("Choose a batch allocated to you in the timetable."))
 

@@ -18,7 +18,7 @@
   <record id="view_faculty_task_form" model="ir.ui.view"><field name="name">campus.faculty.task.form</field><field name="model">campus.faculty.task</field>
     <field name="arch" type="xml"><form string="My task and e-diary"><header><field name="state" widget="statusbar" options="{'clickable':True}"/></header><sheet>
       <div class="oe_title"><label for="name"/><h1><field name="name" placeholder="What do you need to do?"/></h1></div>
-      <group><group><field name="kind"/><field name="priority" widget="priority"/></group><group><field name="date"/><field name="deadline"/><field name="user_id"/><field name="company_id" groups="base.group_multi_company"/></group></group>
+      <group><group><field name="kind"/><field name="priority" widget="priority"/></group><group><field name="date"/><field name="deadline"/><field name="user_id"/><field name="company_id" readonly="True" groups="base.group_multi_company"/></group></group>
       <notebook><page string="E-diary notes"><field name="notes" placeholder="Record your plan, progress and reflections…"/></page>
         <page string="Supporting document"><field name="filename" invisible="True"/><field name="document" filename="filename"/></page></notebook>
     </sheet><div class="oe_chatter"><field name="message_follower_ids"/><field name="activity_ids"/><field name="message_ids"/></div></form></field>

@@ -15,6 +15,7 @@ class ServiceRequest(models.Model):
         ("transfer", "Programme transfer"), ("alternate", "Alternate teaching hour"),
         ("room", "Room request"), ("travel", "Travel proposal"), ("training", "Training request"),
         ("work", "Work / service order"), ("advance", "Payment / salary advance proposal"),
+        ("student_complaint", "Complaint on a student"),
     ], required=True, default="grievance")
     student_id = fields.Many2one("op.student", ondelete="restrict")
     faculty_id = fields.Many2one("op.faculty", ondelete="restrict")
@@ -27,16 +28,19 @@ class ServiceRequest(models.Model):
     amount = fields.Monetary()
     description = fields.Text(required=True)
     resolution = fields.Text()
+    complaint_category = fields.Char()
     document = fields.Binary(attachment=True)
     filename = fields.Char()
 
-    @api.constrains("date_from", "date_to", "amount", "kind", "requested_course_id", "student_id")
+    @api.constrains("date_from", "date_to", "amount", "kind", "requested_course_id", "student_id", "complaint_category")
     def _check_values(self):
         for rec in self:
             if rec.amount < 0 or rec.date_from and rec.date_to and rec.date_to < rec.date_from:
                 raise ValidationError(_("Check the amount and request date range."))
             if rec.kind == "transfer" and (not rec.student_id or not rec.requested_course_id):
                 raise ValidationError(_("Programme transfer requires a student and destination programme."))
+            if rec.kind == "student_complaint" and (not rec.student_id or not rec.complaint_category):
+                raise ValidationError(_("A student complaint requires the student, complaint type and description."))
 
     def _validate_transition(self, target):
         if target == "done" and not self.resolution:

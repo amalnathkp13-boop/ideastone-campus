@@ -38,6 +38,12 @@ class AttendanceLine(models.Model):
 class Exam(models.Model):
     _inherit = "op.exam"
 
+    campus_exam_kind = fields.Selection([
+        ("unclassified", "Unclassified"), ("institution", "Institution test"),
+        ("university", "University examination"), ("autonomous", "Autonomous ESE"),
+    ], required=True, default="unclassified", string="Examination category",
+        help="Classify the examination explicitly before using category-specific reports.")
+
     @api.model_create_multi
     def create(self, vals_list):
         if any(v.get("state") == "done" for v in vals_list) and not self.env.su and not self.env.user.has_group("openeducat_exam.group_op_exam_admin"):
