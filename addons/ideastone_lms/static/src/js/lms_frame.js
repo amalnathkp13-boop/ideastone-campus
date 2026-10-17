@@ -10,11 +10,19 @@ export class LmsFrame extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.state = useState({ url: "/lms/", loaded: false });
-        onWillStart(async () => {
-            const params = await this.orm.call("ir.config_parameter", "get_param", ["ideastone.lms_url", "/lms/"]);
-            this.state.url = params || "/lms/";
-        });
+        this.state = useState({ url: "", loaded: false, error: "" });
+        onWillStart(() => this.loadConfiguration());
+    }
+
+    async loadConfiguration() {
+        this.state.error = "";
+        this.state.loaded = false;
+        try {
+            const configuration = await this.orm.call("ideastone.lms.workspace", "configuration", []);
+            this.state.url = configuration.url;
+        } catch (error) {
+            this.state.error = error.data?.message || "Learning configuration could not be loaded. Contact your college administrator or retry.";
+        }
     }
 
     onLoad() {
@@ -22,7 +30,7 @@ export class LmsFrame extends Component {
     }
 
     openInNewTab() {
-        window.open(this.state.url, "_blank");
+        window.open(this.state.url, "_blank", "noopener,noreferrer");
     }
 }
 

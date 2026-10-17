@@ -5,3 +5,4 @@ from . import test_owner_mvp
 from . import test_student_portal
 
 from . import test_parent_portal
+from . import test_finance_learning

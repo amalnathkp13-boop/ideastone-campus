@@ -1,0 +1,89 @@
+<odoo>
+  <record id="learning_acl_assignment_faculty" model="ir.model.access">
+    <field name="name">College learning assignment faculty</field>
+    <field name="model_id" ref="openeducat_assignment.model_op_assignment" />
+    <field name="group_id" ref="openeducat_core.group_op_faculty" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="learning_acl_grade_faculty" model="ir.model.access">
+    <field name="name">College learning grade faculty</field>
+    <field name="model_id" ref="openeducat_assignment.model_grading_assignment" />
+    <field name="group_id" ref="openeducat_core.group_op_faculty" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="learning_acl_submission_faculty" model="ir.model.access">
+    <field name="name">College learning submission faculty</field>
+    <field name="model_id" ref="openeducat_assignment.model_op_assignment_sub_line" />
+    <field name="group_id" ref="openeducat_core.group_op_faculty" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="learning_acl_type_faculty" model="ir.model.access">
+    <field name="name">College learning type faculty</field>
+    <field name="model_id" ref="openeducat_assignment.model_grading_assignment_type" />
+    <field name="group_id" ref="openeducat_core.group_op_faculty" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="False" />
+    <field name="perm_create" eval="False" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="learning_acl_assignment_registrar" model="ir.model.access">
+    <field name="name">College learning assignment registrar</field>
+    <field name="model_id" ref="openeducat_assignment.model_op_assignment" />
+    <field name="group_id" ref="ideastone_erp.group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="learning_acl_grade_registrar" model="ir.model.access">
+    <field name="name">College learning grade registrar</field>
+    <field name="model_id" ref="openeducat_assignment.model_grading_assignment" />
+    <field name="group_id" ref="ideastone_erp.group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="learning_acl_submission_registrar" model="ir.model.access">
+    <field name="name">College learning submission registrar</field>
+    <field name="model_id" ref="openeducat_assignment.model_op_assignment_sub_line" />
+    <field name="group_id" ref="ideastone_erp.group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="learning_acl_type_registrar" model="ir.model.access">
+    <field name="name">College learning type registrar</field>
+    <field name="model_id" ref="openeducat_assignment.model_grading_assignment_type" />
+    <field name="group_id" ref="ideastone_erp.group_mvp_registrar" />
+    <field name="perm_read" eval="True" />
+    <field name="perm_write" eval="True" />
+    <field name="perm_create" eval="True" />
+    <field name="perm_unlink" eval="False" />
+  </record>
+  <record id="learning_scope_assignment" model="ir.rule">
+    <field name="name">Learning college and assigned faculty: assignment</field>
+    <field name="model_id" ref="openeducat_assignment.model_op_assignment" />
+    <field name="domain_force">[('id','=',0)] if not user.has_group('base.group_user') else [('batch_id.company_id','in',company_ids)] + ([] if user.has_group('ideastone_erp.group_mvp_registrar') or user.has_group('openeducat_assignment.group_op_assignment_manager') else [('faculty_id.user_id','=',user.id)])</field>
+  </record>
+  <record id="learning_scope_grade" model="ir.rule">
+    <field name="name">Learning college and assigned faculty: grade</field>
+    <field name="model_id" ref="openeducat_assignment.model_grading_assignment" />
+    <field name="domain_force">[('id','=',0)] if not user.has_group('base.group_user') else [('course_id.company_id','in',company_ids)] + ([] if user.has_group('ideastone_erp.group_mvp_registrar') or user.has_group('openeducat_assignment.group_op_assignment_manager') else [('faculty_id.user_id','=',user.id)])</field>
+  </record>
+  <record id="learning_scope_submission" model="ir.rule">
+    <field name="name">Learning college and assigned faculty: submission</field>
+    <field name="model_id" ref="openeducat_assignment.model_op_assignment_sub_line" />
+    <field name="domain_force">[('id','=',0)] if not user.has_group('base.group_user') else [('company_id','in',company_ids)] + ([] if user.has_group('ideastone_erp.group_mvp_registrar') or user.has_group('openeducat_assignment.group_op_assignment_manager') else [('assignment_id.faculty_id.user_id','=',user.id)])</field>
+  </record>
+</odoo>

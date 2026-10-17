@@ -1,0 +1,13 @@
+{
+  "concurrentReferenceReplay": "one receipt",
+  "invoiceResidualTotal": 500,
+  "learningSubmodules": 3,
+  "studentFileSubmission": true,
+  "facultyExplicitZero": true,
+  "releasedParentFeedback": true,
+  "responsiveWidths": [
+    1440,
+    390
+  ],
+  "pageErrors": []
+}

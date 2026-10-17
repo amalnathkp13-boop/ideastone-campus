@@ -142,20 +142,19 @@ class ParentPortal(models.AbstractModel):
         service = service.with_company(student.company_id)
         data = super(ParentPortal, service).snapshot(enrolment, date_from, date_to)
         placement = service._portal_context(enrolment, date_from, date_to)[1]
-        subjects = placement.subject_ids or placement.course_id.subject_ids
-        assignments = service._records("op.assignment", [("batch_id.company_id", "=", student.company_id.id), ("batch_id", "=", placement.batch_id.id)] + [
-            ("state", "in", ["publish", "finish"]), ("active", "=", True), ("subject_id", "in", subjects.ids),
-            ("allocation_ids", "in", student.ids)], limit=500, order="submission_date") if placement else self.env["op.assignment"]
+        assignments = service._learning_assignments(student, placement) if placement else self.env["op.assignment"]
         submissions = service._records("op.assignment.sub.line", [("assignment_id", "in", assignments.ids), ("student_id", "=", student.id)], limit=1000, order="id desc")
         now = fields.Datetime.now()
         homework = []
         for task in assignments:
             submission = submissions.filtered(lambda row, task=task: row.assignment_id == task)[:1]
             complete = submission.state in {"submit", "accept"}
-            status = "Accepted" if submission.state == "accept" else "Submitted" if complete else "Overdue" if task.submission_date < now else "Due soon"
+            status = "Accepted" if submission.state == "accept" else "Submitted" if complete else "Revision requested" if submission.state == "change" else "Rejected" if submission.state == "reject" else "Closed" if task.state == "finish" else "Overdue" if task.submission_date < now else "Due soon"
             homework.append({"id": task.id, "name": task.name, "subject": task.subject_id.name, "teacher": task.faculty_id.name,
                 "instructions": task.description, "issued": service._dates(task.issued_date), "due": service._dates(task.submission_date),
-                "status": status, "pending": not complete and task.state != "finish", "date": task.submission_date.isoformat()})
+                "status": status, "pending": not complete and task.state != "finish", "date": task.submission_date.isoformat(),
+                "feedback": submission.note if submission.campus_feedback_released else "",
+                "score": submission.marks if submission.state == "accept" and submission.campus_feedback_released and task.marks else None, "maximum": task.marks})
         notices = service._notice_records(student)
         reads = self.env["campus.parent.notice.read"].sudo().search([("user_id", "=", self.env.uid), ("student_id", "=", student.id), ("notice_id", "in", notices.ids)]).notice_id
         for notice in data["notices"]:

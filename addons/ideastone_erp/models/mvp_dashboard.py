@@ -18,7 +18,8 @@ MODULES = [
     ("staff", "Faculty & Staff", "users", [("Staff directory", "mvp_faculty"), ("Teaching allocation", "mvp_timetable")]),
     ("timetable", "Timetable", "calendar", [("Class timetable", "mvp_timetable"), ("Faculty timetable", "mvp_faculty_timetable"), ("Rooms", "mvp_rooms")]),
     ("attendance", "Attendance", "calendar-check-o", [("Take attendance", "mvp_attendance"), ("Attendance register", "mvp_attendance_registers"), ("Student summary & shortage", "mvp_report_attendance")]),
-    ("fees", "Fees & Payments", "inr", [("Fee heads", "mvp_fee_heads"), ("Fee structures", "mvp_structures"), ("Student fee accounts", "mvp_fees"), ("Assign fee structure", "mvp_assign_fees"), ("Invoices & dues", "mvp_invoices"), ("Receipts", "mvp_receipts")]),
+    ("fees", "Fees & Payments", "inr", [("Fee heads", "mvp_fee_heads"), ("Fee structures", "mvp_structures"), ("Student fee accounts", "mvp_fees"), ("Assign fee structure", "mvp_assign_fees"), ("Invoices & dues", "mvp_invoices"), ("Overdue follow-up", "mvp_overdue_invoices"), ("Receipts", "mvp_receipts")]),
+    ("learning", "Learning & LMS", "book", [("Assignments", "mvp_learning_assignments"), ("Review submissions", "mvp_learning_submissions"), ("LMS accounts & retries", "mvp_lms_accounts")]),
     ("exams", "Examinations", "file-text-o", [("Exam sessions", "mvp_exam_sessions"), ("Schedule & marks entry", "mvp_exams"), ("Grade rules", "mvp_grades"), ("Results & missing entries", "mvp_results")]),
     ("communication", "Communication", "bullhorn", [("Notices & audiences", "mvp_notices"), ("Student requests & support", "mvp_student_requests")]),
     ("reports", "Reports", "bar-chart", [("Admissions", "mvp_report_admissions"), ("Students", "mvp_report_students"), ("Attendance", "mvp_report_attendance"), ("Fee collection", "mvp_report_collection"), ("Outstanding dues", "mvp_report_dues"), ("Results", "mvp_report_results"), ("Faculty workload", "mvp_report_faculty")]),
@@ -52,7 +53,7 @@ class OwnerDashboard(models.AbstractModel):
                 ref = ref.sudo()
                 if action in {"base.action_res_users", "base.action_sequence_form"} and not self.env.user.has_group("ideastone_erp.group_mvp_owner"):
                     continue
-                if action in {"mvp_college", "mvp_import_students", "mvp_requirements"} and not self.env.user.has_group("ideastone_erp.group_mvp_registrar"):
+                if action in {"mvp_college", "mvp_import_students", "mvp_requirements", "mvp_lms_accounts"} and not self.env.user.has_group("ideastone_erp.group_mvp_registrar"):
                     continue
                 report_model = {"mvp_report_admissions": "op.admission", "mvp_report_students": "op.student", "mvp_report_attendance": "op.attendance.line", "mvp_report_collection": "account.payment", "mvp_report_dues": "account.move", "mvp_report_results": "op.result.line", "mvp_report_faculty": "op.faculty"}.get(action)
                 if report_model and not self.env[report_model].check_access_rights("read", raise_exception=False):
