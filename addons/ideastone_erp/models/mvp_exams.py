@@ -16,6 +16,12 @@ class GradeConfiguration(models.Model):
     company_id = fields.Many2one("res.company", default=lambda self: self.env.company, index=True)
 
 
+class ExamType(models.Model):
+    _inherit = "op.exam.type"
+
+    company_id = fields.Many2one("res.company", default=lambda self: self.env.company, index=True)
+
+
 class Exam(models.Model):
     _inherit = ["op.exam", "campus.mvp.mixin"]
     _name = "op.exam"

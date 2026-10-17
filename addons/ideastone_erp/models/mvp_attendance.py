@@ -72,9 +72,15 @@ class AttendanceSheet(models.Model):
         records = super().create(vals_list)
         for rec in records.filtered("campus_managed"):
             rec._validate_mvp_identity()
-            rec.env.cr.execute("SELECT id FROM op_attendance_register WHERE id=%s FOR UPDATE", [rec.register_id.id])
+            if rec.session_id:
+                rec.env.cr.execute("SELECT id FROM op_session WHERE id=%s FOR UPDATE", [rec.session_id.id])
+            else:
+                rec.env.cr.execute("SELECT id FROM op_attendance_register WHERE id=%s FOR UPDATE", [rec.register_id.id])
             identity = [("id", "!=", rec.id), ("register_id", "=", rec.register_id.id), ("state", "!=", "cancel")]
-            identity += [("session_id", "=", rec.session_id.id)] if rec.session_id else [
+            if rec.session_id:
+                identity = [("id", "!=", rec.id), ("state", "!=", "cancel"), ("session_id", "=", rec.session_id.id)]
+            else:
+                identity += [
                 ("session_id", "=", False), ("attendance_date", "=", rec.attendance_date), ("campus_manual_subject_id", "=", rec.campus_manual_subject_id.id)]
             if self.sudo().search_count(identity):
                 raise ValidationError(_("An attendance sheet already exists for this session."))
@@ -183,6 +189,12 @@ class AttendanceLine(models.Model):
             sheet = self.env["op.attendance.sheet"].browse(vals.get("attendance_id"))
             if sheet.campus_managed and sheet.state not in {"draft", "start"}:
                 raise ValidationError(_("Submitted attendance is locked."))
+            if sheet.campus_managed:
+                sheet._mvp_lock()
+                student_id = vals.get("student_id")
+                if not self.env["op.student.course"].search_count([("student_id", "=", student_id), ("batch_id", "=", sheet.batch_id.id),
+                    ("campus_date_from", "<=", sheet.attendance_date), "|", ("campus_date_to", "=", False), ("campus_date_to", ">=", sheet.attendance_date)]):
+                    raise ValidationError(_("The attendance student must be enrolled in this section on the session date."))
         return super().create(vals_list)
 
     def write(self, vals):

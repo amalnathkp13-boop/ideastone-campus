@@ -26,6 +26,7 @@ class AcademicYear(models.Model):
     code = fields.Char(index=True)
     campus_current = fields.Boolean(string="Current academic year")
     active = fields.Boolean(default=True)
+    _sql_constraints = [("campus_year_code", "unique(company_id, code)", "Academic year code must be unique in this college.")]
 
     def _auto_init(self):
         result = super()._auto_init()
@@ -104,6 +105,12 @@ class Subject(models.Model):
     campus_term_id = fields.Many2one("op.academic.term", string="Semester")
     campus_credits = fields.Float(string="Credits")
     campus_max_marks = fields.Integer(string="Default maximum marks", default=100)
+
+
+class Classroom(models.Model):
+    _inherit = "op.classroom"
+
+    company_id = fields.Many2one("res.company", default=lambda self: self.env.company, index=True)
 
 
 class Enrolment(models.Model):

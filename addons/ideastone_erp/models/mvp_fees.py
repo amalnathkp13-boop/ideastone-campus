@@ -42,6 +42,12 @@ class FeeStructureLine(models.Model):
                 raise ValidationError(_("Fee amounts cannot be negative."))
 
 
+class FeeElement(models.Model):
+    _inherit = "op.fees.element"
+
+    company_id = fields.Many2one(related="fees_terms_line_id.company_id", store=True, index=True)
+
+
 class FeeAssignmentWizard(models.TransientModel):
     _name = "campus.fee.assignment.wizard"
     _description = "Assign existing fee structure to an enrolment"
@@ -225,7 +231,7 @@ class FeePaymentWizard(models.TransientModel):
             "amount": self.amount, "payment_date": self.date, "journal_id": self.journal_id.id,
             "communication": self.reference or invoice.name,
         })
-        payment = wizard._create_payments()
+        payment = wizard.with_context(campus_fee_method=self.method, campus_fee_reference=self.reference)._create_payments()
         payment.ensure_one()
         # Native payment register posts and reconciles the receivable against the invoice.
         payment._campus_issue_receipt(invoice, self.method, self.reference)
@@ -255,7 +261,14 @@ class FeePayment(models.Model):
     campus_cashier_id = fields.Many2one("res.users", readonly=True, copy=False)
     campus_reversal_id = fields.Many2one("account.move", readonly=True, copy=False, ondelete="restrict")
     campus_reversal_reason = fields.Text(string="Reversal reason")
-    _sql_constraints = [("campus_receipt_unique", "unique(company_id, campus_receipt_number)", "Receipt numbers must be unique and never reused.")]
+    _sql_constraints = [("campus_receipt_unique", "unique(campus_receipt_number)", "Receipt numbers must be unique and never reused.")]
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        protected = {"campus_receipt_number", "campus_invoice_id", "campus_method", "campus_reference", "campus_cashier_id", "campus_reversal_id"}
+        if any(protected.intersection(vals) for vals in vals_list):
+            raise AccessError(_("Receipt evidence can only be assigned to a posted and reconciled payment."))
+        return super().create(vals_list)
 
     def _campus_issue_receipt(self, invoice, method, reference):
         self.ensure_one()
@@ -310,3 +323,27 @@ class FeePayment(models.Model):
         if self.filtered("campus_receipt_number"):
             raise ValidationError(_("Receipts must be retained, including reversed payments."))
         return super().unlink()
+
+
+class NativeFeePaymentRegister(models.TransientModel):
+    _inherit = "account.payment.register"
+
+    def _create_payments(self):
+        self.ensure_one()
+        invoices = self.line_ids.move_id.filtered("campus_student_id")
+        if invoices:
+            if len(invoices) != 1 or len(self.line_ids.move_id) != 1:
+                raise ValidationError(_("Record one college invoice per payment to retain its exact receipt allocation."))
+            invoice = invoices[0]
+            self.env.cr.execute("SELECT id FROM account_move WHERE id=%s FOR UPDATE", [invoice.id])
+            invoice.invalidate_recordset()
+            if self.currency_id != invoice.company_id.currency_id:
+                raise ValidationError(_("College MVP payments use the college currency. Configure a matching journal."))
+            if self.currency_id.compare_amounts(self.amount, 0) <= 0 or self.currency_id.compare_amounts(self.amount, invoice.amount_residual) > 0:
+                raise ValidationError(_("College payment must be positive and cannot exceed the unpaid invoice balance."))
+        payments = super()._create_payments()
+        if invoices:
+            payments.ensure_one()
+            method = self.env.context.get("campus_fee_method") or ("cash" if payments.journal_id.type == "cash" else "bank")
+            payments._campus_issue_receipt(invoices[0], method, self.env.context.get("campus_fee_reference") or self.communication)
+        return payments

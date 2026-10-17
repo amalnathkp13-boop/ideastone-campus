@@ -1111,82 +1111,82 @@
   <record id="mvp_hod_op_student" model="ir.rule">
     <field name="name">Department head scope: op.student</field>
     <field name="model_id" ref="openeducat_core.model_op_student" />
-    <field name="domain_force">[('course_detail_ids.course_id.department_id','=',user.dept_id.id)] if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+    <field name="domain_force">([('course_detail_ids.course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
   </record>
   <record id="mvp_hod_op_student_course" model="ir.rule">
     <field name="name">Department head scope: op.student.course</field>
     <field name="model_id" ref="openeducat_core.model_op_student_course" />
-    <field name="domain_force">[('course_id.department_id','=',user.dept_id.id)] if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
   </record>
   <record id="mvp_hod_op_faculty" model="ir.rule">
     <field name="name">Department head scope: op.faculty</field>
     <field name="model_id" ref="openeducat_core.model_op_faculty" />
-    <field name="domain_force">[('main_department_id','=',user.dept_id.id)] if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+    <field name="domain_force">([('main_department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
   </record>
   <record id="mvp_hod_op_course" model="ir.rule">
     <field name="name">Department head scope: op.course</field>
     <field name="model_id" ref="openeducat_core.model_op_course" />
-    <field name="domain_force">[('department_id','=',user.dept_id.id)] if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+    <field name="domain_force">([('department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
   </record>
   <record id="mvp_hod_op_batch" model="ir.rule">
     <field name="name">Department head scope: op.batch</field>
     <field name="model_id" ref="openeducat_core.model_op_batch" />
-    <field name="domain_force">[('course_id.department_id','=',user.dept_id.id)] if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
   </record>
   <record id="mvp_hod_op_subject" model="ir.rule">
     <field name="name">Department head scope: op.subject</field>
     <field name="model_id" ref="openeducat_core.model_op_subject" />
-    <field name="domain_force">[('department_id','=',user.dept_id.id)] if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+    <field name="domain_force">([('department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
   </record>
   <record id="mvp_hod_op_session" model="ir.rule">
     <field name="name">Department head scope: op.session</field>
     <field name="model_id" ref="openeducat_timetable.model_op_session" />
-    <field name="domain_force">[('course_id.department_id','=',user.dept_id.id)] if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
   </record>
   <record id="mvp_hod_op_attendance_sheet" model="ir.rule">
     <field name="name">Department head scope: op.attendance.sheet</field>
     <field name="model_id" ref="openeducat_attendance.model_op_attendance_sheet" />
-    <field name="domain_force">[('course_id.department_id','=',user.dept_id.id)] if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
   </record>
   <record id="mvp_hod_op_attendance_line" model="ir.rule">
     <field name="name">Department head scope: op.attendance.line</field>
     <field name="model_id" ref="openeducat_attendance.model_op_attendance_line" />
-    <field name="domain_force">[('course_id.department_id','=',user.dept_id.id)] if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
   </record>
   <record id="mvp_hod_op_attendance_register" model="ir.rule">
     <field name="name">Department head scope: op.attendance.register</field>
     <field name="model_id" ref="openeducat_attendance.model_op_attendance_register" />
-    <field name="domain_force">[('course_id.department_id','=',user.dept_id.id)] if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
   </record>
   <record id="mvp_hod_op_exam" model="ir.rule">
     <field name="name">Department head scope: op.exam</field>
     <field name="model_id" ref="openeducat_exam.model_op_exam" />
-    <field name="domain_force">[('course_id.department_id','=',user.dept_id.id)] if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
   </record>
   <record id="mvp_hod_op_exam_session" model="ir.rule">
     <field name="name">Department head scope: op.exam.session</field>
     <field name="model_id" ref="openeducat_exam.model_op_exam_session" />
-    <field name="domain_force">[('course_id.department_id','=',user.dept_id.id)] if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
   </record>
   <record id="mvp_hod_op_result_line" model="ir.rule">
     <field name="name">Department head scope: op.result.line</field>
     <field name="model_id" ref="openeducat_exam.model_op_result_line" />
-    <field name="domain_force">[('exam_id.course_id.department_id','=',user.dept_id.id)] if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+    <field name="domain_force">([('exam_id.course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
   </record>
   <record id="mvp_hod_op_admission" model="ir.rule">
     <field name="name">Department head scope: op.admission</field>
     <field name="model_id" ref="openeducat_admission.model_op_admission" />
-    <field name="domain_force">[('course_id.department_id','=',user.dept_id.id)] if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
   </record>
   <record id="mvp_hod_op_admission_register" model="ir.rule">
     <field name="name">Department head scope: op.admission.register</field>
     <field name="model_id" ref="openeducat_admission.model_op_admission_register" />
-    <field name="domain_force">[('course_id.department_id','=',user.dept_id.id)] if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
   </record>
   <record id="mvp_hod_op_student_fees_details" model="ir.rule">
     <field name="name">Department head scope: op.student.fees.details</field>
     <field name="model_id" ref="openeducat_fees.model_op_student_fees_details" />
-    <field name="domain_force">[('course_id.department_id','=',user.dept_id.id)] if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
+    <field name="domain_force">([('course_id.department_id','=',user.dept_id.id)] if user.dept_id else [('id','=',0)]) if user.has_group('ideastone_erp.group_mvp_hod') and not user.has_group('ideastone_erp.group_mvp_registrar') else [(1,'=',1)]</field>
   </record>
   <record id="mvp_acl_campus_mvp_report_owner" model="ir.model.access">
     <field name="name">MVP campus.mvp.report owner</field>

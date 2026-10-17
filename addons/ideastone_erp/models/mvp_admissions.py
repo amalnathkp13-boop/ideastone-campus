@@ -128,6 +128,8 @@ class Admission(models.Model):
     def write(self, vals):
         if {"campus_stage", "campus_enrolment_id"}.intersection(vals):
             raise AccessError(_("Use the admission workflow to change decisions or enrolment."))
+        if self.filtered("campus_managed") and {"campus_managed", "state", "partner_id", "nbr", "admission_date"}.intersection(vals):
+            raise AccessError(_("Use approved conversion to update student links or admission status."))
         if any(r.campus_managed and r.campus_stage in {"approved", "enrolled"} for r in self) and set(vals) - {"active", "message_follower_ids", "activity_ids"}:
             raise ValidationError(_("Approved applications are locked. Retain their decision history."))
         result = super().write(vals)

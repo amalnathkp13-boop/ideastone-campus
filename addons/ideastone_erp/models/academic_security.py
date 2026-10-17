@@ -10,7 +10,7 @@ class AttendanceSheet(models.Model):
 
     @api.constrains("faculty_id", "session_id", "register_id")
     def _check_teaching_allocation(self):
-        if self.env.su or self.env.user.has_group("openeducat_attendance.group_op_attendance_manager"):
+        if self.env.su or self.env.user.has_group("openeducat_attendance.group_op_attendance_manager") or self.env.user.has_group("ideastone_erp.group_mvp_registrar"):
             return
         for rec in self:
             if (not rec.session_id or rec.session_id.faculty_id.user_id != self.env.user or
@@ -23,7 +23,7 @@ class AttendanceLine(models.Model):
 
     @api.constrains("attendance_id", "student_id")
     def _check_student_allocation(self):
-        if self.env.su or self.env.user.has_group("openeducat_attendance.group_op_attendance_manager"):
+        if self.env.su or self.env.user.has_group("openeducat_attendance.group_op_attendance_manager") or self.env.user.has_group("ideastone_erp.group_mvp_registrar"):
             return
         for rec in self:
             rec.attendance_id._check_teaching_allocation()

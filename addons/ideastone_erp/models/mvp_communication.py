@@ -11,7 +11,7 @@ class CollegeNotice(models.Model):
     campus_course_id = fields.Many2one("op.course", string="Target programme")
     campus_batch_id = fields.Many2one("op.batch", string="Target section")
     campus_group_id = fields.Many2one("res.groups", string="Target staff group")
-    campus_status = fields.Selection([("draft", "Draft"), ("scheduled", "Scheduled"), ("published", "Published"), ("archived", "Archived")], default="draft", readonly=True)
+    campus_status = fields.Selection([("draft", "Draft"), ("scheduled", "Scheduled"), ("published", "Published"), ("archived", "Archived")], default="draft", readonly=True, copy=False)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -89,7 +89,13 @@ class CollegeReadonlyGuard(models.AbstractModel):
 
     def write(self, vals):
         self._mvp_readonly_guard()
-        return super().write(vals)
+        result = super().write(vals)
+        academic = {"op.academic.year", "op.academic.term", "op.department", "op.course", "op.batch", "op.subject", "op.fees.terms", "op.fees.terms.line"}
+        sensitive = set(vals).intersection({"groups_id", "company_ids", "active"}) if self._name == "res.users" else set(vals).intersection({"campus_attendance_threshold", "campus_excused_policy", "currency_id"}) if self._name == "res.company" else set(vals) if self._name in academic else set()
+        if sensitive and self.env.registry.ready and "campus.mvp.audit" in self.env:
+            for rec in self:
+                self.env["campus.mvp.audit"]._log(rec, "College configuration updated", details={key: str(vals[key])[:500] for key in sorted(sensitive)})
+        return result
 
     def unlink(self):
         self._mvp_readonly_guard()
