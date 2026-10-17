@@ -59,8 +59,10 @@
                 retry = () => navigate(url, options, push);
             }
         } finally {
-            if (pending === controller) pending = null;
-            root()?.querySelector(".student_busy")?.setAttribute("hidden", "hidden");
+            if (pending === controller) {
+                pending = null;
+                root()?.querySelector(".student_busy")?.setAttribute("hidden", "hidden");
+            }
         }
     }
     document.addEventListener("click", event => {
@@ -135,6 +137,12 @@
     });
     document.addEventListener("keydown", event => {
         if (event.key === "Escape" && root()?.querySelector(".student_sidebar.is-open")) { closeMenu(); event.stopPropagation(); }
+        if (event.key === "Tab" && root()?.querySelector(".student_sidebar.is-open")) {
+            const links = [...root().querySelectorAll(".student_sidebar a[href]")];
+            const first = links[0], last = links[links.length - 1];
+            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+            if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+        }
     }, {capture: true});
     window.addEventListener("popstate", () => { if (root()) navigate(location.href, {}, false); });
     window.addEventListener("pagehide", () => { if (root()) root().hidden = true; });

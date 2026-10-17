@@ -142,6 +142,7 @@
     <field name="arch" type="xml">
       <header position="inside">
         <field name="campus_schedule_published" invisible="True" />
+        <field name="state" invisible="True" />
         <button name="action_campus_release_schedule" type="object" string="Release schedule to students" groups="ideastone_erp.group_mvp_exams,openeducat_exam.group_op_exam_admin" invisible="campus_schedule_published or state == 'cancel'" />
       </header>
     </field>
