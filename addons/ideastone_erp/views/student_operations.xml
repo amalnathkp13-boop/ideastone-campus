@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+  <record id="student_request_types_tree" model="ir.ui.view">
+    <field name="name">student.request.types.tree</field>
+    <field name="model">campus.student.request.type</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="sequence" widget="handle" />
+        <field name="name" />
+        <field name="code" />
+        <field name="kind" />
+        <field name="company_id" />
+        <field name="active" />
+      </tree>
+    </field>
+  </record>
+  <record id="student_request_types_form" model="ir.ui.view">
+    <field name="name">student.request.types.form</field>
+    <field name="model">campus.student.request.type</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <group>
+            <field name="name" readonly="not company_id" />
+            <field name="code" readonly="not company_id" />
+            <field name="kind" readonly="not company_id" />
+            <field name="company_id" />
+            <field name="active" readonly="not company_id" />
+            <field name="guidance" readonly="not company_id" />
+            <field name="fee_guidance" readonly="not company_id" />
+            <field name="allow_cancel" readonly="not company_id" />
+            <field name="require_file" readonly="not company_id" />
+            <field name="max_upload_mb" readonly="not company_id" />
+          </group>
+          <p>Global entries are read-only templates. Duplicate an entry to create a college-specific override; students see that override instead of the global template.</p>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_student_request_types" model="ir.actions.act_window">
+    <field name="name">Student request catalogue</field>
+    <field name="res_model">campus.student.request.type</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+  <record id="student_requests_tree" model="ir.ui.view">
+    <field name="name">student.requests.tree</field>
+    <field name="model">campus.service.request</field>
+    <field name="arch" type="xml">
+      <tree create="false">
+        <field name="portal_reference" />
+        <field name="student_id" />
+        <field name="portal_type_id" />
+        <field name="name" />
+        <field name="date" />
+        <field name="state" />
+        <field name="company_id" />
+      </tree>
+    </field>
+  </record>
+  <record id="student_requests_form" model="ir.ui.view">
+    <field name="name">student.requests.form</field>
+    <field name="model">campus.service.request</field>
+    <field name="arch" type="xml">
+      <form create="false">
+        <header>
+          <button name="action_portal_information" string="Request information" type="object" invisible="state != 'submitted'" />
+          <button name="action_approve" string="Approve" type="object" class="oe_highlight" invisible="state != 'submitted'" />
+          <button name="action_portal_reject" string="Reject with response" type="object" invisible="state not in ['submitted','information','approved']" />
+          <button name="action_portal_ready" string="Ready for collection" type="object" invisible="state != 'approved'" />
+          <button name="action_done" string="Complete" type="object" invisible="state not in ['approved','ready']" />
+          <field name="state" widget="statusbar" />
+        </header>
+        <sheet>
+          <h1>
+            <field name="portal_reference" readonly="True" />
+          </h1>
+          <group>
+            <group>
+              <field name="student_id" readonly="True" />
+              <field name="portal_type_id" readonly="True" />
+              <field name="requester_id" readonly="True" />
+              <field name="name" readonly="True" />
+              <field name="description" readonly="True" />
+              <field name="company_id" readonly="True" />
+              <field name="portal_attendance_id" readonly="True" />
+            </group>
+            <group>
+              <field name="document" filename="filename" readonly="True" />
+              <field name="filename" invisible="True" />
+              <field name="portal_student_reply" readonly="True" />
+              <field name="portal_reply" />
+              <field name="portal_result_file" filename="portal_result_filename" />
+              <field name="portal_result_filename" />
+              <field name="resolution" invisible="True" />
+            </group>
+          </group>
+          <p>Only the response above and published official document are shared with the student. Internal chatter remains private. Save your response before changing status.</p>
+          <field name="portal_event_ids" readonly="True">
+            <tree>
+              <field name="create_date" />
+              <field name="name" />
+              <field name="response" />
+            </tree>
+          </field>
+        </sheet>
+        <div class="oe_chatter">
+          <field name="message_follower_ids" />
+          <field name="activity_ids" />
+          <field name="message_ids" />
+        </div>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_student_requests" model="ir.actions.act_window">
+    <field name="name">Student requests &amp; support</field>
+    <field name="res_model">campus.service.request</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[('portal_type_id','!=',False)]</field>
+    <field name="view_id" ref="student_requests_tree" />
+  </record>
+  <record id="student_requests_form_binding" model="ir.actions.act_window.view">
+    <field name="act_window_id" ref="mvp_student_requests" />
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="student_requests_form" />
+    <field name="sequence">2</field>
+  </record>
+  <record id="student_college_policy" model="ir.ui.view">
+    <field name="name">student.college.policy</field>
+    <field name="model">res.company</field>
+    <field name="inherit_id" ref="mvp_college_form" />
+    <field name="arch" type="xml">
+      <field name="campus_demo" position="after">
+        <field name="campus_student_portal_enabled" />
+        <field name="campus_student_contact_edit" />
+      </field>
+    </field>
+  </record>
+  <record id="student_exam_schedule_release" model="ir.ui.view">
+    <field name="name">student.exam.schedule.release</field>
+    <field name="model">op.exam</field>
+    <field name="inherit_id" ref="mvp_exams_form" />
+    <field name="arch" type="xml">
+      <header position="inside">
+        <field name="campus_schedule_published" invisible="True" />
+        <field name="state" invisible="True" />
+        <button name="action_campus_release_schedule" type="object" string="Release schedule to students" groups="ideastone_erp.group_mvp_exams,openeducat_exam.group_op_exam_admin" invisible="campus_schedule_published or state == 'cancel'" />
+      </header>
+    </field>
+  </record>
+  <menuitem id="menu_student_requests" name="Student requests &amp; support" parent="menu_category_2" action="mvp_student_requests" groups="ideastone_erp.group_mvp_registrar,ideastone_erp.group_services,ideastone_erp.group_manager" sequence="60"/>
+  <menuitem id="menu_student_request_types" name="Student request catalogue" parent="menu_category_2" action="mvp_student_request_types" groups="ideastone_erp.group_mvp_registrar" sequence="61"/>
+</odoo>

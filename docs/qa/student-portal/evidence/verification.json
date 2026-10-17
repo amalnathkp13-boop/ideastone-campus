@@ -1,0 +1,39 @@
+{
+  "source": "5c8e651a1a35f4112ce55446f394fe3fb9c41643",
+  "run": "39023993623",
+  "routes": [
+    "dashboard",
+    "profile",
+    "academics",
+    "timetable",
+    "attendance",
+    "exams",
+    "fees",
+    "notices",
+    "requests",
+    "library",
+    "help",
+    "account"
+  ],
+  "profileReload": true,
+  "noticePersistence": true,
+  "requestConcurrentRetry": true,
+  "staffRequestWorkflow": true,
+  "receiptPdf": true,
+  "studentIDOR": true,
+  "csrf": true,
+  "networkRetry": true,
+  "logoutBack": true,
+  "responsive": [
+    1440,
+    768,
+    390
+  ],
+  "ledger": {
+    "assessed": 500,
+    "paid": 400,
+    "due": 100
+  },
+  "attendance": 100,
+  "consoleErrors": []
+}

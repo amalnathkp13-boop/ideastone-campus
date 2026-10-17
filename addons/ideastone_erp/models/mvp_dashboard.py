@@ -20,9 +20,9 @@ MODULES = [
     ("attendance", "Attendance", "calendar-check-o", [("Take attendance", "mvp_attendance"), ("Attendance register", "mvp_attendance_registers"), ("Student summary & shortage", "mvp_report_attendance")]),
     ("fees", "Fees & Payments", "inr", [("Fee heads", "mvp_fee_heads"), ("Fee structures", "mvp_structures"), ("Student fee accounts", "mvp_fees"), ("Assign fee structure", "mvp_assign_fees"), ("Invoices & dues", "mvp_invoices"), ("Receipts", "mvp_receipts")]),
     ("exams", "Examinations", "file-text-o", [("Exam sessions", "mvp_exam_sessions"), ("Schedule & marks entry", "mvp_exams"), ("Grade rules", "mvp_grades"), ("Results & missing entries", "mvp_results")]),
-    ("communication", "Communication", "bullhorn", [("Notices & audiences", "mvp_notices")]),
+    ("communication", "Communication", "bullhorn", [("Notices & audiences", "mvp_notices"), ("Student requests & support", "mvp_student_requests")]),
     ("reports", "Reports", "bar-chart", [("Admissions", "mvp_report_admissions"), ("Students", "mvp_report_students"), ("Attendance", "mvp_report_attendance"), ("Fee collection", "mvp_report_collection"), ("Outstanding dues", "mvp_report_dues"), ("Results", "mvp_report_results"), ("Faculty workload", "mvp_report_faculty")]),
-    ("settings", "Settings", "cog", [("College profile & attendance policy", "mvp_college"), ("Document requirements", "mvp_requirements"), ("Audit log", "mvp_audit"), ("Users & roles", "base.action_res_users"), ("ID & receipt numbering", "base.action_sequence_form"), ("Import students", "mvp_import_students")]),
+    ("settings", "Settings", "cog", [("College profile & attendance policy", "mvp_college"), ("Document requirements", "mvp_requirements"), ("Student request catalogue", "mvp_student_request_types"), ("Audit log", "mvp_audit"), ("Users & roles", "base.action_res_users"), ("ID & receipt numbering", "base.action_sequence_form"), ("Import students", "mvp_import_students")]),
 ]
 
 
@@ -280,6 +280,8 @@ class OwnerDashboard(models.AbstractModel):
         model.check_access_rights("read")
         if xmlid == "ideastone_erp.mvp_college":
             action["res_id"] = self.env.company.id
+        elif xmlid == "ideastone_erp.mvp_student_request_types":
+            action["domain"] = ["|", ("company_id", "=", False), ("company_id", "=", self.env.company.id)]
         elif "company_id" in model._fields:
             domain = safe_eval(action.get("domain") or "[]") if isinstance(action.get("domain"), str) else action.get("domain") or []
             action["domain"] = domain + [("company_id", "=", self.env.company.id)]
