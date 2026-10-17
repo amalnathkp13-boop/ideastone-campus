@@ -281,9 +281,9 @@ class OwnerDashboard(models.AbstractModel):
         if xmlid == "ideastone_erp.mvp_college":
             action["res_id"] = self.env.company.id
         elif "company_id" in model._fields:
-            domain = safe_eval(action.get("domain") or "[]") if isinstance(action.get("domain"), str) else action.get("domain", [])
+            domain = safe_eval(action.get("domain") or "[]") if isinstance(action.get("domain"), str) else action.get("domain") or []
             action["domain"] = domain + [("company_id", "=", self.env.company.id)]
-        context = safe_eval(action.get("context") or "{}", {"uid": self.env.uid, "active_id": False}) if isinstance(action.get("context"), str) else action.get("context", {})
+        context = safe_eval(action.get("context") or "{}", {"uid": self.env.uid, "active_id": False}) if isinstance(action.get("context"), str) else action.get("context") or {}
         action["context"] = dict(context, default_company_id=self.env.company.id, campus_module=self._mvp_module_for(xmlid))
         return action
 
