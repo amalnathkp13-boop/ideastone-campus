@@ -2,6 +2,8 @@
 
 Research date: 17 October 2026 (Asia/Kolkata). Scope: the public IMPRES site, the existing campus codebase, and the college feedback supplied in this chat. This is a product/workflow assessment, not an audit of the competitor's private application or the college's licensed installation.
 
+Delivery: [open PR #23](https://github.com/amalnathkp13-boop/ideastone-campus/pull/23). [Download the reviewed PDF](../output/pdf/ZcERP-Competitor-Review-and-MVP-Report.pdf).
+
 ## Decision
 
 Demonstrate a focused, reliable finance and learning MVP in the accepted ZcERP interface. Give the college evidence that daily work is clearer and safer, then validate that improvement against its actual installation. A longer menu is not, by itself, a reason to migrate.
