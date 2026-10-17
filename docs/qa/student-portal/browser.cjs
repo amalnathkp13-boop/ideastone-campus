@@ -56,7 +56,7 @@ async function save(page, control) {
         const cache=await page.request.get(base+'/my/campus/student/dashboard');
         assert.match(cache.headers()['cache-control'],/no-store/);
         await page.screenshot({path:path.join(out,'student-dashboard-1440.png'),fullPage:true});
-        await page.locator('.student_grid').first().evaluate(element=>element.scrollIntoView({block:'center'}));
+        await page.locator('.student_grid section').first().evaluate(element=>element.scrollIntoView({block:'start'}));
         await page.screenshot({path:path.join(out,'student-dashboard-details-1440.png')});
         await page.evaluate(()=>{document.getElementById('wrapwrap')?.scrollTo({top:0});window.scrollTo(0,0);});
         const routes=initial.navigation.map(item=>item[0]);
@@ -67,6 +67,8 @@ async function save(page, control) {
         await page.getByRole('button',{name:'Selected period',exact:true}).click();
         assert.equal(await page.locator('.student_timetable_row:visible').count(),initial.schedule.length);
         await visit(page,'profile');
+        await page.locator('.student_subnav').getByRole('link',{name:'Documents',exact:true}).click();
+        assert(await page.locator('#student_documents').evaluate(element=>element.getBoundingClientRect().top>=128),'Sticky header obscures the document anchor');
         await page.locator('#profile_phone').fill('+91 90000 00123');
         await page.locator('#profile_city').fill('Coimbatore');
         await save(page,page.getByRole('button',{name:'Save contact details'}));
@@ -160,6 +162,10 @@ async function save(page, control) {
             }
             await page.goto(base+'/my/campus/student/dashboard');
             await page.screenshot({path:path.join(out,`student-dashboard-${width}.png`),fullPage:true});
+            if(width===390) {
+                await page.locator('.student_stats').first().evaluate(element=>element.scrollIntoView({block:'start'}));
+                await page.screenshot({path:path.join(out,'student-summary-390.png')});
+            }
         }
         await page.goto(base+'/web/session/logout?redirect=/web/login');
         await page.goBack();
