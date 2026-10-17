@@ -135,6 +135,30 @@ jobs:
             --workers=0 --max-cron-threads=0 --no-http < docs/qa/student-portal/seed.py
           export NODE_PATH="$RUNNER_TEMP/faculty-ui-tools/node_modules"
           node docs/qa/student-portal/browser.cjs
+      - name: Parent portal child isolation and workflows on disposable Odoo
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PARENT_QA_PASSWORD=$(openssl rand -hex 20)
+          export PARENT_QA_OUT="$RUNNER_TEMP/parent-portal-proof"
+          mkdir -p "$PARENT_QA_OUT"
+          docker run --rm -i --network host --entrypoint odoo \
+            -v faculty-ci-data:/var/lib/odoo \
+            -v "$PWD/addons:/mnt/ideastone-addons:ro" \
+            -v "$PWD/vendor/openeducat_erp:/mnt/openeducat:ro" \
+            -e PARENT_QA_PASSWORD odoo:17.0 shell \
+            --db_host=127.0.0.1 --db_user=odoo --db_password=odoo -d ci \
+            --addons-path=/mnt/ideastone-addons,/mnt/openeducat,/usr/lib/python3/dist-packages/odoo/addons \
+            --workers=0 --max-cron-threads=0 --no-http < docs/qa/parent-portal/seed.py
+          export NODE_PATH="$RUNNER_TEMP/faculty-ui-tools/node_modules"
+          node docs/qa/parent-portal/browser.cjs
+      - name: Preserve Parent Portal evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parent-portal-proof
+          path: ${{ runner.temp }}/parent-portal-proof
+          retention-days: 14
       - name: Upgrade installed campus modules
         shell: bash
         run: |

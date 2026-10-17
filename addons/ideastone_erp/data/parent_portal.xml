@@ -1,0 +1,17 @@
+<odoo noupdate="1">
+  <record id="parent_absence" model="campus.student.request.type">
+    <field name="name">Absence / leave intimation</field><field name="code">parent-absence</field><field name="company_id" eval="False"/>
+    <field name="portal_audience">parent</field><field name="parent_absence" eval="True"/><field name="kind">grievance</field>
+    <field name="guidance">Give the absence dates and reason. Staff review this intimation; it does not change recorded attendance.</field>
+  </record>
+  <record id="parent_meeting" model="campus.student.request.type">
+    <field name="name">Teacher meeting request</field><field name="code">parent-meeting</field><field name="company_id" eval="False"/>
+    <field name="portal_audience">parent</field><field name="kind">grievance</field>
+    <field name="guidance">Explain the topic and preferred times. A meeting is confirmed only when the college responds.</field>
+  </record>
+  <record id="parent_enquiry" model="campus.student.request.type">
+    <field name="name">School enquiry / profile correction</field><field name="code">parent-enquiry</field><field name="company_id" eval="False"/>
+    <field name="portal_audience">parent</field><field name="kind">grievance</field>
+    <field name="guidance">Describe your question or correction and attach supporting evidence when needed. Official records remain under college control.</field>
+  </record>
+</odoo>

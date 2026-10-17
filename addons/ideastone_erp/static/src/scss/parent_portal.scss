@@ -1,0 +1,36 @@
+.parent_workspace {
+    --student-accent: #7438e8;
+    --student-blue: #7438e8;
+    --campus-blue: #7438e8;
+    --campus-blue-dark: #5924c0;
+    color: #25223b;
+    .student_sidebar { background: #faf9ff; color: #49445f; border-right: 1px solid #e7e1f5;
+        .student_nav_link, .student_sidebar_bottom a { color: #49445f; }
+        .student_nav_link.active { background: #eee7ff; color: #6529d4; }
+        .student_nav_link:hover { background: #f0ebfa; }
+        .student_nav_heading, .student_sidebar_bottom, .student_brand { color: #70677e; border-color: #e7e1f5; }
+    }
+    .btn-primary { background: #7438e8; border-color: #7438e8; }
+    .btn-outline-primary { color: #6531c8; border-color: #d9c7f7; }
+    a { color: #6531c8; }
+    .student_count, .student_progress > span { background: #7438e8; }
+    .student_stats { grid-template-columns: repeat(4, minmax(0,1fr)); }
+    .student_stat:nth-child(1) { background: #f6f1ff; }
+    .student_stat:nth-child(2) { background: #eff9f5; }
+    .student_stat:nth-child(3) { background: #fffaed; }
+    .student_stat:nth-child(4) { background: #f0f5ff; }
+    .parent_welcome { padding: 6px 0; margin-bottom: 18px; h2 { font-size: 23px; margin-bottom: 8px; } p { margin-bottom: 8px; } }
+    .parent_child { display: flex; align-items: flex-end; gap: 8px; max-width: 330px; label { margin: 0; } select { max-width: 200px; } button { white-space: nowrap; } }
+    .parent_context { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; > a { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 30px; min-height: 36px; border-radius: 8px; background: #f7f3ff; text-decoration: none; } }
+    .parent_absence { display: flex; flex-wrap: wrap; gap: 16px; label { flex: 1 1 180px; } }
+    .parent_child_name { font-size: 13px; }
+    @media(max-width: 1000px) { .student_stats { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+    @media(max-width: 600px) {
+        .student_header { position: relative; height: auto; min-height: 88px; flex-wrap: wrap; padding-top: 8px; padding-bottom: 8px; }
+        .student_subnav { top: 0; }
+        .parent_child { max-width: 100%; }
+        .parent_child select { max-width: 165px; }
+        .student_main { padding-top: 18px; }
+    }
+    @media(max-width: 390px) { .student_stats { grid-template-columns: minmax(0,1fr); } }
+}

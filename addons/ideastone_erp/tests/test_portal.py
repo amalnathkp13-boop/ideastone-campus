@@ -17,6 +17,9 @@ class TestCampusPortal(HttpCase):
         cls.linked_student = cls.env["op.student"].create({"first_name": "QA", "last_name": "Linked", "gender": "o", "user_id": cls.student_user.id, "partner_id": cls.env["res.partner"].create({"name": "QA-LINKED-STUDENT", "user_id": cls.student_user.id, "company_id": cls.env.company.id}).id})
         cls.unrelated_student = cls.env["op.student"].create({"first_name": "QA", "last_name": "Unrelated", "gender": "o", "partner_id": cls.env["res.partner"].create({"name": "QA-UNRELATED-PRIVATE", "company_id": cls.env.company.id}).id})
         cls.parent_user.write({"child_ids": [(6, 0, cls.student_user.ids)]})
+        relation = cls.env["op.parent.relationship"].create({"name": "HTTP test guardian"})
+        cls.env["op.parent"].create({"name": cls.parent_user.partner_id.id, "user_id": cls.parent_user.id,
+            "relationship_id": relation.id, "student_ids": [(6, 0, cls.linked_student.ids)]})
 
     def test_authentication_required(self):
         response = self.url_open("/my/campus", allow_redirects=False)
@@ -46,9 +49,9 @@ class TestCampusPortal(HttpCase):
         self.assertIn("Parent workspace", response.text)
         self.assertIn("QA-LINKED-STUDENT", response.text)
         response = self.url_open(f"/my/campus?student={self.unrelated_student.id}")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 403)
         self.assertNotIn("QA-UNRELATED-PRIVATE", response.text)
-        self.assertIn("Your account has no linked student record", response.text)
+        self.assertIn("This child is not available", response.text)
 
     def test_student_workspace_uses_own_identity(self):
         self.authenticate("qa_http_student", "qa-http-fixture")
