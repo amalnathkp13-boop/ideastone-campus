@@ -9,6 +9,7 @@ class CampusBase extends Component {
         this.action = useService("action");
         this.notification = useService("notification");
         this.toggleRef = useRef("navToggle");
+        this.subnavRef = useRef("subnavStrip");
         this.state = useState({ loading: true, error: "", navigation: [], stats: [], pages: [], queues: [], quick: [], appointments: [],
             company: "", user: "", filter: "", open: false, page: this.props.action?.context?.campus_page || "overview",
             faculty_modules: [], faculty_tasks: [], faculty_schedule: [], faculty_surveys: [], module: this.props.action?.context?.campus_module || "home", activeAction: 0, activeTool: "",
@@ -86,6 +87,7 @@ class CampusBase extends Component {
         await this.go({ key: "overview" });
     }
     closeNav() { this.state.open = false; this.toggleRef.el?.focus(); }
+    scrollSubmodules(direction) { this.subnavRef.el?.scrollBy({left: direction * 320, behavior: "smooth"}); }
     async loadDesk() {
         this.state.desk = await this.orm.call("campus.library.desk", "get_desk", [this.state.query, this.state.loanPage, this.state.cardQuery]);
         this.state.unit = "";

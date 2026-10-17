@@ -26,10 +26,15 @@ if (!out || !process.env.FACULTY_QA_PASSWORD) throw Error('Disposable QA configu
         await page.getByRole('heading',{name:'My task list',exact:true,level:1}).waitFor();
         await page.screenshot({path:path.join(out,'faculty-module-1440.png')});
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My tasks & e-diary',exact:true}).click();
-        await page.locator('.o_list_button_add').click();
+        const createButton = page.locator('.o_list_button_add:visible');
+        await createButton.waitFor();
+        const createBox=await createButton.boundingBox();
+        const navigationBox=await page.locator('.campus_faculty_subnav').boundingBox();
+        if(createBox.y < navigationBox.y + navigationBox.height) throw Error('Faculty topbar obscures native controls');
+        await createButton.click();
         await page.locator('.o_field_widget[name=name] input').fill('QA browser persisted diary');
         const saveResponse = page.waitForResponse(response => response.url().includes('/campus.faculty.task/web_save'));
-        await page.locator('.o_form_button_save').click();
+        await page.locator('.o_form_button_save:visible').click();
         const saveData = await (await saveResponse).json();
         if (saveData.error) throw Error(JSON.stringify(saveData.error));
         const saved = await page.evaluate(async () => {
@@ -53,6 +58,18 @@ if (!out || !process.env.FACULTY_QA_PASSWORD) throw Error('Disposable QA configu
         const pdfBytes=await pdf.body();
         if(!pdf.ok() || pdfBytes.subarray(0,5).toString() !== '%PDF-') throw Error('Internal assessment PDF export failed');
         await fs.writeFile(path.join(out,'faculty-assessment.pdf'),pdfBytes);
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Internal mark generation',exact:true}).click();
+        await page.locator('.o_data_row:visible').filter({hasText:'QA Internal Assessment'}).click();
+        await page.getByRole('button',{name:'Reopen calculation',exact:true}).click();
+        await page.locator('.o_field_widget[name=output_maximum] input').fill('30');
+        const markSave = page.waitForResponse(response => response.url().includes('/campus.faculty.assessment/web_save'));
+        await page.locator('.o_form_button_save:visible').click();
+        const markSaveData = await (await markSave).json();
+        if (markSaveData.error || markSaveData.result?.[0]?.total !== 25.2) throw Error('Reopened calculation did not persist the expected mark');
+        await page.getByRole('button',{name:'Complete calculation',exact:true}).click();
+        await page.getByRole('button',{name:'Reopen calculation',exact:true}).waitFor();
+        await page.screenshot({path:path.join(out,'faculty-assessment-1440.png')});
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My tasks & e-diary',exact:true}).click();
         await page.reload();
         await page.locator('body.campus_faculty_workspace').waitFor();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My tasks & e-diary',exact:true}).waitFor();
@@ -66,7 +83,7 @@ if (!out || !process.env.FACULTY_QA_PASSWORD) throw Error('Disposable QA configu
         if(overflow) throw Error('Faculty document overflows mobile viewport');
         if(errors.length) throw Error(errors.join('\n'));
         await fs.writeFile(path.join(out,'verification.json'),JSON.stringify({passed:true,
-            checks:['faculty-only shell','main module and topbar navigation','diary form persistence','weighted assessment PDF','reload navigation','mobile drawer Escape','mobile overflow','browser console'],errors},null,2));
+            checks:['faculty-only shell','main module and topbar navigation','diary form persistence','weighted assessment PDF','reopen and complete assessment form','reload navigation','mobile drawer Escape','mobile overflow','browser console'],errors},null,2));
     } catch (error) {
         if (page) {
             await page.screenshot({path:path.join(out,'failure.png')}).catch(()=>{});

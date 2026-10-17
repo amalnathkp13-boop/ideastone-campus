@@ -17,7 +17,7 @@ class FacultyAssessment(models.Model):
 
     student_id = fields.Many2one("op.student", required=True, ondelete="restrict")
     subject_id = fields.Many2one("op.subject", required=True, ondelete="restrict")
-    output_maximum = fields.Float(required=True, string="Internal mark maximum")
+    output_maximum = fields.Float(required=True, string="Output mark maximum")
     component_ids = fields.One2many("campus.faculty.assessment.component", "assessment_id", string="Assessment components")
     total = fields.Float(compute="_compute_total", store=True, digits=(12, 2))
     weight_total = fields.Float(compute="_compute_total", store=True)
@@ -52,6 +52,12 @@ class FacultyAssessment(models.Model):
         if any(rec.state == "done" for rec in self) and set(vals) - {"state", "message_ids", "message_follower_ids", "activity_ids"}:
             raise ValidationError(_("Reopen the calculation before changing completed marks."))
         return super().write(vals)
+
+    def action_complete_calculation(self):
+        return self.write({"state": "done"})
+
+    def action_reopen_calculation(self):
+        return self.write({"state": "planned"})
 
 
 class FacultyAssessmentComponent(models.Model):

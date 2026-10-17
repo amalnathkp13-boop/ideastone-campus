@@ -1,6 +1,6 @@
 <odoo>
   <record id="report_faculty_assessment" model="ir.actions.report">
-    <field name="name">Internal assessment statement</field>
+    <field name="name">Faculty assessment statement</field>
     <field name="model">campus.faculty.assessment</field>
     <field name="report_type">qweb-pdf</field>
     <field name="report_name">ideastone_erp.faculty_assessment_document</field>
@@ -10,7 +10,7 @@
   <template id="faculty_assessment_document">
     <t t-call="web.html_container"><t t-foreach="docs" t-as="o"><t t-call="web.external_layout">
       <div class="page">
-        <h2>Internal assessment statement</h2>
+        <h2>Faculty assessment statement</h2>
         <p>Faculty calculation · not an issued examination result</p>
         <h3 t-field="o.name"/>
         <table class="table table-sm"><tbody>

@@ -126,31 +126,33 @@
     <field name="arch" type="xml">
       <form>
         <header>
-          <field name="state" widget="statusbar" options="{'clickable':True}"/>
+          <button name="action_reopen_calculation" type="object" string="Reopen calculation" invisible="state != 'done'" class="oe_highlight"/>
+          <button name="action_complete_calculation" type="object" string="Complete calculation" invisible="state == 'done'" class="oe_highlight"/>
+          <field name="state" widget="statusbar" statusbar_visible="planned,done"/>
         </header>
         <sheet>
           <div class="alert alert-info">Draft internal assessment. Set the college's component weights and maximum; completion requires weights totaling 100%. Official examination results are published separately.</div>
           <h1>
-            <field name="name" placeholder="Assessment title"/>
+            <field name="name" placeholder="Assessment title" readonly="state == 'done'"/>
           </h1>
           <group>
             <group>
-              <field name="kind"/>
-              <field name="academic_year"/>
-              <field name="semester"/>
-              <field name="student_id" options="{'no_create':True}"/>
-              <field name="subject_id" options="{'no_create':True}"/>
-              <field name="date"/>
-              <field name="deadline"/>
+              <field name="kind" readonly="state == 'done'"/>
+              <field name="academic_year" readonly="state == 'done'"/>
+              <field name="semester" readonly="state == 'done'"/>
+              <field name="student_id" options="{'no_create':True}" readonly="state == 'done'"/>
+              <field name="subject_id" options="{'no_create':True}" readonly="state == 'done'"/>
+              <field name="date" readonly="state == 'done'"/>
+              <field name="deadline" readonly="state == 'done'"/>
             </group>
             <group>
-              <field name="output_maximum"/>
+              <field name="output_maximum" readonly="state == 'done'"/>
               <field name="weight_total"/>
               <field name="total"/>
               <field name="company_id" readonly="True" groups="base.group_multi_company"/>
             </group>
           </group>
-          <field name="component_ids">
+          <field name="component_ids" readonly="state == 'done'">
             <tree editable="bottom">
               <field name="name"/>
               <field name="score"/>
@@ -158,7 +160,7 @@
               <field name="weight" sum="Total weight"/>
             </tree>
           </field>
-          <field name="notes" placeholder="Source marks, academic term and calculation notes…"/>
+          <field name="notes" placeholder="Source marks, academic term and calculation notes…" readonly="state == 'done'"/>
         </sheet>
       </form>
     </field>

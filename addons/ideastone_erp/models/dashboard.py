@@ -165,6 +165,9 @@ class Dashboard(models.AbstractModel):
             if key == "home":
                 items = [{"label": "Faculty overview", "page": "overview"}, {"label": "Find a module", "page": "modules"}]
             elif key == "teaching" and self.env["campus.faculty.task"].check_access_rights("read", raise_exception=False):
+                items = [item for item in items if item["model"] not in {
+                    "campus.faculty.activity", "campus.faculty.document", "campus.faculty.assessment", "op.student",
+                }]
                 items.insert(0, {"label": "My tasks & e-diary", "action": "ideastone_erp.action_faculty_task",
                                  "action_id": self.env.ref("ideastone_erp.action_faculty_task").id})
             elif key == "staff":

@@ -11,7 +11,12 @@
         <div t-if="state.error" role="alert"><p t-esc="state.error"/><button class="btn btn-light" t-on-click="load">Retry</button></div>
         <div class="campus_side_bottom"><strong t-esc="state.company"/><span t-esc="state.workspace_role"/><a href="/my/campus">My campus self-service <i class="fa fa-external-link"/></a></div>
       </aside>
-      <nav t-if="facultyModule" class="campus_faculty_subnav" aria-label="Faculty submodules"><strong t-esc="facultyModule.label"/><div><t t-foreach="facultyModule.items" t-as="item" t-key="item.label"><button t-att-class="{active: item.tool ? state.activeTool === item.tool : item.action_id ? state.activeAction === item.action_id : state.page === item.page}" t-on-click="() => this.facultyGo(item)" t-esc="item.label"/></t></div></nav>
+      <nav t-if="facultyModule" class="campus_faculty_subnav" aria-label="Faculty submodules">
+        <strong t-esc="facultyModule.label"/>
+        <button class="campus_subnav_scroll" t-on-click="() => this.scrollSubmodules(-1)" aria-label="Previous submodules"><i class="fa fa-angle-left"/></button>
+        <div t-ref="subnavStrip"><t t-foreach="facultyModule.items" t-as="item" t-key="item.label"><button t-att-class="{active: item.tool ? state.activeTool === item.tool : item.action_id ? state.activeAction === item.action_id : state.page === item.page}" t-on-click="() => this.facultyGo(item)" t-esc="item.label"/></t></div>
+        <button class="campus_subnav_scroll" t-on-click="() => this.scrollSubmodules(1)" aria-label="Next submodules"><i class="fa fa-angle-right"/></button>
+      </nav>
     </div>
   </t>
   <t t-name="ideastone_erp.Dashboard">
