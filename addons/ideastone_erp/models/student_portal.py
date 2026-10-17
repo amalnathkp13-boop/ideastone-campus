@@ -45,6 +45,11 @@ class StudentRequestType(models.Model):
         if any(not 1 <= rec.max_upload_mb <= 10 for rec in self):
             raise ValidationError(_("Set an upload limit from 1 to 10 MB."))
 
+    def copy(self, default=None):
+        self.ensure_one()
+        # Global catalogue entries are templates; an institution changes its own copy.
+        return super().copy(dict(default or {}, company_id=self.env.company.id))
+
 
 class StudentRequestEvent(models.Model):
     _name = "campus.student.request.event"

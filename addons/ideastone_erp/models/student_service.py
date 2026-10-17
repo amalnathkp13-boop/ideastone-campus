@@ -2,7 +2,9 @@ import base64
 import re
 import uuid
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
+
+import pytz
 
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tools import html_sanitize
@@ -33,7 +35,7 @@ class StudentPortal(models.AbstractModel):
             raise ValidationError(_("This view contains too many records. Select a shorter academic period."))
         return source.search(domain, order=order)
 
-    def _context(self, enrolment=None, date_from=None, date_to=None):
+    def _portal_context(self, enrolment=None, date_from=None, date_to=None):
         student = self._identity()
         placements = student.course_detail_ids.filtered(lambda e: e.company_id == student.company_id).sorted(lambda e: (e.campus_date_from or fields.Date.today(), e.id), reverse=True)
         current = placements.filtered(lambda e: e.state == "running")[:1] or placements[:1]
@@ -92,7 +94,9 @@ class StudentPortal(models.AbstractModel):
         return self._records("campus.service.request", [("student_id", "=", student.id), ("company_id", "=", student.company_id.id), ("requester_id", "=", self.env.uid), ("portal_type_id", "!=", False)], limit=1000, order="id desc")
 
     def _types(self, student):
-        return self._records("campus.student.request.type", [("active", "=", True), "|", ("company_id", "=", False), ("company_id", "=", student.company_id.id)], limit=100, order="sequence, name")
+        types = self.with_context(active_test=False)._records("campus.student.request.type", ["|", ("company_id", "=", False), ("company_id", "=", student.company_id.id)], limit=100, order="sequence, name")
+        overrides = set(types.filtered("company_id").mapped("code"))
+        return types.filtered(lambda rec: rec.active and (rec.company_id or rec.code not in overrides))
 
     def _scope(self, student, enrolment):
         if not enrolment:
@@ -101,7 +105,7 @@ class StudentPortal(models.AbstractModel):
 
     @api.model
     def snapshot(self, enrolment=None, date_from=None, date_to=None):
-        student, placement, placements, first, last = self._context(enrolment, date_from, date_to)
+        student, placement, placements, first, last = self._portal_context(enrolment, date_from, date_to)
         company = student.company_id
         today = fields.Date.context_today(self)
         subjects = placement.subject_ids or placement.course_id.subject_ids
@@ -129,7 +133,10 @@ class StudentPortal(models.AbstractModel):
         conducted = sum(row["eligible"] for row in grouped.values())
         attended = sum(row["attended"] for row in grouped.values())
         rate = round(attended * 100 / conducted, 2) if conducted else None
-        sessions = self._records("op.session", self._scope(student, placement) + [("start_datetime", ">=", first), ("start_datetime", "<", last + timedelta(days=1)), ("state", "in", ["confirm", "cancel"])], order="start_datetime") if placement else self.env["op.session"]
+        timezone = pytz.timezone(self.env.user.tz or "UTC")
+        utc_first = timezone.localize(datetime.combine(first, time.min)).astimezone(pytz.UTC).replace(tzinfo=None)
+        utc_last = timezone.localize(datetime.combine(last + timedelta(days=1), time.min)).astimezone(pytz.UTC).replace(tzinfo=None)
+        sessions = self._records("op.session", self._scope(student, placement) + [("start_datetime", ">=", utc_first), ("start_datetime", "<", utc_last), ("state", "in", ["confirm", "cancel"])], order="start_datetime") if placement else self.env["op.session"]
         # A section can run electives: only the student's authoritative subject list.
         sessions = sessions.filtered(lambda s: s.subject_id in subjects and (not placement.campus_date_from or fields.Datetime.context_timestamp(self, s.start_datetime).date() >= placement.campus_date_from) and (not placement.campus_date_to or fields.Datetime.context_timestamp(self, s.start_datetime).date() <= placement.campus_date_to))
         schedule = [{"id": s.id, "subject": s.subject_id.name, "code": s.subject_id.code, "start": self._dates(s.start_datetime), "end": self._dates(s.end_datetime), "day": str(fields.Datetime.context_timestamp(self, s.start_datetime).date()), "room": s.classroom_id.name or "Room not assigned", "faculty": s.faculty_id.name, "status": s.state, "updated": self._dates(s.write_date)} for s in sessions]
