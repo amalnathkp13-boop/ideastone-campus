@@ -15,7 +15,7 @@
     "model": "campus.faculty.detail",
     "label": "Staff qualifications and documents",
     "group": "Staff",
-    "action": "ideastone_erp.action_faculty_detail"
+    "action": "ideastone_erp.action_faculty_profile"
   },
   {
     "model": "campus.faculty.achievement",

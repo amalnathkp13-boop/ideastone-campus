@@ -1,0 +1,167 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.FacultyProfile">
+    <main class="campus_staff_profile">
+      <div class="staff_profile_topline">
+        <div>
+          <div class="staff_profile_crumb">Campus <span>›</span> Staff <span>›</span> Staff Profile / Self Entry</div>
+          <h1>Staff Profile / Self Entry <span class="staff_profile_subtitle">Personal, academic and service information — complete faculty record.</span></h1>
+        </div>
+        <div class="staff_profile_controls" t-if="state.staff.length">
+          <label for="staff_profile_select">Staff member</label>
+          <select id="staff_profile_select" t-on-change="onFacultyChange">
+            <t t-foreach="state.staff" t-as="faculty" t-key="faculty.id">
+              <option t-att-value="faculty.id" t-att-selected="faculty.id === state.selectedId"><t t-esc="faculty.display_name"/></option>
+            </t>
+          </select>
+        </div>
+      </div>
+
+      <div t-if="state.error" class="staff_profile_alert" role="alert"><span t-esc="state.error"/><button t-on-click="loadStaff">Retry</button></div>
+      <div t-if="state.loading" class="staff_profile_loading" role="status">Loading staff profiles…</div>
+      <div t-elif="!state.staff.length" class="staff_profile_empty card">
+        <div class="staff_profile_empty_icon"><i class="fa fa-user-plus"/></div>
+        <h2>No staff profiles yet</h2><p>Create a faculty record before adding qualifications or compliance documents.</p>
+        <button class="staff_profile_button primary" t-on-click="() => this.openRegister()">Open staff register</button>
+      </div>
+      <t t-elif="state.profile">
+        <nav class="staff_profile_sections" aria-label="Profile section navigation">
+          <button t-att-class="{ active: state.activeSection === 'overview' }" t-on-click="() => this.setSection('overview')"><i class="fa fa-user"/> Part 1 · Profile Overview</button>
+          <button t-att-class="{ active: state.activeSection === 'additional' }" t-on-click="() => this.setSection('additional')"><i class="fa fa-graduation-cap"/> Part 2 · Additional Details</button>
+          <button class="staff_profile_print" t-on-click="printProfile"><i class="fa fa-print"/> Print</button>
+          <button class="staff_profile_refresh" t-on-click="loadStaff"><i class="fa fa-refresh"/> Refresh</button>
+        </nav>
+
+        <section class="staff_profile_hero card" id="staff-profile-overview">
+          <div class="staff_profile_identity">
+            <div class="staff_profile_avatar"><t t-esc="state.profile.display_name.slice(0, 1)"/></div>
+            <div class="staff_profile_identity_copy">
+              <div class="staff_profile_eyebrow">CAMPUS STAFF RECORD</div>
+              <h2 t-esc="state.profile.display_name"/>
+              <p><t t-esc="state.profile.campus_designation || 'Staff member'"/><span>·</span><t t-esc="relationLabel(state.profile.main_department_id)"/></p>
+              <div class="staff_profile_chips">
+                <span class="staff_profile_chip blue" t-if="state.profile.campus_staff_code"><i class="fa fa-id-badge"/> <t t-esc="state.profile.campus_staff_code"/></span>
+                <span class="staff_profile_chip green" t-if="state.profile.campus_service_type"><i class="fa fa-check-circle"/> <t t-esc="relationLabel(state.profile.campus_service_type)"/></span>
+                <span class="staff_profile_chip neutral" t-if="state.profile.campus_category"><t t-esc="relationLabel(state.profile.campus_category)"/></span>
+              </div>
+            </div>
+          </div>
+          <div class="staff_profile_hero_actions">
+            <button class="staff_profile_button" t-on-click="openFaculty"><i class="fa fa-pencil"/> Edit staff profile</button>
+            <button class="staff_profile_button primary" t-on-click="() => this.openRegister()"><i class="fa fa-plus"/> Add a record</button>
+          </div>
+          <div class="staff_profile_hero_facts">
+            <div><i class="fa fa-id-badge"/><span>Staff ID<strong t-esc="state.profile.campus_staff_code || 'Not provided'"/></span></div>
+            <div t-if="state.canManage"><i class="fa fa-id-card-o"/><span>PAN reference<strong t-esc="state.profile.campus_pan_reference || 'Not provided'"/></span></div>
+            <div t-if="state.canManage"><i class="fa fa-lock"/><span>Aadhaar last four<strong t-esc="state.profile.campus_aadhaar_last4 || 'Not provided'"/></span></div>
+            <div><i class="fa fa-building-o"/><span>Department<strong t-esc="relationLabel(state.profile.main_department_id)"/></span></div>
+            <div><i class="fa fa-map-marker"/><span>Work location<strong t-esc="state.profile.campus_work_location || 'Not provided'"/></span></div>
+            <div><i class="fa fa-calendar"/><span>Joining date<strong t-esc="dateLabel(state.profile.campus_joining_date)"/></span></div>
+          </div>
+        </section>
+
+        <div t-if="state.loadingProfile" class="staff_profile_loading compact" role="status">Updating selected profile…</div>
+
+        <section class="staff_profile_metrics" aria-label="Profile summary">
+          <article class="staff_profile_metric card"><span class="metric_icon violet"><i class="fa fa-pie-chart"/></span><div><small>Profile Completion</small><strong><t t-esc="completion"/>%</strong><span>Available staff details</span></div></article>
+          <article class="staff_profile_metric card"><span class="metric_icon green"><i class="fa fa-shield"/></span><div><small>Verified documents</small><strong><t t-esc="verifiedDocuments"/><span class="metric_total"> / <t t-esc="documents.length"/></span></strong><span><t t-esc="pendingDocuments"/> pending · <t t-esc="missingDocuments"/> missing</span></div></article>
+          <article class="staff_profile_metric card"><span class="metric_icon amber"><i class="fa fa-clock-o"/></span><div><small>Pending Actions</small><strong t-esc="pendingActions"/><span>Document reviews</span></div></article>
+          <article class="staff_profile_metric card"><span class="metric_icon blue"><i class="fa fa-calendar"/></span><div><small>Last Updated</small><strong class="staff_profile_date" t-esc="dateLabel(state.profile.write_date)"/><span>Staff record</span></div></article>
+        </section>
+
+        <div class="staff_profile_layout">
+          <div class="staff_profile_main">
+            <section class="staff_profile_panel card">
+              <header><div><span class="staff_profile_step">01</span><div><h3>Identity &amp; Personal Overview</h3><p>Personal and identification information from official records.</p></div></div><button t-on-click="openFaculty">Edit <i class="fa fa-arrow-right"/></button></header>
+              <div class="staff_profile_fields"><t t-foreach="identityItems" t-as="item" t-key="item[0]"><div class="staff_profile_field"><label t-esc="item[0]"/><strong t-esc="item[1]"/></div></t></div>
+            </section>
+
+            <section class="staff_profile_panel card">
+              <header><div><span class="staff_profile_step">02</span><div><h3>Contact &amp; Residence Details</h3><p>Communication channels, addresses and family contacts.</p></div></div><button t-on-click="openFaculty">Edit <i class="fa fa-arrow-right"/></button></header>
+              <div class="staff_profile_fields"><t t-foreach="contactItems" t-as="item" t-key="item[0]"><div class="staff_profile_field"><label t-esc="item[0]"/><strong t-esc="item[1]"/></div></t></div>
+            </section>
+          </div>
+          <aside class="staff_profile_aside">
+            <section class="staff_profile_sidecard card"><div class="staff_profile_side_heading"><span class="metric_icon violet"><i class="fa fa-lightbulb-o"/></span><div><h3>Profile Assistant</h3><p>Based on available campus fields</p></div></div><div class="staff_profile_notice">Review missing details before adding supporting documents.</div>
+              <div class="staff_profile_fact" t-if="!state.profile.campus_staff_code"><span>Staff code is missing</span><button t-on-click="openFaculty">Review →</button></div>
+              <div class="staff_profile_fact" t-if="!state.profile.campus_joining_date"><span>Joining date is missing</span><button t-on-click="openFaculty">Review →</button></div>
+              <div class="staff_profile_fact" t-if="!state.profile.campus_alternate_email"><span>Alternate email is missing</span><button t-on-click="openFaculty">Review →</button></div>
+              <div class="staff_profile_fact" t-if="!documents.length"><span>No documents recorded</span><button t-on-click="() => this.openRegister('document')">Review →</button></div>
+            </section>
+            <section class="staff_profile_sidecard card"><div class="staff_profile_side_heading"><span class="metric_icon blue"><i class="fa fa-file-text-o"/></span><div><h3>Documents Status</h3><p>Supporting records</p></div></div><div class="staff_profile_no_records" t-if="!documents.length">No documents recorded yet.</div><div class="staff_profile_fact" t-foreach="documents.slice(0, 6)" t-as="record" t-key="record.id"><span t-esc="record.display_name"/><strong class="staff_profile_status" t-att-class="record.verification"><t t-esc="record.verification"/></strong></div></section>
+            <section class="staff_profile_sidecard card"><div class="staff_profile_side_heading"><span class="metric_icon green"><i class="fa fa-info-circle"/></span><div><h3>Quick Facts</h3><p>Frequently used staff details</p></div></div><div class="staff_profile_fact"><span>Blood group</span><strong t-esc="state.profile.blood_group || '—'"/></div><div class="staff_profile_fact"><span>Marital status</span><strong t-esc="relationLabel(state.profile.campus_marital_status)"/></div><div class="staff_profile_fact"><span>Residence</span><strong t-esc="state.profile.campus_residence_location || '—'"/></div><div class="staff_profile_fact"><span>Travel mode</span><strong t-esc="state.profile.campus_travel_mode || '—'"/></div><div class="staff_profile_fact"><span>Emergency contact</span><strong t-esc="state.profile.campus_emergency_phone || '—'"/></div></section>
+          </aside>
+        </div>
+
+        <div id="staff-profile-additional" class="staff_profile_divider"><div><h2>Additional Profile Details</h2><p>Qualifications, employment, experience, languages, reporting and compliance. Each information block has its own row.</p></div><span>PART 02 / 02</span></div>
+        <div class="staff_profile_layout">
+          <div class="staff_profile_main">
+            <section class="staff_profile_panel card">
+              <header><div><span class="staff_profile_step">03</span><div><h3>Official / Employment Records</h3><p>Appointment type, service category and statutory identifiers.</p></div></div><button t-on-click="openFaculty">Edit <i class="fa fa-arrow-right"/></button></header>
+              <div class="staff_profile_fields"><t t-foreach="employmentItems" t-as="item" t-key="item[0]"><div class="staff_profile_field"><label t-esc="item[0]"/><strong t-esc="item[1]"/></div></t></div>
+            </section>
+
+            <section class="staff_profile_panel card" id="staff-profile-qualifications">
+              <header><div><span class="staff_profile_step">04</span><div><h3>Qualification &amp; Education</h3><p>Academic qualifications from the campus register.</p></div></div><button class="staff_profile_add" t-on-click="() => this.openRegister('qualification')"><i class="fa fa-plus"/> Add qualification</button></header>
+              <div class="staff_profile_table_wrap"><table><thead><tr><th>Qualification</th><th>Specialization / Title</th><th>Year</th><th>Institution</th><th>University / Board</th><th>Result</th><th>Certificate</th></tr></thead><tbody>
+                <tr t-foreach="qualifications" t-as="record" t-key="record.id" t-on-click="() => this.openDetail(record)"><td><strong t-esc="record.display_name"/></td><td t-esc="record.specialization || '—'"/><td t-esc="record.year || '—'"/><td t-esc="record.institution || '—'"/><td t-esc="record.university || '—'"/><td t-esc="record.result || '—'"/><td t-esc="record.filename || '—'"/></tr>
+                <tr t-if="!qualifications.length"><td colspan="7" class="staff_profile_no_records">No qualifications have been added.</td></tr>
+              </tbody></table></div>
+            </section>
+
+            <section class="staff_profile_panel card" id="staff-profile-experience">
+              <header><div><span class="staff_profile_step">05</span><div><h3>Experience / Service History</h3><p>Employment chronology with clear start and end dates.</p></div></div><button class="staff_profile_add" t-on-click="() => this.openRegister('experience')"><i class="fa fa-plus"/> Add experience</button></header>
+              <div class="staff_profile_table_wrap"><table><thead><tr><th>Institution</th><th>Designation</th><th>From</th><th>To</th><th>Nature</th><th>Reference</th></tr></thead><tbody>
+                <tr t-foreach="experience" t-as="record" t-key="record.id" t-on-click="() => this.openDetail(record)"><td><strong t-esc="record.institution || record.display_name"/></td><td t-esc="record.designation || '—'"/><td t-esc="dateLabel(record.date_from)"/><td t-esc="dateLabel(record.date_to)"/><td t-esc="record.nature || '—'"/><td t-esc="record.reference || '—'"/></tr>
+                <tr t-if="!experience.length"><td colspan="6" class="staff_profile_no_records">No service history has been added.</td></tr>
+              </tbody></table></div>
+            </section>
+
+            <section class="staff_profile_panel card">
+              <header><div><span class="staff_profile_step">06</span><div><h3>References &amp; Reporting Details</h3><p>Departmental reporting structure and employment assignment.</p></div></div><button t-on-click="openFaculty">Edit <i class="fa fa-arrow-right"/></button></header>
+              <div class="staff_profile_fields"><t t-foreach="reportingItems" t-as="item" t-key="item[0]"><div class="staff_profile_field"><label t-esc="item[0]"/><strong t-esc="item[1]"/></div></t></div>
+            </section>
+            <section class="staff_profile_panel card">
+              <header><div><span class="staff_profile_step">07</span><div><h3>Languages Known</h3><p>Reading, writing and speaking abilities shown separately.</p></div></div><button class="staff_profile_add" t-on-click="() => this.openRegister('language')"><i class="fa fa-plus"/> Add language</button></header>
+              <div class="staff_profile_table_wrap"><table><thead><tr><th>Language</th><th>Read</th><th>Write</th><th>Speak</th><th>Status</th></tr></thead><tbody>
+                <tr t-foreach="languages" t-as="record" t-key="record.id" t-on-click="() => this.openDetail(record)"><td><strong t-esc="record.display_name"/></td><td t-esc="record.can_read ? 'Yes' : 'No'"/><td t-esc="record.can_write ? 'Yes' : 'No'"/><td t-esc="record.can_speak ? 'Yes' : 'No'"/><td><span class="staff_profile_status neutral">Recorded</span></td></tr>
+                <tr t-if="!languages.length"><td colspan="5" class="staff_profile_no_records">No language details have been added.</td></tr>
+              </tbody></table></div>
+            </section>
+
+            <section class="staff_profile_panel card">
+              <header><div><span class="staff_profile_step">08</span><div><h3>Previous School / College / University Details</h3><p>Earlier education and institution information.</p></div></div><button t-on-click="openFaculty">Edit <i class="fa fa-arrow-right"/></button></header>
+              <div class="staff_profile_fields"><t t-foreach="previousEducationItems" t-as="item" t-key="item[0]"><div class="staff_profile_field"><label t-esc="item[0]"/><strong t-esc="item[1]"/></div></t></div>
+            </section>
+            <section class="staff_profile_panel card">
+              <header><div><span class="staff_profile_step">09</span><div><h3>Organization / Additional Information</h3><p>Institution information and additional staff notes.</p></div></div><button t-on-click="openFaculty">Edit <i class="fa fa-arrow-right"/></button></header>
+              <div class="staff_profile_fields"><t t-foreach="organizationItems" t-as="item" t-key="item[0]"><div class="staff_profile_field"><label t-esc="item[0]"/><strong t-esc="item[1]"/></div></t></div>
+            </section>
+
+            <section class="staff_profile_panel card" id="staff-profile-documents">
+              <header><div><span class="staff_profile_step">10</span><div><h3>Documents &amp; Compliance Register</h3><p>Per-document verification state, remarks and next action.</p></div></div><button class="staff_profile_add" t-on-click="() => this.openRegister('document')"><i class="fa fa-plus"/> Add document</button></header>
+              <div class="staff_profile_table_wrap"><table><thead><tr><th>Document</th><th>Document ID / Reference</th><th>Status</th><th>Reviewed by</th><th>Next action</th></tr></thead><tbody>
+                <tr t-foreach="documents" t-as="record" t-key="record.id" t-on-click="() => this.openDetail(record)"><td><strong t-esc="record.display_name"/><small t-if="record.filename" t-esc="record.filename"/></td><td t-esc="record.reference || '—'"/><td><span class="staff_profile_status" t-att-class="record.verification"><t t-esc="record.verification"/></span></td><td t-esc="relationLabel(record.reviewer_id)"/><td t-esc="record.next_action || 'Open record to review'"/></tr>
+                <tr t-if="!documents.length"><td colspan="5" class="staff_profile_no_records">No compliance documents have been added.</td></tr>
+              </tbody></table></div>
+              <footer><span><t t-esc="verifiedDocuments"/> verified</span><span><t t-esc="pendingDocuments"/> pending review</span><span><t t-esc="missingDocuments"/> missing</span></footer>
+            </section>
+          </div>
+
+          <aside class="staff_profile_aside">
+            <section class="staff_profile_sidecard card"><div class="staff_profile_side_heading"><span class="metric_icon green"><i class="fa fa-shield"/></span><div><h3>Verification Tracker</h3><p>Based on saved document statuses</p></div></div><div class="staff_profile_completion"><div class="staff_profile_ring" t-att-style="'--completion: ' + verificationPercent + '%' "><strong><t t-esc="verificationPercent"/>%</strong></div><div><strong>Profile Verification</strong><small>Document status in the campus register</small></div></div><div class="staff_profile_verify_boxes"><div><strong t-esc="verifiedDocuments"/><span>Verified</span></div><div><strong t-esc="pendingDocuments"/><span>Pending</span></div><div><strong t-esc="missingDocuments"/><span>Missing</span></div></div></section>
+            <section class="staff_profile_sidecard card"><div class="staff_profile_side_heading"><span class="metric_icon green"><i class="fa fa-check-circle"/></span><div><h3>Profile overview</h3><p>Completion across staff details</p></div></div>
+              <div class="staff_profile_completion"><div class="staff_profile_ring" t-att-style="'--completion: ' + completion + '%' "><strong><t t-esc="completion"/>%</strong></div><div><strong>Profile completeness</strong><small>Calculated from available profile fields</small></div></div>
+              <div class="staff_profile_progress_row"><span>Qualifications</span><strong t-esc="qualifications.length"/></div>
+              <div class="staff_profile_progress_row"><span>Service records</span><strong t-esc="experience.length"/></div>
+              <div class="staff_profile_progress_row"><span>Languages</span><strong t-esc="languages.length"/></div>
+              <div class="staff_profile_progress_row"><span>Documents verified</span><strong><t t-esc="verifiedDocuments"/> / <t t-esc="documents.length"/></strong></div>
+            </section>
+            <section class="staff_profile_sidecard card"><div class="staff_profile_side_heading"><span class="metric_icon blue"><i class="fa fa-file-text-o"/></span><div><h3>Compliance Snapshot</h3><p>Document register</p></div></div><div class="staff_profile_no_records" t-if="!documents.length">No documents recorded yet.</div><div class="staff_profile_fact" t-foreach="documents.slice(0, 7)" t-as="record" t-key="record.id"><span t-esc="record.display_name"/><strong class="staff_profile_status" t-att-class="record.verification"><t t-esc="record.verification"/></strong></div></section>
+            <section class="staff_profile_sidecard card"><div class="staff_profile_side_heading"><span class="metric_icon amber"><i class="fa fa-clock-o"/></span><div><h3>Recent Activity</h3><p>Latest saved detail records</p></div></div><div class="staff_profile_no_records" t-if="!recentActivity.length">No staff record activity yet.</div><div class="staff_profile_activity" t-foreach="recentActivity" t-as="record" t-key="record.id"><span/><div><strong t-esc="record.display_name"/><small t-esc="dateLabel(record.write_date)"/></div></div></section>
+          </aside>
+        </div>
+        <footer class="staff_profile_footer">Campus staff profile · Records saved in the ERP</footer>
+      </t>
+    </main>
+  </t>
+</templates>
