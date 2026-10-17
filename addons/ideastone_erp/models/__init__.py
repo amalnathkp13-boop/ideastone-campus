@@ -29,3 +29,7 @@ from . import dashboard
 from . import digital_resource
 from . import responsibility, library_desk, attendance_export
 from . import academic_security
+from . import faculty_task
+from . import faculty_activity, faculty_document, faculty_assessment
+from . import student_leave
+from . import student_education

@@ -1,10 +1,12 @@
 from odoo.exceptions import AccessError, ValidationError
 
-from odoo import _, api, models
+from odoo import _, api, fields, models
 
 
 class AttendanceSheet(models.Model):
     _inherit = "op.attendance.sheet"
+
+    campus_subject_id = fields.Many2one(related="session_id.subject_id", store=True, string="Subject")
 
     @api.constrains("faculty_id", "session_id", "register_id")
     def _check_teaching_allocation(self):
@@ -35,6 +37,12 @@ class AttendanceLine(models.Model):
 
 class Exam(models.Model):
     _inherit = "op.exam"
+
+    campus_exam_kind = fields.Selection([
+        ("unclassified", "Unclassified"), ("institution", "Institution test"),
+        ("university", "University examination"), ("autonomous", "Autonomous ESE"),
+    ], required=True, default="unclassified", string="Examination category",
+        help="Classify the examination explicitly before using category-specific reports.")
 
     @api.model_create_multi
     def create(self, vals_list):

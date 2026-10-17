@@ -1,0 +1,108 @@
+<odoo>
+  <record id="access_faculty_task" model="ir.model.access">
+    <field name="name">Faculty personal tasks</field>
+    <field name="model_id" ref="model_campus_faculty_task"/>
+    <field name="group_id" ref="openeducat_core.group_op_faculty"/>
+    <field name="perm_read" eval="True"/>
+    <field name="perm_write" eval="True"/>
+    <field name="perm_create" eval="True"/>
+    <field name="perm_unlink" eval="True"/>
+  </record>
+  <record id="rule_faculty_task_owner" model="ir.rule">
+    <field name="name">Personal tasks belong to the authenticated faculty and college</field>
+    <field name="model_id" ref="model_campus_faculty_task"/>
+    <field name="domain_force">[('user_id','=',user.id),('company_id','in',company_ids)]</field>
+  </record>
+  <record id="view_faculty_task_tree" model="ir.ui.view">
+    <field name="name">campus.faculty.task.tree</field>
+    <field name="model">campus.faculty.task</field>
+    <field name="arch" type="xml">
+      <tree decoration-muted="state in ('done','cancelled')" decoration-danger="deadline &lt; current_date and state not in ('done','cancelled')">
+        <field name="priority" widget="priority"/>
+        <field name="name"/>
+        <field name="kind"/>
+        <field name="date"/>
+        <field name="deadline"/>
+        <field name="state" widget="badge"/>
+      </tree>
+    </field>
+  </record>
+  <record id="view_faculty_task_form" model="ir.ui.view">
+    <field name="name">campus.faculty.task.form</field>
+    <field name="model">campus.faculty.task</field>
+    <field name="arch" type="xml">
+      <form string="My task and e-diary">
+        <header>
+          <field name="state" widget="statusbar" options="{'clickable':True}"/>
+        </header>
+        <sheet>
+          <div class="oe_title">
+            <label for="name"/>
+            <h1>
+              <field name="name" placeholder="What do you need to do?"/>
+            </h1>
+          </div>
+          <group>
+            <group>
+              <field name="kind"/>
+              <field name="priority" widget="priority"/>
+            </group>
+            <group>
+              <field name="date"/>
+              <field name="deadline"/>
+              <field name="user_id"/>
+              <field name="company_id" readonly="True" groups="base.group_multi_company"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="E-diary notes">
+              <field name="notes" placeholder="Record your plan, progress and reflections…"/>
+            </page>
+            <page string="Supporting document">
+              <field name="filename" invisible="True"/>
+              <field name="document" filename="filename"/>
+            </page>
+          </notebook>
+        </sheet>
+        <div class="oe_chatter">
+          <field name="message_follower_ids"/>
+          <field name="activity_ids"/>
+          <field name="message_ids"/>
+        </div>
+      </form>
+    </field>
+  </record>
+  <record id="view_faculty_task_search" model="ir.ui.view">
+    <field name="name">campus.faculty.task.search</field>
+    <field name="model">campus.faculty.task</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="name"/>
+        <field name="kind"/>
+        <filter name="open" string="Open tasks" domain="[('state','in',['planned','progress'])]"/>
+        <filter name="overdue" string="Overdue" domain="[('deadline','&lt;',context_today().strftime('%Y-%m-%d')),('state','in',['planned','progress'])]"/>
+        <filter name="done" string="Completed" domain="[('state','=','done')]"/>
+        <group expand="0" string="Group by">
+          <filter name="kind_group" string="Activity" context="{'group_by':'kind'}"/>
+          <filter name="state_group" string="Status" context="{'group_by':'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+  <record id="view_faculty_task_calendar" model="ir.ui.view">
+    <field name="name">campus.faculty.task.calendar</field>
+    <field name="model">campus.faculty.task</field>
+    <field name="arch" type="xml">
+      <calendar string="My faculty diary" date_start="deadline" color="kind" mode="month" quick_create="false">
+        <field name="name"/>
+        <field name="state"/>
+      </calendar>
+    </field>
+  </record>
+  <record id="action_faculty_task" model="ir.actions.act_window">
+    <field name="name">My tasks &amp; e-diary</field>
+    <field name="res_model">campus.faculty.task</field>
+    <field name="view_mode">tree,calendar,form</field>
+    <field name="context">{'search_default_open':1}</field>
+  </record>
+</odoo>

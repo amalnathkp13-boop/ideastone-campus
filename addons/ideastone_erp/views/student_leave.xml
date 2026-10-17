@@ -1,0 +1,112 @@
+<odoo>
+  <record id="view_student_leave_tree" model="ir.ui.view">
+    <field name="name">campus.student.leave.tree</field>
+    <field name="model">campus.student.leave</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name"/>
+        <field name="student_id"/>
+        <field name="date"/>
+        <field name="deadline"/>
+        <field name="advisor_id"/>
+        <field name="hod_id"/>
+        <field name="state" widget="badge"/>
+      </tree>
+    </field>
+  </record>
+  <record id="view_student_leave_form" model="ir.ui.view">
+    <field name="name">campus.student.leave.form</field>
+    <field name="model">campus.student.leave</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <button name="action_submit" type="object" string="Submit for review" class="oe_highlight" invisible="state != 'draft'"/>
+          <button name="action_approve" type="object" string="Approve stage" class="oe_highlight" invisible="not can_decide"/>
+          <button name="action_reject" type="object" string="Reject" invisible="not can_decide" confirm="Reject this leave request with the recorded reason?"/>
+          <field name="state" widget="statusbar" statusbar_visible="draft,advisor,hod,principal,approved"/>
+        </header>
+        <sheet>
+          <h1>
+            <field name="name" readonly="state != 'draft'" placeholder="Leave request title"/>
+          </h1>
+          <div class="alert alert-info">File a student request using the college-managed advisor route. Each named reviewer approves their stage; principal approval is used when configured.</div>
+          <field name="can_decide" invisible="True"/>
+          <group>
+            <group>
+              <field name="routing_id" options="{'no_create':True}" readonly="id"/>
+              <field name="student_id"/>
+              <field name="date" string="Leave from" readonly="state != 'draft'"/>
+              <field name="deadline" string="Leave to" readonly="state != 'draft'"/>
+            </group>
+            <group>
+              <field name="advisor_id"/>
+              <field name="hod_id"/>
+              <field name="principal_id"/>
+              <field name="company_id" groups="base.group_multi_company" readonly="True"/>
+            </group>
+          </group>
+          <group string="Leave details">
+            <field name="reason" readonly="state != 'draft'"/>
+            <field name="filename" invisible="True"/>
+            <field name="document" filename="filename" readonly="state != 'draft'"/>
+          </group>
+          <group string="Review">
+            <field name="decision_reason" readonly="not can_decide"/>
+            <field name="decision_log"/>
+          </group>
+        </sheet>
+        <div class="oe_chatter">
+          <field name="message_follower_ids"/>
+          <field name="activity_ids"/>
+          <field name="message_ids"/>
+        </div>
+      </form>
+    </field>
+  </record>
+  <record id="view_student_leave_routing_tree" model="ir.ui.view">
+    <field name="name">campus.student.leave.routing.tree</field>
+    <field name="model">campus.student.leave.routing</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name"/>
+        <field name="student_id"/>
+        <field name="advisor_id"/>
+        <field name="hod_id"/>
+        <field name="principal_id"/>
+        <field name="company_id" groups="base.group_multi_company"/>
+        <field name="active"/>
+      </tree>
+    </field>
+  </record>
+  <record id="view_student_leave_routing_form" model="ir.ui.view">
+    <field name="name">campus.student.leave.routing.form</field>
+    <field name="model">campus.student.leave.routing</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="student_id"/>
+            <field name="company_id" groups="base.group_multi_company"/>
+            <field name="advisor_id"/>
+            <field name="hod_id"/>
+            <field name="principal_id"/>
+            <field name="active"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="action_student_leave" model="ir.actions.act_window">
+    <field name="name">Student leave approvals</field>
+    <field name="res_model">campus.student.leave</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+  <record id="action_student_leave_routing" model="ir.actions.act_window">
+    <field name="name">Student leave approval routing</field>
+    <field name="res_model">campus.student.leave.routing</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+  <menuitem id="menu_student_leave" name="Student leave approvals" parent="menu_operations" action="action_student_leave" sequence="25"/>
+  <menuitem id="menu_student_leave_routing" name="Student leave routing" parent="menu_operations" action="action_student_leave_routing" groups="ideastone_erp.group_college_admin,ideastone_erp.group_manager" sequence="95"/>
+</odoo>

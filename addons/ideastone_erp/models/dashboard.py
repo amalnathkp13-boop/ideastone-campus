@@ -1,4 +1,5 @@
 import json
+from datetime import timedelta
 
 from odoo.exceptions import AccessError
 
@@ -67,7 +68,7 @@ class Dashboard(models.AbstractModel):
                 item["group"] = "Mentorship & student support"
             if admin or item["allowed"]:
                 visible.append(item)
-        faculty = self.env["op.faculty"].search([("user_id", "=", self.env.uid)], limit=1) if self.env["op.faculty"].check_access_rights("read", raise_exception=False) else self.env["op.faculty"]
+        faculty = self.env["op.faculty"].search([("user_id", "=", self.env.uid), "|", ("company_id", "=", False), ("company_id", "=", self.env.company.id)], limit=1) if self.env["op.faculty"].check_access_rights("read", raise_exception=False) else self.env["op.faculty"]
         stats = []
         if admin:
             for label, model, domain in [
@@ -106,7 +107,40 @@ class Dashboard(models.AbstractModel):
             count = self.env["campus.responsibility"].search_count([("state", "=", "requested"), ("company_id", "=", self.env.company.id)])
             queues.append({"label": "Faculty role requests", "count": count, "detail": "Appointments awaiting independent approval", "action": "ideastone_erp.action_responsibilities"})
         quick = [x for x in visible if x["allowed"] and x["label"] in ("Admissions", "Class attendance", "Timetable", "Fee invoices", "Mentor counseling", "Lesson plans")][:4]
+        faculty_modules = self._faculty_modules(visible, faculty, pages) if faculty and not admin and self.env.user.has_group("openeducat_core.group_op_faculty") else []
+        faculty_tasks, faculty_schedule, faculty_surveys = [], [], []
+        if faculty_modules:
+            allocations = self.env["op.session"].read_group([
+                ("faculty_id", "=", faculty.id), ("company_id", "=", self.env.company.id), ("state", "!=", "cancel"),
+            ], ["subject_id"], ["subject_id"])
+            assigned_subjects = set(faculty.faculty_subject_ids.ids) | {row["subject_id"][0] for row in allocations if row["subject_id"]}
+            for stat in stats:
+                if stat["label"] == "Assigned subjects":
+                    stat.update(value=len(assigned_subjects), detail="Faculty subjects and timetable")
+            # Survey participation uses Odoo's token-checked website workflow. This
+            # bounded projection exposes only invitations addressed to this account;
+            # faculty do not receive survey design or other respondents' ACLs.
+            invitations = self.env["survey.user_input"].sudo().search([
+                ("partner_id", "=", self.env.user.partner_id.id), ("test_entry", "=", False),
+            ], limit=30)
+            faculty_surveys = [{"id": invitation.id, "name": invitation.survey_id.title,
+                "state": invitation.state, "deadline": str(invitation.deadline or ""),
+                "expired": bool(invitation.deadline and invitation.deadline < fields.Datetime.now()),
+                "url": invitation.get_print_url() if invitation.state == "done" else invitation.get_start_url(),
+            } for invitation in invitations]
+            tasks = self.env["campus.faculty.task"].search([("state", "in", ["planned", "progress"])], limit=5)
+            faculty_tasks = [{"id": task.id, "name": task.name, "due": str(task.deadline), "state": task.state} for task in tasks]
+            if self.env["op.session"].check_access_rights("read", raise_exception=False):
+                sessions = self.env["op.session"].search([("faculty_id", "=", faculty.id), ("company_id", "=", self.env.company.id),
+                    ("state", "=", "confirm"), ("start_datetime", ">=", fields.Datetime.now()),
+                    ("start_datetime", "<", fields.Datetime.now() + timedelta(days=7))], order="start_datetime", limit=5)
+                faculty_schedule = [{"id": s.id, "subject": s.subject_id.name, "batch": s.batch_id.name,
+                    "when": fields.Datetime.context_timestamp(self, s.start_datetime).strftime("%d %b %Y · %H:%M")} for s in sessions]
+            stats += [{"label": "Open tasks", "value": self.env["campus.faculty.task"].search_count([("state", "in", ["planned", "progress"])]), "detail": "Your personal diary"},
+                      {"label": "Activities", "value": self.env["campus.faculty.activity"].search_count([]), "detail": "Your clubs, SDP and training"}]
         return {"company": self.env.company.name, "user": self.env.user.name,
+                "faculty_modules": faculty_modules,
+                "faculty_tasks": faculty_tasks, "faculty_schedule": faculty_schedule, "faculty_surveys": faculty_surveys,
                 "navigation": visible, "stats": stats, "pages": pages, "queues": queues, "quick": quick,
                 "is_admin": admin, "workspace_role": "College administrator" if admin else "Faculty" if faculty else "Staff",
                 "today": fields.Date.to_string(fields.Date.context_today(self)), "library_allowed": library,
@@ -114,3 +148,147 @@ class Dashboard(models.AbstractModel):
                 "payroll_allowed": self.env["campus.payslip"].check_access_rights("read", raise_exception=False),
                 "appointments": [{"id": r.id, "faculty": r.faculty_id.name, "role": "Library In-charge", "scope": ", ".join(r.media_type_ids.mapped("name")),
                                   "state": r.state, "effective": r.effective, "until": str(r.date_to)} for r in appointments]}
+
+    def _faculty_modules(self, visible, faculty, pages):
+        """Navigation is discovery only. Every action keeps its model ACLs and record rules."""
+        definitions = [
+            ("home", "Home", "home", []),
+            ("teaching", "My task list", "graduation-cap", ["Academic management", "Examination & results", "Mentorship & student support"]),
+            ("search", "Search", "search", []),
+            ("staff", "My profile & payroll", "user", ["HR & payroll"]),
+            ("library", "Library & learning", "book", ["Library & learning"]),
+            ("grievances", "Grievances & others", "commenting-o", []),
+            ("services", "Campus services", "building-o", ["Campus services"]),
+            ("hostel", "Hostel", "bed", ["Campus services"]),
+            ("engagement", "Communication", "comments-o", ["Communication & student portal"]),
+            ("reports", "Reports", "bar-chart", []),
+            ("analytics", "Dashboard", "dashboard", []),
+            ("help", "Help", "question-circle", []),
+        ]
+        result = []
+        for key, label, icon, groups in definitions:
+            items = [dict(item, action_id=self.env.ref(item["action"]).id) for item in visible
+                     if item["allowed"] and item["group"] in groups]
+            if key == "home":
+                items = [{"label": "Faculty overview", "page": "overview"}, {"label": "Find a module", "page": "modules"}]
+            elif key == "teaching" and self.env["campus.faculty.task"].check_access_rights("read", raise_exception=False):
+                items = [item for item in items if item["model"] not in {
+                    "campus.faculty.activity", "campus.faculty.document", "campus.faculty.assessment", "op.student",
+                }]
+                items.insert(0, {"label": "My tasks & e-diary", "action": "ideastone_erp.action_faculty_task",
+                                 "action_id": self.env.ref("ideastone_erp.action_faculty_task").id})
+            elif key == "staff":
+                items.insert(0, {"label": "My staff profile", "profile_id": faculty.id})
+            elif key == "library":
+                items.insert(0, {"label": "OPAC & digital library", "url": "/my/campus/library"})
+                if any(p["key"] == "library" for p in pages):
+                    items.insert(0, {"label": "Circulation desk", "page": "library"})
+            elif key == "reports":
+                items = [{"label": "Reports & exports", "page": "reports"}]
+                report_tools = [
+                    ("report_internal", "Internal mark generation & analysis", "campus.faculty.assessment"),
+                    ("report_students", "Class & students", "op.student"),
+                    ("report_photos", "Class & student photos", "op.student"),
+                    ("report_education", "Previous academic information", "campus.student.education"),
+                    ("report_attendance", "Subject-wise attendance report", "op.attendance.sheet"),
+                    ("report_tests", "Institution tests", "op.exam"),
+                    ("report_counseling", "Students counseling", "campus.counseling"),
+                    ("report_lesson", "Notes of lesson", "campus.teaching.plan"),
+                    ("report_lesson_review", "NOL approval", "campus.teaching.plan"),
+                    ("report_chronicle", "My chronicle this year", "campus.faculty.achievement"),
+                    ("report_university", "University examination results", "op.result.line"),
+                    ("report_autonomous", "Autonomous ESE results", "op.result.line"),
+                ]
+                items += [{"label": title, "tool": tool, "model": model} for tool, title, model in report_tools
+                          if self.env[model].check_access_rights("read", raise_exception=False)]
+            elif key == "search":
+                items = [{"label": "Find a module", "page": "modules"}]
+                if self.env["op.student"].check_access_rights("read", raise_exception=False):
+                    items.append({"label": "Search my students", "tool": "assigned_students"})
+            elif key == "analytics":
+                items = [{"label": "Faculty analytics", "page": "analytics"}]
+            elif key == "grievances":
+                items = [{"label": "My grievances", "tool": "grievance"}] if self.env["campus.service.request"].check_access_rights("read", raise_exception=False) else []
+            elif key == "hostel":
+                items = [item for item in items if item["label"].startswith("Hostel")]
+            elif key == "services":
+                items = [item for item in items if not item["label"].startswith("Hostel")]
+                if self.env["campus.service.request"].check_access_rights("read", raise_exception=False):
+                    items.append({"label": "Register complaint on student", "tool": "student_complaint"})
+            elif key == "help":
+                items = [{"label": "Faculty guide", "page": "help"}]
+            if key == "teaching":
+                items.append({"label": "Survey direct", "page": "surveys"})
+                tools = [("assigned_students", "My assigned students", "op.student"),
+                         ("subject_attendance", "Subject-wise attendance", "op.attendance.sheet"),
+                         ("alternate", "Alternate hour", "campus.service.request"),
+                         ("club", "Club functions & attendance", "campus.faculty.activity"),
+                         ("sdp", "SDP functions & attendance", "campus.faculty.activity"),
+                         ("vac", "VAC & placement training", "campus.faculty.activity"),
+                         ("certificates", "Exam certificates", "campus.faculty.document"),
+                         ("question_papers", "Question papers", "campus.faculty.document"),
+                         ("answer_keys", "Answer keys", "campus.faculty.document"),
+                         ("internal", "Internal mark generation", "campus.faculty.assessment"),
+                         ("additional", "Additional internal marks", "campus.faculty.assessment"),
+                         ("practical", "Practical external marks", "campus.faculty.assessment"),
+                         ("holidays", "College holidays", "resource.calendar.leaves")]
+                for tool, title, model in tools:
+                    if self.env[model].check_access_rights("read", raise_exception=False):
+                        items.append({"label": title, "tool": tool, "model": model})
+            if items:
+                result.append({"key": key, "label": label, "icon": icon, "items": items})
+        return result
+
+    @api.model
+    def get_faculty_action(self, tool):
+        faculty = self.env["op.faculty"].search([("user_id", "=", self.env.uid), "|", ("company_id", "=", False), ("company_id", "=", self.env.company.id)], limit=1)
+        if not faculty or not self.env.user.has_group("openeducat_core.group_op_faculty"):
+            raise AccessError(_("A linked faculty account is required."))
+        specs = {
+            "assigned_students": ("My assigned students", "op.student", [], {}),
+            "subject_attendance": ("Subject-wise attendance", "op.attendance.sheet", [("faculty_id", "=", faculty.id)], {"group_by": "campus_subject_id"}),
+            "alternate": ("Alternate teaching hour", "campus.service.request", [("kind", "=", "alternate")], {"default_kind": "alternate", "default_faculty_id": faculty.id}),
+            "club": ("Club functions & attendance", "campus.faculty.activity", [("kind", "=", "club")], {"default_kind": "club"}),
+            "sdp": ("SDP functions & attendance", "campus.faculty.activity", [("kind", "=", "sdp")], {"default_kind": "sdp"}),
+            "vac": ("VAC & placement training", "campus.faculty.activity", [("kind", "=", "vac")], {"default_kind": "vac"}),
+            "certificates": ("Exam certificates", "campus.faculty.document", [("kind", "=", "certificate")], {"default_kind": "certificate"}),
+            "question_papers": ("Question papers", "campus.faculty.document", [("kind", "=", "question")], {"default_kind": "question"}),
+            "answer_keys": ("Answer keys", "campus.faculty.document", [("kind", "=", "answer")], {"default_kind": "answer"}),
+            "holidays": ("College holidays", "resource.calendar.leaves", [("resource_id", "=", False)], {}),
+            "grievance": ("My grievances", "campus.service.request", [("kind", "=", "grievance")], {"default_kind": "grievance"}),
+            "student_complaint": ("Register complaint on student", "campus.service.request", [("kind", "=", "student_complaint")], {"default_kind": "student_complaint", "default_faculty_id": faculty.id}),
+            "report_internal": ("Internal mark generation & analysis", "campus.faculty.assessment", [], {}),
+            "report_students": ("Class & students", "op.student", [], {}),
+            "report_photos": ("Class & student photos", "op.student", [], {}),
+            "report_education": ("Previous academic information", "campus.student.education", [], {}),
+            "report_attendance": ("Subject-wise attendance report", "op.attendance.sheet", [("faculty_id", "=", faculty.id), ("state", "=", "done")], {"group_by": "campus_subject_id"}),
+            "report_tests": ("Institution tests", "op.exam", [("campus_exam_kind", "=", "institution")], {"default_campus_exam_kind": "institution"}),
+            "report_counseling": ("Students counseling", "campus.counseling", [("mentor_id", "=", faculty.id)], {}),
+            "report_lesson": ("Notes of lesson", "campus.teaching.plan", [("faculty_id", "=", faculty.id)], {}),
+            "report_lesson_review": ("NOL approval", "campus.teaching.plan", [("review_state", "=", "submitted")], {}),
+            "report_chronicle": ("My chronicle this year", "campus.faculty.achievement", [("faculty_id", "=", faculty.id), ("date_from", ">=", fields.Date.context_today(self).replace(month=1, day=1))], {}),
+            "report_university": ("University examination results", "op.result.line", [("exam_id.campus_exam_kind", "=", "university")], {}),
+            "report_autonomous": ("Autonomous ESE results", "op.result.line", [("exam_id.campus_exam_kind", "=", "autonomous")], {}),
+        }
+        for kind, label in [("internal", "Internal mark generation"), ("additional", "Additional internal marks"), ("practical", "Practical external marks")]:
+            specs[kind] = (label, "campus.faculty.assessment", [("kind", "=", kind)], {"default_kind": kind})
+        if tool not in specs:
+            raise AccessError(_("Unknown faculty workspace."))
+        label, model, domain, context = specs[tool]
+        self.env[model].check_access_rights("read")
+        if "company_id" in self.env[model]._fields:
+            domain += ["|", ("company_id", "=", False), ("company_id", "in", self.env.companies.ids)]
+        if tool in {"assigned_students", "report_students", "report_photos"}:
+            batches = self.env["op.session"].search([("faculty_id", "=", faculty.id), ("company_id", "=", self.env.company.id)]).batch_id
+            domain += [("course_detail_ids.batch_id", "in", batches.ids)]
+        if model in {"op.exam", "op.result.line"}:
+            batches = self.env["op.session"].search([("faculty_id", "=", faculty.id), ("company_id", "=", self.env.company.id)]).batch_id
+            prefix = "exam_id." if model == "op.result.line" else ""
+            domain += [(prefix + "responsible_id", "in", faculty.ids), (prefix + "batch_id", "in", batches.ids)]
+        views = [(False, "tree"), (False, "form")]
+        if tool == "report_photos":
+            views.insert(0, (self.env.ref("openeducat_core.kanban_view_student").id, "kanban"))
+        module = "reports" if tool.startswith("report_") else {"grievance": "grievances", "student_complaint": "services", "assigned_students": "search"}.get(tool, "teaching")
+        return {"type": "ir.actions.act_window", "name": label, "res_model": model,
+                "views": views, "domain": domain,
+                "context": dict(self.env.context, **context, campus_module=module, campus_tool=tool)}
