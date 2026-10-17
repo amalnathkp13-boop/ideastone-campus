@@ -187,4 +187,3 @@ class TestFinanceLearning(OwnerMVPFixture, TransactionCase):
         self.env["ir.config_parameter"].sudo().set_param("ideastone.lms_url", "javascript:alert(1)")
         with self.assertRaises(ValidationError):
             self.env["ideastone.lms.workspace"].with_user(self.teacher).configuration()
-
