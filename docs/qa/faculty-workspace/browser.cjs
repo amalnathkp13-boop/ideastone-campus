@@ -24,7 +24,8 @@ async function diagnosticMarkup(page) {
         await page.goto(base+'/web/login?db=ci');
         await page.locator('input[name=login]').fill('faculty.ui.qa');
         await page.locator('input[name=password]').fill(process.env.FACULTY_QA_PASSWORD);
-        await page.locator('button[type=submit]').click();
+        // Wait for the login POST to finish before navigating elsewhere; navigating early cancels it.
+        await Promise.all([page.waitForURL(url=>!url.pathname.startsWith('/web/login')), page.locator('button[type=submit]').click()]);
         await page.goto(base+'/web#action=ideastone_erp.action_dashboard');
         await page.locator('body.campus_faculty_workspace').waitFor();
         await page.getByRole('heading', {name:'Welcome back, QA Faculty'}).waitFor();

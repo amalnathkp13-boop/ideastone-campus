@@ -32,7 +32,8 @@ async function markup(page) {
         await page.goto(base+'/web/login?db=ci');
         await page.locator('input[name=login]').fill('owner.ui.qa');
         await page.locator('input[name=password]').fill(process.env.FACULTY_QA_PASSWORD);
-        await page.locator('button[type=submit]').click();
+        // Wait for the login POST to finish before navigating elsewhere; navigating early cancels it.
+        await Promise.all([page.waitForURL(url=>!url.pathname.startsWith('/web/login')), page.locator('button[type=submit]').click()]);
         await page.goto(base+'/web#action=ideastone_erp.action_dashboard');
         await page.getByRole('heading',{name:'Welcome back, College Owner'}).waitFor();
         await page.locator('.campus_owner_stat').first().waitFor();
