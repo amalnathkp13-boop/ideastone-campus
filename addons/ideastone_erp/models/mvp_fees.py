@@ -293,14 +293,18 @@ class FeePayment(models.Model):
     campus_invoice_id = fields.Many2one("account.move", readonly=True, copy=False, ondelete="restrict")
     campus_method = fields.Selection(METHODS, readonly=True, copy=False)
     campus_reference = fields.Char(readonly=True, copy=False)
+    campus_transaction_key = fields.Char(readonly=True, copy=False, index=True)
     campus_cashier_id = fields.Many2one("res.users", readonly=True, copy=False)
     campus_reversal_id = fields.Many2one("account.move", readonly=True, copy=False, ondelete="restrict")
     campus_reversal_reason = fields.Text(string="Reversal reason")
-    _sql_constraints = [("campus_receipt_unique", "unique(campus_receipt_number)", "Receipt numbers must be unique and never reused.")]
+    _sql_constraints = [
+        ("campus_receipt_unique", "unique(campus_receipt_number)", "Receipt numbers must be unique and never reused."),
+        ("campus_transaction_unique", "unique(campus_transaction_key)", "This transaction reference has already been collected in this journal. Check the original receipt."),
+    ]
 
     @api.model_create_multi
     def create(self, vals_list):
-        protected = {"campus_receipt_number", "campus_invoice_id", "campus_method", "campus_reference", "campus_cashier_id", "campus_reversal_id"}
+        protected = {"campus_receipt_number", "campus_invoice_id", "campus_method", "campus_reference", "campus_transaction_key", "campus_cashier_id", "campus_reversal_id"}
         if any(protected.intersection(vals) for vals in vals_list):
             raise AccessError(_("Receipt evidence can only be assigned to a posted and reconciled payment."))
         return super().create(vals_list)
@@ -309,14 +313,30 @@ class FeePayment(models.Model):
         self.ensure_one()
         if self.campus_receipt_number:
             return
+        reference = (reference or "").strip()
+        key = self._campus_transaction_key_for(self.journal_id, method, reference)
         number = self.env["ir.sequence"].with_company(self.company_id).next_by_code("campus.receipt")
         if not number:
             raise ValidationError(_("Configure the college receipt sequence before collecting fees."))
         super().write({"campus_receipt_number": number, "campus_invoice_id": invoice.id, "campus_method": method,
-                       "campus_reference": reference, "campus_cashier_id": self.env.uid})
+                       "campus_reference": reference, "campus_transaction_key": key, "campus_cashier_id": self.env.uid})
+
+    @api.model
+    def _campus_transaction_key_for(self, journal, method, reference):
+        normalized = " ".join((reference or "").split()).upper()
+        if method != "cash" and not normalized:
+            raise ValidationError(_("Enter the bank, UPI or card transaction reference, separately from the invoice memo."))
+        if len(normalized) > 200:
+            raise ValidationError(_("Transaction references may contain at most 200 characters."))
+        # account.payment delegates company/journal to account.move. Qualifying
+        # this dedicated stored key makes the database constraint cover both.
+        key = f"{journal.company_id.id}:{journal.id}:{normalized}" if method != "cash" else False
+        if key and self.sudo().search_count([("campus_transaction_key", "=", key)]):
+            raise ValidationError(_("This transaction reference has already been collected in this journal. Check the original receipt."))
+        return key
 
     def write(self, vals):
-        protected = {"campus_receipt_number", "campus_invoice_id", "campus_method", "campus_reference", "campus_cashier_id", "campus_reversal_id"}
+        protected = {"campus_receipt_number", "campus_invoice_id", "campus_method", "campus_reference", "campus_transaction_key", "campus_cashier_id", "campus_reversal_id"}
         if protected.intersection(vals):
             raise AccessError(_("Receipt evidence is maintained by the payment workflow."))
         if self.filtered("campus_receipt_number") and {"amount", "date", "partner_id", "journal_id", "state"}.intersection(vals):
@@ -360,8 +380,24 @@ class FeePayment(models.Model):
         return super().unlink()
 
 
+class FeeCollectionJournal(models.Model):
+    _inherit = "account.journal"
+
+    campus_collection_revision = fields.Integer(readonly=True, copy=False)
+
+
 class NativeFeePaymentRegister(models.TransientModel):
     _inherit = "account.payment.register"
+
+    campus_college_payment = fields.Boolean(compute="_compute_campus_college_payment")
+    campus_reference_required = fields.Boolean(compute="_compute_campus_college_payment")
+    campus_transaction_reference = fields.Char(string="Bank / UPI / card transaction reference", help="The actual transaction identifier, not the invoice number. Prevents collecting the same transaction twice in this journal.")
+
+    @api.depends("line_ids", "journal_id")
+    def _compute_campus_college_payment(self):
+        for rec in self:
+            rec.campus_college_payment = bool(rec.line_ids.move_id.filtered("campus_student_id"))
+            rec.campus_reference_required = rec.campus_college_payment and rec.journal_id.type != "cash"
 
     def _create_payments(self):
         self.ensure_one()
@@ -378,9 +414,21 @@ class NativeFeePaymentRegister(models.TransientModel):
                 raise ValidationError(_("College MVP payments use the college currency. Configure a matching journal."))
             if self.currency_id.compare_amounts(self.amount, 0) <= 0 or self.currency_id.compare_amounts(self.amount, invoice.amount_residual) > 0:
                 raise ValidationError(_("College payment must be positive and cannot exceed the unpaid invoice balance."))
+            if self.journal_id.type != "cash" and not (self.env.context.get("campus_fee_reference") or self.campus_transaction_reference or "").strip():
+                raise ValidationError(_("Enter the bank, UPI or card transaction reference, separately from the invoice memo."))
+            if self.journal_id.company_id != invoice.company_id:
+                raise ValidationError(_("Choose a collection journal in the invoice's college."))
+            # The first entry in a journal has no previous sequence row to lock.
+            # Touch a dedicated revision so concurrent REPEATABLE READ requests
+            # retry with the committed journal/receipt state before posting.
+            self.env.cr.execute("UPDATE account_journal SET campus_collection_revision=COALESCE(campus_collection_revision,0)+1 WHERE id=%s", [self.journal_id.id])
+            method = self.env.context.get("campus_fee_method") or ("cash" if self.journal_id.type == "cash" else "bank")
+            reference = self.env.context.get("campus_fee_reference") or self.campus_transaction_reference
+            self.env["account.payment"]._campus_transaction_key_for(self.journal_id, method, reference)
         payments = super()._create_payments()
         if invoices:
             payments.ensure_one()
             method = self.env.context.get("campus_fee_method") or ("cash" if payments.journal_id.type == "cash" else "bank")
-            payments._campus_issue_receipt(invoices[0], method, self.env.context.get("campus_fee_reference") or self.communication)
+            reference = self.env.context.get("campus_fee_reference") or self.campus_transaction_reference
+            payments._campus_issue_receipt(invoices[0], method, reference or (self.communication if method == "cash" else ""))
         return payments

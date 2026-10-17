@@ -159,6 +159,30 @@ jobs:
           name: parent-portal-proof
           path: ${{ runner.temp }}/parent-portal-proof
           retention-days: 14
+      - name: Finance and coursework lifecycle on disposable Odoo
+        shell: bash
+        run: |
+          set -euo pipefail
+          export MVP_QA_PASSWORD=$(openssl rand -hex 20)
+          export MVP_QA_OUT="$RUNNER_TEMP/finance-learning-proof"
+          mkdir -p "$MVP_QA_OUT"
+          docker run --rm -i --network host --entrypoint odoo \
+            -v faculty-ci-data:/var/lib/odoo \
+            -v "$PWD/addons:/mnt/ideastone-addons:ro" \
+            -v "$PWD/vendor/openeducat_erp:/mnt/openeducat:ro" \
+            -e MVP_QA_PASSWORD odoo:17.0 shell \
+            --db_host=127.0.0.1 --db_user=odoo --db_password=odoo -d ci \
+            --addons-path=/mnt/ideastone-addons,/mnt/openeducat,/usr/lib/python3/dist-packages/odoo/addons \
+            --workers=0 --max-cron-threads=0 --no-http < docs/qa/finance-learning/seed.py
+          export NODE_PATH="$RUNNER_TEMP/faculty-ui-tools/node_modules"
+          node docs/qa/finance-learning/browser.cjs
+      - name: Preserve finance and coursework evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: finance-learning-proof
+          path: ${{ runner.temp }}/finance-learning-proof
+          retention-days: 14
       - name: Upgrade installed campus modules
         shell: bash
         run: |

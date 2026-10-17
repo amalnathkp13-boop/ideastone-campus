@@ -1,0 +1,79 @@
+<odoo>
+  <record id="learning_assignment_form" model="ir.ui.view">
+    <field name="name">campus.learning.assignment.form</field><field name="model">op.assignment</field><field name="inherit_id" ref="openeducat_assignment.view_op_assignment_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='marks']" position="after"><field name="campus_learning" readonly="state != 'draft'"/><field name="campus_allow_late" readonly="state != 'draft'"/></xpath>
+      <xpath expr="//header" position="replace"><header>
+        <button name="act_publish" type="object" string="Publish assignment" class="oe_highlight" invisible="state != 'draft'"/>
+        <button name="act_set_to_draft" type="object" string="Return to draft" invisible="state != 'publish'"/>
+        <button name="act_finish" type="object" string="Close submissions" invisible="state != 'publish'"/>
+        <button name="act_cancel" type="object" string="Cancel assignment" invisible="state != 'publish'"/>
+        <field name="state" widget="statusbar" statusbar_visible="draft,publish,finish"/>
+      </header></xpath>
+    </field>
+  </record>
+  <record id="learning_submission_form" model="ir.ui.view">
+    <field name="name">campus.learning.submission.form</field><field name="model">op.assignment.sub.line</field><field name="inherit_id" ref="openeducat_assignment.view_op_assignment_sub_line_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//form" position="attributes"><attribute name="create">False</attribute><attribute name="delete">False</attribute></xpath>
+      <xpath expr="//header" position="replace"><header>
+        <button name="act_accept" type="object" string="Release grade &amp; feedback" class="oe_highlight" invisible="state != 'submit'"/>
+        <button name="act_change_req" type="object" string="Return for revision" invisible="state not in ['submit','accept']"/>
+        <button name="act_reject" type="object" string="Reject with reason" invisible="state != 'submit'"/>
+        <field name="state" widget="statusbar" statusbar_visible="draft,submit,accept"/>
+      </header></xpath>
+      <xpath expr="//field[@name='marks']" position="attributes"><attribute name="invisible">False</attribute><attribute name="readonly">state == 'accept'</attribute></xpath>
+      <xpath expr="//field[@name='marks']" position="after"><field name="campus_maximum"/><field name="campus_marks_entered" string="Grade confirmed (check for explicit zero)" readonly="state != 'submit'"/><field name="campus_feedback_released" readonly="True"/><field name="campus_revision_reason" invisible="state != 'accept'"/></xpath>
+      <xpath expr="//field[@name='description']" position="attributes"><attribute name="readonly">True</attribute></xpath>
+      <xpath expr="//field[@name='student_id']" position="attributes"><attribute name="readonly">True</attribute></xpath>
+      <xpath expr="//field[@name='assignment_id']" position="attributes"><attribute name="readonly">True</attribute></xpath>
+      <xpath expr="//field[@name='note']" position="attributes"><attribute name="string">Faculty feedback / revision instructions</attribute><attribute name="readonly">state == 'accept'</attribute></xpath>
+      <xpath expr="//field[@name='submission_date']" position="after"><field name="campus_submitted_by"/><field name="campus_filename" invisible="True"/><field name="campus_file" filename="campus_filename" readonly="True"/></xpath>
+    </field>
+  </record>
+  <record id="learning_submission_tree" model="ir.ui.view"><field name="name">campus.learning.submission.tree</field><field name="model">op.assignment.sub.line</field><field name="inherit_id" ref="openeducat_assignment.view_op_assignment_sub_line_tree"/><field name="arch" type="xml"><xpath expr="//tree" position="attributes"><attribute name="create">False</attribute><attribute name="delete">False</attribute></xpath></field></record>
+  <record id="mvp_learning_assignments" model="ir.actions.act_window"><field name="name">Coursework &amp; assignments</field><field name="res_model">op.assignment</field><field name="view_mode">tree,form</field><field name="context">{'default_campus_learning': True}</field></record>
+  <record id="mvp_learning_submissions" model="ir.actions.act_window"><field name="name">Review student submissions</field><field name="res_model">op.assignment.sub.line</field><field name="view_mode">tree,form</field><field name="context">{'search_default_group_by_assignment_state': 1}</field></record>
+  <record id="mvp_lms_accounts_tree" model="ir.ui.view"><field name="name">campus.lms.accounts.tree</field><field name="model">op.student</field><field name="arch" type="xml"><tree create="False" delete="False"><field name="name"/><field name="gr_no"/><field name="lms_login"/><field name="lms_identity_key"/><field name="lms_enrolment_pending"/><field name="lms_synced_on"/><field name="lms_sync_error"/><button name="action_provision_lms" type="object" string="Synchronize / retry" icon="fa-refresh"/></tree></field></record>
+  <record id="mvp_lms_accounts" model="ir.actions.act_window"><field name="name">LMS accounts &amp; enrolment status</field><field name="res_model">op.student</field><field name="view_mode">tree,form</field><field name="view_id" ref="mvp_lms_accounts_tree"/></record>
+
+  <record id="mvp_native_transaction_reference" model="ir.ui.view"><field name="name">campus.payment.transaction.reference</field><field name="model">account.payment.register</field><field name="inherit_id" ref="account.view_account_payment_register_form"/><field name="arch" type="xml"><xpath expr="//field[@name='communication']" position="after"><field name="campus_college_payment" invisible="True"/><field name="campus_reference_required" invisible="True"/><field name="campus_transaction_reference" invisible="not campus_reference_required" required="campus_reference_required"/></xpath></field></record>
+  <record id="mvp_payment_transaction_reference" model="ir.ui.view"><field name="name">campus.payment.reference.required</field><field name="model">campus.fee.payment.wizard</field><field name="inherit_id" ref="mvp_payment_form"/><field name="arch" type="xml"><xpath expr="//field[@name='reference']" position="attributes"><attribute name="required">method != 'cash'</attribute><attribute name="string">Transaction reference</attribute></xpath></field></record>
+  <record id="mvp_invoice_followup_search" model="ir.ui.view"><field name="name">campus.invoice.followup.search</field><field name="model">account.move</field><field name="arch" type="xml"><search><field name="name"/><field name="campus_student_id"/><field name="campus_course_id"/><field name="campus_year_id"/>
+    <filter name="unpaid" string="Outstanding" domain="[('state','=','posted'),('amount_residual','&gt;',0)]"/>
+    <filter name="overdue" string="Overdue" domain="[('state','=','posted'),('amount_residual','&gt;',0),('invoice_date_due','&lt;',context_today().strftime('%Y-%m-%d'))]"/>
+    <filter name="partial" string="Part-paid" domain="[('payment_state','=','partial')]"/>
+    <group string="Group by"><filter name="programme" string="Programme" context="{'group_by':'campus_course_id'}"/><filter name="year" string="Academic year" context="{'group_by':'campus_year_id'}"/><filter name="due" string="Due month" context="{'group_by':'invoice_date_due:month'}"/></group>
+  </search></field></record>
+  <record id="mvp_invoices" model="ir.actions.act_window"><field name="search_view_id" ref="mvp_invoice_followup_search"/></record>
+  <record id="mvp_overdue_invoices_tree" model="ir.ui.view">
+    <field name="name">campus.invoice.followup.tree</field><field name="model">account.move</field>
+    <field name="arch" type="xml"><tree create="False" delete="False">
+      <field name="name" string="Invoice"/><field name="campus_student_id" string="Student"/>
+      <field name="campus_course_id" string="Programme" optional="show"/><field name="campus_year_id" optional="hide"/>
+      <field name="invoice_date_due" string="Due date"/>
+      <field name="amount_total" string="Invoice total" sum="Invoice total"/>
+      <field name="amount_residual" string="Outstanding" sum="Outstanding"/>
+      <field name="currency_id" column_invisible="True"/>
+      <field name="payment_state" widget="badge" decoration-warning="payment_state == 'partial'" decoration-danger="payment_state == 'not_paid'"/>
+    </tree></field>
+  </record>
+  <record id="mvp_overdue_invoices" model="ir.actions.act_window"><field name="name">Overdue fee follow-up</field><field name="res_model">account.move</field><field name="view_mode">tree,form</field><field name="view_id" ref="mvp_overdue_invoices_tree"/><field name="domain">[('campus_student_id','!=',False),('move_type','=','out_invoice')]</field><field name="context">{'search_default_overdue': 1}</field><field name="search_view_id" ref="mvp_invoice_followup_search"/></record>
+
+  <template id="student_learning" inherit_id="ideastone_erp.student_academics">
+    <xpath expr="//section[@id='student_materials']" position="before"><section id="student_assignments" class="student_panel"><h2>Assignments &amp; faculty feedback</h2>
+      <p>Work allocated to your selected academic placement. Grades and feedback appear only when released by faculty.</p>
+      <article t-foreach="d['assignments']" t-as="work" class="student_record student_assignment" t-att-data-assignment="work['id']">
+        <h3 t-esc="work['name']"/><span class="student_chip" t-esc="work['status']"/><p><t t-esc="work['subject']"/> · <t t-esc="work['teacher']"/> · Due <t t-esc="work['due']"/></p><p t-esc="work['instructions']"/>
+        <p t-if="work['feedback']"><strong>Faculty feedback: </strong><t t-esc="work['feedback']"/></p><p t-if="work['marks'] is not None"><strong>Released grade: </strong><t t-esc="work['marks']"/> / <t t-esc="work['maximum']"/></p>
+        <p t-if="work['submitted']">Last submitted <t t-esc="work['submitted']"/></p><details t-if="work['description'] and not work['can_submit']"><summary>My submitted explanation</summary><p t-esc="work['description']"/></details><a t-if="work['file']" t-att-href="'/my/campus/student/download/assignment/%s' % work['submission_id']">Download my submitted file</a>
+        <form t-if="work['can_submit']" action="/my/campus/student/action" method="post" enctype="multipart/form-data"><t t-call="ideastone_erp.student_action_fields"/><input type="hidden" name="operation" value="assignment"/><input type="hidden" name="return_to" value="academics"/><input type="hidden" name="assignment_id" t-att-value="work['id']"/>
+          <label t-att-for="'coursework_' + str(work['id'])">Your work / explanation<textarea t-att-id="'coursework_' + str(work['id'])" name="description" class="form-control" required="required" maxlength="10000" rows="4" t-esc="work['description']"/></label>
+          <label t-att-for="'coursework_file_' + str(work['id'])">Supporting file (PDF, PNG, JPEG or text, up to 5 MB)<input t-att-id="'coursework_file_' + str(work['id'])" name="file" type="file" class="form-control" accept=".pdf,.png,.jpg,.jpeg,.txt"/></label><button type="submit" class="btn btn-primary">Submit my work</button>
+        </form><p t-if="work['late'] and not work['can_submit'] and work['state'] not in ['submit','accept']" class="student_warning">The deadline has passed. Contact faculty if a revision or extension is needed.</p>
+      </article><p t-if="not d['assignments']" class="student_empty">No published assignments are allocated to you in this placement.</p>
+    </section></xpath>
+  </template>
+  <template id="student_learning_navigation" inherit_id="ideastone_erp.student_workspace"><xpath expr="//a[@href='#student_materials']" position="before"><a href="#student_assignments">Assignments &amp; feedback</a></xpath></template>
+  <template id="parent_learning_feedback" inherit_id="ideastone_erp.parent_learning"><xpath expr="//p[@t-esc=&quot;h['instructions']&quot;]" position="after"><p t-if="h['feedback']"><strong>Released faculty feedback: </strong><t t-esc="h['feedback']"/></p><p t-if="h['score'] is not None"><strong>Released grade: </strong><t t-esc="h['score']"/> / <t t-esc="h['maximum']"/></p></xpath></template>
+</odoo>
