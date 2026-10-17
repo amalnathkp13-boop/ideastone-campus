@@ -22,7 +22,7 @@ if (!out || !process.env.FACULTY_QA_PASSWORD) throw Error('Disposable QA configu
         await page.getByRole('heading', {name:'Welcome back, QA Faculty'}).waitFor();
         await page.screenshot({path:path.join(out,'faculty-overview-1440.png')});
         await page.locator('.campus_sidebar').getByRole('button',{name:'My task list',exact:true}).click();
-        await page.getByRole('heading',{name:'My task list',exact:true}).waitFor();
+        await page.getByRole('heading',{name:'My task list',exact:true,level:1}).waitFor();
         await page.screenshot({path:path.join(out,'faculty-module-1440.png')});
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My tasks & e-diary',exact:true}).click();
         await page.locator('.o_list_button_add').click();

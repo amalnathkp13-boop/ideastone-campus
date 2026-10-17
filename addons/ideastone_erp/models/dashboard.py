@@ -68,7 +68,7 @@ class Dashboard(models.AbstractModel):
                 item["group"] = "Mentorship & student support"
             if admin or item["allowed"]:
                 visible.append(item)
-        faculty = self.env["op.faculty"].search([("user_id", "=", self.env.uid)], limit=1) if self.env["op.faculty"].check_access_rights("read", raise_exception=False) else self.env["op.faculty"]
+        faculty = self.env["op.faculty"].search([("user_id", "=", self.env.uid), "|", ("company_id", "=", False), ("company_id", "=", self.env.company.id)], limit=1) if self.env["op.faculty"].check_access_rights("read", raise_exception=False) else self.env["op.faculty"]
         stats = []
         if admin:
             for label, model, domain in [
@@ -108,8 +108,19 @@ class Dashboard(models.AbstractModel):
             queues.append({"label": "Faculty role requests", "count": count, "detail": "Appointments awaiting independent approval", "action": "ideastone_erp.action_responsibilities"})
         quick = [x for x in visible if x["allowed"] and x["label"] in ("Admissions", "Class attendance", "Timetable", "Fee invoices", "Mentor counseling", "Lesson plans")][:4]
         faculty_modules = self._faculty_modules(visible, faculty, pages) if faculty and not admin and self.env.user.has_group("openeducat_core.group_op_faculty") else []
-        faculty_tasks, faculty_schedule = [], []
+        faculty_tasks, faculty_schedule, faculty_surveys = [], [], []
         if faculty_modules:
+            # Survey participation uses Odoo's token-checked website workflow. This
+            # bounded projection exposes only invitations addressed to this account;
+            # faculty do not receive survey design or other respondents' ACLs.
+            invitations = self.env["survey.user_input"].sudo().search([
+                ("partner_id", "=", self.env.user.partner_id.id), ("test_entry", "=", False),
+            ], limit=30)
+            faculty_surveys = [{"id": invitation.id, "name": invitation.survey_id.title,
+                "state": invitation.state, "deadline": str(invitation.deadline or ""),
+                "expired": bool(invitation.deadline and invitation.deadline < fields.Datetime.now()),
+                "url": invitation.get_print_url() if invitation.state == "done" else invitation.get_start_url(),
+            } for invitation in invitations]
             tasks = self.env["campus.faculty.task"].search([("state", "in", ["planned", "progress"])], limit=5)
             faculty_tasks = [{"id": task.id, "name": task.name, "due": str(task.deadline), "state": task.state} for task in tasks]
             if self.env["op.session"].check_access_rights("read", raise_exception=False):
@@ -122,7 +133,7 @@ class Dashboard(models.AbstractModel):
                       {"label": "Activities", "value": self.env["campus.faculty.activity"].search_count([]), "detail": "Your clubs, SDP and training"}]
         return {"company": self.env.company.name, "user": self.env.user.name,
                 "faculty_modules": faculty_modules,
-                "faculty_tasks": faculty_tasks, "faculty_schedule": faculty_schedule,
+                "faculty_tasks": faculty_tasks, "faculty_schedule": faculty_schedule, "faculty_surveys": faculty_surveys,
                 "navigation": visible, "stats": stats, "pages": pages, "queues": queues, "quick": quick,
                 "is_admin": admin, "workspace_role": "College administrator" if admin else "Faculty" if faculty else "Staff",
                 "today": fields.Date.to_string(fields.Date.context_today(self)), "library_allowed": library,
@@ -195,6 +206,7 @@ class Dashboard(models.AbstractModel):
             elif key == "help":
                 items = [{"label": "Faculty guide", "page": "help"}]
             if key == "teaching":
+                items.append({"label": "Survey direct", "page": "surveys"})
                 tools = [("assigned_students", "My assigned students", "op.student"),
                          ("subject_attendance", "Subject-wise attendance", "op.attendance.sheet"),
                          ("alternate", "Alternate hour", "campus.service.request"),
@@ -217,7 +229,7 @@ class Dashboard(models.AbstractModel):
 
     @api.model
     def get_faculty_action(self, tool):
-        faculty = self.env["op.faculty"].search([("user_id", "=", self.env.uid)], limit=1)
+        faculty = self.env["op.faculty"].search([("user_id", "=", self.env.uid), "|", ("company_id", "=", False), ("company_id", "=", self.env.company.id)], limit=1)
         if not faculty or not self.env.user.has_group("openeducat_core.group_op_faculty"):
             raise AccessError(_("A linked faculty account is required."))
         specs = {

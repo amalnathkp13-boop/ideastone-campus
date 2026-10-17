@@ -1,61 +1,162 @@
 <odoo>
   <record id="view_student_education_tree" model="ir.ui.view">
-    <field name="name">campus.student.education.tree</field><field name="model">campus.student.education</field>
-    <field name="arch" type="xml"><tree><field name="student_id"/><field name="qualification"/><field name="institution"/><field name="board"/><field name="completion_year"/><field name="percentage"/></tree></field>
+    <field name="name">campus.student.education.tree</field>
+    <field name="model">campus.student.education</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="student_id"/>
+        <field name="qualification"/>
+        <field name="institution"/>
+        <field name="board"/>
+        <field name="completion_year"/>
+        <field name="percentage"/>
+      </tree>
+    </field>
   </record>
   <record id="view_student_education_form" model="ir.ui.view">
-    <field name="name">campus.student.education.form</field><field name="model">campus.student.education</field>
-    <field name="arch" type="xml"><form><sheet>
-      <div class="alert alert-info">Faculty-maintained previous academic information for assigned students. Attach source evidence; this does not change an issued marksheet.</div>
-      <h1><field name="name" placeholder="Academic record title"/></h1>
-      <group><group><field name="student_id" options="{'no_create':True}"/><field name="qualification"/><field name="institution"/><field name="board"/><field name="completion_year"/></group>
-      <group><field name="score"/><field name="maximum"/><field name="percentage"/><field name="date"/><field name="deadline"/><field name="company_id" readonly="True" groups="base.group_multi_company"/></group></group>
-      <field name="filename" invisible="True"/><field name="document" filename="filename"/><field name="notes"/>
-    </sheet></form></field>
+    <field name="name">campus.student.education.form</field>
+    <field name="model">campus.student.education</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <div class="alert alert-info">Faculty-maintained previous academic information for assigned students. Attach source evidence; this does not change an issued marksheet.</div>
+          <h1>
+            <field name="name" placeholder="Academic record title"/>
+          </h1>
+          <group>
+            <group>
+              <field name="student_id" options="{'no_create':True}"/>
+              <field name="qualification"/>
+              <field name="institution"/>
+              <field name="board"/>
+              <field name="completion_year"/>
+            </group>
+            <group>
+              <field name="score"/>
+              <field name="maximum"/>
+              <field name="percentage"/>
+              <field name="date"/>
+              <field name="deadline"/>
+              <field name="company_id" readonly="True" groups="base.group_multi_company"/>
+            </group>
+          </group>
+          <field name="filename" invisible="True"/>
+          <field name="document" filename="filename"/>
+          <field name="notes"/>
+        </sheet>
+      </form>
+    </field>
   </record>
   <record id="view_exam_category" model="ir.ui.view">
-    <field name="name">op.exam.campus.category</field><field name="model">op.exam</field><field name="inherit_id" ref="openeducat_exam.view_op_exam_form"/>
-    <field name="arch" type="xml"><xpath expr="//field[@name='subject_id']" position="after"><field name="campus_exam_kind"/></xpath></field>
+    <field name="name">op.exam.campus.category</field>
+    <field name="model">op.exam</field>
+    <field name="inherit_id" ref="openeducat_exam.view_op_exam_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='subject_id']" position="after">
+        <field name="campus_exam_kind"/>
+      </xpath>
+    </field>
   </record>
   <record id="view_service_complaint" model="ir.ui.view">
-    <field name="name">campus.service.student.complaint</field><field name="model">campus.service.request</field><field name="inherit_id" ref="view_service_request_form"/>
-    <field name="arch" type="xml"><xpath expr="//field[@name='student_id']" position="after"><field name="complaint_category" invisible="kind != 'student_complaint'" required="kind == 'student_complaint'" readonly="state in ('approved','done')"/></xpath></field>
+    <field name="name">campus.service.student.complaint</field>
+    <field name="model">campus.service.request</field>
+    <field name="inherit_id" ref="view_service_request_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='student_id']" position="after">
+        <field name="complaint_category" invisible="kind != 'student_complaint'" required="kind == 'student_complaint'" readonly="state in ('approved','done')"/>
+      </xpath>
+    </field>
   </record>
   <record id="view_teaching_review" model="ir.ui.view">
-    <field name="name">campus.teaching.plan.review</field><field name="model">campus.teaching.plan</field><field name="inherit_id" ref="view_teaching_plan_form"/>
+    <field name="name">campus.teaching.plan.review</field>
+    <field name="model">campus.teaching.plan</field>
+    <field name="inherit_id" ref="view_teaching_plan_form"/>
     <field name="arch" type="xml">
       <xpath expr="//header" position="inside">
         <button name="action_submit_review" type="object" string="Submit for review" invisible="review_state not in ('draft','rejected')"/>
-        <button name="action_approve_review" type="object" string="Approve notes of lesson" groups="ideastone_erp.group_academic,ideastone_erp.group_manager" invisible="review_state != 'submitted'"/>
-        <button name="action_return_review" type="object" string="Return for revision" groups="ideastone_erp.group_academic,ideastone_erp.group_manager" invisible="review_state != 'submitted'"/>
+        <button name="action_approve_review" type="object" string="Approve notes of lesson" invisible="not can_review"/>
+        <button name="action_return_review" type="object" string="Return for revision" invisible="not can_review"/>
         <field name="review_state" widget="statusbar"/>
       </xpath>
-      <xpath expr="//sheet" position="inside"><group string="Academic review"><field name="review_reason"/><field name="reviewed_by"/><field name="reviewed_on"/></group></xpath>
-      <xpath expr="//field[@name='faculty_id']" position="attributes"><attribute name="readonly">review_state in ('submitted','approved')</attribute></xpath>
-      <xpath expr="//field[@name='subject_id']" position="attributes"><attribute name="readonly">review_state in ('submitted','approved')</attribute></xpath>
-      <xpath expr="//field[@name='batch_id']" position="attributes"><attribute name="readonly">review_state in ('submitted','approved')</attribute></xpath>
-      <xpath expr="//field[@name='term_id']" position="attributes"><attribute name="readonly">review_state in ('submitted','approved')</attribute></xpath>
-      <xpath expr="//field[@name='planned_date']" position="attributes"><attribute name="readonly">review_state in ('submitted','approved')</attribute></xpath>
-      <xpath expr="//field[@name='unit']" position="attributes"><attribute name="readonly">review_state in ('submitted','approved')</attribute></xpath>
-      <xpath expr="//field[@name='topic']" position="attributes"><attribute name="readonly">review_state in ('submitted','approved')</attribute></xpath>
-      <xpath expr="//field[@name='planned_hours']" position="attributes"><attribute name="readonly">review_state in ('submitted','approved')</attribute></xpath>
+      <xpath expr="//sheet" position="inside">
+        <field name="can_review" invisible="True"/>
+        <group string="Academic review">
+          <field name="review_reason" readonly="not can_review"/>
+          <field name="reviewed_by"/>
+          <field name="reviewed_on"/>
+        </group>
+      </xpath>
+      <xpath expr="//field[@name='faculty_id']" position="attributes">
+        <attribute name="readonly">review_state in ('submitted','approved')</attribute>
+      </xpath>
+      <xpath expr="//field[@name='subject_id']" position="attributes">
+        <attribute name="readonly">review_state in ('submitted','approved')</attribute>
+      </xpath>
+      <xpath expr="//field[@name='batch_id']" position="attributes">
+        <attribute name="readonly">review_state in ('submitted','approved')</attribute>
+      </xpath>
+      <xpath expr="//field[@name='term_id']" position="attributes">
+        <attribute name="readonly">review_state in ('submitted','approved')</attribute>
+      </xpath>
+      <xpath expr="//field[@name='planned_date']" position="attributes">
+        <attribute name="readonly">review_state in ('submitted','approved')</attribute>
+      </xpath>
+      <xpath expr="//field[@name='unit']" position="attributes">
+        <attribute name="readonly">review_state in ('submitted','approved')</attribute>
+      </xpath>
+      <xpath expr="//field[@name='topic']" position="attributes">
+        <attribute name="readonly">review_state in ('submitted','approved')</attribute>
+      </xpath>
+      <xpath expr="//field[@name='planned_hours']" position="attributes">
+        <attribute name="readonly">review_state in ('submitted','approved')</attribute>
+      </xpath>
     </field>
   </record>
   <record id="view_faculty_payroll_buttons" model="ir.ui.view">
-    <field name="name">campus.payslip.operator.buttons</field><field name="model">campus.payslip</field><field name="inherit_id" ref="view_payslip_form"/>
-    <field name="arch" type="xml"><xpath expr="//button[@name='action_submit']" position="attributes"><attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute></xpath>
-<xpath expr="//button[@name='action_approve']" position="attributes"><attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute></xpath>
-<xpath expr="//button[@name='action_done']" position="attributes"><attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute></xpath>
-<xpath expr="//button[@name='action_cancel']" position="attributes"><attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute></xpath>
-<xpath expr="//button[@name='action_reset']" position="attributes"><attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute></xpath>
-<xpath expr="//button[@name='action_compute']" position="attributes"><attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute></xpath></field>
+    <field name="name">campus.payslip.operator.buttons</field>
+    <field name="model">campus.payslip</field>
+    <field name="inherit_id" ref="view_payslip_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//button[@name='action_submit']" position="attributes">
+        <attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_approve']" position="attributes">
+        <attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_done']" position="attributes">
+        <attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_cancel']" position="attributes">
+        <attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_reset']" position="attributes">
+        <attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_compute']" position="attributes">
+        <attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute>
+      </xpath>
+    </field>
   </record>
   <record id="view_faculty_salary_buttons" model="ir.ui.view">
-    <field name="name">campus.salary.operator.buttons</field><field name="model">campus.salary.agreement</field><field name="inherit_id" ref="view_salary_agreement_form"/>
-    <field name="arch" type="xml"><xpath expr="//button[@name='action_submit']" position="attributes"><attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute></xpath>
-<xpath expr="//button[@name='action_approve']" position="attributes"><attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute></xpath>
-<xpath expr="//button[@name='action_done']" position="attributes"><attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute></xpath>
-<xpath expr="//button[@name='action_cancel']" position="attributes"><attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute></xpath>
-<xpath expr="//button[@name='action_reset']" position="attributes"><attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute></xpath></field>
+    <field name="name">campus.salary.operator.buttons</field>
+    <field name="model">campus.salary.agreement</field>
+    <field name="inherit_id" ref="view_salary_agreement_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//button[@name='action_submit']" position="attributes">
+        <attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_approve']" position="attributes">
+        <attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_done']" position="attributes">
+        <attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_cancel']" position="attributes">
+        <attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute>
+      </xpath>
+      <xpath expr="//button[@name='action_reset']" position="attributes">
+        <attribute name="groups">ideastone_erp.group_people,ideastone_erp.group_manager</attribute>
+      </xpath>
+    </field>
   </record>
 </odoo>

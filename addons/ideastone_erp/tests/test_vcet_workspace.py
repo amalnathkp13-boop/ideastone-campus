@@ -287,6 +287,15 @@ class TestVcetWorkspace(TransactionCase):
         with self.assertRaises(ValidationError), self.cr.savepoint():
             model.with_user(self.other_teacher).create(vals)
 
+    def test_survey_invitations_are_projected_only_for_recipient(self):
+        survey = self.env["survey.survey"].create({"title": "QA staff survey", "access_mode": "token"})
+        own = self.env["survey.user_input"].create({"survey_id": survey.id, "partner_id": self.teacher.partner_id.id})
+        foreign = self.env["survey.user_input"].create({"survey_id": survey.id, "partner_id": self.other_teacher.partner_id.id})
+        invitations = self.env["campus.dashboard"].with_user(self.teacher).get_overview()["faculty_surveys"]
+        self.assertIn(own.id, [row["id"] for row in invitations])
+        self.assertNotIn(foreign.id, [row["id"] for row in invitations])
+        self.assertIn(own.access_token, next(row["url"] for row in invitations if row["id"] == own.id))
+
     def test_lesson_review_is_independent_and_preserves_delivery(self):
         batch, subject = self.faculty_class_fixture()
         term = self.env["op.academic.term"].search([], limit=1)
@@ -309,18 +318,31 @@ class TestVcetWorkspace(TransactionCase):
             plan.write({"reviewed_by": self.teacher.id})
         with self.assertRaises(ValidationError):
             plan.unlink()
+        returned = plan.copy({"name": "QA return and revise"})
+        returned.action_submit_review()
+        with self.assertRaises(ValidationError):
+            returned.with_user(reviewer).action_return_review()
+        returned.with_user(reviewer).write({"review_reason": "Add learning outcomes"})
+        returned.with_user(reviewer).action_return_review()
+        returned.write({"topic": "Revised with outcomes"})
+        returned.action_submit_review()
+        returned.with_user(reviewer).action_approve_review()
+        self.assertEqual(returned.review_state, "approved")
+        with self.assertRaises(AccessError):
+            returned.write({"review_reason": "Erased"})
 
     def test_personal_payroll_is_read_only_and_own_only(self):
+        payroll = new_test_user(self.env, login="qa_faculty_payroll_operator", groups="ideastone_erp.group_manager")
         employee = self.env["hr.employee"].create({"name": "QA payroll faculty", "user_id": self.teacher.id})
         agreement = self.env["campus.salary.agreement"].create({"name": "QA pay agreement", "employee_id": employee.id,
                      "date_from": "2035-01-01", "basic": 1000})
-        agreement.action_submit()
-        agreement.action_approve()
+        agreement.with_user(payroll).action_submit()
+        agreement.with_user(payroll).action_approve()
         slip = self.env["campus.payslip"].create({"name": "QA own payslip", "agreement_id": agreement.id,
                     "date_from": "2035-01-01", "date_to": "2035-01-31", "working_days": 20})
-        slip.action_compute()
-        slip.action_submit()
-        slip.action_approve()
+        slip.with_user(payroll).action_compute()
+        slip.with_user(payroll).action_submit()
+        slip.with_user(payroll).action_approve()
         self.assertEqual(slip.with_user(self.teacher).read(["name"])[0]["name"], slip.name)
         with self.assertRaises(AccessError):
             slip.with_user(self.other_teacher).read(["net"])

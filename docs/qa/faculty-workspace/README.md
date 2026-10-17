@@ -15,6 +15,7 @@ The source is the VCET staff screenshot folder in `docs/erp-reference-register.c
 | Internal / additional internal / practical external marks | Separate assessment kinds; explicit academic year, semester, output maximum and weighted score components; completed calculations must be reopened to edit |
 | Exam certificates, question papers, answer keys | Separate searchable document kinds; binary uploads and subject/exam references; personal faculty ownership |
 | Club function / attendance, SDP function / attendance, VAC / placement training | Date range, batch, level, venue, notes/evidence and unique enrolled participants with FN/AN attendance |
+| Survey direct | Only invitations addressed to the signed-in faculty account; open/resume and view completed responses using Odoo's existing survey submission workflow |
 | Online student leave | College-managed advisor/HOD/optional principal routing, staged review, rejection reason and immutable decision history |
 | Register complaint on student | Student, complaint category, description and evidence through existing service-request resolution workflow |
 | Previous academic information | Faculty-maintained assigned-student qualification, institution, board, year, marks/maximum, calculated percentage and source attachment |

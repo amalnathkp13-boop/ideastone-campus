@@ -32,6 +32,14 @@ class TeachingPlan(models.Model):
     review_reason = fields.Text()
     reviewed_by = fields.Many2one("res.users", readonly=True, copy=False)
     reviewed_on = fields.Datetime(readonly=True, copy=False)
+    can_review = fields.Boolean(compute="_compute_can_review")
+
+    @api.depends("review_state", "faculty_id")
+    @api.depends_context("uid")
+    def _compute_can_review(self):
+        reviewer = self.env.user.has_group("ideastone_erp.group_academic") or self.env.user.has_group("ideastone_erp.group_manager")
+        for rec in self:
+            rec.can_review = reviewer and rec.review_state == "submitted" and rec.faculty_id.user_id != self.env.user
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -43,6 +51,8 @@ class TeachingPlan(models.Model):
         if {"reviewed_by", "reviewed_on"} & vals.keys():
             raise AccessError(_("Lesson review evidence is maintained by the workflow."))
         self._lock()
+        if "review_reason" in vals and any(not rec.can_review for rec in self):
+            raise AccessError(_("Only an independent reviewer can enter a reason while the plan awaits review."))
         if "review_state" in vals:
             if set(vals) != {"review_state"}:
                 raise ValidationError(_("Save the lesson details before changing review status."))
@@ -80,7 +90,7 @@ class TeachingPlan(models.Model):
         return self.write({"review_state": "rejected"})
 
     def unlink(self):
-        if any(rec.review_state in {"submitted", "approved"} for rec in self):
+        if any(rec.review_state != "draft" for rec in self):
             raise ValidationError(_("Keep submitted lesson plans for their review history."))
         return super().unlink()
 

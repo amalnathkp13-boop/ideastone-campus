@@ -1,18 +1,183 @@
 <odoo>
-  <record id="view_faculty_activity_tree" model="ir.ui.view"><field name="name">campus.faculty.activity.tree</field><field name="model">campus.faculty.activity</field><field name="arch" type="xml"><tree><field name="name"/><field name="kind"/><field name="batch_id"/><field name="date"/><field name="deadline"/><field name="venue"/><field name="state" widget="badge"/></tree></field></record>
-  <record id="view_faculty_activity_form" model="ir.ui.view"><field name="name">campus.faculty.activity.form</field><field name="model">campus.faculty.activity</field><field name="arch" type="xml"><form><header><field name="state" widget="statusbar" options="{'clickable':True}"/></header><sheet>
-    <h1><field name="name" placeholder="Activity or function name"/></h1><group><group><field name="kind"/><field name="batch_id"/><field name="level"/><field name="venue"/></group><group><field name="date" string="From date"/><field name="deadline" string="To date"/><field name="user_id"/><field name="company_id" readonly="True" groups="base.group_multi_company"/></group></group>
-    <notebook><page string="Participants &amp; attendance"><field name="attendance_ids"><tree editable="bottom"><field name="student_id" options="{'no_create':True}"/><field name="forenoon"/><field name="afternoon"/><field name="remarks"/></tree></field></page><page string="Notes &amp; evidence"><field name="notes"/><field name="filename" invisible="True"/><field name="document" filename="filename"/></page></notebook>
-  </sheet></form></field></record>
-  <record id="view_faculty_document_tree" model="ir.ui.view"><field name="name">campus.faculty.document.tree</field><field name="model">campus.faculty.document</field><field name="arch" type="xml"><tree><field name="name"/><field name="kind"/><field name="subject_id"/><field name="exam_id"/><field name="date"/><field name="filename"/><field name="state" widget="badge"/></tree></field></record>
-  <record id="view_faculty_document_form" model="ir.ui.view"><field name="name">campus.faculty.document.form</field><field name="model">campus.faculty.document</field><field name="arch" type="xml"><form><sheet><h1><field name="name" placeholder="Document title"/></h1><group><group><field name="kind"/><field name="subject_id" options="{'no_create':True}"/><field name="exam_id" options="{'no_create':True}"/></group><group><field name="date"/><field name="deadline"/><field name="state"/><field name="company_id" readonly="True" groups="base.group_multi_company"/></group></group><field name="filename" invisible="True"/><field name="document" filename="filename"/><field name="notes"/></sheet></form></field></record>
-  <record id="view_faculty_assessment_tree" model="ir.ui.view"><field name="name">campus.faculty.assessment.tree</field><field name="model">campus.faculty.assessment</field><field name="arch" type="xml"><tree><field name="name"/><field name="student_id"/><field name="subject_id"/><field name="output_maximum"/><field name="weight_total"/><field name="total"/><field name="state" widget="badge"/></tree></field></record>
-  <record id="view_faculty_assessment_form" model="ir.ui.view"><field name="name">campus.faculty.assessment.form</field><field name="model">campus.faculty.assessment</field><field name="arch" type="xml"><form><header><field name="state" widget="statusbar" options="{'clickable':True}"/></header><sheet>
-    <div class="alert alert-info">Draft internal assessment. Set the college's component weights and maximum; completion requires weights totaling 100%. Official examination results are published separately.</div><h1><field name="name" placeholder="Assessment title"/></h1>
-    <group><group><field name="kind"/><field name="academic_year"/><field name="semester"/><field name="student_id" options="{'no_create':True}"/><field name="subject_id" options="{'no_create':True}"/><field name="date"/><field name="deadline"/></group><group><field name="output_maximum"/><field name="weight_total"/><field name="total"/><field name="company_id" readonly="True" groups="base.group_multi_company"/></group></group>
-    <field name="component_ids"><tree editable="bottom"><field name="name"/><field name="score"/><field name="maximum"/><field name="weight" sum="Total weight"/></tree></field><field name="notes" placeholder="Source marks, academic term and calculation notes…"/>
-  </sheet></form></field></record>
-  <record id="action_faculty_activity" model="ir.actions.act_window"><field name="name">Club, SDP &amp; placement activities</field><field name="res_model">campus.faculty.activity</field><field name="view_mode">tree,form</field><field name="context">{'default_kind':'club'}</field></record>
-  <record id="action_faculty_document" model="ir.actions.act_window"><field name="name">Exam certificates, papers &amp; answer keys</field><field name="res_model">campus.faculty.document</field><field name="view_mode">tree,form</field><field name="context">{'default_kind':'certificate'}</field></record>
-  <record id="action_faculty_assessment" model="ir.actions.act_window"><field name="name">Internal mark calculation</field><field name="res_model">campus.faculty.assessment</field><field name="view_mode">tree,form</field></record>
+  <record id="view_faculty_activity_tree" model="ir.ui.view">
+    <field name="name">campus.faculty.activity.tree</field>
+    <field name="model">campus.faculty.activity</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name"/>
+        <field name="kind"/>
+        <field name="batch_id"/>
+        <field name="date"/>
+        <field name="deadline"/>
+        <field name="venue"/>
+        <field name="state" widget="badge"/>
+      </tree>
+    </field>
+  </record>
+  <record id="view_faculty_activity_form" model="ir.ui.view">
+    <field name="name">campus.faculty.activity.form</field>
+    <field name="model">campus.faculty.activity</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <field name="state" widget="statusbar" options="{'clickable':True}"/>
+        </header>
+        <sheet>
+          <h1>
+            <field name="name" placeholder="Activity or function name"/>
+          </h1>
+          <group>
+            <group>
+              <field name="kind"/>
+              <field name="batch_id"/>
+              <field name="level"/>
+              <field name="venue"/>
+            </group>
+            <group>
+              <field name="date" string="From date"/>
+              <field name="deadline" string="To date"/>
+              <field name="user_id"/>
+              <field name="company_id" readonly="True" groups="base.group_multi_company"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Participants &amp; attendance">
+              <field name="attendance_ids">
+                <tree editable="bottom">
+                  <field name="student_id" options="{'no_create':True}"/>
+                  <field name="forenoon"/>
+                  <field name="afternoon"/>
+                  <field name="remarks"/>
+                </tree>
+              </field>
+            </page>
+            <page string="Notes &amp; evidence">
+              <field name="notes"/>
+              <field name="filename" invisible="True"/>
+              <field name="document" filename="filename"/>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="view_faculty_document_tree" model="ir.ui.view">
+    <field name="name">campus.faculty.document.tree</field>
+    <field name="model">campus.faculty.document</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name"/>
+        <field name="kind"/>
+        <field name="subject_id"/>
+        <field name="exam_id"/>
+        <field name="date"/>
+        <field name="filename"/>
+        <field name="state" widget="badge"/>
+      </tree>
+    </field>
+  </record>
+  <record id="view_faculty_document_form" model="ir.ui.view">
+    <field name="name">campus.faculty.document.form</field>
+    <field name="model">campus.faculty.document</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <h1>
+            <field name="name" placeholder="Document title"/>
+          </h1>
+          <group>
+            <group>
+              <field name="kind"/>
+              <field name="subject_id" options="{'no_create':True}"/>
+              <field name="exam_id" options="{'no_create':True}"/>
+            </group>
+            <group>
+              <field name="date"/>
+              <field name="deadline"/>
+              <field name="state"/>
+              <field name="company_id" readonly="True" groups="base.group_multi_company"/>
+            </group>
+          </group>
+          <field name="filename" invisible="True"/>
+          <field name="document" filename="filename"/>
+          <field name="notes"/>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="view_faculty_assessment_tree" model="ir.ui.view">
+    <field name="name">campus.faculty.assessment.tree</field>
+    <field name="model">campus.faculty.assessment</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name"/>
+        <field name="student_id"/>
+        <field name="subject_id"/>
+        <field name="output_maximum"/>
+        <field name="weight_total"/>
+        <field name="total"/>
+        <field name="state" widget="badge"/>
+      </tree>
+    </field>
+  </record>
+  <record id="view_faculty_assessment_form" model="ir.ui.view">
+    <field name="name">campus.faculty.assessment.form</field>
+    <field name="model">campus.faculty.assessment</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <field name="state" widget="statusbar" options="{'clickable':True}"/>
+        </header>
+        <sheet>
+          <div class="alert alert-info">Draft internal assessment. Set the college's component weights and maximum; completion requires weights totaling 100%. Official examination results are published separately.</div>
+          <h1>
+            <field name="name" placeholder="Assessment title"/>
+          </h1>
+          <group>
+            <group>
+              <field name="kind"/>
+              <field name="academic_year"/>
+              <field name="semester"/>
+              <field name="student_id" options="{'no_create':True}"/>
+              <field name="subject_id" options="{'no_create':True}"/>
+              <field name="date"/>
+              <field name="deadline"/>
+            </group>
+            <group>
+              <field name="output_maximum"/>
+              <field name="weight_total"/>
+              <field name="total"/>
+              <field name="company_id" readonly="True" groups="base.group_multi_company"/>
+            </group>
+          </group>
+          <field name="component_ids">
+            <tree editable="bottom">
+              <field name="name"/>
+              <field name="score"/>
+              <field name="maximum"/>
+              <field name="weight" sum="Total weight"/>
+            </tree>
+          </field>
+          <field name="notes" placeholder="Source marks, academic term and calculation notes…"/>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="action_faculty_activity" model="ir.actions.act_window">
+    <field name="name">Club, SDP &amp; placement activities</field>
+    <field name="res_model">campus.faculty.activity</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{'default_kind':'club'}</field>
+  </record>
+  <record id="action_faculty_document" model="ir.actions.act_window">
+    <field name="name">Exam certificates, papers &amp; answer keys</field>
+    <field name="res_model">campus.faculty.document</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{'default_kind':'certificate'}</field>
+  </record>
+  <record id="action_faculty_assessment" model="ir.actions.act_window">
+    <field name="name">Internal mark calculation</field>
+    <field name="res_model">campus.faculty.assessment</field>
+    <field name="view_mode">tree,form</field>
+  </record>
 </odoo>
