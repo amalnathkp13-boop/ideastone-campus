@@ -13,6 +13,7 @@ class Session(models.Model):
     _inherit = ["op.session", "campus.mvp.mixin"]
     _name = "op.session"
 
+    company_id = fields.Many2one(default=lambda self: self.env.company)
     campus_year_id = fields.Many2one(related="batch_id.campus_year_id", store=True, index=True)
 
     @api.constrains("start_datetime", "end_datetime", "faculty_id", "batch_id", "classroom_id", "state", "active")

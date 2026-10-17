@@ -23,6 +23,7 @@ class AcademicYear(models.Model):
     _inherit = ["op.academic.year", "campus.mvp.mixin"]
     _name = "op.academic.year"
 
+    company_id = fields.Many2one(default=lambda self: self.env.company)
     code = fields.Char(index=True)
     campus_current = fields.Boolean(string="Current academic year")
     active = fields.Boolean(default=True)
@@ -67,6 +68,7 @@ class Programme(models.Model):
 class AcademicTerm(models.Model):
     _inherit = "op.academic.term"
 
+    company_id = fields.Many2one(default=lambda self: self.env.company)
     campus_sequence = fields.Integer(string="Semester / year number", default=1)
     campus_course_id = fields.Many2one("op.course", string="Programme")
 

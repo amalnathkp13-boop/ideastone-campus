@@ -13,6 +13,7 @@ STAGES = [
 class AdmissionRegister(models.Model):
     _inherit = "op.admission.register"
 
+    company_id = fields.Many2one(default=lambda self: self.env.company)
     min_count = fields.Integer(default=1)
 
 
@@ -127,6 +128,7 @@ class Admission(models.Model):
     _inherit = ["op.admission", "campus.mvp.mixin"]
     _name = "op.admission"
 
+    company_id = fields.Many2one(default=lambda self: self.env.company)
     campus_managed = fields.Boolean(default=False, copy=False)
     campus_stage = fields.Selection(STAGES, default="started", required=True, readonly=True, tracking=True, copy=False)
     campus_lead_id = fields.Many2one("crm.lead", string="Source enquiry", ondelete="restrict")

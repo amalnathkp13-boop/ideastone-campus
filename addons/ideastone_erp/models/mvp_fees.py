@@ -15,6 +15,7 @@ class FeeHead(models.Model):
 class FeeStructure(models.Model):
     _inherit = "op.fees.terms"
 
+    company_id = fields.Many2one(default=lambda self: self.env.company)
     campus_course_id = fields.Many2one("op.course", string="Programme")
     campus_year_id = fields.Many2one("op.academic.year", string="Academic year")
     campus_term_id = fields.Many2one("op.academic.term", string="Semester (optional)")
@@ -90,6 +91,8 @@ class StudentFee(models.Model):
     _inherit = ["op.student.fees.details", "campus.mvp.mixin"]
     _name = "op.student.fees.details"
 
+    company_id = fields.Many2one(default=lambda self: self.env.company)
+    currency_id = fields.Many2one(default=lambda self: self.env.company.currency_id)
     campus_managed = fields.Boolean(default=False)
     campus_year_id = fields.Many2one("op.academic.year", string="Academic year")
     campus_concession = fields.Monetary(string="Proposed concession", currency_field="currency_id")
