@@ -281,6 +281,10 @@ class Dashboard(models.AbstractModel):
         if tool in {"assigned_students", "report_students", "report_photos"}:
             batches = self.env["op.session"].search([("faculty_id", "=", faculty.id), ("company_id", "=", self.env.company.id)]).batch_id
             domain += [("course_detail_ids.batch_id", "in", batches.ids)]
+        if model in {"op.exam", "op.result.line"}:
+            batches = self.env["op.session"].search([("faculty_id", "=", faculty.id), ("company_id", "=", self.env.company.id)]).batch_id
+            prefix = "exam_id." if model == "op.result.line" else ""
+            domain += [(prefix + "responsible_id", "in", faculty.ids), (prefix + "batch_id", "in", batches.ids)]
         views = [(False, "tree"), (False, "form")]
         if tool == "report_photos":
             views.insert(0, (self.env.ref("openeducat_core.kanban_view_student").id, "kanban"))

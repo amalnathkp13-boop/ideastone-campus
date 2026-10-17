@@ -289,6 +289,27 @@ class TestVcetWorkspace(TransactionCase):
         with self.assertRaises(AccessError):
             session.with_user(self.teacher).write({"state": "confirm"})
 
+    def test_examination_reports_keep_category_and_allocation_scope(self):
+        batch, subject = self.faculty_class_fixture()
+        kind = self.env["op.exam.type"].create({"name": "QA faculty examination", "code": "FACQA"})
+        session = self.env["op.exam.session"].create({"name": "QA faculty session", "course_id": batch.course_id.id,
+            "batch_id": batch.id, "exam_code": "FACQA", "start_date": "2035-01-01", "end_date": "2035-01-31", "exam_type": kind.id})
+        exam = self.env["op.exam"].create({"name": "QA university exam", "session_id": session.id, "subject_id": subject.id,
+            "exam_code": "FACQA", "start_time": "2035-01-02 10:00:00", "end_time": "2035-01-02 11:00:00",
+            "total_marks": 100, "min_marks": 40, "responsible_id": [(6, 0, self.faculty.ids)], "campus_exam_kind": "university"})
+        own = self.env["op.result.line"].create({"exam_id": exam.id, "student_id": self.student.id, "marks": 75})
+        foreign_exam = exam.copy({"exam_code": "FACQA-OTHER", "responsible_id": [(5, 0, 0)]})
+        foreign = self.env["op.result.line"].create({"exam_id": foreign_exam.id, "student_id": self.student.id, "marks": 90})
+        dashboard = self.env["campus.dashboard"].with_user(self.teacher)
+        action = dashboard.get_faculty_action("report_university")
+        results = self.env["op.result.line"].with_user(self.teacher).search(action["domain"])
+        self.assertIn(own, results)
+        self.assertNotIn(foreign, results)
+        action = dashboard.get_faculty_action("report_autonomous")
+        self.assertNotIn(own, self.env["op.result.line"].with_user(self.teacher).search(action["domain"]))
+        exam.write({"campus_exam_kind": "autonomous"})
+        self.assertIn(own, self.env["op.result.line"].with_user(self.teacher).search(action["domain"]))
+
     def test_student_complaint_identity_and_required_category(self):
         requests = self.env["campus.service.request"].with_user(self.teacher)
         vals = {"name": "QA student complaint", "kind": "student_complaint", "student_id": self.student.id,

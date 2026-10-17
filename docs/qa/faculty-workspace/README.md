@@ -20,7 +20,7 @@ The source is the VCET staff screenshot folder in `docs/erp-reference-register.c
 | Register complaint on student | Student, complaint category, description and evidence through existing service-request resolution workflow |
 | Previous academic information | Faculty-maintained assigned-student qualification, institution, board, year, marks/maximum, calculated percentage and source attachment |
 | My chronicle | Own faculty achievements from the current calendar year |
-| University exam / autonomous ESE reports | Results filtered by explicitly classified examinations; old examinations remain Unclassified until an authorized operator classifies them |
+| University exam / autonomous ESE reports | Results filtered by explicitly classified examinations, the named responsible faculty and that faculty's timetable batches; old examinations remain Unclassified until an authorized operator classifies them |
 | Payroll | Read-only own approved/completed salary slips and own salary agreement; HR retains payroll actions |
 | Report output | Internal assessment PDF with score/weight breakdown; existing immutable attendance PDF/CSV snapshots and payroll PDF; native filtered lists and exports for other report categories |
 

@@ -83,7 +83,8 @@ if (!out || !process.env.FACULTY_QA_PASSWORD) throw Error('Disposable QA configu
         await page.locator('.campus_mobile_toggle').click();
         await page.locator('.campus_sidebar.is-open').waitFor();
         await page.keyboard.press('Escape');
-        await page.locator('.campus_sidebar:not(.is-open)').waitFor();
+        await page.locator('.campus_sidebar:not(.is-open)').waitFor({state:'attached'});
+        await page.locator('.campus_sidebar').waitFor({state:'hidden'});
         await page.screenshot({path:path.join(out,'faculty-mobile-390.png')});
         const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);
         if(overflow) throw Error('Faculty document overflows mobile viewport');
