@@ -40,6 +40,9 @@ async function markup(page) {
         const studentCard = firstMetrics.stats.find(s=>s.kind==='active_students');
         if(studentCard.value!==3) throw Error('Owner demo does not reconcile with its saved students');
         await page.screenshot({path:path.join(out,'owner-dashboard-1440.png'),fullPage:true});
+        await page.locator('.campus_owner_charts').evaluate(element=>element.scrollIntoView({block:'start'}));
+        await page.screenshot({path:path.join(out,'owner-charts-1440.png')});
+        await page.locator('.campus_dashboard').evaluate(element=>element.scrollTop=0);
         const modules = await page.locator('.campus_sidebar nav .campus_nav_link').allTextContents();
         if(modules.length!==12) throw Error('Owner sidebar does not contain the 12 functional MVP modules');
         const overview=await rpc(page,'campus.dashboard','get_overview');
