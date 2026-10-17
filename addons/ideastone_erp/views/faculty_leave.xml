@@ -4,5 +4,4 @@
     <field name="name">Leave Requests</field>
     <field name="tag">ideastone_erp.faculty_leave_page</field>
   </record>
-  <menuitem id="menu_standard_leave" name="Leave Requests" parent="menu_category_1" action="action_faculty_leave_page"/>
 </odoo>
