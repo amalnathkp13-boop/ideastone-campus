@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import TransactionCase, new_test_user, tagged
@@ -143,8 +143,17 @@ class TestVcetWorkspace(TransactionCase):
         self.assertIn(b"DRAFT", html)
 
     def test_faculty_cannot_publish_or_edit_other_attendance(self):
-        exam = self.env["op.exam"].search([], limit=1)
-        self.assertTrue(exam)
+        # Permission checks must not depend on optional vendor demo records.
+        today = fields.Date.today()
+        course = self.env["op.course"].create({"name": "Publication QA", "code": "VCET-PUB"})
+        batch = self.env["op.batch"].create({"name": "Publication QA", "code": "VCET-PUB", "course_id": course.id, "end_date": today + timedelta(days=30)})
+        subject = self.env["op.subject"].create({"name": "Publication QA", "code": "VCET-PUB"})
+        kind = self.env["op.exam.type"].create({"name": "Publication QA", "code": "VCET-PUB"})
+        session = self.env["op.exam.session"].create({"name": "Publication QA", "exam_code": "VCET-PUB", "course_id": course.id, "batch_id": batch.id,
+                                                    "exam_type": kind.id, "start_date": today, "end_date": today})
+        exam = self.env["op.exam"].create({"name": "Publication QA", "exam_code": "VCET-PUB", "session_id": session.id, "subject_id": subject.id,
+                                          "total_marks": 100, "min_marks": 40, "responsible_id": [(6, 0, self.faculty.ids)],
+                                          "start_time": datetime.combine(today, time(14)), "end_time": datetime.combine(today, time(15))})
         with self.assertRaises(AccessError):
             exam.with_user(self.teacher).act_done()
         exam.write({"state": "done"})
@@ -153,8 +162,8 @@ class TestVcetWorkspace(TransactionCase):
             result.with_user(self.teacher).write({"marks": exam.total_marks})
         with self.assertRaises(ValidationError), self.cr.savepoint():
             result.write({"marks": exam.total_marks + 1})
-        sheet = self.env["op.attendance.sheet"].search([], limit=1)
-        self.assertTrue(sheet)
+        register = self.env["op.attendance.register"].create({"name": "Publication QA", "code": "VCET-PUB", "course_id": course.id, "batch_id": batch.id})
+        sheet = self.env["op.attendance.sheet"].create({"register_id": register.id, "attendance_date": today})
         with self.assertRaises(AccessError):
             sheet.with_user(self.teacher).write({"state": "done"})
 

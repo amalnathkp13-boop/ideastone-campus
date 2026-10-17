@@ -1,0 +1,16 @@
+{
+  "destinations": 22,
+  "children": 2,
+  "requestWorkflow": true,
+  "receipt": true,
+  "document": true,
+  "IDOR": true,
+  "CSRF": true,
+  "logout": true,
+  "widths": [
+    1440,
+    768,
+    390
+  ],
+  "pageErrors": []
+}

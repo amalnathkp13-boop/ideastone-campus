@@ -1,0 +1,22 @@
+<odoo>
+  <record id="parent_request_type_form" model="ir.ui.view">
+    <field name="name">parent.request.type.form</field><field name="model">campus.student.request.type</field><field name="inherit_id" ref="student_request_types_form"/>
+    <field name="arch" type="xml"><xpath expr="//field[@name='kind']" position="after"><field name="portal_audience" readonly="not company_id"/><field name="parent_absence" readonly="not company_id"/></xpath></field>
+  </record>
+  <record id="parent_request_review" model="ir.ui.view">
+    <field name="name">parent.request.review</field><field name="model">campus.service.request</field><field name="inherit_id" ref="student_requests_form"/>
+    <field name="arch" type="xml"><xpath expr="//field[@name='student_id']" position="after"><field name="parent_absence_from"/><field name="parent_absence_to"/></xpath></field>
+  </record>
+  <record id="parent_college_policy" model="ir.ui.view">
+    <field name="name">parent.college.policy</field><field name="model">res.company</field><field name="inherit_id" ref="base.view_company_form"/>
+    <field name="arch" type="xml"><xpath expr="//sheet" position="inside"><group string="Parent Portal"><field name="campus_parent_portal_enabled"/><field name="campus_parent_transport"/></group></xpath></field>
+  </record>
+  <record id="parent_notice_pin" model="ir.ui.view">
+    <field name="name">parent.notice.pin</field><field name="model">campus.circular</field><field name="inherit_id" ref="mvp_notices_form"/>
+    <field name="arch" type="xml"><xpath expr="//field[@name='audience']" position="after"><field name="parent_pinned"/></xpath></field>
+  </record>
+  <record id="parent_document_release" model="ir.ui.view">
+    <field name="name">parent.document.release</field><field name="model">campus.admission.document</field><field name="inherit_id" ref="mvp_document_form"/>
+    <field name="arch" type="xml"><xpath expr="//header" position="inside"><button name="action_parent_share" type="object" string="Toggle parent release" invisible="state != 'verified'"/></xpath><xpath expr="//field[@name='state']" position="after"><field name="parent_shared"/></xpath></field>
+  </record>
+</odoo>

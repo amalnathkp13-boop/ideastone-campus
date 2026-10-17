@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-17",
+  "runtime": "Native Odoo 17.0 / Python 3.12.14 / PostgreSQL 16.15 / Windows / Chrome",
+  "database": "Isolated disposable campus_parent_qa; existing localhost:8070 untouched",
+  "backend": {
+    "full_module_suite": {
+      "tests": 69,
+      "failed": 0,
+      "errors": 0
+    },
+    "additional_transport_case": {
+      "tests": 1,
+      "failed": 0,
+      "errors": 0
+    }
+  },
+  "browser": {
+    "destinations": 22,
+    "children": 2,
+    "requestWorkflow": true,
+    "receipt": true,
+    "document": true,
+    "IDOR": true,
+    "CSRF": true,
+    "logout": true,
+    "widths": [
+      1440,
+      768,
+      390
+    ],
+    "pageErrors": []
+  },
+  "static": [
+    "Ruff addons/ and scripts/",
+    "All addon XML",
+    "CI workflow YAML",
+    "Node syntax: parent browser and shared portal JS",
+    "git diff --check"
+  ],
+  "limits": [
+    "Docker/WSL unavailable locally; container jobs run in GitHub CI",
+    "No live gateway, GPS, SMS/email delivery or institutional holiday feed tested",
+    "Synthetic data only; no production data changed"
+  ]
+}

@@ -99,10 +99,13 @@ class StudentPortal(models.AbstractModel):
         self.env.cr.execute("UPDATE op_student SET campus_portal_revision=COALESCE(campus_portal_revision,0)+1 WHERE id=%s", [student.id])
         student.invalidate_recordset(["campus_portal_revision"])
 
+    def _request_audience(self):
+        return "student"
+
     def _types(self, student):
         types = self.with_context(active_test=False)._records("campus.student.request.type", ["|", ("company_id", "=", False), ("company_id", "=", student.company_id.id)], limit=100, order="sequence, name")
         overrides = set(types.filtered("company_id").mapped("code"))
-        return types.filtered(lambda rec: rec.active and (rec.company_id or rec.code not in overrides))
+        return types.filtered(lambda rec: rec.active and rec.portal_audience in {self._request_audience(), "both"} and (rec.company_id or rec.code not in overrides))
 
     def _scope(self, student, enrolment):
         if not enrolment:

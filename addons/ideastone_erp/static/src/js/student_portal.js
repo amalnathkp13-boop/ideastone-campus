@@ -107,7 +107,7 @@
         const link = event.target.closest("a[href]");
         if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || link.target || link.hasAttribute("download")) return;
         const url = new URL(link.href, location.href);
-        if (url.origin !== location.origin || !url.pathname.startsWith("/my/campus/student/") || url.pathname.includes("/download/") || url.hash) return;
+        if (url.origin !== location.origin || !url.pathname.startsWith(workspace.dataset.portalPrefix || "/my/campus/student/") || url.pathname.includes("/download/") || url.hash) return;
         event.preventDefault();
         navigate(url.href);
     });
@@ -131,7 +131,14 @@
             });
         }
     });
-    document.addEventListener("change", event => { if (event.target.matches(".student_request_type")) enhance(); });
+    document.addEventListener("change", event => {
+        if (event.target.matches(".student_request_type")) enhance();
+        if (event.target.matches(".parent_homework_filter")) {
+            root()?.querySelectorAll(".parent_homework").forEach(row => {
+                row.hidden = event.target.value !== "all" && (event.target.value === "pending") !== (row.dataset.pending === "true");
+            });
+        }
+    });
     document.addEventListener("input", event => {
         if (!event.target.matches(".student_book_search")) return;
         const query = event.target.value.trim().toLocaleLowerCase();

@@ -1,0 +1,126 @@
+<odoo>
+  <template id="parent_action_fields">
+    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+    <input t-foreach="d['filters'].items()" t-as="f" type="hidden" t-att-name="f[0]" t-att-value="f[1]"/>
+  </template>
+  <template id="parent_workspace" name="Parent workspace">
+    <t t-call="web.frontend_layout">
+      <t t-set="no_header" t-value="True"/><t t-set="no_footer" t-value="True"/><t t-set="body_classname" t-value="'campus_student_body'"/>
+      <t t-set="d" t-value="portal_data"/>
+      <div id="campus_student_workspace" class="student_workspace parent_workspace" data-portal-prefix="/my/campus/parent/">
+        <a class="student_skip" href="#student_main">Skip to content</a>
+        <aside id="student_sidebar" class="student_sidebar" aria-label="Parent navigation">
+          <a class="student_brand" href="/my/campus"><img src="/ideastone_campus/static/src/img/vcet-wordmark.png" alt="Campus ERP"/><span>Campus Management ERP</span></a>
+          <span class="student_nav_heading">PARENT WORKSPACE</span>
+          <nav t-if="d"><a t-foreach="d['navigation']" t-as="item" t-att-href="student_url_for(item[0])" t-att-class="'student_nav_link active' if section == item[0] else 'student_nav_link'" t-att-aria-current="'page' if section == item[0] else None"><i t-att-class="'fa fa-' + item[2]" aria-hidden="true"/><span t-esc="item[1]"/></a></nav>
+          <div class="student_sidebar_bottom"><strong t-if="d" t-esc="d['company']"/><span>Parent monitoring &amp; contact</span><a href="/web/session/logout?redirect=/web/login">Sign out</a></div>
+        </aside>
+        <button class="student_backdrop" type="button" aria-label="Close navigation" hidden="hidden"/>
+        <div class="student_main_wrap">
+          <header class="student_header">
+            <div><button class="student_menu" type="button" aria-label="Toggle parent navigation" aria-expanded="false" aria-controls="student_sidebar"><i class="fa fa-bars" aria-hidden="true"/></button><span class="student_header_title">My child's progress</span></div>
+            <div t-if="d" class="parent_context">
+              <form t-if="len(d['children']) &gt; 1" method="get" t-att-action="'/my/campus/parent/' + section" class="parent_child">
+                <label for="parent_child">Child<select id="parent_child" class="form-select" name="child"><option t-foreach="d['children']" t-as="c" t-att-value="c['id']" t-att-selected="c['id'] == d['student_id']" t-esc="c['name']"/></select></label><button type="submit" class="btn btn-outline-primary">Switch child</button>
+              </form>
+              <strong t-else="" class="parent_child_name" t-esc="d['student']['name']"/>
+              <a t-att-href="student_url_for('notices')" aria-label="School updates"><i class="fa fa-bell-o" aria-hidden="true"/><span t-if="d['notice_badge'] and d['unread']" t-esc="d['unread']"/></a>
+              <a t-att-href="student_url_for('account')" aria-label="Parent account"><i class="fa fa-user-circle-o" aria-hidden="true"/></a>
+            </div>
+          </header>
+          <nav t-if="d" class="student_subnav" aria-label="Parent context"><strong t-esc="dict((i[0],i[1]) for i in d['navigation'])[section]"/><span t-esc="d['student']['name']"/><span t-esc="d['placement']['year']"/><a t-att-href="student_url_for('requests')">Contact college</a></nav>
+          <main id="student_main" class="student_main" tabindex="-1">
+            <div class="student_network_error alert alert-danger" role="alert" hidden="hidden"><span/><button type="button" class="btn btn-outline-danger student_retry">Retry</button></div>
+            <div class="student_busy" role="status" hidden="hidden">Loading saved college records…</div>
+            <section t-if="portal_error" class="student_panel"><h1>Parent workspace</h1><p role="alert" t-esc="portal_error"/><p>Contact the college office to verify your guardian link.</p><a class="btn btn-primary" href="/my/campus">Retry parent access</a><a href="/web/session/logout?redirect=/web/login">Sign out</a></section>
+            <t t-if="d">
+              <div t-if="d['demo']" class="student_demo">DEMONSTRATION COLLEGE · SAMPLE DATA</div>
+              <div t-if="saved" class="alert alert-success" role="status">Your changes have been saved.</div><div t-if="form_error" class="alert alert-danger" role="alert" t-esc="form_error"/>
+              <header class="student_page_heading"><div><h1 t-esc="dict((i[0],i[1]) for i in d['navigation'])[section]"/><p><strong t-esc="d['student']['name']"/> · <t t-esc="d['placement']['programme']"/> · <t t-esc="d['placement']['section']"/></p></div><a class="btn btn-outline-primary" t-att-href="student_url_for(section)">Refresh records</a></header>
+              <form t-if="d['placements'] and section in ['dashboard','attendance','learning','timetable','exams']" method="get" t-att-action="'/my/campus/parent/' + section" class="student_filters student_panel">
+                <input type="hidden" name="child" t-att-value="d['student_id']"/>
+                <label for="parent_term">Academic placement<select id="parent_term" name="enrolment" class="form-select"><option t-foreach="d['placements']" t-as="p" t-att-value="p['id']" t-att-selected="p['id'] == d['placement']['id']" t-esc="p['label']"/></select></label>
+                <label for="parent_from">Class records from<input id="parent_from" type="date" name="date_from" class="form-control" t-att-value="d['filters']['date_from']" required="required"/></label>
+                <label for="parent_to">Through<input id="parent_to" type="date" name="date_to" class="form-control" t-att-value="d['filters']['date_to']" required="required"/></label><button type="submit" class="btn btn-primary">Apply</button>
+              </form>
+              <t t-if="section == 'dashboard'" t-call="ideastone_erp.parent_dashboard"/>
+              <t t-elif="section == 'profile'" t-call="ideastone_erp.parent_profile"/>
+              <t t-elif="section == 'attendance'" t-call="ideastone_erp.student_attendance"/>
+              <t t-elif="section == 'learning'" t-call="ideastone_erp.parent_learning"/>
+              <t t-elif="section == 'timetable'" t-call="ideastone_erp.parent_timetable"/>
+              <t t-elif="section == 'exams'" t-call="ideastone_erp.student_exams"/>
+              <t t-elif="section == 'fees'" t-call="ideastone_erp.student_fees"/>
+              <t t-elif="section == 'notices'" t-call="ideastone_erp.parent_notices"/>
+              <t t-elif="section == 'requests'" t-call="ideastone_erp.parent_requests"/>
+              <t t-elif="section == 'documents'" t-call="ideastone_erp.parent_documents"/>
+              <t t-elif="section == 'transport'" t-call="ideastone_erp.parent_transport"/>
+              <t t-elif="section == 'account'" t-call="ideastone_erp.parent_account"/>
+              <footer class="student_footer">College records shared securely with linked parents · <t t-esc="d['company']"/></footer>
+            </t>
+          </main>
+        </div>
+      </div>
+    </t>
+  </template>
+  <template id="parent_dashboard">
+    <section class="parent_welcome"><h2>Welcome, <t t-esc="d['parent_name']"/></h2><p>Follow <strong t-esc="d['student']['name']"/>'s progress and see what needs attention.</p></section>
+    <div class="student_stats">
+      <a class="student_stat" t-att-href="student_url_for('attendance')"><span>Attendance this period</span><strong t-esc="str(d['attendance']['rate']) + '%' if d['attendance']['rate'] is not None else 'Not available yet'"/><small t-esc="'Needs attention' if d['attendance']['shortage'] else 'On track' if d['attendance']['conducted'] else 'No submitted records yet'"/></a>
+      <a class="student_stat" t-att-href="student_url_for('learning')"><span>Pending work</span><strong t-esc="d['pending_work']"/><small t-esc="'No pending assignments right now.' if not d['pending_work'] else 'Nearest deadline: ' + d['nearest_work']"/></a>
+      <a class="student_stat" t-att-href="student_url_for(d['upcoming'][0]['target'] if d['upcoming'] else 'timetable')"><span>Next class, exam or deadline</span><strong t-esc="d['upcoming'][0]['kind'] if d['upcoming'] else 'Not available yet'"/><small t-esc="d['upcoming'][0]['when'] if d['upcoming'] else 'No upcoming schedule is recorded.'"/></a>
+      <a class="student_stat" t-att-href="student_url_for('fees')"><span>Fees due</span><strong t-esc="money(d['fees']['due']) if d['fees']['recorded'] else 'Not available yet'"/><small t-esc="'No outstanding fees recorded.' if d['fees']['recorded'] and not d['fees']['due'] else 'Nearest due date: ' + d['nearest_fee'] if d['nearest_fee'] else 'View due dates and verified payments'"/></a>
+    </div>
+    <div class="student_grid">
+      <section class="student_panel"><div class="student_panel_heading"><h2>Attendance by subject</h2><a t-att-href="student_url_for('attendance')">Details &amp; trend</a></div><t t-call="ideastone_erp.student_attendance_bars"/></section>
+      <section class="student_panel"><h2>Monthly attendance trend</h2><p class="student_muted">Selected class-record period: <t t-esc="d['filters']['date_from']"/> through <t t-esc="d['filters']['date_to']"/>. Values are published attended sessions as a percentage of eligible sessions.</p><div t-foreach="d['attendance']['trend']" t-as="row" class="student_chart_row"><div><span t-esc="row['month']"/><strong><t t-esc="row['rate']"/>%</strong></div><div class="student_progress" role="img" t-att-aria-label="row['month'] + ': ' + str(row['rate']) + ' percent attendance'"><span t-att-style="'width: ' + str(row['rate']) + '%'"/></div></div><p t-if="not d['attendance']['trend']" class="student_empty">Attendance trends will appear after the college submits attendance.</p></section>
+      <section class="student_panel"><h2>Upcoming schedule</h2><article t-foreach="d['upcoming'][:5]" t-as="u" class="student_record"><a t-att-href="student_url_for(u['target'])"><h3 t-esc="u['name']"/></a><p><t t-esc="u['kind']"/> · <t t-esc="u['when']"/></p></article><p t-if="not d['upcoming']" class="student_empty">No confirmed upcoming classes, exams or deadlines are recorded.</p></section>
+      <section class="student_panel"><h2>Assignments to follow up</h2><article t-foreach="[h for h in d['homework'] if h['pending']][:4]" t-as="h" class="student_record"><a t-att-href="student_url_for('learning')"><h3 t-esc="h['name']"/></a><p><t t-esc="h['subject']"/> · <t t-esc="h['due']"/></p><span class="student_chip" t-esc="h['status']"/></article><p t-if="not d['pending_work']" class="student_empty">No pending assignments right now.</p></section>
+      <section class="student_panel"><h2>Recent published progress</h2><article t-foreach="d['results'][:4]" t-as="r" class="student_record"><h3 t-esc="r['subject']"/><p><t t-esc="r['exam']"/> · <t t-esc="r['marks']"/> / <t t-esc="r['maximum']"/> · Grade <t t-esc="r['grade']"/></p></article><p t-if="not d['results']" class="student_empty">Results will appear here after the institution publishes them.</p><a t-att-href="student_url_for('exams')">View results</a></section>
+      <section class="student_panel"><h2>School notices</h2><article t-foreach="d['notices'][:4]" t-as="n" class="student_record"><h3 t-esc="n['name']"/><p><t t-esc="n['date']"/> · <t t-esc="'Pinned · ' if n['pinned'] else ''"/><t t-esc="'Read' if n['read'] else 'Unread'"/></p></article><p t-if="not d['notices']" class="student_empty">No notices are currently published for your child's audience.</p><a t-att-href="student_url_for('notices')">Read school updates</a></section>
+      <section class="student_panel"><h2>Fee snapshot</h2><dl class="student_details"><dt>Assessed</dt><dd t-esc="money(d['fees']['assessed'])"/><dt>Settled / paid</dt><dd t-esc="money(d['fees']['paid'])"/><dt>Outstanding</dt><dd t-esc="money(d['fees']['due'])"/></dl><p class="student_muted">All posted college invoices, including earlier academic periods.</p><a t-att-href="student_url_for('fees')">Fee ledger &amp; receipts</a></section>
+    </div>
+    <section class="student_panel student_quick"><h2>Quick actions</h2><a t-att-href="student_url_for('attendance')">Attendance</a><a t-att-href="student_url_for('timetable')">Timetable</a><a t-att-href="student_url_for('requests')">Intimate absence / contact school</a></section>
+  </template>
+  <template id="parent_profile">
+    <section class="student_panel"><h2>Child's college record</h2><dl class="student_details"><dt>Name</dt><dd t-esc="d['student']['name']"/><dt>Student number</dt><dd t-esc="d['student']['number']"/><dt>Register number</dt><dd t-esc="d['student']['register']"/><dt>Enrolment status</dt><dd t-esc="d['student']['status'].replace('_',' ').title()"/><dt>Programme</dt><dd t-esc="d['placement']['programme']"/><dt>Academic year</dt><dd t-esc="d['placement']['year']"/><dt>Semester / section</dt><dd><t t-esc="d['placement']['semester']"/> / <t t-esc="d['placement']['section']"/></dd></dl><p>Official identity, enrolment and academic information are maintained by the college.</p><a class="btn btn-outline-primary" t-att-href="student_url_for('requests')">Request a correction</a></section>
+    <section class="student_panel"><h2>Guardian access</h2><p>Signed in as <strong t-esc="d['parent_name']"/>. This child is explicitly linked to your active guardian record by the college office.</p><p>Contact the college for changes to guardian relationships or emergency contact details.</p></section>
+  </template>
+  <template id="parent_learning">
+    <section class="student_panel"><h2>Assigned homework</h2><label for="parent_homework_filter">Show work<select id="parent_homework_filter" class="form-select parent_homework_filter"><option value="all">All assignments</option><option value="pending">Pending / overdue</option><option value="completed">Submitted / accepted</option></select></label><article t-foreach="d['homework']" t-as="h" class="student_record parent_homework" t-att-data-pending="'true' if h['pending'] else 'false'"><h3 t-esc="h['name']"/><span class="student_chip" t-esc="h['status']"/><p><t t-esc="h['subject']"/> · <t t-esc="h['teacher']"/></p><p>Assigned <t t-esc="h['issued']"/> · Due <t t-esc="h['due']"/></p><p t-esc="h['instructions']"/></article><p t-if="not d['homework']" class="student_empty">No published work has been assigned to your child in this academic placement.</p><p>Submission status comes from the existing assignment record. Parents cannot submit or change a student's work.</p></section>
+    <section class="student_panel"><h2>Teacher-published learning materials</h2><article t-foreach="d['materials']" t-as="m" class="student_record"><h3 t-esc="m['name']"/><p t-esc="m['subject']"/><a t-att-href="'/my/campus/parent/download/resource/%s?child=%s' % (m['id'],d['student_id'])">Download <t t-esc="m['filename']"/></a></article><p t-if="not d['materials']" class="student_empty">No approved materials have been published for this placement.</p></section>
+  </template>
+  <template id="parent_documents">
+    <section class="student_panel"><h2>Released college documents</h2><article t-foreach="d['documents']" t-as="doc" class="student_record"><h3 t-esc="doc['name']"/><a t-att-href="'/my/campus/parent/download/document/%s?child=%s' % (doc['id'],d['student_id'])">Download <t t-esc="doc['filename']"/></a></article><p t-if="not d['documents']" class="student_empty">No verified documents have been released to parents.</p><p class="student_muted">Official report-card documents will appear only after the college releases them. Draft/internal files are not shared.</p></section>
+    <section class="student_panel"><h2>Fee receipts</h2><article t-foreach="d['fees']['payments']" t-as="p" class="student_record"><strong t-esc="p['reference']"/><p><t t-esc="p['date']"/> · <t t-esc="money(p['amount'])"/> · <t t-esc="p['status']"/></p><a t-att-href="p['url']">Download receipt</a></article><p t-if="not d['fees']['payments']" class="student_empty">No official receipts are recorded.</p></section>
+    <section class="student_panel"><h2>Responses to your requests</h2><article t-foreach="[r for r in d['requests'] if r['file']]" t-as="r" class="student_record"><h3 t-esc="r['name']"/><a t-att-href="'/my/campus/parent/download/request/%s?child=%s' % (r['id'],d['student_id'])">Download official response</a></article><a t-att-href="student_url_for('requests')">Request history</a></section>
+  </template>
+  <template id="parent_transport">
+    <section class="student_panel"><h2>Approved transport allocation</h2><article t-foreach="d['transport']" t-as="r" class="student_record"><h3 t-esc="r['name']"/><p>Boarding point: <t t-esc="r['stop']"/></p><p>Scheduled pickup: <t t-esc="r['pickup']"/></p><p>Transport contact: <t t-esc="r['contact']"/></p></article><p class="student_info">This is the recorded timetable. Live vehicle tracking and drop timings are not available.</p></section>
+  </template>
+  <template id="parent_notices" inherit_id="ideastone_erp.student_notices" primary="True">
+    <xpath expr="//form" position="attributes"><attribute name="action">/my/campus/parent/action</attribute></xpath>
+    <xpath expr="//t[@t-call='ideastone_erp.student_action_fields']" position="attributes"><attribute name="t-call">ideastone_erp.parent_action_fields</attribute></xpath>
+    <xpath expr="//a[@t-as='f']" position="attributes"><attribute name="t-att-href">'/my/campus/parent/download/notice/%s?child=%s' % (f['id'],d['student_id'])</attribute></xpath>
+  </template>
+  <template id="parent_timetable" inherit_id="ideastone_erp.student_timetable" primary="True">
+    <xpath expr="//section[last()]" position="after"><section class="student_panel"><h2>Confirmed classes, released exams &amp; assignment deadlines</h2><article t-foreach="d['upcoming']" t-as="u" class="student_record"><a t-att-href="student_url_for(u['target'])"><h3 t-esc="u['name']"/></a><p><t t-esc="u['kind']"/> · <t t-esc="u['when']"/></p></article><p t-if="not d['upcoming']" class="student_empty">No upcoming items are recorded.</p></section></xpath>
+  </template>
+  <template id="parent_requests" inherit_id="ideastone_erp.student_requests" primary="True">
+    <xpath expr="//section[@id='student_request_new']/form" position="attributes"><attribute name="action">/my/campus/parent/action</attribute></xpath>
+    <xpath expr="//section[@id='student_request_new']/form/t" position="attributes"><attribute name="t-call">ideastone_erp.parent_action_fields</attribute></xpath>
+    <xpath expr="//form[@t-if=&quot;r['state'] == 'information'&quot;]" position="attributes"><attribute name="action">/my/campus/parent/action</attribute></xpath>
+    <xpath expr="//form[@t-if=&quot;r['state'] == 'information'&quot;]/t" position="attributes"><attribute name="t-call">ideastone_erp.parent_action_fields</attribute></xpath>
+    <xpath expr="//form[@t-if=&quot;r['can_cancel']&quot;]" position="attributes"><attribute name="action">/my/campus/parent/action</attribute></xpath>
+    <xpath expr="//form[@t-if=&quot;r['can_cancel']&quot;]/t" position="attributes"><attribute name="t-call">ideastone_erp.parent_action_fields</attribute></xpath>
+    <xpath expr="//form[@t-if=&quot;d['updates']&quot;]" position="replace"/>
+    <xpath expr="//p[@t-if=&quot;not d['requests']&quot;]" position="replace"><p t-if="not d['requests']" class="student_empty">You have not submitted any parent requests for this child.</p></xpath>
+    <xpath expr="//section[1]/h2" position="replace"><h2>Contact school or submit a parent request</h2></xpath>
+    <xpath expr="//label[@for='student_request_description']" position="after"><div class="parent_absence"><label for="parent_absence_from">Absence from (for absence intimation)<input id="parent_absence_from" type="date" name="absence_from" class="form-control"/></label><label for="parent_absence_to">Absence through<input id="parent_absence_to" type="date" name="absence_to" class="form-control"/></label></div><p class="student_info">Absence intimation is reviewed by staff and does not change official attendance. Meeting requests are confirmed only by the college response.</p></xpath>
+    <xpath expr="//a[@t-if=&quot;r['file']&quot;]" position="attributes"><attribute name="t-att-href">'/my/campus/parent/download/request/%s?child=%s' % (r['id'],d['student_id'])</attribute></xpath>
+  </template>
+  <template id="parent_account" inherit_id="ideastone_erp.student_account" primary="True">
+    <xpath expr="//form" position="attributes"><attribute name="action">/my/campus/parent/action</attribute></xpath>
+    <xpath expr="//t[@t-call='ideastone_erp.student_action_fields']" position="attributes"><attribute name="t-call">ideastone_erp.parent_action_fields</attribute></xpath>
+    <xpath expr="//section[1]" position="after"><section class="student_panel"><h2>College contact &amp; help</h2><p t-if="d['support_email']"><strong>Email:</strong> <a t-att-href="'mailto:' + d['support_email']" t-esc="d['support_email']"/></p><p t-if="d['support_phone']"><strong>Phone:</strong> <t t-esc="d['support_phone']"/></p><p t-if="not d['support_email'] and not d['support_phone']">Contact the college office or submit an enquiry.</p><a t-att-href="student_url_for('requests')">Send an enquiry to the college queue</a></section></xpath>
+  </template>
+</odoo>
