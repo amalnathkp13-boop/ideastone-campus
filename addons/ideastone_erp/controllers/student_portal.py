@@ -84,7 +84,7 @@ class StudentWorkspace(CampusPortal):
         try:
             data, name, mimetype = request.env["campus.student.portal"]._download(kind, record_id)
         except (AccessError, UserError):
-            return self._private(request.not_found())
+            return self._private(request.make_response("This document is not available.", status=404))
         return self._private(request.make_response(data, headers=[("Content-Type", mimetype), ("Content-Disposition", content_disposition(name))]))
 
     @http.route()

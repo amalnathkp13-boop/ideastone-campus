@@ -100,6 +100,8 @@ class StudentServiceRequest(models.Model):
         filename = str(filename or "").replace("\\", "/").rsplit("/", 1)[-1]
         if not filename or len(filename) > 120 or any(ord(c) < 32 for c in filename):
             raise ValidationError(_("Use a short, safe filename."))
+        if not isinstance(content, (str, bytes)) or len(content) > ((limit * 1024 * 1024 + 2) // 3) * 4:
+            raise ValidationError(_("Upload a file within the configured size limit."))
         try:
             raw = base64.b64decode(content, validate=True)
         except (ValueError, binascii.Error) as exc:

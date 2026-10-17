@@ -177,6 +177,26 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         session = self.session(start_datetime=start, end_datetime=start + timedelta(minutes=30))
         data = self.portal.snapshot(date_from=str(self.today), date_to=str(self.today))
         self.assertIn(session.id, [row["id"] for row in data["schedule"]])
-        self.student.active = False
+        self.student.write({"active": False, "campus_status_reason": "QA archive checks student access revocation"})
         with self.assertRaises(AccessError):
             self.portal.snapshot()
+
+    def test_material_publication_and_college_download_scope(self):
+        model = self.env["campus.digital.resource"]
+        own = model.create({"name": "Student published guide", "document": base64.b64encode(b"QA guide"), "filename": "guide.txt"})
+        own.action_submit()
+        own.with_user(self.owner).action_approve()
+        draft = model.create({"name": "PRIVATE draft guide", "document": base64.b64encode(b"Private"), "filename": "draft.txt"})
+        company = self.env["res.company"].create({"name": "Other college student privacy QA"})
+        operator = new_test_user(self.env, login="student_other_college_operator", groups="ideastone_erp.group_manager", company_id=company.id, company_ids=[(6, 0, company.ids)])
+        foreign = model.create({"name": "PRIVATE other college guide", "company_id": company.id, "document": base64.b64encode(b"Private"), "filename": "other.txt"})
+        foreign.action_submit()
+        foreign.with_user(operator).action_approve()
+        shown = [row["id"] for row in self.portal.snapshot()["materials"]]
+        self.assertIn(own.id, shown)
+        self.assertNotIn(draft.id, shown)
+        self.assertNotIn(foreign.id, shown)
+        self.assertEqual(self.portal._download("resource", own.id)[0], b"QA guide")
+        for record in draft | foreign:
+            with self.assertRaises(AccessError):
+                self.portal._download("resource", record.id)
