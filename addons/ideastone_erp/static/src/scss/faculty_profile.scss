@@ -1,0 +1,139 @@
+.campus_staff_profile {
+    --staff-ink: #102b50; --staff-muted: #697c96; --staff-blue: #0666e7;
+    --staff-line: #e4ebf4; --staff-body: #f4f8fc;
+    height: 100%; min-height: 0; width: 100%; overflow-y: auto; overscroll-behavior: contain; padding: 24px 28px 48px;
+    background: var(--staff-body); color: var(--staff-ink); font-size: 13px;
+    .staff_profile_topline { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 20px; }
+    .staff_profile_crumb { color: #6d84a1; font-size: 12px; margin-bottom: 10px; span { padding: 0 7px; color: #a9b8c9; } }
+    h1 { color: #102e60; font-size: 25px; line-height: 1.2; margin: 0; font-weight: 750; }
+    .staff_profile_subtitle { display: block; color: var(--staff-muted); font-weight: 450; font-size: 12px; margin-top: 6px; }
+    .staff_profile_controls { display: flex; flex-direction: column; gap: 5px; min-width: 255px; label { font-size: 11px; color: #536d8c; font-weight: 650; } select { border: 1px solid #dbe5f2; background: #fff; color: #193963; border-radius: 7px; height: 38px; padding: 0 10px; } }
+    .staff_profile_sections { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; border-bottom: 1px solid #dfe8f2; a { color: #5b7492; padding: 10px 13px; border-bottom: 2px solid transparent; font-size: 12px; font-weight: 650; &:hover, &.active { color: var(--staff-blue); border-color: var(--staff-blue); } } }
+    .card { background: #fff; border: 1px solid var(--staff-line); border-radius: 12px; box-shadow: 0 5px 20px rgba(15,50,91,.045); }
+    .staff_profile_hero { display: grid; grid-template-columns: minmax(0,1fr) auto; justify-content: space-between; align-items: center; gap: 20px; padding: 21px 23px; margin-bottom: 14px; }
+    .staff_profile_identity { display: flex; align-items: center; gap: 15px; min-width: 0; }
+    .staff_profile_avatar { display: grid; place-items: center; flex: none; width: 58px; height: 58px; border-radius: 14px; background: linear-gradient(145deg,#e9f3ff,#d7eaff); color: #075ac4; font-size: 25px; font-weight: 800; }
+    .staff_profile_eyebrow { color: #7189a6; letter-spacing: .08em; font-size: 10px; font-weight: 800; margin-bottom: 4px; }
+    .staff_profile_identity_copy h2 { font-size: 20px; line-height: 1.25; margin: 0; color: #142f60; }
+    .staff_profile_identity_copy p { color: #69809b; margin: 5px 0 9px; font-size: 12px; span { margin: 0 8px; color: #b2c0cf; } }
+    .staff_profile_chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .staff_profile_chip, .staff_profile_status { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 99px; font-size: 10px; font-weight: 750; background: #edf3fa; color: #58708d; text-transform: capitalize; }
+    .staff_profile_chip.blue { background: #eaf3ff; color: #1363c8; } .staff_profile_chip.green, .staff_profile_status.verified { background: #e4f8eb; color: #087743; }
+    .staff_profile_status.pending { background: #fff0d9; color: #ad5b00; } .staff_profile_status.missing { background: #ffe5e8; color: #c33445; }
+    .staff_profile_hero_actions { display: flex; gap: 8px; flex: none; }
+    .staff_profile_button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid #d9e4f1; border-radius: 7px; padding: 9px 12px; background: #fff; color: #234673; font-size: 11px; font-weight: 700; }
+    .staff_profile_button.primary { color: #fff; background: #0764e5; border-color: #0764e5; }
+    .staff_profile_metrics { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; margin-bottom: 14px; }
+    .staff_profile_metric { display: flex; align-items: center; gap: 12px; padding: 15px; min-height: 97px; }
+    .metric_icon { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 11px; color: #0666e7; background: #eaf4ff; font-size: 16px; }
+    .metric_icon.violet { color: #6654d9; background: #f0efff; } .metric_icon.green { color: #12965a; background: #e6f8ee; } .metric_icon.amber { color: #d9870f; background: #fff3df; }
+    .staff_profile_metric small, .staff_profile_metric div > span { display: block; color: #788ba3; font-size: 10px; }
+    .staff_profile_metric strong { display: block; margin: 2px 0 3px; color: #153461; font-size: 20px; line-height: 1.1; }
+    .staff_profile_metric .metric_total { display: inline; font-size: 14px; color: #8394a9; }
+    .staff_profile_layout { display: grid; grid-template-columns: minmax(0,1fr) 285px; gap: 14px; align-items: start; }
+    .staff_profile_main, .staff_profile_aside { display: flex; flex-direction: column; gap: 13px; min-width: 0; }
+    .staff_profile_panel { padding: 17px 18px 18px; scroll-margin-top: 80px; }
+    .staff_profile_panel > header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 15px; }
+    .staff_profile_panel > header > div { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .staff_profile_step { display: grid; place-items: center; width: 29px; height: 29px; flex: none; border-radius: 8px; color: #0863d6; background: #eaf3ff; font-size: 10px; font-weight: 800; }
+    .staff_profile_panel h3, .staff_profile_sidecard h3 { margin: 0; color: #173566; font-size: 14px; font-weight: 800; }
+    .staff_profile_panel header p, .staff_profile_sidecard p { margin: 3px 0 0; color: #8295aa; font-size: 10px; }
+    .staff_profile_panel header > button { border: 0; background: transparent; color: #0567e8; padding: 6px; font-size: 10px; font-weight: 750; white-space: nowrap; }
+    .staff_profile_panel header > button.staff_profile_add { padding: 7px 10px; border: 1px solid #d6e8fc; border-radius: 6px; background: #f3f8ff; }
+    .staff_profile_fields { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 0 13px; }
+    .staff_profile_field { min-width: 0; padding: 10px 0; border-top: 1px solid #edf2f7; }
+    .staff_profile_field label { display: block; color: #8195ac; font-size: 10px; margin-bottom: 5px; }
+    .staff_profile_field strong { display: block; color: #1c3b67; font-size: 11px; line-height: 1.4; overflow-wrap: anywhere; font-weight: 650; white-space: pre-line; }
+    .staff_profile_table_wrap { overflow-x: auto; border: 1px solid #e7edf4; border-radius: 8px; }
+    .staff_profile_panel table { width: 100%; border-collapse: collapse; min-width: 570px; font-size: 10.5px; }
+    .staff_profile_panel th { padding: 10px 10px; background: #f2f7fc; color: #486787; font-size: 9.5px; font-weight: 800; text-align: left; white-space: nowrap; }
+    .staff_profile_panel td { padding: 10px; border-top: 1px solid #edf2f7; color: #3d5877; vertical-align: middle; }
+    .staff_profile_panel tbody tr:not(:has(.staff_profile_no_records)) { cursor: pointer; &:hover td { background: #f9fcff; } }
+    .staff_profile_panel td strong { color: #1b3b67; font-weight: 700; }
+    .staff_profile_panel td small { display: block; margin-top: 3px; color: #8195ac; }
+    .staff_profile_panel td > .fa-chevron-right { color: #91a5bd; font-size: 9px; }
+    .staff_profile_no_records { text-align: center; color: #8195ac !important; padding: 19px !important; }
+    .staff_profile_panel > footer { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px; color: #68819f; font-size: 10px; }
+    .staff_profile_sidecard { padding: 16px; }
+    .staff_profile_side_heading { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
+    .staff_profile_side_heading .metric_icon { width: 35px; height: 35px; font-size: 14px; }
+    .staff_profile_completion { display: flex; align-items: center; gap: 11px; padding: 11px 0 14px; border-bottom: 1px solid #edf2f7; }
+    .staff_profile_ring { display: grid; place-items: center; position: relative; flex: none; width: 58px; height: 58px; border-radius: 50%; background: conic-gradient(#159e5b var(--completion),#e4eef9 0); }
+    .staff_profile_ring:before { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: white; }
+    .staff_profile_ring strong { position: relative; color: #123764; font-size: 15px; }
+    .staff_profile_completion > div:last-child strong, .staff_profile_completion small { display: block; font-size: 10px; color: #2d4b70; }
+    .staff_profile_completion small { margin-top: 4px; color: #8799ad; font-size: 9px; }
+    .staff_profile_progress_row, .staff_profile_fact { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid #edf2f7; font-size: 10px; }
+    .staff_profile_progress_row:last-child, .staff_profile_fact:last-child { border-bottom: 0; }
+    .staff_profile_progress_row span, .staff_profile_fact span { color: #68809b; }
+    .staff_profile_progress_row strong, .staff_profile_fact strong { color: #24456f; text-align: right; font-weight: 700; overflow-wrap: anywhere; }
+    .staff_profile_quick_action { display: flex; align-items: center; width: 100%; gap: 9px; border: 1px solid #e7edf4; border-radius: 7px; background: #fff; color: #315477; padding: 10px; margin-top: 7px; text-align: left; font-size: 10px; &:hover { border-color: #8dbcf4; background: #f8fbff; } .fa:first-child { color: #0767e3; } .fa:last-child { margin-left: auto; color: #8195ac; } }
+    .staff_profile_alert { display: flex; justify-content: space-between; gap: 12px; padding: 12px; margin-bottom: 14px; border: 1px solid #ffd7d7; border-radius: 8px; background: #fff3f3; color: #a72a33; button { border: 0; background: none; color: inherit; font-weight: 700; } }
+    .staff_profile_loading { padding: 30px; text-align: center; color: #7289a4; } .staff_profile_loading.compact { padding: 10px; }
+    .staff_profile_empty { max-width: 540px; margin: 70px auto; padding: 38px; text-align: center; h2 { margin: 12px 0 5px; color: #173566; font-size: 19px; } p { color: #778ba3; margin: 0 0 18px; } }
+    .staff_profile_empty_icon { display: inline-grid; place-items: center; width: 50px; height: 50px; border-radius: 14px; background: #eaf3ff; color: #0866df; font-size: 20px; }
+    @media(max-width: 1250px) { .staff_profile_layout { grid-template-columns: minmax(0,1fr) 260px; } .staff_profile_metrics { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+    @media(max-width: 950px) { padding: 18px 16px 35px; .staff_profile_layout { grid-template-columns: 1fr; } .staff_profile_aside { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: start; } }
+    @media(max-width: 680px) { .staff_profile_topline, .staff_profile_hero { align-items: flex-start; grid-template-columns: 1fr; } .staff_profile_controls { width: 100%; } .staff_profile_hero_actions { width: 100%; flex-wrap: wrap; } .staff_profile_metrics { grid-template-columns: 1fr 1fr; } .staff_profile_fields { grid-template-columns: repeat(2,minmax(0,1fr)); } .staff_profile_aside { grid-template-columns: 1fr; } .staff_profile_panel { padding: 14px 12px; } .staff_profile_panel > header { align-items: flex-start; } }
+    @media(max-width: 420px) { .staff_profile_metrics, .staff_profile_fields { grid-template-columns: 1fr; } h1 { font-size: 22px; } .staff_profile_identity_copy h2 { font-size: 17px; } .staff_profile_sections { overflow-x: auto; flex-wrap: nowrap; } .staff_profile_sections a { white-space: nowrap; } }
+}
+
+// The client action owns the scroll area; Odoo clips overflowing action content.
+.campus_staff_profile {
+    height: calc(100vh - 46px) !important;
+    max-height: calc(100vh - 46px);
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scroll-behavior: smooth;
+    .staff_profile_crumb { margin-bottom: 16px; }
+    h1 { font-size: 23px; }
+    .staff_profile_sections { align-items: center; gap: 0; border-bottom: 1px solid #dce8f6; margin: 0 0 16px; }
+    .staff_profile_sections button { border: 0; border-bottom: 3px solid transparent; padding: 12px 16px; background: transparent; color: #526f93; font-weight: 750; font-size: 11px; white-space: nowrap; }
+    .staff_profile_sections button i { margin-right: 7px; }
+    .staff_profile_sections button:hover, .staff_profile_sections button.active { color: #0866d8; border-bottom-color: #0866d8; background: #edf6ff; }
+    .staff_profile_sections .staff_profile_print { margin-left: auto; }
+    .staff_profile_sections .staff_profile_print, .staff_profile_sections .staff_profile_refresh { border: 1px solid #dae7f5; border-radius: 7px; padding: 8px 12px; margin-bottom: 4px; background: white; }
+    .staff_profile_sections .staff_profile_refresh { margin-left: 7px; }
+    .staff_profile_hero { grid-template-columns: minmax(0,1fr) auto; padding: 22px 24px 0; gap: 15px; }
+    .staff_profile_avatar { background: #eaf4ff; }
+    .staff_profile_hero_facts { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); border-top: 1px solid #e8eef7; margin: 4px -24px 0; padding: 15px 24px; gap: 13px 20px; }
+    .staff_profile_hero_facts > div { min-width: 0; display: flex; align-items: center; gap: 9px; color: #1367c2; }
+    .staff_profile_hero_facts i { display: grid; place-items: center; flex: none; width: 27px; height: 27px; border-radius: 7px; background: #eef6ff; }
+    .staff_profile_hero_facts span { color: #7991ac; font-size: 10px; }
+    .staff_profile_hero_facts strong { display: block; margin-top: 3px; color: #24476e; font-size: 11px; overflow-wrap: anywhere; }
+    .staff_profile_metrics { grid-template-columns: repeat(4,minmax(0,1fr)); }
+    .staff_profile_metric { min-height: 91px; gap: 9px; padding: 12px; }
+    .staff_profile_metric strong { font-size: 19px; }
+    .staff_profile_metric .staff_profile_date { font-size: 13px; }
+    .staff_profile_divider { display: flex; align-items: end; justify-content: space-between; gap: 15px; margin: 29px 0 15px; scroll-margin-top: 18px; }
+    .staff_profile_divider h2 { margin: 0; font-size: 20px; color: #113467; }
+    .staff_profile_divider p { margin: 5px 0 0; color: #738ba5; font-size: 11px; }
+    .staff_profile_divider > span { flex: none; padding: 6px 10px; border-radius: 20px; color: #0861d0; background: #eaf3ff; font-size: 10px; font-weight: 800; }
+    .staff_profile_layout { grid-template-columns: minmax(0,1fr) minmax(230px,31%); margin-bottom: 15px; }
+    .staff_profile_panel h3 { font-size: 13px; }
+    .staff_profile_panel { scroll-margin-top: 20px; }
+    .staff_profile_panel > header { border-bottom: 1px solid #e9f0f8; padding-bottom: 12px; }
+    .staff_profile_fields { grid-template-columns: repeat(3,minmax(0,1fr)); }
+    .staff_profile_field { padding: 9px 4px; border-top: 0; }
+    .staff_profile_field label { font-weight: 700; color: #657f9c; }
+    .staff_profile_field strong { min-height: 28px; border: 1px solid #e5edf7; border-radius: 6px; padding: 7px 8px; background: #fbfdff; }
+    .staff_profile_notice { padding: 10px; border-radius: 7px; border: 1px solid #d7eafa; background: #f1f9ff; color: #366387; font-size: 10px; line-height: 1.45; }
+    .staff_profile_fact button { border: 0; background: none; color: #0866d8; font-size: 10px; font-weight: 700; }
+    .staff_profile_verify_boxes { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 5px; margin-top: 13px; }
+    .staff_profile_verify_boxes div { text-align: center; padding: 8px 3px; border: 1px solid #e5edf7; background: #f5f9fd; border-radius: 7px; color: #66819c; font-size: 9px; }
+    .staff_profile_verify_boxes strong { display: block; color: #10975b; font-size: 17px; }
+    .staff_profile_verify_boxes div:nth-child(2) strong { color: #d98a11; }
+    .staff_profile_verify_boxes div:nth-child(3) strong { color: #d44858; }
+    .staff_profile_activity { display: flex; gap: 8px; border-bottom: 1px solid #eaf0f7; padding: 8px 0; }
+    .staff_profile_activity > span { width: 8px; height: 8px; margin-top: 4px; flex: none; border-radius: 50%; background: #149668; }
+    .staff_profile_activity strong, .staff_profile_activity small { display: block; font-size: 10px; }
+    .staff_profile_activity small { margin-top: 3px; color: #8296ad; }
+    .staff_profile_footer { text-align: center; color: #8a9eb5; padding: 25px 0 5px; font-size: 10px; }
+    @media (max-width: 1180px) { .staff_profile_metrics { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+    @media (max-width: 850px) { .staff_profile_layout { grid-template-columns: 1fr; } .staff_profile_hero_facts { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+    @media (max-width: 680px) { .staff_profile_sections { overflow-x: auto; } .staff_profile_sections .staff_profile_print { margin-left: 5px; } .staff_profile_hero_facts { grid-template-columns: 1fr; } .staff_profile_metrics { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+}
+
+@media print { .campus_staff_profile { height: auto !important; max-height: none; overflow: visible !important; } .campus_staff_profile .staff_profile_sections, .campus_staff_profile button { display: none !important; } }
+
