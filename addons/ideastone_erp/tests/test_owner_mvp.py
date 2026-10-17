@@ -239,6 +239,9 @@ class TestOwnerMVP(TransactionCase):
         self.env["campus.dashboard"].with_user(self.readonly).get_owner_metrics()
         with self.assertRaises(AccessError):
             self.env["campus.dashboard"].with_user(self.readonly).get_owner_action("base.action_res_users")
+        admission_overview = self.env["campus.dashboard"].with_user(self.admissions).get_overview()
+        actions = {item.get("action") for module in admission_overview["faculty_modules"] for item in module["items"]}
+        self.assertNotIn("ideastone_erp.mvp_report_collection", actions)
 
     def test_dashboard_kpi_reconciles_with_saved_records_and_source(self):
         app = self.enrolled()

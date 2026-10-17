@@ -54,6 +54,9 @@ class OwnerDashboard(models.AbstractModel):
                     continue
                 if action in {"mvp_college", "mvp_import_students", "mvp_requirements"} and not self.env.user.has_group("ideastone_erp.group_mvp_registrar"):
                     continue
+                report_model = {"mvp_report_admissions": "op.admission", "mvp_report_students": "op.student", "mvp_report_attendance": "op.attendance.line", "mvp_report_collection": "account.payment", "mvp_report_dues": "account.move", "mvp_report_results": "op.result.line", "mvp_report_faculty": "op.faculty"}.get(action)
+                if report_model and not self.env[report_model].check_access_rights("read", raise_exception=False):
+                    continue
                 if not self.env[ref.res_model].check_access_rights("read", raise_exception=False):
                     continue
                 item = {"label": title, "action": ref.get_external_id()[ref.id], "action_id": ref.id, "model": ref.res_model, "group": label, "allowed": True}
