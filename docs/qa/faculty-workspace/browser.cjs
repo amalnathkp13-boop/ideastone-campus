@@ -86,6 +86,9 @@ if (!out || !process.env.FACULTY_QA_PASSWORD) throw Error('Disposable QA configu
         await page.locator('.campus_sidebar:not(.is-open)').waitFor({state:'attached'});
         await page.locator('.campus_sidebar').waitFor({state:'hidden'});
         await page.screenshot({path:path.join(out,'faculty-mobile-390.png')});
+        await fs.writeFile(path.join(out,'mobile-dom.html'),await page.content());
+        const unobscured=await page.evaluate(()=>Boolean(document.elementFromPoint(window.innerWidth/2,window.innerHeight/2)?.closest('.o_list_view')));
+        if(!unobscured) throw Error('An unexpected overlay covers the faculty list');
         const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);
         if(overflow) throw Error('Faculty document overflows mobile viewport');
         if(errors.length) throw Error(errors.join('\n'));
@@ -94,6 +97,7 @@ if (!out || !process.env.FACULTY_QA_PASSWORD) throw Error('Disposable QA configu
     } catch (error) {
         if (page) {
             await page.screenshot({path:path.join(out,'failure.png')}).catch(()=>{});
+            await fs.writeFile(path.join(out,'failure-dom.html'),await page.content());
             await fs.writeFile(path.join(out,'failure.txt'),`${error.stack}\nURL: ${page.url()}\n${await page.locator('body').innerText().catch(()=>'')}`);
         }
         throw error;
