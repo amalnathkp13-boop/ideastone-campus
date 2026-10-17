@@ -92,6 +92,13 @@ class StudentPortal(models.AbstractModel):
     def _requests(self, student):
         return self._records("campus.service.request", [("student_id", "=", student.id), ("company_id", "=", student.company_id.id), ("requester_id", "=", self.env.uid), ("portal_type_id", "!=", False)], limit=1000, order="id desc")
 
+    def _serialize(self, student):
+        # Odoo uses REPEATABLE READ: a lock alone does not refresh a waiter's
+        # snapshot. Touch a dedicated revision so a concurrent stale transaction
+        # is retried by Odoo before it checks for an existing request/read/feedback.
+        self.env.cr.execute("UPDATE op_student SET campus_portal_revision=COALESCE(campus_portal_revision,0)+1 WHERE id=%s", [student.id])
+        student.invalidate_recordset(["campus_portal_revision"])
+
     def _types(self, student):
         types = self.with_context(active_test=False)._records("campus.student.request.type", ["|", ("company_id", "=", False), ("company_id", "=", student.company_id.id)], limit=100, order="sequence, name")
         overrides = set(types.filtered("company_id").mapped("code"))
@@ -213,7 +220,7 @@ class StudentPortal(models.AbstractModel):
             notice = self._notice_records(student).filtered(lambda n: n.id == int(payload.get("notice_id") or 0))
             if not notice:
                 raise AccessError(_("This notice is not available to your account."))
-            self.env.cr.execute("SELECT id FROM op_student WHERE id=%s FOR UPDATE", [student.id])
+            self._serialize(student)
             existing = self.env["campus.student.notice.read"].sudo().search([("student_id", "=", student.id), ("notice_id", "=", notice.id)])
             if payload.get("read", True) and not existing:
                 self.env["campus.student.notice.read"].sudo().create({"student_id": student.id, "notice_id": notice.id})
@@ -244,7 +251,7 @@ class StudentPortal(models.AbstractModel):
             score = int(payload.get("score") or 0)
             if not period or len(period) > 80 or not 1 <= score <= 5 or len(comments) > 5000:
                 raise ValidationError(_("Enter a period, a rating from 1 to 5 and comments within 5,000 characters."))
-            self.env.cr.execute("SELECT id FROM op_student WHERE id=%s FOR UPDATE", [student.id])
+            self._serialize(student)
             if self.env["campus.feedback"].sudo().search_count([("respondent_id", "=", self.env.uid), ("company_id", "=", student.company_id.id), ("kind", "=", "student"), ("period", "=", period), ("faculty_id", "=", False)]):
                 raise ValidationError(_("Feedback has already been submitted for this period."))
             self.env["campus.feedback"].sudo().create({"name": "Student feedback: " + period, "student_id": student.id, "respondent_id": self.env.uid, "company_id": student.company_id.id, "kind": "student", "period": period, "score": score, "comments": comments})
@@ -253,7 +260,7 @@ class StudentPortal(models.AbstractModel):
         return {"saved": True}
 
     def _create_request(self, student, payload):
-        self.env.cr.execute("SELECT id FROM op_student WHERE id=%s FOR UPDATE", [student.id])
+        self._serialize(student)
         key = str(payload.get("key") or "")
         if not re.fullmatch(r"[0-9a-f]{32}", key):
             raise ValidationError(_("Reload the request form before submitting."))

@@ -26,6 +26,14 @@ async function visit(page, section) {
     assert.equal(await page.locator('.student_network_error:visible').count(),0);
 }
 async function snapshot(page) {return rpc(page,'campus.student.portal','snapshot');}
+async function save(page, control) {
+    const previous=await page.locator('#campus_student_workspace').elementHandle();
+    try {
+        await control.click();
+        await page.waitForFunction(element=>!element.isConnected,previous);
+        await page.getByText('Your changes have been saved.',{exact:true}).waitFor();
+    } finally {await previous.dispose();}
+}
 (async()=>{
     await fs.mkdir(out,{recursive:true});
     const browser=await chromium.launch({headless:true});
@@ -48,6 +56,9 @@ async function snapshot(page) {return rpc(page,'campus.student.portal','snapshot
         const cache=await page.request.get(base+'/my/campus/student/dashboard');
         assert.match(cache.headers()['cache-control'],/no-store/);
         await page.screenshot({path:path.join(out,'student-dashboard-1440.png'),fullPage:true});
+        await page.locator('.student_grid').first().evaluate(element=>element.scrollIntoView({block:'center'}));
+        await page.screenshot({path:path.join(out,'student-dashboard-details-1440.png')});
+        await page.evaluate(()=>{document.getElementById('wrapwrap')?.scrollTo({top:0});window.scrollTo(0,0);});
         const routes=initial.navigation.map(item=>item[0]);
         for(const route of routes) await visit(page,route);
         await visit(page,'timetable');
@@ -58,8 +69,7 @@ async function snapshot(page) {return rpc(page,'campus.student.portal','snapshot
         await visit(page,'profile');
         await page.locator('#profile_phone').fill('+91 90000 00123');
         await page.locator('#profile_city').fill('Coimbatore');
-        await page.getByRole('button',{name:'Save contact details'}).click();
-        await page.getByText('Your changes have been saved.',{exact:true}).waitFor();
+        await save(page,page.getByRole('button',{name:'Save contact details'}));
         await page.reload();
         assert.equal(await page.locator('#profile_city').inputValue(),'Coimbatore');
         assert.equal((await snapshot(page)).student.phone,'+91 90000 00123');
@@ -68,8 +78,8 @@ async function snapshot(page) {return rpc(page,'campus.student.portal','snapshot
         await assert.rejects(()=>rpc(page,'campus.dashboard','get_owner_metrics'));
         await page.screenshot({path:path.join(out,'student-profile-1440.png'),fullPage:true});
         await visit(page,'notices');
-        await page.getByRole('button',{name:'Mark read',exact:true}).first().click();
-        await page.getByText('Your changes have been saved.',{exact:true}).waitFor();
+        assert(await page.locator('#student_main h1').evaluate(element=>element.getBoundingClientRect().top>=120),'Navigation did not reset the native portal scroll container');
+        await save(page,page.getByRole('button',{name:'Mark read',exact:true}).first());
         assert.equal((await snapshot(page)).unread,initial.unread-1);
         await visit(page,'requests');
         const kind=initial.request_types.find(item=>item.code==='bonafide') || initial.request_types[0];
@@ -77,8 +87,7 @@ async function snapshot(page) {return rpc(page,'campus.student.portal','snapshot
         await page.locator('#student_request_title').fill('Bonafide for scholarship verification');
         await page.locator('#student_request_description').fill('Please issue an official bonafide certificate for the scholarship office.');
         await page.locator('#student_request_file').setInputFiles({name:'support.txt',mimeType:'text/plain',buffer:Buffer.from('Synthetic student supporting document.')});
-        await page.getByRole('button',{name:'Submit request',exact:true}).click();
-        await page.getByText('Your changes have been saved.',{exact:true}).waitFor();
+        await save(page,page.getByRole('button',{name:'Submit request',exact:true}));
         let data=await snapshot(page);
         assert.equal(data.requests.length,1);
         const record=data.requests[0];
@@ -94,8 +103,8 @@ async function snapshot(page) {return rpc(page,'campus.student.portal','snapshot
         await page.reload();
         await page.locator('.student_case summary').first().click();
         await page.locator('textarea[name=reply]').fill('Scholarship office, QA Demo College');
-        await page.getByRole('button',{name:'Send information',exact:true}).click();
-        await page.getByText('Your changes have been saved.',{exact:true}).waitFor();
+        await save(page,page.getByRole('button',{name:'Send information',exact:true}));
+        assert.equal((await snapshot(page)).requests.find(item=>item.id===record.id).state,'submitted');
         await rpc(staff,'campus.service.request','action_approve',[[record.id]]);
         await rpc(staff,'campus.service.request','write',[[record.id],{portal_reply:'Your bonafide certificate is ready.',portal_result_file:Buffer.from('Official synthetic certificate for QA Arun.').toString('base64'),portal_result_filename:'bonafide.txt'}]);
         await rpc(staff,'campus.service.request','action_portal_ready',[[record.id]]);
@@ -103,6 +112,14 @@ async function snapshot(page) {return rpc(page,'campus.student.portal','snapshot
         await page.locator('.student_case summary').first().click();
         const final=await page.request.get(base+`/my/campus/student/download/request/${record.id}`);
         assert.equal(final.status(),200); assert.match(await final.text(),/QA Arun/);
+        const support=initial.request_types.find(item=>item.code==='support');
+        const attempt={type_id:support.id,key:(await snapshot(page)).submission_key,title:'Student support QA',description:'Concurrent first submission from two tabs.'};
+        const simultaneous=await Promise.all([
+            rpc(page,'campus.student.portal','act',['request',attempt]),
+            rpc(page,'campus.student.portal','act',['request',{...attempt,key:require('node:crypto').randomUUID().replaceAll('-','')}])
+        ]);
+        assert.equal(simultaneous[0].reference,simultaneous[1].reference);
+        assert.equal((await snapshot(page)).requests.filter(item=>item.type_id===support.id).length,1);
         await page.screenshot({path:path.join(out,'student-requests-1440.png'),fullPage:true});
         await visit(page,'fees');
         const receipts=(await snapshot(page)).fees.payments;

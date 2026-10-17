@@ -48,6 +48,8 @@
             document.title = html.title || document.title;
             enhance();
             document.getElementById("student_main")?.focus({preventScroll: true});
+            // Native portal pages scroll inside #wrapwrap rather than the window.
+            document.getElementById("wrapwrap")?.scrollTo({top: 0});
             window.scrollTo({top: 0});
         } catch (error) {
             if (error.name === "AbortError") return;

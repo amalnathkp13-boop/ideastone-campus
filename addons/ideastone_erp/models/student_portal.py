@@ -20,6 +20,7 @@ class StudentPortalPreferences(models.Model):
     campus_notice_badge = fields.Boolean(default=True, string="Show unread notice badge")
     campus_request_seen_at = fields.Datetime(readonly=True)
     campus_request_seen_event = fields.Integer(readonly=True, default=0)
+    campus_portal_revision = fields.Integer(readonly=True, default=0)
 
 
 class StudentRequestType(models.Model):
