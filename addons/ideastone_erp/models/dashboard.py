@@ -106,7 +106,9 @@ class Dashboard(models.AbstractModel):
             count = self.env["campus.responsibility"].search_count([("state", "=", "requested"), ("company_id", "=", self.env.company.id)])
             queues.append({"label": "Faculty role requests", "count": count, "detail": "Appointments awaiting independent approval", "action": "ideastone_erp.action_responsibilities"})
         quick = [x for x in visible if x["allowed"] and x["label"] in ("Admissions", "Class attendance", "Timetable", "Fee invoices", "Mentor counseling", "Lesson plans")][:4]
+        faculty_modules = self._faculty_modules(visible, faculty, pages) if faculty and not admin else []
         return {"company": self.env.company.name, "user": self.env.user.name,
+                "faculty_modules": faculty_modules,
                 "navigation": visible, "stats": stats, "pages": pages, "queues": queues, "quick": quick,
                 "is_admin": admin, "workspace_role": "College administrator" if admin else "Faculty" if faculty else "Staff",
                 "today": fields.Date.to_string(fields.Date.context_today(self)), "library_allowed": library,
@@ -114,3 +116,78 @@ class Dashboard(models.AbstractModel):
                 "payroll_allowed": self.env["campus.payslip"].check_access_rights("read", raise_exception=False),
                 "appointments": [{"id": r.id, "faculty": r.faculty_id.name, "role": "Library In-charge", "scope": ", ".join(r.media_type_ids.mapped("name")),
                                   "state": r.state, "effective": r.effective, "until": str(r.date_to)} for r in appointments]}
+
+    def _faculty_modules(self, visible, faculty, pages):
+        """Navigation is discovery only. Every action keeps its model ACLs and record rules."""
+        definitions = [
+            ("home", "Home", "home", []),
+            ("teaching", "My task list", "graduation-cap", ["Academic management", "Examination & results", "Mentorship & student support"]),
+            ("staff", "My profile & payroll", "user", ["HR & payroll"]),
+            ("library", "Library & learning", "book", ["Library & learning"]),
+            ("services", "Campus services", "building-o", ["Campus services"]),
+            ("engagement", "Communication", "comments-o", ["Communication & student portal"]),
+            ("reports", "Reports", "bar-chart", []),
+            ("help", "Help", "question-circle", []),
+        ]
+        result = []
+        for key, label, icon, groups in definitions:
+            items = [dict(item, action_id=self.env.ref(item["action"]).id) for item in visible
+                     if item["allowed"] and item["group"] in groups]
+            if key == "home":
+                items = [{"label": "Faculty overview", "page": "overview"}, {"label": "Find a module", "page": "modules"}]
+            elif key == "teaching" and self.env["campus.faculty.task"].check_access_rights("read", raise_exception=False):
+                items.insert(0, {"label": "My tasks & e-diary", "action": "ideastone_erp.action_faculty_task",
+                                 "action_id": self.env.ref("ideastone_erp.action_faculty_task").id})
+            elif key == "staff":
+                items.insert(0, {"label": "My staff profile", "profile_id": faculty.id})
+            elif key == "library" and any(p["key"] == "library" for p in pages):
+                items.insert(0, {"label": "Circulation desk", "page": "library"})
+            elif key == "reports":
+                items = [{"label": "Reports & exports", "page": "reports"}]
+            elif key == "help":
+                items = [{"label": "Faculty guide", "page": "help"}]
+            if key == "teaching":
+                tools = [("assigned_students", "My assigned students", "op.student"),
+                         ("subject_attendance", "Subject-wise attendance", "op.attendance.sheet"),
+                         ("alternate", "Alternate hour", "campus.service.request"),
+                         ("club", "Club functions & attendance", "campus.faculty.activity"),
+                         ("sdp", "SDP functions & attendance", "campus.faculty.activity"),
+                         ("vac", "VAC & placement training", "campus.faculty.activity"),
+                         ("certificates", "Exam certificates", "campus.faculty.document"),
+                         ("question_papers", "Question papers", "campus.faculty.document"),
+                         ("answer_keys", "Answer keys", "campus.faculty.document"),
+                         ("holidays", "College holidays", "resource.calendar.leaves")]
+                for tool, title, model in tools:
+                    if self.env[model].check_access_rights("read", raise_exception=False):
+                        items.append({"label": title, "tool": tool})
+            if items:
+                result.append({"key": key, "label": label, "icon": icon, "items": items})
+        return result
+
+    @api.model
+    def get_faculty_action(self, tool):
+        faculty = self.env["op.faculty"].search([("user_id", "=", self.env.uid)], limit=1)
+        if not faculty or not self.env.user.has_group("openeducat_core.group_op_faculty"):
+            raise AccessError(_("A linked faculty account is required."))
+        specs = {
+            "assigned_students": ("My assigned students", "op.student", [], {}),
+            "subject_attendance": ("Subject-wise attendance", "op.attendance.sheet", [("faculty_id", "=", faculty.id)], {"group_by": "campus_subject_id"}),
+            "alternate": ("Alternate teaching hour", "campus.service.request", [("kind", "=", "alternate")], {"default_kind": "alternate", "default_faculty_id": faculty.id}),
+            "club": ("Club functions & attendance", "campus.faculty.activity", [("kind", "=", "club")], {"default_kind": "club"}),
+            "sdp": ("SDP functions & attendance", "campus.faculty.activity", [("kind", "=", "sdp")], {"default_kind": "sdp"}),
+            "vac": ("VAC & placement training", "campus.faculty.activity", [("kind", "=", "vac")], {"default_kind": "vac"}),
+            "certificates": ("Exam certificates", "campus.faculty.document", [("kind", "=", "certificate")], {"default_kind": "certificate"}),
+            "question_papers": ("Question papers", "campus.faculty.document", [("kind", "=", "question")], {"default_kind": "question"}),
+            "answer_keys": ("Answer keys", "campus.faculty.document", [("kind", "=", "answer")], {"default_kind": "answer"}),
+            "holidays": ("College holidays", "resource.calendar.leaves", [("resource_id", "=", False)], {}),
+        }
+        if tool not in specs:
+            raise AccessError(_("Unknown faculty workspace."))
+        label, model, domain, context = specs[tool]
+        self.env[model].check_access_rights("read")
+        if tool == "assigned_students":
+            batches = self.env["op.session"].search([("faculty_id", "=", faculty.id)]).batch_id
+            domain = [("course_detail_ids.batch_id", "in", batches.ids)]
+        return {"type": "ir.actions.act_window", "name": label, "res_model": model,
+                "views": [(False, "tree"), (False, "form")], "domain": domain,
+                "context": dict(self.env.context, **context, campus_module="teaching", campus_tool=tool)}

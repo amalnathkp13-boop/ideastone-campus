@@ -1,10 +1,12 @@
 from odoo.exceptions import AccessError, ValidationError
 
-from odoo import _, api, models
+from odoo import _, api, fields, models
 
 
 class AttendanceSheet(models.Model):
     _inherit = "op.attendance.sheet"
+
+    campus_subject_id = fields.Many2one(related="session_id.subject_id", store=True, string="Subject")
 
     @api.constrains("faculty_id", "session_id", "register_id")
     def _check_teaching_allocation(self):

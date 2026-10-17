@@ -166,5 +166,29 @@
     "label": "Mark reviews and revaluation",
     "group": "Academics",
     "action": "ideastone_erp.action_exam_review"
+  },
+  {
+    "model": "campus.faculty.activity",
+    "label": "Club, SDP & placement activities",
+    "group": "Academics",
+    "action": "ideastone_erp.action_faculty_activity"
+  },
+  {
+    "model": "campus.faculty.document",
+    "label": "Exam certificates, papers & answer keys",
+    "group": "Academics",
+    "action": "ideastone_erp.action_faculty_document"
+  },
+  {
+    "model": "campus.faculty.assessment",
+    "label": "Internal mark calculation",
+    "group": "Academics",
+    "action": "ideastone_erp.action_faculty_assessment"
+  },
+  {
+    "model": "campus.student.leave",
+    "label": "Student leave approvals",
+    "group": "Campus services",
+    "action": "ideastone_erp.action_student_leave"
   }
 ]

@@ -164,5 +164,26 @@ class TestVcetWorkspace(TransactionCase):
         self.assertFalse(overview["is_admin"])
         self.assertNotIn("access", [p["key"] for p in overview["pages"]])
         self.assertFalse(overview["library_allowed"])
+        self.assertIn("teaching", [module["key"] for module in overview["faculty_modules"]])
+        for module in overview["faculty_modules"]:
+            for item in module["items"]:
+                if item.get("action"):
+                    self.assertEqual(self.env.ref(item["action"]).id, item["action_id"])
+        self.assertFalse(self.env["campus.dashboard"].with_user(self.admin).get_overview()["faculty_modules"])
         with self.assertRaises(AccessError):
             self.env["campus.library.desk"].with_user(self.other_teacher).get_desk()
+
+    def test_personal_diary_is_private_and_persistent(self):
+        tasks = self.env["campus.faculty.task"].with_user(self.teacher)
+        task = tasks.create({"name": "Prepare next lesson", "kind": "teaching", "notes": "Planning notes"})
+        task.write({"state": "progress"})
+        self.assertEqual(task.state, "progress")
+        self.assertEqual(task.user_id, self.teacher)
+        with self.assertRaises(AccessError):
+            task.with_user(self.other_teacher).read(["notes"])
+        with self.assertRaises(AccessError):
+            tasks.create({"name": "Forged owner", "user_id": self.other_teacher.id})
+        with self.assertRaises(AccessError):
+            task.write({"user_id": self.other_teacher.id})
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            tasks.create({"name": "Invalid dates", "date": "2026-10-17", "deadline": "2026-10-16"})
