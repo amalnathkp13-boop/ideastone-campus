@@ -298,7 +298,8 @@ class TestVcetWorkspace(TransactionCase):
             "exam_code": "FACQA", "start_time": "2035-01-02 10:00:00", "end_time": "2035-01-02 11:00:00",
             "total_marks": 100, "min_marks": 40, "responsible_id": [(6, 0, self.faculty.ids)], "campus_exam_kind": "university"})
         own = self.env["op.result.line"].create({"exam_id": exam.id, "student_id": self.student.id, "marks": 75})
-        foreign_exam = exam.copy({"exam_code": "FACQA-OTHER", "responsible_id": [(5, 0, 0)]})
+        foreign_exam = exam.copy({"exam_code": "FACQA-OTHER", "responsible_id": [(5, 0, 0)],
+            "start_time": "2035-01-03 10:00:00", "end_time": "2035-01-03 11:00:00"})
         foreign = self.env["op.result.line"].create({"exam_id": foreign_exam.id, "student_id": self.student.id, "marks": 90})
         dashboard = self.env["campus.dashboard"].with_user(self.teacher)
         action = dashboard.get_faculty_action("report_university")
