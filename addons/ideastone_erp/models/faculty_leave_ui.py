@@ -1,7 +1,8 @@
 from collections import Counter
 
-from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError
+
+from odoo import _, api, fields, models
 
 
 class FacultyLeaveUI(models.AbstractModel):
@@ -134,8 +135,8 @@ class FacultyLeaveUI(models.AbstractModel):
         try:
             start = fields.Date.to_date(values.get("date_from"))
             end = fields.Date.to_date(values.get("date_to"))
-        except (TypeError, ValueError):
-            raise UserError(_("Enter valid leave dates."))
+        except (TypeError, ValueError) as exc:
+            raise UserError(_("Enter valid leave dates.")) from exc
         if not start or not end or end < start:
             raise UserError(_("The end date must be on or after the start date."))
         first = values.get("from_session")
