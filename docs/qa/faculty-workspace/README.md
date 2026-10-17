@@ -22,7 +22,7 @@ The source is the VCET staff screenshot folder in `docs/erp-reference-register.c
 | My chronicle | Own faculty achievements from the current calendar year |
 | University exam / autonomous ESE reports | Results filtered by explicitly classified examinations; old examinations remain Unclassified until an authorized operator classifies them |
 | Payroll | Read-only own approved/completed salary slips and own salary agreement; HR retains payroll actions |
-| Report output | Existing immutable attendance PDF/CSV snapshots and payroll PDF; native filtered lists and exports for other report categories |
+| Report output | Internal assessment PDF with score/weight breakdown; existing immutable attendance PDF/CSV snapshots and payroll PDF; native filtered lists and exports for other report categories |
 
 ## Inferred workflows
 

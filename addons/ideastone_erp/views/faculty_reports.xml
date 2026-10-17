@@ -1,4 +1,32 @@
 <odoo>
+  <record id="report_faculty_assessment" model="ir.actions.report">
+    <field name="name">Internal assessment statement</field>
+    <field name="model">campus.faculty.assessment</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">ideastone_erp.faculty_assessment_document</field>
+    <field name="binding_model_id" ref="model_campus_faculty_assessment"/>
+    <field name="binding_type">report</field>
+  </record>
+  <template id="faculty_assessment_document">
+    <t t-call="web.html_container"><t t-foreach="docs" t-as="o"><t t-call="web.external_layout">
+      <div class="page">
+        <h2>Internal assessment statement</h2>
+        <p>Faculty calculation · not an issued examination result</p>
+        <h3 t-field="o.name"/>
+        <table class="table table-sm"><tbody>
+          <tr><th>Student</th><td t-field="o.student_id.name"/><th>Subject</th><td t-field="o.subject_id.name"/></tr>
+          <tr><th>Academic year</th><td t-field="o.academic_year"/><th>Semester</th><td t-field="o.semester"/></tr>
+          <tr><th>Assessment</th><td t-field="o.kind"/><th>Status</th><td t-field="o.state"/></tr>
+        </tbody></table>
+        <table class="table table-sm"><thead><tr><th>Component</th><th>Score</th><th>Maximum</th><th>Weight (%)</th></tr></thead><tbody>
+          <tr t-foreach="o.component_ids" t-as="line"><td t-field="line.name"/><td t-field="line.score"/><td t-field="line.maximum"/><td t-field="line.weight"/></tr>
+        </tbody></table>
+        <p>Weighted mark: <strong t-field="o.total"/> / <span t-field="o.output_maximum"/></p>
+        <p>Total component weight: <span t-field="o.weight_total"/>%</p>
+        <p>Calculated using each component's score / maximum × weight / 100 × output maximum.</p>
+      </div>
+    </t></t></t>
+  </template>
   <record id="view_student_education_tree" model="ir.ui.view">
     <field name="name">campus.student.education.tree</field>
     <field name="model">campus.student.education</field>

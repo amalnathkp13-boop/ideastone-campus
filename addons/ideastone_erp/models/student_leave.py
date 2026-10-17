@@ -90,7 +90,7 @@ class StudentLeave(models.Model):
                 if target == "rejected" and not rec.decision_reason:
                     raise ValidationError(_("Record a rejection reason first."))
                 entry = f"{fields.Datetime.now()} | {self.env.user.name} | {rec.state} -> {target} | {rec.decision_reason or ''}"
-                super(StudentLeave, rec).write({"decision_log": (rec.decision_log or "") + entry + "\n"})
+                super(StudentLeave, rec).write({"decision_log": (rec.decision_log or "") + entry + "\n", "decision_reason": False})
         elif any(rec.state != "draft" for rec in self) and set(vals) - {"decision_reason", "message_ids", "message_follower_ids", "activity_ids"}:
             raise ValidationError(_("Submitted leave details are locked; file a revised request if needed."))
         return super().write(vals)

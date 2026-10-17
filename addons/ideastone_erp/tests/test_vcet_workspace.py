@@ -207,6 +207,9 @@ class TestVcetWorkspace(TransactionCase):
         record = assessments.create(vals)
         self.assertAlmostEqual(record.total, 21)
         record.write({"state": "done"})
+        html, _kind = self.env["ir.actions.report"].with_user(self.teacher)._render_qweb_html("ideastone_erp.report_faculty_assessment", record.ids)
+        self.assertIn(b"QA internal marks", html)
+        self.assertIn(b"21.00", html)
         with self.assertRaises(AccessError):
             record.with_user(self.other_teacher).read(["total"])
         with self.assertRaises(ValidationError), self.cr.savepoint():
@@ -272,6 +275,29 @@ class TestVcetWorkspace(TransactionCase):
         self.assertIn(self.student.id, self.env["op.student"].with_user(self.teacher).search(photos["domain"]).ids)
         with self.assertRaises(AccessError):
             dashboard.get_faculty_action("arbitrary_model")
+
+    def test_timetable_read_is_own_only_and_does_not_allow_mutation(self):
+        batch, _subject = self.faculty_class_fixture()
+        session = self.env["op.session"].search([("batch_id", "=", batch.id)], limit=1)
+        self.assertEqual(session.with_user(self.teacher).read(["batch_id"])[0]["batch_id"][0], batch.id)
+        with self.assertRaises(AccessError):
+            session.with_user(self.other_teacher).read(["batch_id"])
+        with self.assertRaises(AccessError):
+            session.with_user(self.teacher).write({"state": "confirm"})
+
+    def test_student_complaint_identity_and_required_category(self):
+        requests = self.env["campus.service.request"].with_user(self.teacher)
+        vals = {"name": "QA student complaint", "kind": "student_complaint", "student_id": self.student.id,
+                "description": "QA complaint evidence", "complaint_category": "Attendance concern"}
+        complaint = requests.create(vals)
+        complaint.action_submit()
+        self.assertEqual(complaint.state, "submitted")
+        with self.assertRaises(AccessError):
+            complaint.write({"requester_id": self.other_teacher.id})
+        with self.assertRaises(AccessError):
+            requests.create(dict(vals, requester_id=self.other_teacher.id))
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            requests.create(dict(vals, complaint_category=False))
 
     def test_previous_academic_records_scope_and_scores(self):
         self.faculty_class_fixture()

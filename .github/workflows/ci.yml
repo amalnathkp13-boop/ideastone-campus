@@ -64,7 +64,9 @@ jobs:
       - name: Install all campus modules and run tests on Odoo 17
         shell: bash
         run: |
+          docker volume create faculty-ci-data
           docker run --rm --network host --entrypoint odoo \
+            -v faculty-ci-data:/var/lib/odoo \
             -v "$PWD/addons:/mnt/ideastone-addons:ro" \
             -v "$PWD/vendor/openeducat_erp:/mnt/openeducat:ro" \
             odoo:17.0 \
@@ -87,7 +89,7 @@ jobs:
           export FACULTY_QA_PASSWORD=$(openssl rand -hex 20)
           export FACULTY_QA_OUT="$RUNNER_TEMP/faculty-ui-proof"
           mkdir -p "$FACULTY_QA_OUT"
-          mounts=(-v "$PWD/addons:/mnt/ideastone-addons:ro" -v "$PWD/vendor/openeducat_erp:/mnt/openeducat:ro")
+          mounts=(-v faculty-ci-data:/var/lib/odoo -v "$PWD/addons:/mnt/ideastone-addons:ro" -v "$PWD/vendor/openeducat_erp:/mnt/openeducat:ro")
           odoo_args=(--db_host=127.0.0.1 --db_user=odoo --db_password=odoo -d ci --addons-path=/mnt/ideastone-addons,/mnt/openeducat,/usr/lib/python3/dist-packages/odoo/addons --workers=0 --max-cron-threads=0)
           docker run --rm -i --network host --entrypoint odoo "${mounts[@]}" -e FACULTY_QA_PASSWORD odoo:17.0 shell "${odoo_args[@]}" --no-http < docs/qa/faculty-workspace/seed.py
           docker run -d --name faculty-ui-ci --network host --entrypoint odoo "${mounts[@]}" odoo:17.0 "${odoo_args[@]}" --http-port=18069 --db-filter='^ci$'
@@ -103,8 +105,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          docker rm -f faculty-ui-ci
+          docker stop faculty-ui-ci
           docker run --rm --network host --entrypoint odoo \
+            -v faculty-ci-data:/var/lib/odoo \
             -v "$PWD/addons:/mnt/ideastone-addons:ro" \
             -v "$PWD/vendor/openeducat_erp:/mnt/openeducat:ro" \
             odoo:17.0 --db_host=127.0.0.1 --db_user=odoo --db_password=odoo -d ci \
@@ -118,6 +121,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/faculty-ui-proof"
           docker logs faculty-ui-ci > "$RUNNER_TEMP/faculty-ui-proof/odoo.log" 2>&1 || true
           docker rm -f faculty-ui-ci || true
+          docker volume rm faculty-ci-data || true
       - name: Preserve faculty UI evidence
         if: always()
         uses: actions/upload-artifact@v4
