@@ -1,0 +1,7 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.FacultyLeavePage">
+    <div class="campus_leave_host">
+      <iframe t-ref="leaveFrame" title="Online leave apply and status" src="/ideastone_erp/static/src/html/leave_management.html"/>
+    </div>
+  </t>
+</templates>
