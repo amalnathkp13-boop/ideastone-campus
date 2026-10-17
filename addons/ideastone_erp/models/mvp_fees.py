@@ -218,8 +218,12 @@ class FeeInvoiceLine(models.Model):
 
     def write(self, vals):
         financial_fields = {"price_unit", "quantity", "discount", "account_id", "tax_ids", "debit", "credit", "balance", "amount_currency", "partner_id", "currency_id", "move_id"}
-        if financial_fields.intersection(vals) and self.filtered(lambda r: r.move_id.state == "posted" and (r.move_id.campus_student_id or r.move_id.payment_id.campus_receipt_number)):
-            raise ValidationError(_("Posted college invoice and receipt lines cannot be overwritten. Use the documented reversal or credit note workflow."))
+        if financial_fields.intersection(vals):
+            for line in self.filtered(lambda r: r.move_id.state == "posted" and (r.move_id.campus_student_id or r.move_id.payment_id.campus_receipt_number)):
+                # Native invoice synchronization reassigns unchanged balances at
+                # posting time. Reuse its field-aware comparison, not a bypass flag.
+                if any(self.env["account.move"]._field_will_change(line, vals, name) for name in financial_fields.intersection(vals)):
+                    raise ValidationError(_("Posted college invoice and receipt lines cannot be overwritten. Use the documented reversal or credit note workflow."))
         return super().write(vals)
 
 
