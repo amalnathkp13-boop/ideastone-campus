@@ -21,7 +21,7 @@ class CampusBase extends Component {
             company: "", user: "", filter: "", open: false, page: route.page,
             is_owner_workspace: false, is_demo: false, ownerMetrics: {stats: [], years: [], setup: [], funnel: [], programmes: [], collection: [], trend: [], recent: [], notices: [], upcoming: [], due_dates: []},
             ownerFilters: {date_from: "", date_to: "", year_id: ""}, ownerError: "", ownerLoading: false,
-            faculty_modules: [], faculty_tasks: [], faculty_schedule: [], faculty_surveys: [], module: route.module, activeAction: 0, activeTool: "",
+            faculty_modules: [], faculty_tasks: [], faculty_schedule: [], faculty_surveys: [], module: route.module, activeAction: 0, activeTool: "", leavePage: false,
             busy: false, query: "", cardQuery: "", unit: "", card: "", loanPage: 0, desk: { units: [], cards: [], loans: [], next: false } });
         // Handle the drawer before Odoo's global Escape shortcut consumes the key.
         useExternalListener(window, "keydown", (event) => {
@@ -91,7 +91,7 @@ class CampusBase extends Component {
             } else if (item.profile_id) {
                 await this.action.doAction({ type: "ir.actions.act_window", res_model: "op.faculty", res_id: item.profile_id, views: [[false, "form"]], target: "current" });
             } else {
-                await this.action.doAction(this.state.is_owner_workspace ?
+                await this.action.doAction(this.state.is_owner_workspace && item.action !== "ideastone_erp.action_faculty_leave_page" ?
                     await this.orm.call("campus.dashboard", "get_owner_action", [item.action]) : item.action);
             }
             this.state.open = false;
@@ -184,7 +184,14 @@ export class CampusNavigation extends CampusBase {
     }
     syncFacultyRoute() {
         const action = this.action.currentController?.action;
-        if (!action || action.target === "new" || !this.state.faculty_modules.length) return;
+        if (!action || action.target === "new") return;
+        const enteringLeavePage = action.tag === "ideastone_erp.faculty_leave_page" && !this.state.leavePage;
+        this.state.leavePage = action.tag === "ideastone_erp.faculty_leave_page";
+        if (enteringLeavePage) {
+            requestAnimationFrame(() => requestAnimationFrame(() =>
+                document.querySelector(".campus_sidebar.is-leave .campus_nav_link.active")?.scrollIntoView({block: "center"})));
+        }
+        if (!this.state.faculty_modules.length) return;
         this.state.activeAction = action.id || 0;
         this.state.activeTool = action.context?.campus_tool || "";
         if (action.tag === "ideastone_erp.dashboard") {
