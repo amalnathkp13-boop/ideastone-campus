@@ -44,6 +44,7 @@ async function markup(page) {
         const collectionBars=await page.locator('.campus_owner_charts section').nth(1).locator('.campus_chart_track span').evaluateAll(nodes=>nodes.map(node=>parseFloat(node.style.width)));
         if(collectionBars.length!==2 || Math.abs(collectionBars[0]-100)>0.1 || Math.abs(collectionBars[1]-200/300*100)>0.1) throw Error('Collection and dues chart does not use a common amount scale');
         await page.screenshot({path:path.join(out,'owner-charts-1440.png')});
+        if(await page.locator('.campus_dashboard').innerText().then(text=>/Â·|â€”|â†/.test(text))) throw Error('Owner template contains incorrectly decoded UTF-8 punctuation');
         await page.locator('.campus_dashboard').evaluate(element=>element.scrollTop=0);
         const modules = await page.locator('.campus_sidebar nav .campus_nav_link').allTextContents();
         if(modules.length!==12) throw Error('Owner sidebar does not contain the 12 functional MVP modules');
