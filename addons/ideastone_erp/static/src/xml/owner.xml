@@ -1,4 +1,8 @@
 <templates xml:space="preserve">
+  <!-- The upstream timed review advert obscures forms and steals keyboard focus. -->
+  <t t-inherit="web.WebClient" t-inherit-mode="extension">
+    <xpath expr="//G2Review" position="replace"/>
+  </t>
   <t t-name="ideastone_erp.OwnerOverview">
     <section class="campus_faculty_welcome"><div><span>YOUR CAMPUS, CONNECTED</span><h2>Welcome back, <t t-esc="state.user"/></h2><p>Admissions, academics and accounts, connected through saved college records.</p><span t-if="state.is_demo" class="campus_demo_label">DEMONSTRATION COLLEGE · SAMPLE DATA</span></div><i class="fa fa-university" aria-hidden="true"/></section>
     <form class="campus_owner_filters campus_panel" t-on-submit.prevent="loadOwnerMetrics">

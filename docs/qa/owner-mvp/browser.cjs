@@ -76,6 +76,7 @@ async function markup(page) {
         if(subjects.length!==1 || subjects[0].name!=='QA browser persisted subject') throw Error('Owner subject form did not persist');
         await page.reload();
         await page.locator('.o_form_view:visible').waitFor();
+        if(await page.locator('.g2_review_container').count()) throw Error('Upstream promotional dialog blocks the Owner workspace');
         await page.screenshot({path:path.join(out,'owner-subject-1440.png')});
         const apps=await rpc(page,'op.admission','search_read',[[['name','=','QA Concurrent Applicant']]],{fields:['campus_stage']});
         await Promise.all([rpc(page,'op.admission','enroll_student',[[apps[0].id]]),rpc(page,'op.admission','enroll_student',[[apps[0].id]])]);
