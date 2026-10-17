@@ -1,0 +1,29 @@
+{
+  "backend": [
+    "2026-10-17 10:16:05,899 1 INFO ci odoo.tests.result: 0 failed, 0 error(s) of 59 tests when loading database 'ci' "
+  ],
+  "run": "https://github.com/amalnathkp13-boop/ideastone-campus/actions/runs/39023993623",
+  "tested_head": "52f2aa7bea5ec4b8d9e21d9506270e36ab05e814",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "name": "lint",
+      "conclusion": "success"
+    },
+    {
+      "name": "install",
+      "conclusion": "success"
+    },
+    {
+      "name": "docker images",
+      "conclusion": "success"
+    }
+  ],
+  "upgrade": [
+    "2026-10-17 10:17:25,238 1 INFO ci odoo.modules.loading: 1 modules loaded in 0.00s, 0 queries (+0 extra) ",
+    "2026-10-17 10:17:34,881 1 INFO ci odoo.modules.loading: 114 modules loaded in 8.18s, 11194 queries (+11194 extra) ",
+    "2026-10-17 10:17:36,376 1 INFO ci odoo.modules.loading: Modules loaded. ",
+    "2026-10-17 10:17:36,384 1 INFO ci odoo.service.server: Initiating shutdown "
+  ],
+  "tested_merge": "5c8e651a1a35f4112ce55446f394fe3fb9c41643"
+}

@@ -90,3 +90,30 @@ The browser suite checks every visible destination, saved profile reload, direct
 - Library circulation is read-only. Reservations/renewal are not exposed without a supported student workflow. The catalogue currently lists up to 200 scoped titles with a local filter; staff retain the circulation desk.
 - Assignments, hostel, transport, placement and wallet are optional later-phase portal modules. They remain hidden rather than presenting empty navigation or fake balances.
 - Local Docker Desktop cannot start on this Windows host. Runtime and browser verification therefore run on the disposable Linux CI host; local checks cover Ruff, JavaScript syntax, XML and diff validation.
+
+## Verified results and actual preview
+
+[Successful full CI run](https://github.com/amalnathkp13-boop/ideastone-campus/actions/runs/39023993623) verified application head `52f2aa7bea5ec4b8d9e21d9506270e36ab05e814` through PR merge commit `5c8e651a1a35f4112ce55446f394fe3fb9c41643`. The application, workflow and browser/seed files were compared between those commits and are identical. Subsequent evidence/report commits do not change the application.
+
+| Check | Actual result |
+| --- | --- |
+| Odoo 17/PostgreSQL 16 backend suite | **59 tests; 0 failures, 0 errors**. Includes 11 Student tests and 48 existing tests. |
+| Faculty browser regressions | Passed against the actual installed ERP. |
+| Owner browser regressions | Passed, including native views/forms, reports, admission/payment concurrency and receipt PDF. |
+| Student browser workflows | All 12 visible destinations passed; saved profile reload, official-field/model denial, notice persistence, valid upload, request information/reply/approval/issued document and concurrent first submissions/retries. |
+| Security/recovery | Another student's enrolment, request and receipt were denied; CSRF rejection, failed-navigation retry and logout/back reauthentication passed. |
+| Responsive/accessibility | 1440/768/390 px checks passed; no tested page overflow, keyboard drawer dismissal, native scroll reset and sticky-header anchor clearance. No uncaught page exceptions. |
+| Financial reconciliation | Synthetic posted invoice 500, settled 400, residual 100; receipt is a real server PDF, one page, visually inspected with full readable content. These are fixture records, not application constants. |
+| Upgrade/builds | Installed database upgrade passed; Odoo and OpenOlat images built; Ruff/XML/shell/compose checks passed. Local JavaScript syntax and diff checks passed. |
+
+Raw provenance: [CI source and exact backend summary](qa/student-portal/evidence/ci-source.json), [browser verification](qa/student-portal/evidence/verification.json). The [48-case manual acceptance checklist](qa/student-portal/manual-checks.md) is provided for staging UAT; it is not labelled as 48 manually executed passes.
+
+The following are screenshots of the running ERP with explicitly labelled synthetic college data, not design mockups:
+
+![Student dashboard](qa/student-portal/evidence/student-dashboard-1440.png)
+
+![Live schedule, attendance and fee charts](qa/student-portal/evidence/student-dashboard-details-1440.png)
+
+Additional previews: [profile](qa/student-portal/evidence/student-profile-1440.png), [fees](qa/student-portal/evidence/student-fees-1440.png), [request workflow](qa/student-portal/evidence/student-requests-1440.png), [tablet](qa/student-portal/evidence/student-dashboard-768.png), [mobile](qa/student-portal/evidence/student-dashboard-390.png), [official sample receipt](qa/student-portal/evidence/student-receipt.pdf).
+
+No production deployment or merge was performed. The remaining conditional integrations are listed above; configured native academic, accounting and request workflows are verified end to end.
