@@ -32,16 +32,21 @@ class ServiceRequest(models.Model):
     document = fields.Binary(attachment=True)
     filename = fields.Char()
 
+    def _faculty_self_service(self):
+        return not self.env.su and self.env.user.has_group("openeducat_core.group_op_faculty") and not (
+            self.env.user.has_group("ideastone_erp.group_services") or self.env.user.has_group("ideastone_erp.group_manager")
+        )
+
     @api.model_create_multi
     def create(self, vals_list):
-        if not self.env.su and not self.env.user.has_group("ideastone_erp.group_manager"):
+        if self._faculty_self_service():
             if any(v.get("requester_id", self.env.uid) != self.env.uid for v in vals_list):
                 raise AccessError(_("Submit service requests under your own account."))
         return super().create(vals_list)
 
     def write(self, vals):
-        if "requester_id" in vals and not self.env.su and not self.env.user.has_group("ideastone_erp.group_manager"):
-            raise AccessError(_("Only a campus manager can reassign a service request."))
+        if "requester_id" in vals and self._faculty_self_service():
+            raise AccessError(_("A service operator must reassign a faculty service request."))
         return super().write(vals)
 
     @api.constrains("date_from", "date_to", "amount", "kind", "requested_course_id", "student_id", "complaint_category", "company_id")

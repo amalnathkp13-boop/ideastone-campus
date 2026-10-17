@@ -236,6 +236,10 @@ class TestVcetWorkspace(TransactionCase):
     def test_student_leave_review_chain_and_evidence(self):
         route = self.env["campus.student.leave.routing"].create({"name": "QA student advisor", "student_id": self.student.id,
                     "advisor_id": self.teacher.id, "hod_id": self.other_teacher.id})
+        preview = self.env["campus.student.leave"].with_user(self.teacher).new({"routing_id": route.id})
+        preview._onchange_routing_id()
+        self.assertEqual(preview.student_id, self.student)
+        self.assertEqual(preview.hod_id, self.other_teacher)
         leave = self.env["campus.student.leave"].with_user(self.teacher).create({"name": "QA student leave", "routing_id": route.id, "reason": "QA medical leave"})
         with self.assertRaises(AccessError):
             leave.write({"state": "approved"})
@@ -375,3 +379,5 @@ class TestVcetWorkspace(TransactionCase):
         with self.assertRaises(AccessError):
             slip.with_user(self.teacher).write({"payment_reference": "Forged"})
         self.env["campus.payslip"].with_user(self.teacher).get_views([(False, "form")], {"toolbar": True})
+        html, _kind = self.env["ir.actions.report"].with_user(self.teacher)._render_qweb_html("ideastone_erp.report_payslip", slip.ids)
+        self.assertIn(b"Salary statement", html)

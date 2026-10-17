@@ -14,12 +14,12 @@
         <p>Faculty calculation · not an issued examination result</p>
         <h3 t-field="o.name"/>
         <table class="table table-sm"><tbody>
-          <tr><th>Student</th><td t-field="o.student_id.name"/><th>Subject</th><td t-field="o.subject_id.name"/></tr>
-          <tr><th>Academic year</th><td t-field="o.academic_year"/><th>Semester</th><td t-field="o.semester"/></tr>
-          <tr><th>Assessment</th><td t-field="o.kind"/><th>Status</th><td t-field="o.state"/></tr>
+          <tr><th>Student</th><td><span t-field="o.student_id.name"/></td><th>Subject</th><td><span t-field="o.subject_id.name"/></td></tr>
+          <tr><th>Academic year</th><td><span t-field="o.academic_year"/></td><th>Semester</th><td><span t-field="o.semester"/></td></tr>
+          <tr><th>Assessment</th><td><span t-field="o.kind"/></td><th>Status</th><td><span t-field="o.state"/></td></tr>
         </tbody></table>
         <table class="table table-sm"><thead><tr><th>Component</th><th>Score</th><th>Maximum</th><th>Weight (%)</th></tr></thead><tbody>
-          <tr t-foreach="o.component_ids" t-as="line"><td t-field="line.name"/><td t-field="line.score"/><td t-field="line.maximum"/><td t-field="line.weight"/></tr>
+          <tr t-foreach="o.component_ids" t-as="line"><td><span t-field="line.name"/></td><td><span t-field="line.score"/></td><td><span t-field="line.maximum"/></td><td><span t-field="line.weight"/></td></tr>
         </tbody></table>
         <p>Weighted mark: <strong t-field="o.total"/> / <span t-field="o.output_maximum"/></p>
         <p>Total component weight: <span t-field="o.weight_total"/>%</p>

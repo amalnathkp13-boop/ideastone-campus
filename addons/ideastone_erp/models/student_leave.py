@@ -47,6 +47,14 @@ class StudentLeave(models.Model):
     decision_log = fields.Text(readonly=True, copy=False)
     can_decide = fields.Boolean(compute="_compute_can_decide")
 
+    @api.onchange("routing_id")
+    def _onchange_routing_id(self):
+        for rec in self:
+            rec.student_id = rec.routing_id.student_id
+            rec.advisor_id = rec.routing_id.advisor_id
+            rec.hod_id = rec.routing_id.hod_id
+            rec.principal_id = rec.routing_id.principal_id
+
     @api.depends("state", "advisor_id", "hod_id", "principal_id")
     @api.depends_context("uid")
     def _compute_can_decide(self):
