@@ -63,6 +63,9 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         data = self.portal.snapshot()
         self.assertEqual(data["attendance"]["rate"], 100)
         self.assertEqual(len(data["attendance"]["rows"]), 1)
+        chart = self.env["ir.ui.view"]._render_template("ideastone_erp.student_attendance_bars", {"d": data})
+        self.assertIn("width: 100", str(chart))
+        self.assertIn("%", str(chart))
         source = self.env["campus.dashboard"].with_user(self.owner)._attendance_rows(sheet.attendance_line.filtered(lambda line: line.student_id == self.student))
         self.assertEqual(source[0]["rate"], data["attendance"]["rate"])
         with self.assertRaises(AccessError):

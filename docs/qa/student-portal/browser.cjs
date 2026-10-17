@@ -37,6 +37,7 @@ async function snapshot(page) {return rpc(page,'campus.student.portal','snapshot
     try {
         await login(page,'student.ui.qa');
         await page.waitForURL(/\/my\/campus/);
+        if(await page.getByText('500: Internal Server Error',{exact:true}).count()) throw Error('Student landing returned a server error');
         await page.getByRole('heading',{name:'Student Dashboard',exact:true}).waitFor();
         const initial=await snapshot(page);
         assert.equal(initial.fees.assessed,500); assert.equal(initial.fees.paid,400); assert.equal(initial.fees.due,100);
@@ -150,6 +151,11 @@ async function snapshot(page) {return rpc(page,'campus.student.portal','snapshot
         console.log('Student Portal: all scoped routes, saved workflows, PDF, IDOR, CSRF, retry, logout and responsive checks passed.');
     } catch(error) {
         await page.screenshot({path:path.join(out,'failure.png'),fullPage:true}).catch(()=>{});
+        await fs.writeFile(path.join(out,'failure.html'),await page.evaluate(()=>{
+            const body=document.body.cloneNode(true);
+            body.querySelectorAll('script,input[name=csrf_token],input[type=password]').forEach(node=>node.remove());
+            return body.outerHTML;
+        })).catch(()=>{});
         await fs.writeFile(path.join(out,'failure.txt'),String(error.stack));
         throw error;
     } finally {await browser.close();}
