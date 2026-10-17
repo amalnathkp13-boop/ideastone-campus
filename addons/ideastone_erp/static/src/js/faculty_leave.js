@@ -4,6 +4,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
 const DASHBOARD_DESTINATIONS = {
+    "App modules": ["modules", "staff"],
     "Home": ["overview", "home"],
     "Search": ["modules", "search"],
     "Library": ["faculty-module", "library"],
@@ -13,6 +14,9 @@ const DASHBOARD_DESTINATIONS = {
     "Hostel": ["faculty-module", "hostel"],
     "Services": ["faculty-module", "services"],
     "Help": ["help", "help"],
+    "profile additional info": ["faculty-module", "staff"],
+    "Faculty skills": ["faculty-module", "staff"],
+    "Professional Development": ["faculty-module", "staff"],
 };
 
 export class FacultyLeavePage extends Component {
@@ -32,8 +36,12 @@ export class FacultyLeavePage extends Component {
         const module = event.data.module;
         if (module === "My Task List") {
             await this.action.doAction("ideastone_erp.action_faculty_task");
-        } else if (module === "My Profile") {
+        } else if (module === "My Profile" || module === "Profile - Self Entry") {
             await this.action.doAction("ideastone_erp.action_faculty_detail");
+        } else if (module === "attendance") {
+            await this.action.doAction("ideastone_erp.action_staff_attendance");
+        } else if (module === "payroll history") {
+            await this.action.doAction("ideastone_erp.action_payslip");
         } else if (module === "Account Settings") {
             await this.action.doAction({type: "ir.actions.act_window", name: "My account",
                 res_model: "res.users", res_id: this.user.userId, views: [[false, "form"]]});

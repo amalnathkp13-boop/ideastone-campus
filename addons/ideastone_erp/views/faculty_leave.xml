@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-  <!-- Kept without a menu until the requester chooses its placement. -->
   <record id="action_faculty_leave_page" model="ir.actions.client">
-    <field name="name">Online leave apply &amp; status</field>
+    <field name="name">Leave Requests</field>
     <field name="tag">ideastone_erp.faculty_leave_page</field>
   </record>
+  <menuitem id="menu_standard_leave" name="Leave Requests" parent="menu_category_1" action="action_faculty_leave_page"/>
 </odoo>

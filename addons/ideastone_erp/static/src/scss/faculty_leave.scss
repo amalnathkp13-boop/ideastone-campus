@@ -1,9 +1,12 @@
-.o_web_client:has(.campus_leave_host) .o_main_navbar {
+.o_web_client:has(.campus_leave_host) > .o_navbar,
+.o_web_client:has(.campus_leave_host) > .o_main_navbar,
+.o_web_client:has(.campus_leave_host) .campus_faculty_subnav {
     display: none !important;
 }
 
-.o_web_client:has(.campus_leave_host) .o_action_manager {
-    height: 100vh;
+.o_web_client:has(.campus_leave_host) > .o_action_manager {
+    margin-top: 0 !important;
+    height: 100vh !important;
     overflow: hidden;
 }
 

@@ -120,8 +120,6 @@ function renderLive(data) {
         data.monthly_eligibility == null ? '—' : String(data.monthly_eligibility);
     document.querySelector('.kpi-grid .kpi:nth-child(3) .kpi-value').textContent = String(data.approved_count);
     $('pendingKpi').textContent = String(data.pending_count);
-    document.querySelector('.side-foot > span:first-child').textContent = data.company_name;
-    document.querySelector('.side-foot > span:nth-child(2)').textContent = data.role;
     const avatar = $('accountButton').querySelector('.avatar');
     avatar.textContent = (data.user_name || '?').trim().charAt(0).toUpperCase();
     $('accountMenu').querySelector('.menu-line').innerHTML = `${esc(data.user_name)}<br>${esc(data.role)}`;
@@ -132,7 +130,6 @@ function renderLive(data) {
     $('notificationMenu').innerHTML = `<div class="menu-line">Notifications</div>${data.notifications.length
         ? data.notifications.map((item) => `<div class="menu-line">${esc(item)}</div>`).join('')
         : '<div class="menu-line">No current notifications</div>'}`;
-    $('semesterMenu').querySelector('.menu-line').textContent = `VCET : ${data.academic_years[0]}`;
     $('academicYear').innerHTML = data.academic_years.map((year) =>
         `<option value="${esc(year)}">VCET : ${esc(year.replace('-', ' - '))}</option>`).join('');
     $('leaveType').innerHTML = data.leave_types.length ? data.leave_types.map((type) =>
@@ -197,7 +194,7 @@ function toggleMenu(menuId, button) {
 }
 
 function navigate(module) {
-    if (module === 'Payroll') return;
+    if (module === 'online leave apply & status') return;
     if (preview) {
         toast(`${module} is outside this leave-management preview.`);
     } else if (module === 'Sign out') {
@@ -225,17 +222,13 @@ document.addEventListener('click', (event) => {
 });
 
 for (const [buttonId, menuId] of [
-    ['semesterButton', 'semesterMenu'], ['notificationsButton', 'notificationMenu'], ['accountButton', 'accountMenu'],
+    ['notificationsButton', 'notificationMenu'], ['accountButton', 'accountMenu'],
 ]) {
     $(buttonId).addEventListener('click', () => toggleMenu(menuId, $(buttonId)));
 }
-document.querySelectorAll('[data-semester]').forEach((button) => button.addEventListener('click', () => {
-    $('semesterMenu').classList.remove('open');
-    $('semesterButton').querySelectorAll('span')[1].textContent = button.dataset.semester === 'Odd Semester' ? 'ODD' : 'EVEN';
-}));
-document.querySelectorAll('.side-menu [data-module], #accountMenu [data-module]').forEach((button) =>
+document.querySelectorAll('#accountMenu [data-module]').forEach((button) =>
     button.addEventListener('click', () => navigate(button.dataset.module)));
-$('campusLink').setAttribute('href', '/my/campus');
+$('appsButton').addEventListener('click', () => navigate('App modules'));
 
 $('historyRows').addEventListener('click', (event) => {
     const button = event.target.closest('[data-history]');
@@ -331,8 +324,6 @@ if (preview) {
     $('pendingKpi').textContent = '—';
     $('historyRows').innerHTML = '<tr><td colspan="6" class="empty-row">Loading leave requests…</td></tr>';
     renderAttendance([]);
-    document.querySelector('.side-foot > span:first-child').textContent = 'Campus';
-    document.querySelector('.side-foot > span:nth-child(2)').textContent = 'Staff';
     $('accountButton').querySelector('.avatar').textContent = '?';
     $('accountMenu').querySelector('.menu-line').textContent = 'Loading account…';
     $('notificationsButton').querySelector('.notify-dot').hidden = true;
