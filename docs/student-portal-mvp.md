@@ -65,11 +65,14 @@ All application changes live in the existing `addons/ideastone_erp` addon; the p
 - `views/student_portal.xml`, `static/src/js/student_portal.js`, `static/src/scss/student_portal.scss`: same-app QWeb shell, progressive navigation, retry/loading/error states, responsive drawer and faculty/Owner design palette.
 - `views/student_operations.xml`, `models/mvp_dashboard.py`: existing staff shell navigation and native staff forms.
 - `tests/test_student_portal.py`: identity, direct-model denial, profile policy, attendance consistency, result privacy, ledger/receipt scope, notices, request lifecycle/retries/files, catalogue override and timezone boundary tests. Shared Owner test setup is reused without rerunning duplicate inherited tests.
+- `tests/test_portal.py` adds native student link regressions; `tests/test_owner_mvp.py` extracts the shared fixture without duplicating its tests. Manifest and model/controller/test imports register the extension in the existing addon.
 - `docs/qa/student-portal/{seed.py,browser.cjs}`, `.github/workflows/ci.yml`: real disposable Odoo browser workflows and screenshot evidence.
 
 Upgrade `ideastone_erp` with the same Odoo 17/OpenEduCat addons path used by the existing deployment. The manifest advances to `17.0.1.0.4`. Schema additions are additive; existing ledger/attendance/result rows are reused. Global catalogue seeds are `noupdate`; existing company catalogue edits survive upgrades. Managed exams remain unreleased until an authorized examination officer uses **Release schedule to students**. Existing native completed/public schedules remain available according to their native state.
 
 Before enabling a college, verify each student account is a portal user linked to exactly one active `op.student`, with the correct permitted company. College configuration controls portal access and contact editing. Do not grant student users internal, faculty, registrar or accounting roles.
+
+Staff use **Communication → Student requests & support** in the Owner/Registrar shell. Authorized services/manager operators also have the native **Campus Operations → Campus services → Student requests & support** menu, which opens the same guarded staff form. Registrars manage the request catalogue from Settings or its native Campus services entry.
 
 ## Reproducible QA and preview data
 

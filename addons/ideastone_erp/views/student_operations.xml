@@ -147,4 +147,6 @@
       </header>
     </field>
   </record>
+  <menuitem id="menu_student_requests" name="Student requests &amp; support" parent="menu_category_2" action="mvp_student_requests" groups="ideastone_erp.group_mvp_registrar,ideastone_erp.group_services,ideastone_erp.group_manager" sequence="60"/>
+  <menuitem id="menu_student_request_types" name="Student request catalogue" parent="menu_category_2" action="mvp_student_request_types" groups="ideastone_erp.group_mvp_registrar" sequence="61"/>
 </odoo>
