@@ -45,7 +45,7 @@ class StudentWorkspace(CampusPortal):
         response = request.render("ideastone_erp.student_workspace", {
             "portal_data": data, "portal_error": error, "section": section,
             "saved": bool(kw.get("saved")), "form_error": str(kw.get("form_error") or "")[:500],
-            "url_for": lambda page: "/my/campus/student/" + page + suffix,
+            "student_url_for": lambda page: "/my/campus/student/" + page + suffix,
             "money": lambda amount: format_amount(request.env, amount, company.currency_id),
             "notice_body": lambda text: Markup(text), "enrolment_value": kw.get("enrolment", ""),
         }, status=status)

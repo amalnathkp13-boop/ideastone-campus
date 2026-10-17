@@ -50,6 +50,11 @@ async function snapshot(page) {return rpc(page,'campus.student.portal','snapshot
         await page.screenshot({path:path.join(out,'student-dashboard-1440.png'),fullPage:true});
         const routes=initial.navigation.map(item=>item[0]);
         for(const route of routes) await visit(page,route);
+        await visit(page,'timetable');
+        await page.getByRole('button',{name:'Today',exact:true}).click();
+        assert.equal(await page.locator('.student_timetable_row:visible').count(),initial.schedule.filter(row=>row.day===initial.today_iso).length);
+        await page.getByRole('button',{name:'Selected period',exact:true}).click();
+        assert.equal(await page.locator('.student_timetable_row:visible').count(),initial.schedule.length);
         await visit(page,'profile');
         await page.locator('#profile_phone').fill('+91 90000 00123');
         await page.locator('#profile_city').fill('Coimbatore');

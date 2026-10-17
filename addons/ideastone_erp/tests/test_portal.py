@@ -55,6 +55,8 @@ class TestCampusPortal(HttpCase):
         response = self.url_open("/my/campus?campus_role=Admin")
         self.assertEqual(response.status_code, 200)
         self.assertIn("Student workspace", response.text)
+        self.assertIn("/my/campus/student/profile", response.text)
+        self.assertNotIn('href="/my/profile"', response.text)
         self.assertNotIn("QA-UNRELATED-PRIVATE", response.text)
 
     def test_portal_login_lands_on_campus(self):
