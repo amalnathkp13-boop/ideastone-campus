@@ -101,6 +101,23 @@ jobs:
           "$RUNNER_TEMP/faculty-ui-tools/node_modules/.bin/playwright" install --with-deps chromium
           export NODE_PATH="$RUNNER_TEMP/faculty-ui-tools/node_modules"
           node docs/qa/faculty-workspace/browser.cjs
+      - name: Owner lifecycle and UI on disposable Odoo
+        shell: bash
+        run: |
+          set -euo pipefail
+          export FACULTY_QA_PASSWORD=$(openssl rand -hex 20)
+          export OWNER_QA_OUT="$RUNNER_TEMP/owner-mvp-proof"
+          mkdir -p "$OWNER_QA_OUT"
+          docker run --rm -i --network host --entrypoint odoo \
+            -v faculty-ci-data:/var/lib/odoo \
+            -v "$PWD/addons:/mnt/ideastone-addons:ro" \
+            -v "$PWD/vendor/openeducat_erp:/mnt/openeducat:ro" \
+            -e FACULTY_QA_PASSWORD odoo:17.0 shell \
+            --db_host=127.0.0.1 --db_user=odoo --db_password=odoo -d ci \
+            --addons-path=/mnt/ideastone-addons,/mnt/openeducat,/usr/lib/python3/dist-packages/odoo/addons \
+            --workers=0 --max-cron-threads=0 --no-http < docs/qa/owner-mvp/seed.py
+          export NODE_PATH="$RUNNER_TEMP/faculty-ui-tools/node_modules"
+          node docs/qa/owner-mvp/browser.cjs
       - name: Upgrade installed campus modules
         shell: bash
         run: |
@@ -128,6 +145,13 @@ jobs:
         with:
           name: faculty-ui-proof
           path: ${{ runner.temp }}/faculty-ui-proof
+          retention-days: 14
+      - name: Preserve owner MVP evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: owner-mvp-proof
+          path: ${{ runner.temp }}/owner-mvp-proof
           retention-days: 14
       - name: Preserve install and test diagnostics
         if: always()

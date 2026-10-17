@@ -31,8 +31,9 @@ class MVPAudit(models.Model):
     @api.model
     def _log(self, record, action, reason=None, details=None):
         record.ensure_one()
+        company = record if record._name == "res.company" else record.company_id if "company_id" in record._fields else self.env.company
         return self.sudo().create({
-            "name": action, "company_id": (record.company_id or self.env.company).id,
+            "name": action, "company_id": (company or self.env.company).id,
             "actor_id": self.env.uid, "model_name": record._name, "record_id": record.id,
             "reason": reason, "details": details or {},
         })

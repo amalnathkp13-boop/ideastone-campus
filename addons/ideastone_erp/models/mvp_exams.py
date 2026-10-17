@@ -32,7 +32,7 @@ class Exam(models.Model):
     campus_state = fields.Selection([
         ("draft", "Draft"), ("entry", "Entry in progress"), ("submitted", "Submitted"),
         ("locked", "Locked / approved"), ("published", "Published"),
-    ], default="draft", readonly=True, tracking=True)
+    ], default="draft", readonly=True, tracking=True, copy=False)
     campus_result_ids = fields.One2many("op.result.line", "exam_id", string="Marks roster")
     campus_grade_ids = fields.Many2many("op.grade.configuration", string="Grade rules")
     campus_reopen_reason = fields.Text(string="Reopen reason")

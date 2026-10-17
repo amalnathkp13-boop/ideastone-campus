@@ -1296,4 +1296,16 @@
     <field name="perm_create" eval="False" />
     <field name="perm_unlink" eval="False" />
   </record>
+  <record id="mvp_read_enrolment_accountant" model="ir.model.access">
+    <field name="name">MVP enrolment reader accountant</field>
+    <field name="model_id" ref="openeducat_core.model_op_student_course" />
+    <field name="group_id" ref="group_mvp_accountant" />
+    <field name="perm_read" eval="True" />
+  </record>
+  <record id="mvp_read_enrolment_exams" model="ir.model.access">
+    <field name="name">MVP enrolment reader exams</field>
+    <field name="model_id" ref="openeducat_core.model_op_student_course" />
+    <field name="group_id" ref="group_mvp_exams" />
+    <field name="perm_read" eval="True" />
+  </record>
 </odoo>

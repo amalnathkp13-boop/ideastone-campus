@@ -186,6 +186,20 @@ class FeeInvoice(models.Model):
     campus_course_id = fields.Many2one("op.course", ondelete="restrict", index=True)
     campus_year_id = fields.Many2one("op.academic.year", ondelete="restrict", index=True)
 
+    def write(self, vals):
+        posted = self.filtered(lambda r: r.campus_student_id and r.state == "posted")
+        if posted and ({"invoice_line_ids", "partner_id", "currency_id", "company_id", "campus_student_id", "campus_year_id", "campus_course_id"}.intersection(vals) or vals.get("state") == "draft"):
+            raise ValidationError(_("Posted college invoices are retained unchanged. Use a credit note or reversal for corrections."))
+        return super().write(vals)
+
+    @api.constrains("campus_student_id", "campus_year_id", "campus_course_id", "company_id", "currency_id")
+    def _check_college_invoice_scope(self):
+        for rec in self.filtered("campus_student_id"):
+            if any(r.company_id and r.company_id != rec.company_id for r in (rec.campus_student_id | self.env["op.student"])):
+                raise ValidationError(_("Invoice and student must belong to the same college."))
+            if rec.currency_id != rec.company_id.currency_id:
+                raise ValidationError(_("College MVP invoices use the college currency."))
+
     def unlink(self):
         if self.filtered("campus_student_id"):
             raise ValidationError(_("College invoices must be cancelled or reversed and retained."))

@@ -466,15 +466,15 @@
         <header />
         <sheet>
           <group>
-            <field name="name" />
-            <field name="course_id" />
-            <field name="academic_years_id" />
-            <field name="academic_term_id" />
-            <field name="product_id" />
-            <field name="start_date" />
-            <field name="end_date" />
-            <field name="max_count" />
-            <field name="company_id" />
+            <field name="name" readonly="False" />
+            <field name="course_id" readonly="False" />
+            <field name="academic_years_id" readonly="False" />
+            <field name="academic_term_id" readonly="False" />
+            <field name="product_id" readonly="False" />
+            <field name="start_date" readonly="False" />
+            <field name="end_date" readonly="False" />
+            <field name="max_count" readonly="False" />
+            <field name="company_id" readonly="False" />
           </group>
         </sheet>
       </form>
@@ -693,10 +693,10 @@
       <form>
         <sheet>
           <div class="oe_button_box" name="button_box">
-            <button name="action_campus_fees" type="object" class="oe_stat_button" icon="fa-external-link" string="Fee ledger" />
-            <button name="action_campus_attendance" type="object" class="oe_stat_button" icon="fa-external-link" string="Attendance" />
-            <button name="action_campus_results" type="object" class="oe_stat_button" icon="fa-external-link" string="Results" />
-            <button name="action_campus_applications" type="object" class="oe_stat_button" icon="fa-external-link" string="Admissions" />
+            <button name="action_campus_fees" type="object" class="oe_stat_button" icon="fa-external-link" string="Fee ledger" groups="ideastone_erp.group_mvp_accountant,ideastone_erp.group_mvp_readonly" />
+            <button name="action_campus_attendance" type="object" class="oe_stat_button" icon="fa-external-link" string="Attendance" groups="ideastone_erp.group_mvp_registrar,ideastone_erp.group_mvp_readonly,ideastone_erp.group_mvp_hod" />
+            <button name="action_campus_results" type="object" class="oe_stat_button" icon="fa-external-link" string="Results" groups="ideastone_erp.group_mvp_registrar,ideastone_erp.group_mvp_exams,ideastone_erp.group_mvp_readonly,ideastone_erp.group_mvp_hod" />
+            <button name="action_campus_applications" type="object" class="oe_stat_button" icon="fa-external-link" string="Admissions" groups="ideastone_erp.group_mvp_admissions,ideastone_erp.group_mvp_readonly" />
           </div>
           <h1>
             <field name="name" placeholder="Student name" />
@@ -735,7 +735,7 @@
                 </tree>
               </field>
             </page>
-            <page string="Fee ledger">
+            <page string="Fee ledger" groups="ideastone_erp.group_mvp_accountant,ideastone_erp.group_mvp_readonly">
               <field name="fees_detail_ids" readonly="True">
                 <tree>
                   <field name="product_id" />
@@ -744,6 +744,9 @@
                   <field name="campus_balance" />
                 </tree>
               </field>
+            </page>
+            <page string="Documents" groups="ideastone_erp.group_mvp_admissions,ideastone_erp.group_mvp_readonly">
+              <field name="campus_admission_document_ids" readonly="True" />
             </page>
           </notebook>
         </sheet>
@@ -1835,5 +1838,57 @@
       <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
     </field>
     <field name="view_id" ref="mvp_import_form" />
+  </record>
+  <record id="mvp_faculty_tree" model="ir.ui.view">
+    <field name="name">mvp.faculty.tree</field>
+    <field name="model">op.faculty</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name" />
+        <field name="campus_staff_code" />
+        <field name="main_department_id" />
+        <field name="campus_designation" />
+        <field name="campus_category" />
+        <field name="active" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_faculty_form" model="ir.ui.view">
+    <field name="name">mvp.faculty.form</field>
+    <field name="model">op.faculty</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <group>
+            <field name="first_name" />
+            <field name="last_name" />
+            <field name="birth_date" />
+            <field name="gender" />
+            <field name="phone" />
+            <field name="email" />
+            <field name="campus_staff_code" />
+            <field name="campus_designation" />
+            <field name="campus_category" />
+            <field name="campus_joining_date" />
+            <field name="main_department_id" />
+            <field name="faculty_subject_ids" />
+            <field name="active" />
+            <field name="company_id" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_faculty_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_faculty_tree" />
+    <field name="act_window_id" ref="mvp_faculty" />
+  </record>
+  <record id="mvp_faculty_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_faculty_form" />
+    <field name="act_window_id" ref="mvp_faculty" />
   </record>
 </odoo>

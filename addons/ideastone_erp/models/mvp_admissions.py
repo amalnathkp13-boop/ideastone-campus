@@ -10,6 +10,12 @@ STAGES = [
 ]
 
 
+class AdmissionRegister(models.Model):
+    _inherit = "op.admission.register"
+
+    min_count = fields.Integer(default=1)
+
+
 class Enquiry(models.Model):
     _inherit = "crm.lead"
 
@@ -52,6 +58,7 @@ class AdmissionDocument(models.Model):
 
     admission_id = fields.Many2one("op.admission", required=True, ondelete="restrict")
     company_id = fields.Many2one(related="admission_id.company_id", store=True, index=True)
+    student_id = fields.Many2one(related="admission_id.student_id", store=True, index=True)
     requirement_id = fields.Many2one("campus.admission.requirement", required=True, ondelete="restrict")
     name = fields.Char(related="requirement_id.name", store=True)
     file = fields.Binary(attachment=True, required=True)
@@ -106,7 +113,7 @@ class Admission(models.Model):
     _name = "op.admission"
 
     campus_managed = fields.Boolean(default=False, copy=False)
-    campus_stage = fields.Selection(STAGES, default="started", required=True, readonly=True, tracking=True)
+    campus_stage = fields.Selection(STAGES, default="started", required=True, readonly=True, tracking=True, copy=False)
     campus_lead_id = fields.Many2one("crm.lead", string="Source enquiry", ondelete="restrict")
     campus_source_id = fields.Many2one("utm.source", string="Source")
     campus_officer_id = fields.Many2one("res.users", string="Assigned officer", default=lambda self: self.env.user)
@@ -226,6 +233,7 @@ class Student(models.Model):
     campus_status_date = fields.Date(string="Status effective date", default=fields.Date.context_today)
     campus_admission_date = fields.Date(string="Admission date")
     campus_guardian_ids = fields.Many2many("res.partner", "campus_student_guardian_rel", string="Guardians")
+    campus_admission_document_ids = fields.One2many("campus.admission.document", "student_id", string="Admission documents")
 
     def write(self, vals):
         if {"campus_status", "active"}.intersection(vals):
