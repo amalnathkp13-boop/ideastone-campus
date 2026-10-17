@@ -1,0 +1,1839 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+  <record id="mvp_years_tree" model="ir.ui.view">
+    <field name="name">mvp.years.tree</field>
+    <field name="model">op.academic.year</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name" />
+        <field name="code" />
+        <field name="start_date" />
+        <field name="end_date" />
+        <field name="campus_current" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_years_form" model="ir.ui.view">
+    <field name="name">mvp.years.form</field>
+    <field name="model">op.academic.year</field>
+    <field name="arch" type="xml">
+      <form>
+        <header />
+        <sheet>
+          <group>
+            <field name="name" />
+            <field name="code" />
+            <field name="start_date" />
+            <field name="end_date" />
+            <field name="term_structure" />
+            <field name="campus_current" />
+            <field name="company_id" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_years" model="ir.actions.act_window">
+    <field name="name">Academic years</field>
+    <field name="res_model">op.academic.year</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="view_id" ref="mvp_years_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_years_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_years_tree" />
+    <field name="act_window_id" ref="mvp_years" />
+  </record>
+  <record id="mvp_years_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_years_form" />
+    <field name="act_window_id" ref="mvp_years" />
+  </record>
+  <record id="mvp_departments_tree" model="ir.ui.view">
+    <field name="name">mvp.departments.tree</field>
+    <field name="model">op.department</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name" />
+        <field name="code" />
+        <field name="active" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_departments_form" model="ir.ui.view">
+    <field name="name">mvp.departments.form</field>
+    <field name="model">op.department</field>
+    <field name="arch" type="xml">
+      <form>
+        <header />
+        <sheet>
+          <group>
+            <field name="name" />
+            <field name="code" />
+            <field name="parent_id" />
+            <field name="active" />
+            <field name="company_id" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_departments" model="ir.actions.act_window">
+    <field name="name">Departments</field>
+    <field name="res_model">op.department</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="view_id" ref="mvp_departments_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_departments_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_departments_tree" />
+    <field name="act_window_id" ref="mvp_departments" />
+  </record>
+  <record id="mvp_departments_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_departments_form" />
+    <field name="act_window_id" ref="mvp_departments" />
+  </record>
+  <record id="mvp_programmes_tree" model="ir.ui.view">
+    <field name="name">mvp.programmes.tree</field>
+    <field name="model">op.course</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name" />
+        <field name="code" />
+        <field name="department_id" />
+        <field name="campus_duration" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_programmes_form" model="ir.ui.view">
+    <field name="name">mvp.programmes.form</field>
+    <field name="model">op.course</field>
+    <field name="arch" type="xml">
+      <form>
+        <header />
+        <sheet>
+          <group>
+            <field name="name" />
+            <field name="code" />
+            <field name="department_id" />
+            <field name="evaluation_type" />
+            <field name="campus_duration" />
+            <field name="campus_award" />
+            <field name="subject_ids" />
+            <field name="company_id" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_programmes" model="ir.actions.act_window">
+    <field name="name">Programmes</field>
+    <field name="res_model">op.course</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="view_id" ref="mvp_programmes_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_programmes_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_programmes_tree" />
+    <field name="act_window_id" ref="mvp_programmes" />
+  </record>
+  <record id="mvp_programmes_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_programmes_form" />
+    <field name="act_window_id" ref="mvp_programmes" />
+  </record>
+  <record id="mvp_terms_tree" model="ir.ui.view">
+    <field name="name">mvp.terms.tree</field>
+    <field name="model">op.academic.term</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name" />
+        <field name="academic_year_id" />
+        <field name="campus_course_id" />
+        <field name="campus_sequence" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_terms_form" model="ir.ui.view">
+    <field name="name">mvp.terms.form</field>
+    <field name="model">op.academic.term</field>
+    <field name="arch" type="xml">
+      <form>
+        <header />
+        <sheet>
+          <group>
+            <field name="name" />
+            <field name="academic_year_id" />
+            <field name="campus_course_id" />
+            <field name="campus_sequence" />
+            <field name="term_start_date" />
+            <field name="term_end_date" />
+            <field name="company_id" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_terms" model="ir.actions.act_window">
+    <field name="name">Semesters</field>
+    <field name="res_model">op.academic.term</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="view_id" ref="mvp_terms_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_terms_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_terms_tree" />
+    <field name="act_window_id" ref="mvp_terms" />
+  </record>
+  <record id="mvp_terms_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_terms_form" />
+    <field name="act_window_id" ref="mvp_terms" />
+  </record>
+  <record id="mvp_sections_tree" model="ir.ui.view">
+    <field name="name">mvp.sections.tree</field>
+    <field name="model">op.batch</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name" />
+        <field name="code" />
+        <field name="course_id" />
+        <field name="campus_year_id" />
+        <field name="campus_term_id" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_sections_form" model="ir.ui.view">
+    <field name="name">mvp.sections.form</field>
+    <field name="model">op.batch</field>
+    <field name="arch" type="xml">
+      <form>
+        <header />
+        <sheet>
+          <group>
+            <field name="name" />
+            <field name="code" />
+            <field name="course_id" />
+            <field name="campus_year_id" />
+            <field name="campus_term_id" />
+            <field name="start_date" />
+            <field name="end_date" />
+            <field name="company_id" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_sections" model="ir.actions.act_window">
+    <field name="name">Sections</field>
+    <field name="res_model">op.batch</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="view_id" ref="mvp_sections_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_sections_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_sections_tree" />
+    <field name="act_window_id" ref="mvp_sections" />
+  </record>
+  <record id="mvp_sections_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_sections_form" />
+    <field name="act_window_id" ref="mvp_sections" />
+  </record>
+  <record id="mvp_subjects_tree" model="ir.ui.view">
+    <field name="name">mvp.subjects.tree</field>
+    <field name="model">op.subject</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name" />
+        <field name="code" />
+        <field name="department_id" />
+        <field name="campus_term_id" />
+        <field name="campus_credits" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_subjects_form" model="ir.ui.view">
+    <field name="name">mvp.subjects.form</field>
+    <field name="model">op.subject</field>
+    <field name="arch" type="xml">
+      <form>
+        <header />
+        <sheet>
+          <group>
+            <field name="name" />
+            <field name="code" />
+            <field name="department_id" />
+            <field name="campus_term_id" />
+            <field name="type" />
+            <field name="subject_type" />
+            <field name="campus_credits" />
+            <field name="campus_max_marks" />
+            <field name="company_id" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_subjects" model="ir.actions.act_window">
+    <field name="name">Subjects &amp; curriculum</field>
+    <field name="res_model">op.subject</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="view_id" ref="mvp_subjects_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_subjects_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_subjects_tree" />
+    <field name="act_window_id" ref="mvp_subjects" />
+  </record>
+  <record id="mvp_subjects_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_subjects_form" />
+    <field name="act_window_id" ref="mvp_subjects" />
+  </record>
+  <record id="mvp_requirements_tree" model="ir.ui.view">
+    <field name="name">mvp.requirements.tree</field>
+    <field name="model">campus.admission.requirement</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name" />
+        <field name="course_id" />
+        <field name="required" />
+        <field name="active" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_requirements_form" model="ir.ui.view">
+    <field name="name">mvp.requirements.form</field>
+    <field name="model">campus.admission.requirement</field>
+    <field name="arch" type="xml">
+      <form>
+        <header />
+        <sheet>
+          <group>
+            <field name="name" />
+            <field name="course_id" />
+            <field name="required" />
+            <field name="active" />
+            <field name="company_id" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_requirements" model="ir.actions.act_window">
+    <field name="name">Document requirements</field>
+    <field name="res_model">campus.admission.requirement</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="view_id" ref="mvp_requirements_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_requirements_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_requirements_tree" />
+    <field name="act_window_id" ref="mvp_requirements" />
+  </record>
+  <record id="mvp_requirements_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_requirements_form" />
+    <field name="act_window_id" ref="mvp_requirements" />
+  </record>
+  <record id="mvp_enquiries_tree" model="ir.ui.view">
+    <field name="name">mvp.enquiries.tree</field>
+    <field name="model">crm.lead</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name" />
+        <field name="contact_name" />
+        <field name="phone" />
+        <field name="email_from" />
+        <field name="campus_course_id" />
+        <field name="campus_year_id" />
+        <field name="campus_contacted" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_enquiries_form" model="ir.ui.view">
+    <field name="name">mvp.enquiries.form</field>
+    <field name="model">crm.lead</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <button name="action_campus_application" type="object" string="Create / open application" class="oe_highlight" />
+        </header>
+        <sheet>
+          <group>
+            <field name="name" />
+            <field name="contact_name" />
+            <field name="phone" />
+            <field name="email_from" />
+            <field name="campus_course_id" />
+            <field name="campus_year_id" />
+            <field name="source_id" />
+            <field name="user_id" />
+            <field name="campus_contacted" />
+            <field name="description" />
+            <field name="company_id" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_enquiries" model="ir.actions.act_window">
+    <field name="name">Enquiries</field>
+    <field name="res_model">crm.lead</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{'default_campus_enquiry': True}</field>
+    <field name="domain">[('campus_enquiry', '=', True)]</field>
+    <field name="view_id" ref="mvp_enquiries_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_enquiries_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_enquiries_tree" />
+    <field name="act_window_id" ref="mvp_enquiries" />
+  </record>
+  <record id="mvp_enquiries_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_enquiries_form" />
+    <field name="act_window_id" ref="mvp_enquiries" />
+  </record>
+  <record id="mvp_intakes_tree" model="ir.ui.view">
+    <field name="name">mvp.intakes.tree</field>
+    <field name="model">op.admission.register</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name" />
+        <field name="course_id" />
+        <field name="academic_years_id" />
+        <field name="start_date" />
+        <field name="end_date" />
+        <field name="max_count" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_intakes_form" model="ir.ui.view">
+    <field name="name">mvp.intakes.form</field>
+    <field name="model">op.admission.register</field>
+    <field name="arch" type="xml">
+      <form>
+        <header />
+        <sheet>
+          <group>
+            <field name="name" />
+            <field name="course_id" />
+            <field name="academic_years_id" />
+            <field name="academic_term_id" />
+            <field name="product_id" />
+            <field name="start_date" />
+            <field name="end_date" />
+            <field name="max_count" />
+            <field name="company_id" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_intakes" model="ir.actions.act_window">
+    <field name="name">Admission register</field>
+    <field name="res_model">op.admission.register</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="view_id" ref="mvp_intakes_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_intakes_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_intakes_tree" />
+    <field name="act_window_id" ref="mvp_intakes" />
+  </record>
+  <record id="mvp_intakes_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_intakes_form" />
+    <field name="act_window_id" ref="mvp_intakes" />
+  </record>
+  <record id="mvp_applications_tree" model="ir.ui.view">
+    <field name="name">mvp.applications.tree</field>
+    <field name="model">op.admission</field>
+    <field name="arch" type="xml">
+      <tree decoration-success="campus_stage == 'enrolled'">
+        <field name="application_number" />
+        <field name="name" />
+        <field name="course_id" />
+        <field name="batch_id" />
+        <field name="campus_year_id" />
+        <field name="campus_source_id" />
+        <field name="campus_stage" />
+        <field name="student_id" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_admission_form" model="ir.ui.view">
+    <field name="name">mvp.admission.form</field>
+    <field name="model">op.admission</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <button name="action_campus_submit" type="object" string="Submit application" class="oe_highlight" invisible="campus_stage not in ('started','documents')" />
+          <button name="action_campus_review" type="object" string="Start review" invisible="campus_stage not in ('submitted','documents','waitlisted')" />
+          <button name="action_campus_documents" type="object" string="Request documents" invisible="campus_stage not in ('submitted','review')" />
+          <button name="action_campus_approve" type="object" string="Approve" class="oe_highlight" invisible="campus_stage != 'review'" />
+          <button name="action_campus_reject" type="object" string="Reject" invisible="campus_stage != 'review'" />
+          <button name="action_campus_waitlist" type="object" string="Waitlist" invisible="campus_stage != 'review'" />
+          <button name="enroll_student" type="object" string="Convert to student" class="oe_highlight" invisible="campus_stage != 'approved'" confirm="Create or reuse the student profile and enrolment for this approved application?" />
+          <field name="campus_stage" widget="statusbar" statusbar_visible="started,submitted,review,approved,enrolled" />
+        </header>
+        <sheet>
+          <field name="campus_managed" invisible="True" />
+          <h1>
+            <field name="name" placeholder="Applicant full name" />
+          </h1>
+          <group readonly="campus_stage in ('approved','enrolled')">
+            <group>
+              <field name="application_number" />
+              <field name="first_name" />
+              <field name="last_name" />
+              <field name="gender" />
+              <field name="birth_date" />
+              <field name="phone" />
+              <field name="email" />
+            </group>
+            <group>
+              <field name="register_id" />
+              <field name="course_id" />
+              <field name="batch_id" />
+              <field name="campus_year_id" />
+              <field name="campus_lead_id" />
+              <field name="campus_source_id" />
+              <field name="campus_officer_id" />
+              <field name="application_date" />
+              <field name="company_id" />
+            </group>
+          </group>
+          <notebook>
+            <page string="Documents">
+              <field name="campus_document_ids" readonly="campus_stage in ('approved','enrolled')">
+                <tree>
+                  <field name="requirement_id" />
+                  <field name="filename" />
+                  <field name="state" widget="badge" />
+                  <field name="verified_by" />
+                  <field name="verified_on" />
+                </tree>
+              </field>
+            </page>
+            <page string="Decision &amp; conversion">
+              <group>
+                <field name="campus_reason" readonly="campus_stage in ('approved','enrolled')" />
+                <field name="campus_document_exception" readonly="campus_stage in ('approved','enrolled')" />
+                <field name="is_student" readonly="campus_stage in ('approved','enrolled')" />
+                <field name="student_id" readonly="campus_stage in ('approved','enrolled')" />
+                <field name="campus_enrolment_id" />
+              </group>
+            </page>
+          </notebook>
+        </sheet>
+        <div class="oe_chatter">
+          <field name="message_follower_ids" />
+          <field name="message_ids" />
+        </div>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_applications" model="ir.actions.act_window">
+    <field name="name">Applications &amp; admission review</field>
+    <field name="res_model">op.admission</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{'default_campus_managed': True}</field>
+    <field name="domain">[('campus_managed', '=', True)]</field>
+    <field name="view_id" ref="mvp_applications_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_applications_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_applications_tree" />
+    <field name="act_window_id" ref="mvp_applications" />
+  </record>
+  <record id="mvp_applications_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_admission_form" />
+    <field name="act_window_id" ref="mvp_applications" />
+  </record>
+  <record id="mvp_document_form" model="ir.ui.view">
+    <field name="name">mvp.document.form</field>
+    <field name="model">campus.admission.document</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <button name="action_verify" type="object" string="Verify document" class="oe_highlight" />
+          <button name="action_reject" type="object" string="Reject with note" />
+          <field name="state" widget="statusbar" />
+        </header>
+        <sheet>
+          <group>
+            <field name="admission_id" />
+            <field name="requirement_id" />
+            <field name="file" filename="filename" />
+            <field name="filename" />
+            <field name="note" />
+            <field name="verified_by" />
+            <field name="verified_on" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_document_tree" model="ir.ui.view">
+    <field name="name">mvp.document.tree</field>
+    <field name="model">campus.admission.document</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="admission_id" />
+        <field name="requirement_id" />
+        <field name="state" />
+        <field name="verified_by" />
+        <field name="verified_on" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_documents" model="ir.actions.act_window">
+    <field name="name">Document review</field>
+    <field name="res_model">campus.admission.document</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="view_id" ref="mvp_document_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_documents_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_document_tree" />
+    <field name="act_window_id" ref="mvp_documents" />
+  </record>
+  <record id="mvp_documents_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_document_form" />
+    <field name="act_window_id" ref="mvp_documents" />
+  </record>
+  <record id="mvp_students_tree" model="ir.ui.view">
+    <field name="name">mvp.students.tree</field>
+    <field name="model">op.student</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="gr_no" />
+        <field name="name" />
+        <field name="phone" />
+        <field name="email" />
+        <field name="campus_admission_date" />
+        <field name="campus_status" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_student_form" model="ir.ui.view">
+    <field name="name">mvp.student.form</field>
+    <field name="model">op.student</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="action_campus_fees" type="object" class="oe_stat_button" icon="fa-external-link" string="Fee ledger" />
+            <button name="action_campus_attendance" type="object" class="oe_stat_button" icon="fa-external-link" string="Attendance" />
+            <button name="action_campus_results" type="object" class="oe_stat_button" icon="fa-external-link" string="Results" />
+            <button name="action_campus_applications" type="object" class="oe_stat_button" icon="fa-external-link" string="Admissions" />
+          </div>
+          <h1>
+            <field name="name" placeholder="Student name" />
+          </h1>
+          <group>
+            <group>
+              <field name="gr_no" />
+              <field name="register_no" />
+              <field name="first_name" />
+              <field name="last_name" />
+              <field name="gender" />
+              <field name="phone" />
+              <field name="email" />
+            </group>
+            <group>
+              <field name="campus_admission_date" />
+              <field name="campus_status" />
+              <field name="campus_status_reason" />
+              <field name="campus_status_date" />
+              <field name="active" />
+              <field name="company_id" />
+            </group>
+          </group>
+          <notebook>
+            <page string="Guardians">
+              <field name="campus_guardian_ids" widget="many2many_tags" />
+            </page>
+            <page string="Enrolments">
+              <field name="course_detail_ids">
+                <tree>
+                  <field name="course_id" />
+                  <field name="batch_id" />
+                  <field name="academic_years_id" />
+                  <field name="academic_term_id" />
+                  <field name="state" />
+                </tree>
+              </field>
+            </page>
+            <page string="Fee ledger">
+              <field name="fees_detail_ids" readonly="True">
+                <tree>
+                  <field name="product_id" />
+                  <field name="amount" />
+                  <field name="invoice_id" />
+                  <field name="campus_balance" />
+                </tree>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_students" model="ir.actions.act_window">
+    <field name="name">Student directory</field>
+    <field name="res_model">op.student</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="view_id" ref="mvp_students_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_students_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_students_tree" />
+    <field name="act_window_id" ref="mvp_students" />
+  </record>
+  <record id="mvp_students_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_student_form" />
+    <field name="act_window_id" ref="mvp_students" />
+  </record>
+  <record id="mvp_enrolments_tree" model="ir.ui.view">
+    <field name="name">mvp.enrolments.tree</field>
+    <field name="model">op.student.course</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="student_id" />
+        <field name="course_id" />
+        <field name="batch_id" />
+        <field name="academic_years_id" />
+        <field name="academic_term_id" />
+        <field name="state" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_enrolments_form" model="ir.ui.view">
+    <field name="name">mvp.enrolments.form</field>
+    <field name="model">op.student.course</field>
+    <field name="arch" type="xml">
+      <form>
+        <header />
+        <sheet>
+          <group>
+            <field name="student_id" />
+            <field name="course_id" />
+            <field name="batch_id" />
+            <field name="academic_years_id" />
+            <field name="academic_term_id" />
+            <field name="campus_date_from" />
+            <field name="campus_date_to" />
+            <field name="state" />
+            <field name="campus_reason" />
+            <field name="subject_ids" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_enrolments" model="ir.actions.act_window">
+    <field name="name">Enrolments &amp; transfers</field>
+    <field name="res_model">op.student.course</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="view_id" ref="mvp_enrolments_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_enrolments_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_enrolments_tree" />
+    <field name="act_window_id" ref="mvp_enrolments" />
+  </record>
+  <record id="mvp_enrolments_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_enrolments_form" />
+    <field name="act_window_id" ref="mvp_enrolments" />
+  </record>
+  <record id="mvp_faculty" model="ir.actions.act_window">
+    <field name="name">Faculty &amp; staff directory</field>
+    <field name="res_model">op.faculty</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_rooms" model="ir.actions.act_window">
+    <field name="name">Rooms</field>
+    <field name="res_model">op.classroom</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_timetable_tree" model="ir.ui.view">
+    <field name="name">mvp.timetable.tree</field>
+    <field name="model">op.session</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name" />
+        <field name="course_id" />
+        <field name="batch_id" />
+        <field name="subject_id" />
+        <field name="faculty_id" />
+        <field name="start_datetime" />
+        <field name="end_datetime" />
+        <field name="state" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_timetable_form" model="ir.ui.view">
+    <field name="name">mvp.timetable.form</field>
+    <field name="model">op.session</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <button name="action_campus_attendance" type="object" string="Take attendance" class="oe_highlight" />
+        </header>
+        <sheet>
+          <group>
+            <field name="course_id" />
+            <field name="batch_id" />
+            <field name="subject_id" />
+            <field name="faculty_id" />
+            <field name="classroom_id" />
+            <field name="start_datetime" />
+            <field name="end_datetime" />
+            <field name="state" />
+            <field name="company_id" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_timetable" model="ir.actions.act_window">
+    <field name="name">Class timetable</field>
+    <field name="res_model">op.session</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="view_id" ref="mvp_timetable_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_timetable_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_timetable_tree" />
+    <field name="act_window_id" ref="mvp_timetable" />
+  </record>
+  <record id="mvp_timetable_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_timetable_form" />
+    <field name="act_window_id" ref="mvp_timetable" />
+  </record>
+  <record id="mvp_faculty_timetable" model="ir.actions.act_window">
+    <field name="name">Faculty timetable</field>
+    <field name="res_model">op.session</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{'group_by': 'faculty_id'}</field>
+    <field name="view_id" ref="mvp_timetable_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_faculty_timetable_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_timetable_tree" />
+    <field name="act_window_id" ref="mvp_faculty_timetable" />
+  </record>
+  <record id="mvp_faculty_timetable_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_timetable_form" />
+    <field name="act_window_id" ref="mvp_faculty_timetable" />
+  </record>
+  <record id="mvp_attendance_registers_tree" model="ir.ui.view">
+    <field name="name">mvp.attendance.registers.tree</field>
+    <field name="model">op.attendance.register</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name" />
+        <field name="code" />
+        <field name="course_id" />
+        <field name="batch_id" />
+        <field name="subject_id" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_attendance_registers_form" model="ir.ui.view">
+    <field name="name">mvp.attendance.registers.form</field>
+    <field name="model">op.attendance.register</field>
+    <field name="arch" type="xml">
+      <form>
+        <header />
+        <sheet>
+          <group>
+            <field name="name" />
+            <field name="code" />
+            <field name="course_id" />
+            <field name="batch_id" />
+            <field name="subject_id" />
+            <field name="company_id" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_attendance_registers" model="ir.actions.act_window">
+    <field name="name">Attendance registers</field>
+    <field name="res_model">op.attendance.register</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="view_id" ref="mvp_attendance_registers_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_attendance_registers_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_attendance_registers_tree" />
+    <field name="act_window_id" ref="mvp_attendance_registers" />
+  </record>
+  <record id="mvp_attendance_registers_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_attendance_registers_form" />
+    <field name="act_window_id" ref="mvp_attendance_registers" />
+  </record>
+  <record id="mvp_attendance_tree" model="ir.ui.view">
+    <field name="name">mvp.attendance.tree</field>
+    <field name="model">op.attendance.sheet</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name" />
+        <field name="attendance_date" />
+        <field name="course_id" />
+        <field name="batch_id" />
+        <field name="session_id" />
+        <field name="faculty_id" />
+        <field name="state" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_attendance_form" model="ir.ui.view">
+    <field name="name">mvp.attendance.form</field>
+    <field name="model">op.attendance.sheet</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <button name="action_campus_roster" type="object" string="Load roster" invisible="state != 'draft'" />
+          <button name="attendance_done" type="object" string="Submit attendance" class="oe_highlight" invisible="state not in ('draft','start')" />
+          <button name="attendance_draft" type="object" string="Reopen for correction" invisible="state != 'done'" />
+          <button name="attendance_cancel" type="object" string="Cancel with reason" invisible="state == 'cancel'" />
+          <field name="state" widget="statusbar" />
+        </header>
+        <sheet>
+          <group>
+            <field name="register_id" />
+            <field name="session_id" />
+            <field name="campus_manual_subject_id" />
+            <field name="attendance_date" />
+            <field name="faculty_id" />
+            <field name="campus_managed" invisible="True" />
+            <field name="campus_correction_reason" />
+            <field name="campus_submitted_by" />
+            <field name="campus_submitted_on" />
+          </group>
+          <p>Late counts as present. Excused sessions follow the college attendance policy. Save the draft, then explicitly submit this roster.</p>
+          <field name="attendance_line" readonly="state not in ('draft','start')">
+            <tree editable="bottom" create="false">
+              <field name="student_id" readonly="True" />
+              <field name="campus_status" />
+              <field name="remark" />
+            </tree>
+          </field>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_attendance" model="ir.actions.act_window">
+    <field name="name">Take attendance</field>
+    <field name="res_model">op.attendance.sheet</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{'default_campus_managed': True}</field>
+    <field name="domain">[('campus_managed', '=', True)]</field>
+    <field name="view_id" ref="mvp_attendance_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_attendance_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_attendance_tree" />
+    <field name="act_window_id" ref="mvp_attendance" />
+  </record>
+  <record id="mvp_attendance_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_attendance_form" />
+    <field name="act_window_id" ref="mvp_attendance" />
+  </record>
+  <record id="mvp_fee_heads" model="ir.actions.act_window">
+    <field name="name">Fee heads</field>
+    <field name="res_model">product.template</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{'default_campus_fee_head': True, 'default_type': 'service'}</field>
+    <field name="domain">[('campus_fee_head', '=', True)]</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_structures_tree" model="ir.ui.view">
+    <field name="name">mvp.structures.tree</field>
+    <field name="model">op.fees.terms</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name" />
+        <field name="campus_course_id" />
+        <field name="campus_year_id" />
+        <field name="campus_term_id" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_structures_form" model="ir.ui.view">
+    <field name="name">mvp.structures.form</field>
+    <field name="model">op.fees.terms</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <h1>
+            <field name="name" />
+          </h1>
+          <group>
+            <field name="campus_course_id" />
+            <field name="campus_year_id" />
+            <field name="campus_term_id" />
+            <field name="company_id" />
+            <field name="campus_managed" invisible="True" />
+          </group>
+          <field name="line_ids">
+            <tree editable="bottom">
+              <field name="campus_product_id" />
+              <field name="campus_amount" />
+              <field name="due_date" />
+              <field name="due_days" />
+            </tree>
+          </field>
+          <field name="note" />
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_structures" model="ir.actions.act_window">
+    <field name="name">Fee structures</field>
+    <field name="res_model">op.fees.terms</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{'default_campus_managed': True}</field>
+    <field name="domain">[('campus_managed', '=', True)]</field>
+    <field name="view_id" ref="mvp_structures_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_structures_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_structures_tree" />
+    <field name="act_window_id" ref="mvp_structures" />
+  </record>
+  <record id="mvp_structures_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_structures_form" />
+    <field name="act_window_id" ref="mvp_structures" />
+  </record>
+  <record id="mvp_fees_tree" model="ir.ui.view">
+    <field name="name">mvp.fees.tree</field>
+    <field name="model">op.student.fees.details</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="student_id" />
+        <field name="product_id" />
+        <field name="amount" />
+        <field name="date" />
+        <field name="campus_year_id" />
+        <field name="invoice_id" />
+        <field name="campus_balance" />
+        <field name="campus_payment_state" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_fees_form" model="ir.ui.view">
+    <field name="name">mvp.fees.form</field>
+    <field name="model">op.student.fees.details</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <button name="get_invoice" type="object" string="Generate invoice" invisible="invoice_id" />
+          <button name="action_campus_post" type="object" string="Post fee invoice" class="oe_highlight" />
+          <button name="action_campus_pay" type="object" string="Record payment" class="oe_highlight" invisible="not invoice_id" />
+          <button name="action_campus_concession" type="object" string="Approve concession" groups="ideastone_erp.group_mvp_concession" invisible="invoice_id" />
+        </header>
+        <sheet>
+          <group>
+            <field name="student_id" />
+            <field name="course_id" />
+            <field name="batch_id" />
+            <field name="campus_year_id" />
+            <field name="product_id" />
+            <field name="amount" />
+            <field name="date" />
+            <field name="invoice_id" />
+            <field name="campus_balance" />
+            <field name="campus_payment_state" />
+            <field name="campus_concession" />
+            <field name="campus_concession_reason" />
+            <field name="campus_approved_by" />
+            <field name="campus_approved_on" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_fees" model="ir.actions.act_window">
+    <field name="name">Student fee accounts</field>
+    <field name="res_model">op.student.fees.details</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="domain">[('campus_managed', '=', True)]</field>
+    <field name="view_id" ref="mvp_fees_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_fees_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_fees_tree" />
+    <field name="act_window_id" ref="mvp_fees" />
+  </record>
+  <record id="mvp_fees_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_fees_form" />
+    <field name="act_window_id" ref="mvp_fees" />
+  </record>
+  <record id="mvp_assignment_form" model="ir.ui.view">
+    <field name="name">mvp.assignment.form</field>
+    <field name="model">campus.fee.assignment.wizard</field>
+    <field name="arch" type="xml">
+      <form>
+        <group>
+          <field name="enrolment_id" />
+          <field name="structure_id" />
+          <field name="date_from" />
+          <field name="company_id" invisible="True" />
+        </group>
+        <footer>
+          <button name="action_assign" type="object" string="Assign fee installments" class="btn-primary" />
+          <button special="cancel" string="Cancel" />
+        </footer>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_payment_form" model="ir.ui.view">
+    <field name="name">mvp.payment.form</field>
+    <field name="model">campus.fee.payment.wizard</field>
+    <field name="arch" type="xml">
+      <form>
+        <group>
+          <field name="invoice_id" />
+          <field name="amount" />
+          <field name="date" />
+          <field name="method" />
+          <field name="reference" />
+          <field name="journal_id" />
+          <field name="company_id" invisible="True" />
+        </group>
+        <footer>
+          <button name="action_pay" type="object" string="Record payment &amp; receipt" class="btn-primary" />
+          <button special="cancel" string="Cancel" />
+        </footer>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_assign_fees" model="ir.actions.act_window">
+    <field name="name">Assign fee structure</field>
+    <field name="res_model">campus.fee.assignment.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="context">{}</field>
+    <field name="target">new</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+    <field name="view_id" ref="mvp_assignment_form" />
+  </record>
+  <record id="mvp_invoices" model="ir.actions.act_window">
+    <field name="name">College invoices &amp; dues</field>
+    <field name="res_model">account.move</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="domain">[('campus_student_id', '!=', False), ('move_type', '=', 'out_invoice')]</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_receipts_tree" model="ir.ui.view">
+    <field name="name">mvp.receipts.tree</field>
+    <field name="model">account.payment</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="campus_receipt_number" />
+        <field name="date" />
+        <field name="partner_id" />
+        <field name="campus_invoice_id" />
+        <field name="amount" />
+        <field name="campus_method" />
+        <field name="campus_cashier_id" />
+        <field name="campus_reversal_id" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_receipts_form" model="ir.ui.view">
+    <field name="name">mvp.receipts.form</field>
+    <field name="model">account.payment</field>
+    <field name="arch" type="xml">
+      <form create="false">
+        <header>
+          <button name="action_campus_receipt" type="object" string="Print / download receipt" class="oe_highlight" />
+          <button name="action_campus_reverse" type="object" string="Reverse with reason" invisible="campus_reversal_id" confirm="Reverse this posted payment and restore the unpaid invoice balance?" />
+        </header>
+        <sheet>
+          <group>
+            <field name="campus_receipt_number" readonly="True" />
+            <field name="date" readonly="True" />
+            <field name="partner_id" readonly="True" />
+            <field name="campus_invoice_id" readonly="True" />
+            <field name="amount" readonly="True" />
+            <field name="campus_method" readonly="True" />
+            <field name="campus_reference" readonly="True" />
+            <field name="campus_cashier_id" readonly="True" />
+            <field name="campus_reversal_id" readonly="True" />
+            <field name="campus_reversal_reason" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_receipts" model="ir.actions.act_window">
+    <field name="name">Payment receipts</field>
+    <field name="res_model">account.payment</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="domain">[('campus_receipt_number', '!=', False)]</field>
+    <field name="view_id" ref="mvp_receipts_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_receipts_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_receipts_tree" />
+    <field name="act_window_id" ref="mvp_receipts" />
+  </record>
+  <record id="mvp_receipts_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_receipts_form" />
+    <field name="act_window_id" ref="mvp_receipts" />
+  </record>
+  <record id="mvp_exam_sessions_tree" model="ir.ui.view">
+    <field name="name">mvp.exam.sessions.tree</field>
+    <field name="model">op.exam.session</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name" />
+        <field name="exam_code" />
+        <field name="course_id" />
+        <field name="batch_id" />
+        <field name="campus_year_id" />
+        <field name="start_date" />
+        <field name="end_date" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_exam_sessions_form" model="ir.ui.view">
+    <field name="name">mvp.exam.sessions.form</field>
+    <field name="model">op.exam.session</field>
+    <field name="arch" type="xml">
+      <form>
+        <header />
+        <sheet>
+          <group>
+            <field name="name" />
+            <field name="exam_code" />
+            <field name="course_id" />
+            <field name="batch_id" />
+            <field name="campus_year_id" />
+            <field name="start_date" />
+            <field name="end_date" />
+            <field name="exam_type" />
+            <field name="evaluation_type" />
+            <field name="company_id" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_exam_sessions" model="ir.actions.act_window">
+    <field name="name">Examination sessions</field>
+    <field name="res_model">op.exam.session</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="view_id" ref="mvp_exam_sessions_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_exam_sessions_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_exam_sessions_tree" />
+    <field name="act_window_id" ref="mvp_exam_sessions" />
+  </record>
+  <record id="mvp_exam_sessions_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_exam_sessions_form" />
+    <field name="act_window_id" ref="mvp_exam_sessions" />
+  </record>
+  <record id="mvp_grades_tree" model="ir.ui.view">
+    <field name="name">mvp.grades.tree</field>
+    <field name="model">op.grade.configuration</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="result" />
+        <field name="min_per" />
+        <field name="max_per" />
+        <field name="company_id" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_grades_form" model="ir.ui.view">
+    <field name="name">mvp.grades.form</field>
+    <field name="model">op.grade.configuration</field>
+    <field name="arch" type="xml">
+      <form>
+        <header />
+        <sheet>
+          <group>
+            <field name="result" />
+            <field name="min_per" />
+            <field name="max_per" />
+            <field name="company_id" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_grades" model="ir.actions.act_window">
+    <field name="name">Grade rules</field>
+    <field name="res_model">op.grade.configuration</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="view_id" ref="mvp_grades_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_grades_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_grades_tree" />
+    <field name="act_window_id" ref="mvp_grades" />
+  </record>
+  <record id="mvp_grades_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_grades_form" />
+    <field name="act_window_id" ref="mvp_grades" />
+  </record>
+  <record id="mvp_exams_tree" model="ir.ui.view">
+    <field name="name">mvp.exams.tree</field>
+    <field name="model">op.exam</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name" />
+        <field name="exam_code" />
+        <field name="subject_id" />
+        <field name="batch_id" />
+        <field name="start_time" />
+        <field name="total_marks" />
+        <field name="min_marks" />
+        <field name="campus_state" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_exams_form" model="ir.ui.view">
+    <field name="name">mvp.exams.form</field>
+    <field name="model">op.exam</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <button name="action_campus_roster" type="object" string="Load marks roster" invisible="campus_state not in ('draft','entry')" />
+          <button name="action_campus_submit" type="object" string="Submit marks" class="oe_highlight" invisible="campus_state != 'entry'" />
+          <button name="action_campus_lock" type="object" string="Approve &amp; lock" invisible="campus_state != 'submitted'" />
+          <button name="action_campus_publish" type="object" string="Publish results" class="oe_highlight" invisible="campus_state != 'locked'" />
+          <button name="action_campus_reopen" type="object" string="Reopen with reason" invisible="campus_state not in ('submitted','locked','published')" />
+          <field name="campus_state" widget="statusbar" />
+        </header>
+        <sheet>
+          <group>
+            <field name="name" />
+            <field name="exam_code" />
+            <field name="session_id" />
+            <field name="subject_id" />
+            <field name="start_time" />
+            <field name="end_time" />
+            <field name="responsible_id" />
+            <field name="total_marks" />
+            <field name="min_marks" />
+            <field name="campus_grade_ids" widget="many2many_tags" />
+            <field name="campus_reopen_reason" />
+            <field name="campus_managed" invisible="True" />
+          </group>
+          <p>Missing marks are shown separately. Enter marks or explicitly confirm a zero before submitting. Only the examination officer may approve, publish or reopen results.</p>
+          <field name="campus_result_ids" readonly="campus_state not in ('draft','entry')">
+            <tree editable="bottom" create="false" delete="false">
+              <field name="student_id" readonly="True" />
+              <field name="marks" />
+              <field name="campus_entered" />
+              <field name="campus_percentage" />
+              <field name="grade" />
+              <field name="status" />
+            </tree>
+          </field>
+          <group>
+            <field name="campus_published_by" />
+            <field name="campus_published_on" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_exams" model="ir.actions.act_window">
+    <field name="name">Schedule &amp; marks entry</field>
+    <field name="res_model">op.exam</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{'default_campus_managed': True}</field>
+    <field name="domain">[('campus_managed', '=', True)]</field>
+    <field name="view_id" ref="mvp_exams_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_exams_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_exams_tree" />
+    <field name="act_window_id" ref="mvp_exams" />
+  </record>
+  <record id="mvp_exams_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_exams_form" />
+    <field name="act_window_id" ref="mvp_exams" />
+  </record>
+  <record id="mvp_results" model="ir.actions.act_window">
+    <field name="name">Results &amp; missing entries</field>
+    <field name="res_model">op.result.line</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="domain">[('exam_id.campus_managed', '=', True)]</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_notices_tree" model="ir.ui.view">
+    <field name="name">mvp.notices.tree</field>
+    <field name="model">campus.circular</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="reference" />
+        <field name="name" />
+        <field name="audience" />
+        <field name="date_from" />
+        <field name="date_to" />
+        <field name="campus_status" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_notices_form" model="ir.ui.view">
+    <field name="name">mvp.notices.form</field>
+    <field name="model">campus.circular</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <button name="action_campus_publish" type="object" string="Publish / schedule notice" class="oe_highlight" invisible="campus_status != 'draft'" />
+          <button name="action_campus_archive" type="object" string="Archive notice" />
+          <field name="campus_status" widget="statusbar" />
+        </header>
+        <sheet>
+          <group>
+            <field name="name" />
+            <field name="reference" />
+            <field name="campus_category" />
+            <field name="audience" />
+            <field name="campus_course_id" />
+            <field name="campus_batch_id" />
+            <field name="campus_group_id" />
+            <field name="date_from" />
+            <field name="date_to" />
+            <field name="company_id" />
+            <field name="campus_managed" invisible="True" />
+          </group>
+          <field name="body" widget="html" />
+          <p>In-app publication only. Email, SMS and WhatsApp delivery are not enabled by this action.</p>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_notices" model="ir.actions.act_window">
+    <field name="name">Notices &amp; audiences</field>
+    <field name="res_model">campus.circular</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{'default_campus_managed': True}</field>
+    <field name="domain">[('campus_managed', '=', True)]</field>
+    <field name="view_id" ref="mvp_notices_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_notices_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_notices_tree" />
+    <field name="act_window_id" ref="mvp_notices" />
+  </record>
+  <record id="mvp_notices_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_notices_form" />
+    <field name="act_window_id" ref="mvp_notices" />
+  </record>
+  <record id="mvp_audit_tree" model="ir.ui.view">
+    <field name="name">mvp.audit.tree</field>
+    <field name="model">campus.mvp.audit</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="create_date" />
+        <field name="actor_id" />
+        <field name="name" />
+        <field name="model_name" />
+        <field name="record_id" />
+        <field name="reason" />
+      </tree>
+    </field>
+  </record>
+  <record id="mvp_audit_form" model="ir.ui.view">
+    <field name="name">mvp.audit.form</field>
+    <field name="model">campus.mvp.audit</field>
+    <field name="arch" type="xml">
+      <form>
+        <header />
+        <sheet>
+          <group>
+            <field name="create_date" />
+            <field name="actor_id" />
+            <field name="name" />
+            <field name="model_name" />
+            <field name="record_id" />
+            <field name="reason" />
+            <field name="details" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_audit" model="ir.actions.act_window">
+    <field name="name">College workflow audit</field>
+    <field name="res_model">campus.mvp.audit</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{}</field>
+    <field name="view_id" ref="mvp_audit_tree" />
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+  </record>
+  <record id="mvp_audit_tree_binding" model="ir.actions.act_window.view">
+    <field name="sequence">1</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="mvp_audit_tree" />
+    <field name="act_window_id" ref="mvp_audit" />
+  </record>
+  <record id="mvp_audit_form_binding" model="ir.actions.act_window.view">
+    <field name="sequence">2</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="mvp_audit_form" />
+    <field name="act_window_id" ref="mvp_audit" />
+  </record>
+  <record id="mvp_college_form" model="ir.ui.view">
+    <field name="name">mvp.college.form</field>
+    <field name="model">res.company</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <h1>
+            <field name="name" />
+          </h1>
+          <group>
+            <field name="logo" />
+            <field name="street" />
+            <field name="city" />
+            <field name="phone" />
+            <field name="email" />
+            <field name="currency_id" />
+            <field name="campus_attendance_threshold" />
+            <field name="campus_excused_policy" />
+            <field name="campus_demo" />
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_college" model="ir.actions.act_window">
+    <field name="name">College profile &amp; attendance policy</field>
+    <field name="res_model">res.company</field>
+    <field name="view_mode">form</field>
+    <field name="context">{}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+    <field name="view_id" ref="mvp_college_form" />
+  </record>
+  <record id="mvp_report_form" model="ir.ui.view">
+    <field name="name">mvp.report.form</field>
+    <field name="model">campus.mvp.report</field>
+    <field name="arch" type="xml">
+      <form>
+        <group>
+          <field name="kind" />
+          <field name="date_from" />
+          <field name="date_to" />
+          <field name="year_id" />
+          <field name="course_id" />
+          <field name="batch_id" />
+          <field name="subject_id" />
+          <field name="faculty_id" />
+          <field name="student_id" />
+          <field name="source_id" />
+          <field name="status" />
+          <field name="method" />
+          <field name="cashier_id" />
+          <field name="only_shortage" />
+        </group>
+        <p>CSV uses the same college, filters and record permissions as the source register. An empty period exports an explanation, not fabricated data.</p>
+        <field name="summary" />
+        <footer>
+          <button name="action_csv" type="object" string="Generate filtered CSV" class="btn-primary" />
+          <button special="cancel" string="Close" />
+        </footer>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_report_admissions" model="ir.actions.act_window">
+    <field name="name">Admissions report</field>
+    <field name="res_model">campus.mvp.report</field>
+    <field name="view_mode">form</field>
+    <field name="context">{'default_kind': 'admissions'}</field>
+    <field name="target">new</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+    <field name="view_id" ref="mvp_report_form" />
+  </record>
+  <record id="mvp_report_students" model="ir.actions.act_window">
+    <field name="name">Students report</field>
+    <field name="res_model">campus.mvp.report</field>
+    <field name="view_mode">form</field>
+    <field name="context">{'default_kind': 'students'}</field>
+    <field name="target">new</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+    <field name="view_id" ref="mvp_report_form" />
+  </record>
+  <record id="mvp_report_attendance" model="ir.actions.act_window">
+    <field name="name">Attendance report</field>
+    <field name="res_model">campus.mvp.report</field>
+    <field name="view_mode">form</field>
+    <field name="context">{'default_kind': 'attendance'}</field>
+    <field name="target">new</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+    <field name="view_id" ref="mvp_report_form" />
+  </record>
+  <record id="mvp_report_collection" model="ir.actions.act_window">
+    <field name="name">Collection report</field>
+    <field name="res_model">campus.mvp.report</field>
+    <field name="view_mode">form</field>
+    <field name="context">{'default_kind': 'collection'}</field>
+    <field name="target">new</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+    <field name="view_id" ref="mvp_report_form" />
+  </record>
+  <record id="mvp_report_dues" model="ir.actions.act_window">
+    <field name="name">Dues report</field>
+    <field name="res_model">campus.mvp.report</field>
+    <field name="view_mode">form</field>
+    <field name="context">{'default_kind': 'dues'}</field>
+    <field name="target">new</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+    <field name="view_id" ref="mvp_report_form" />
+  </record>
+  <record id="mvp_report_results" model="ir.actions.act_window">
+    <field name="name">Results report</field>
+    <field name="res_model">campus.mvp.report</field>
+    <field name="view_mode">form</field>
+    <field name="context">{'default_kind': 'results'}</field>
+    <field name="target">new</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+    <field name="view_id" ref="mvp_report_form" />
+  </record>
+  <record id="mvp_report_faculty" model="ir.actions.act_window">
+    <field name="name">Faculty report</field>
+    <field name="res_model">campus.mvp.report</field>
+    <field name="view_mode">form</field>
+    <field name="context">{'default_kind': 'faculty'}</field>
+    <field name="target">new</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+    <field name="view_id" ref="mvp_report_form" />
+  </record>
+  <record id="mvp_import_form" model="ir.ui.view">
+    <field name="name">mvp.import.form</field>
+    <field name="model">campus.student.import</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <button name="action_preview" type="object" string="Preview &amp; validate" invisible="committed" />
+          <button name="action_commit" type="object" string="Import validated rows" class="oe_highlight" invisible="not checksum or committed" confirm="Create the validated students and enrolments in this college?" />
+        </header>
+        <sheet>
+          <p>Required mapped CSV columns: student_number, first_name, last_name, phone, section_code. Preview all rows before committing. Duplicate numbers and missing academic configuration block the entire import.</p>
+          <group>
+            <field name="company_id" />
+            <field name="file" filename="filename" />
+            <field name="filename" />
+            <field name="mapping" />
+            <field name="checksum" invisible="True" />
+            <field name="committed" />
+          </group>
+          <field name="preview" />
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="mvp_import_students" model="ir.actions.act_window">
+    <field name="name">Import students</field>
+    <field name="res_model">campus.student.import</field>
+    <field name="view_mode">form</field>
+    <field name="context">{}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">No records yet. Create a record or adjust your search filters.</p>
+    </field>
+    <field name="view_id" ref="mvp_import_form" />
+  </record>
+</odoo>
