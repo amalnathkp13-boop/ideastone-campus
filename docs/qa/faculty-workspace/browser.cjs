@@ -25,6 +25,8 @@ if (!out || !process.env.FACULTY_QA_PASSWORD) throw Error('Disposable QA configu
         await page.locator('.campus_sidebar').getByRole('button',{name:'My task list',exact:true}).click();
         await page.getByRole('heading',{name:'My task list',exact:true,level:1}).waitFor();
         await page.screenshot({path:path.join(out,'faculty-module-1440.png')});
+        await page.reload();
+        await page.getByRole('heading',{name:'My task list',exact:true,level:1}).waitFor();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My tasks & e-diary',exact:true}).click();
         const createButton = page.locator('.o_list_button_add:visible');
         await createButton.waitFor();
@@ -69,7 +71,11 @@ if (!out || !process.env.FACULTY_QA_PASSWORD) throw Error('Disposable QA configu
         await page.getByRole('button',{name:'Complete calculation',exact:true}).click();
         await page.getByRole('button',{name:'Reopen calculation',exact:true}).waitFor();
         await page.screenshot({path:path.join(out,'faculty-assessment-1440.png')});
+        await page.reload();
+        await page.getByRole('button',{name:'Reopen calculation',exact:true}).waitFor();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Internal mark generation',exact:true}).waitFor();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My tasks & e-diary',exact:true}).click();
+        await page.locator('.o_list_view:visible .o_data_row').filter({hasText:'QA browser persisted diary'}).waitFor();
         await page.reload();
         await page.locator('body.campus_faculty_workspace').waitFor();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My tasks & e-diary',exact:true}).waitFor();
@@ -87,7 +93,7 @@ if (!out || !process.env.FACULTY_QA_PASSWORD) throw Error('Disposable QA configu
     } catch (error) {
         if (page) {
             await page.screenshot({path:path.join(out,'failure.png')}).catch(()=>{});
-            await fs.writeFile(path.join(out,'failure.txt'),`${error.stack}\n${await page.locator('body').innerText().catch(()=>'')}`);
+            await fs.writeFile(path.join(out,'failure.txt'),`${error.stack}\nURL: ${page.url()}\n${await page.locator('body').innerText().catch(()=>'')}`);
         }
         throw error;
     } finally { await browser.close(); }

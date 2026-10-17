@@ -110,6 +110,13 @@ class Dashboard(models.AbstractModel):
         faculty_modules = self._faculty_modules(visible, faculty, pages) if faculty and not admin and self.env.user.has_group("openeducat_core.group_op_faculty") else []
         faculty_tasks, faculty_schedule, faculty_surveys = [], [], []
         if faculty_modules:
+            allocations = self.env["op.session"].read_group([
+                ("faculty_id", "=", faculty.id), ("company_id", "=", self.env.company.id), ("state", "!=", "cancel"),
+            ], ["subject_id"], ["subject_id"])
+            assigned_subjects = set(faculty.faculty_subject_ids.ids) | {row["subject_id"][0] for row in allocations if row["subject_id"]}
+            for stat in stats:
+                if stat["label"] == "Assigned subjects":
+                    stat.update(value=len(assigned_subjects), detail="Faculty subjects and timetable")
             # Survey participation uses Odoo's token-checked website workflow. This
             # bounded projection exposes only invitations addressed to this account;
             # faculty do not receive survey design or other respondents' ACLs.
@@ -172,8 +179,10 @@ class Dashboard(models.AbstractModel):
                                  "action_id": self.env.ref("ideastone_erp.action_faculty_task").id})
             elif key == "staff":
                 items.insert(0, {"label": "My staff profile", "profile_id": faculty.id})
-            elif key == "library" and any(p["key"] == "library" for p in pages):
-                items.insert(0, {"label": "Circulation desk", "page": "library"})
+            elif key == "library":
+                items.insert(0, {"label": "OPAC & digital library", "url": "/my/campus/library"})
+                if any(p["key"] == "library" for p in pages):
+                    items.insert(0, {"label": "Circulation desk", "page": "library"})
             elif key == "reports":
                 items = [{"label": "Reports & exports", "page": "reports"}]
                 report_tools = [
@@ -190,7 +199,7 @@ class Dashboard(models.AbstractModel):
                     ("report_university", "University examination results", "op.result.line"),
                     ("report_autonomous", "Autonomous ESE results", "op.result.line"),
                 ]
-                items += [{"label": title, "tool": tool} for tool, title, model in report_tools
+                items += [{"label": title, "tool": tool, "model": model} for tool, title, model in report_tools
                           if self.env[model].check_access_rights("read", raise_exception=False)]
             elif key == "search":
                 items = [{"label": "Find a module", "page": "modules"}]
@@ -225,7 +234,7 @@ class Dashboard(models.AbstractModel):
                          ("holidays", "College holidays", "resource.calendar.leaves")]
                 for tool, title, model in tools:
                     if self.env[model].check_access_rights("read", raise_exception=False):
-                        items.append({"label": title, "tool": tool})
+                        items.append({"label": title, "tool": tool, "model": model})
             if items:
                 result.append({"key": key, "label": label, "icon": icon, "items": items})
         return result

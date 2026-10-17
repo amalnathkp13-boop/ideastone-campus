@@ -3,16 +3,23 @@ import { Component, onWillStart, onWillUnmount, useExternalListener, useRef, use
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 
+function dashboardRoute(action = {}) {
+    const params = {...action.params, ...action.context?.params, ...action.context};
+    return {page: params.campus_page || "overview", module: params.campus_module || "home"};
+}
+
 class CampusBase extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
+        this.router = useService("router");
         this.notification = useService("notification");
         this.toggleRef = useRef("navToggle");
         this.subnavRef = useRef("subnavStrip");
+        const route = dashboardRoute(this.props.action);
         this.state = useState({ loading: true, error: "", navigation: [], stats: [], pages: [], queues: [], quick: [], appointments: [],
-            company: "", user: "", filter: "", open: false, page: this.props.action?.context?.campus_page || "overview",
-            faculty_modules: [], faculty_tasks: [], faculty_schedule: [], faculty_surveys: [], module: this.props.action?.context?.campus_module || "home", activeAction: 0, activeTool: "",
+            company: "", user: "", filter: "", open: false, page: route.page,
+            faculty_modules: [], faculty_tasks: [], faculty_schedule: [], faculty_surveys: [], module: route.module, activeAction: 0, activeTool: "",
             busy: false, query: "", cardQuery: "", unit: "", card: "", loanPage: 0, desk: { units: [], cards: [], loans: [], next: false } });
         // Handle the drawer before Odoo's global Escape shortcut consumes the key.
         useExternalListener(window, "keydown", (event) => {
@@ -59,13 +66,15 @@ class CampusBase extends Component {
         this.state.open = false;
     }
     async facultyGo(item) {
-        if (item.action || item.profile_id || item.tool) return this.open(item);
+        if (item.action || item.profile_id || item.tool || item.url) return this.open(item);
         await this.go({ key: item.page });
     }
     async open(item) {
         if (item.allowed === false) return;
         try {
-            if (item.tool) {
+            if (item.url) {
+                await this.action.doAction({type: "ir.actions.act_url", url: item.url, target: "new"});
+            } else if (item.tool) {
                 await this.action.doAction(await this.orm.call("campus.dashboard", "get_faculty_action", [item.tool]));
             } else if (item.profile_id) {
                 await this.action.doAction({ type: "ir.actions.act_window", res_model: "op.faculty", res_id: item.profile_id, views: [[false, "form"]], target: "current" });
@@ -80,7 +89,8 @@ class CampusBase extends Component {
     async go(item) {
         if (item.action || item.profile_id) return this.open(item);
         this.state.open = false;
-        await this.action.doAction("ideastone_erp.action_dashboard", { additionalContext: { campus_page: item.key, campus_module: this.state.module } });
+        const module = this.state.faculty_modules.length && ["reports", "analytics", "help"].includes(item.key) ? item.key : this.state.module;
+        await this.action.doAction("ideastone_erp.action_dashboard", { additionalContext: { campus_page: item.key, campus_module: module } });
     }
     async home() {
         if (this.state.faculty_modules.length) return this.chooseModule(this.state.faculty_modules[0]);
@@ -138,14 +148,21 @@ export class CampusNavigation extends CampusBase {
     }
     syncFacultyRoute() {
         const action = this.action.currentController?.action;
-        if (!action || action.target === "new") return;
+        if (!action || action.target === "new" || !this.state.faculty_modules.length) return;
         this.state.activeAction = action.id || 0;
         this.state.activeTool = action.context?.campus_tool || "";
-        if (action.context?.campus_module) {
+        if (action.tag === "ideastone_erp.dashboard") {
+            const route = dashboardRoute(action);
+            this.state.module = route.module;
+            this.state.page = route.page;
+            // Odoo includes these hash parameters in the restored client action.
+            this.router.pushState({campus_module: route.module, campus_page: route.page});
+        } else if (action.context?.campus_module) {
             this.state.module = action.context.campus_module;
             this.state.page = action.context.campus_page || "overview";
         } else {
-            const module = this.state.faculty_modules.find(module => module.items.some(item => item.action_id === action.id));
+            const module = this.state.faculty_modules.find(module => module.items.some(item => item.action_id && item.action_id === action.id)) ||
+                this.state.faculty_modules.find(module => module.items.some(item => item.model && item.model === action.res_model));
             if (module) this.state.module = module.key;
         }
     }
