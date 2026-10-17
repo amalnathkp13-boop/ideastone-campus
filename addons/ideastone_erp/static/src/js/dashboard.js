@@ -21,7 +21,7 @@ class CampusBase extends Component {
             company: "", user: "", filter: "", open: false, page: route.page,
             is_owner_workspace: false, is_demo: false, ownerMetrics: {stats: [], years: [], setup: [], funnel: [], programmes: [], collection: [], trend: [], recent: [], notices: [], upcoming: [], due_dates: []},
             ownerFilters: {date_from: "", date_to: "", year_id: ""}, ownerError: "", ownerLoading: false,
-            faculty_modules: [], faculty_tasks: [], faculty_schedule: [], faculty_surveys: [], module: route.module, activeAction: 0, activeTool: "", leavePage: false,
+            faculty_modules: [], faculty_tasks: [], faculty_schedule: [], faculty_surveys: [], module: route.module, activeAction: 0, activeTool: "",
             busy: false, query: "", cardQuery: "", unit: "", card: "", loanPage: 0, desk: { units: [], cards: [], loans: [], next: false } });
         // Handle the drawer before Odoo's global Escape shortcut consumes the key.
         useExternalListener(window, "keydown", (event) => {
@@ -184,14 +184,7 @@ export class CampusNavigation extends CampusBase {
     }
     syncFacultyRoute() {
         const action = this.action.currentController?.action;
-        if (!action || action.target === "new") return;
-        const enteringLeavePage = action.tag === "ideastone_erp.faculty_leave_page" && !this.state.leavePage;
-        this.state.leavePage = action.tag === "ideastone_erp.faculty_leave_page";
-        if (enteringLeavePage) {
-            requestAnimationFrame(() => requestAnimationFrame(() =>
-                document.querySelector(".campus_sidebar.is-leave .campus_nav_link.active")?.scrollIntoView({block: "center"})));
-        }
-        if (!this.state.faculty_modules.length) return;
+        if (!action || action.target === "new" || !this.state.faculty_modules.length) return;
         this.state.activeAction = action.id || 0;
         this.state.activeTool = action.context?.campus_tool || "";
         if (action.tag === "ideastone_erp.dashboard") {
