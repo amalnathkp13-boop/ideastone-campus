@@ -7,8 +7,7 @@ from odoo.tests import TransactionCase, new_test_user, tagged
 from odoo import fields
 
 
-@tagged("post_install", "-at_install")
-class TestOwnerMVP(TransactionCase):
+class OwnerMVPFixture:
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -81,6 +80,9 @@ class TestOwnerMVP(TransactionCase):
             "start_time": datetime.combine(self.today, time(14, 0)), "end_time": datetime.combine(self.today, time(15, 0)),
             "responsible_id": [(6, 0, self.faculty.ids)], "campus_managed": True, "campus_grade_ids": [(6, 0, grades.ids)]})
 
+
+@tagged("post_install", "-at_install")
+class TestOwnerMVP(OwnerMVPFixture, TransactionCase):
     def test_admission_document_gate_conversion_retry_and_audit(self):
         requirement = self.env["campus.admission.requirement"].create({"name": "School certificate"})
         app = self.application()
