@@ -193,7 +193,7 @@ class FeeInvoice(models.Model):
 
     def write(self, vals):
         posted = self.filtered(lambda r: r.campus_student_id and r.state == "posted")
-        if posted and ({"invoice_line_ids", "partner_id", "currency_id", "company_id", "campus_student_id", "campus_year_id", "campus_course_id"}.intersection(vals) or vals.get("state") == "draft"):
+        if posted and ({"invoice_line_ids", "line_ids", "partner_id", "currency_id", "company_id", "campus_student_id", "campus_year_id", "campus_course_id", "invoice_date", "invoice_date_due", "date", "move_type", "journal_id", "invoice_payment_term_id", "fiscal_position_id"}.intersection(vals) or vals.get("state") == "draft"):
             raise ValidationError(_("Posted college invoices are retained unchanged. Use a credit note or reversal for corrections."))
         if vals.get("state") == "draft" and self.filtered(lambda r: r.payment_id.campus_receipt_number):
             raise ValidationError(_("A college receipt journal entry must be reversed, never reset to draft."))
