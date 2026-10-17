@@ -5,6 +5,13 @@ const path = require('node:path');
 const base = 'http://127.0.0.1:18069';
 const out = process.env.FACULTY_QA_OUT;
 if (!out || !process.env.FACULTY_QA_PASSWORD) throw Error('Disposable QA configuration required');
+async function diagnosticMarkup(page) {
+    return page.evaluate(() => {
+        const body = document.body.cloneNode(true);
+        body.querySelectorAll('script, input[name=csrf_token], input[type=password]').forEach(node => node.remove());
+        return body.outerHTML;
+    });
+}
 (async () => {
     await fs.mkdir(out, {recursive:true});
     const browser = await chromium.launch({headless:true});
@@ -86,7 +93,7 @@ if (!out || !process.env.FACULTY_QA_PASSWORD) throw Error('Disposable QA configu
         await page.locator('.campus_sidebar:not(.is-open)').waitFor({state:'attached'});
         await page.locator('.campus_sidebar').waitFor({state:'hidden'});
         await page.screenshot({path:path.join(out,'faculty-mobile-390.png')});
-        await fs.writeFile(path.join(out,'mobile-dom.html'),await page.content());
+        await fs.writeFile(path.join(out,'mobile-dom.html'),await diagnosticMarkup(page));
         const unobscured=await page.evaluate(()=>Boolean(document.elementFromPoint(window.innerWidth/2,window.innerHeight/2)?.closest('.o_list_view')));
         if(!unobscured) throw Error('An unexpected overlay covers the faculty list');
         const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);
@@ -97,7 +104,7 @@ if (!out || !process.env.FACULTY_QA_PASSWORD) throw Error('Disposable QA configu
     } catch (error) {
         if (page) {
             await page.screenshot({path:path.join(out,'failure.png')}).catch(()=>{});
-            await fs.writeFile(path.join(out,'failure-dom.html'),await page.content());
+            await fs.writeFile(path.join(out,'failure-dom.html'),await diagnosticMarkup(page));
             await fs.writeFile(path.join(out,'failure.txt'),`${error.stack}\nURL: ${page.url()}\n${await page.locator('body').innerText().catch(()=>'')}`);
         }
         throw error;

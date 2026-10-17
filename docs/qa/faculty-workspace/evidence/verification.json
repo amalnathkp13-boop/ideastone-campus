@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "checks": [
+    "faculty-only shell",
+    "main module and topbar navigation",
+    "diary form persistence",
+    "weighted assessment PDF",
+    "reopen and complete assessment form",
+    "reload navigation",
+    "mobile drawer Escape",
+    "mobile overflow",
+    "browser console"
+  ],
+  "errors": [],
+  "source_commit": "1dcaad483b26c0a0cb42db18244855e41d0d53f7",
+  "ci_run": "https://github.com/amalnathkp13-boop/ideastone-campus/actions/runs/39009591134"
+}

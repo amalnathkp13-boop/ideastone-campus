@@ -37,6 +37,14 @@ The following are implementation choices inferred from names/screens, rather tha
 
 ## Automated verification
 
+The retained [screenshots and browser verification](evidence/verification.json) were captured from synthetic records on commit `1dcaad483b26c0a0cb42db18244855e41d0d53f7`, in [successful CI run 39009591134](https://github.com/amalnathkp13-boop/ideastone-campus/actions/runs/39009591134). Later documentation/evidence changes do not alter the application UI. The run passed clean install, transaction tests, browser/PDF checks and module upgrade; lint and both container image builds also passed.
+
+The assessment example initially prints 21/25. The browser then reopens it, changes the maximum to 30, saves 25.20/30 and completes it again. The assessment screenshot shows that final state. The PDF artifact shows the earlier 21/25 state, deliberately tested before reopening.
+
+![Faculty overview](evidence/faculty-overview-1440.png)
+
+![Completed assessment after reopening](evidence/faculty-assessment-1440.png)
+
 The PR CI installs the addons on Odoo 17/PostgreSQL, executes the real transaction tests, opens a synthetic faculty login with Playwright, creates a diary record through the actual form, checks persistence over RPC, reloads the native action, checks the 390px drawer and document overflow, and upgrades the installed modules. Artifacts contain synthetic screenshots and logs. `seed.py` refuses any database name other than `ci`; its random password is ephemeral and never committed.
 
 Tests cover personal-record privacy, class/student boundaries, valid and invalid mark inputs, completed component deletion, leave-stage authority and snapshots, lesson review, own payroll access, report domains and faculty-specific view compilation. Runtime results and screenshots must be taken from the final CI head, not an earlier green commit.
