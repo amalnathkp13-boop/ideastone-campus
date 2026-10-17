@@ -118,6 +118,23 @@ jobs:
             --workers=0 --max-cron-threads=0 --no-http < docs/qa/owner-mvp/seed.py
           export NODE_PATH="$RUNNER_TEMP/faculty-ui-tools/node_modules"
           node docs/qa/owner-mvp/browser.cjs
+      - name: Student portal workflows and UI on disposable Odoo
+        shell: bash
+        run: |
+          set -euo pipefail
+          export STUDENT_QA_PASSWORD=$(openssl rand -hex 20)
+          export STUDENT_QA_OUT="$RUNNER_TEMP/student-portal-proof"
+          mkdir -p "$STUDENT_QA_OUT"
+          docker run --rm -i --network host --entrypoint odoo \
+            -v faculty-ci-data:/var/lib/odoo \
+            -v "$PWD/addons:/mnt/ideastone-addons:ro" \
+            -v "$PWD/vendor/openeducat_erp:/mnt/openeducat:ro" \
+            -e STUDENT_QA_PASSWORD odoo:17.0 shell \
+            --db_host=127.0.0.1 --db_user=odoo --db_password=odoo -d ci \
+            --addons-path=/mnt/ideastone-addons,/mnt/openeducat,/usr/lib/python3/dist-packages/odoo/addons \
+            --workers=0 --max-cron-threads=0 --no-http < docs/qa/student-portal/seed.py
+          export NODE_PATH="$RUNNER_TEMP/faculty-ui-tools/node_modules"
+          node docs/qa/student-portal/browser.cjs
       - name: Upgrade installed campus modules
         shell: bash
         run: |
@@ -152,6 +169,13 @@ jobs:
         with:
           name: owner-mvp-proof
           path: ${{ runner.temp }}/owner-mvp-proof
+          retention-days: 14
+      - name: Preserve student portal evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: student-portal-proof
+          path: ${{ runner.temp }}/student-portal-proof
           retention-days: 14
       - name: Preserve install and test diagnostics
         if: always()

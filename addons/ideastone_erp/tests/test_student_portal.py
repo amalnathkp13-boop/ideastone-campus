@@ -1,5 +1,6 @@
 import base64
 import uuid
+from datetime import datetime, time, timedelta
 
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import TransactionCase, new_test_user, tagged
@@ -157,3 +158,25 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         rec = self.env["campus.service.request"].search([("portal_reference", "=", valid["reference"])])
         self.assertEqual(rec.student_id, self.student)
         self.assertEqual(rec.filename, "evidence.txt")
+
+    def test_disabled_college_catalogue_override_hides_global_template(self):
+        template = self.env.ref("ideastone_erp.student_request_bonafide")
+        local = template.with_user(self.owner).copy({"name": "College bonafide policy"})
+        shown = self.portal.snapshot()["request_types"]
+        self.assertIn(local.id, [row["id"] for row in shown])
+        self.assertNotIn(template.id, [row["id"] for row in shown])
+        with self.assertRaises(AccessError):
+            template.with_user(self.owner).write({"active": False})
+        local.with_user(self.owner).write({"active": False})
+        self.assertNotIn(template.code, [row["code"] for row in self.portal.snapshot()["request_types"]])
+
+    def test_local_day_bounds_and_inactive_identity(self):
+        self.student_user.tz = "Asia/Kolkata"
+        # 00:30 local time belongs to today even though its stored UTC date is yesterday.
+        start = datetime.combine(self.today - timedelta(days=1), time(19, 0))
+        session = self.session(start_datetime=start, end_datetime=start + timedelta(minutes=30))
+        data = self.portal.snapshot(date_from=str(self.today), date_to=str(self.today))
+        self.assertIn(session.id, [row["id"] for row in data["schedule"]])
+        self.student.active = False
+        with self.assertRaises(AccessError):
+            self.portal.snapshot()

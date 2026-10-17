@@ -77,6 +77,29 @@
         }
         if (event.target.closest(".student_backdrop")) { closeMenu(); return; }
         if (event.target.closest(".student_retry")) { retry?.(); return; }
+        const range = event.target.closest("[data-timetable]");
+        if (range) {
+            const controls = range.closest(".student_timetable_controls");
+            const today = new Date(controls.dataset.today + "T12:00:00Z");
+            const monday = new Date(today);
+            monday.setUTCDate(today.getUTCDate() - (today.getUTCDay() + 6) % 7);
+            const sunday = new Date(monday);
+            sunday.setUTCDate(monday.getUTCDate() + 6);
+            let count = 0;
+            workspace.querySelectorAll(".student_timetable_row").forEach(row => {
+                const day = new Date(row.dataset.day + "T12:00:00Z");
+                const show = range.dataset.timetable === "all" || (range.dataset.timetable === "today" ? day.getTime() === today.getTime() : day >= monday && day <= sunday);
+                row.hidden = !show;
+                count += Number(show);
+            });
+            controls.querySelectorAll("button").forEach(button => {
+                button.setAttribute("aria-pressed", String(button === range));
+                button.classList.toggle("btn-primary", button === range);
+                button.classList.toggle("btn-outline-primary", button !== range);
+            });
+            workspace.querySelector(".student_timetable_empty").hidden = count > 0;
+            return;
+        }
         const link = event.target.closest("a[href]");
         if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || link.target || link.hasAttribute("download")) return;
         const url = new URL(link.href, location.href);

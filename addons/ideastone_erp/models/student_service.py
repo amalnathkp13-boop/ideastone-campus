@@ -5,7 +5,6 @@ from collections import defaultdict
 from datetime import datetime, time, timedelta
 
 import pytz
-
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tools import html_sanitize
 
@@ -160,7 +159,7 @@ class StudentPortal(models.AbstractModel):
         if loans or books or materials:
             navigation.append(("library", "Library", "book"))
         navigation += [("help", "Help & Feedback", "question-circle-o"), ("account", "Account & Preferences", "cog")]
-        return {"company": company.name, "demo": company.campus_demo, "today": self._dates(today), "timezone": self.env.user.tz or "UTC", "student_id": student.id,
+        return {"company": company.name, "demo": company.campus_demo, "today": self._dates(today), "today_iso": str(today), "timezone": self.env.user.tz or "UTC", "student_id": student.id,
             "student": {"name": student.name, "number": student.gr_no or "Not assigned", "register": student.register_no or "Not assigned", "status": student.campus_status, "email": student.email or "", "phone": student.phone or "", "mobile": student.mobile or "", "street": student.street or "", "street2": student.street2 or "", "city": student.city or "", "zip": student.zip or "", "admitted": self._dates(student.campus_admission_date)},
             "guardians": [{"name": g.name, "phone": g.phone or g.mobile or "", "email": g.email or ""} for g in student.campus_guardian_ids],
             "contact_edit": company.campus_student_contact_edit, "support_email": company.email or "", "support_phone": company.phone or "", "login": self.env.user.login,

@@ -17,7 +17,7 @@
   <record id="student_request_types_form" model="ir.ui.view">
     <field name="name">student.request.types.form</field>
     <field name="model">campus.student.request.type</field>
-    <field name="arch" type="xml" readonly="not company_id">
+    <field name="arch" type="xml">
       <form>
         <sheet>
           <group>
