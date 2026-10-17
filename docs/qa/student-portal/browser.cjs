@@ -73,7 +73,11 @@ async function save(page, control) {
         await page.locator('#profile_phone').fill('+91 90000 00123');
         await page.locator('#profile_city').fill('Coimbatore');
         await save(page,page.getByRole('button',{name:'Save contact details'}));
-        await page.reload();
+        await page.reload({waitUntil:'load'});
+        // Read only after the reloaded profile form is rendered; a stale/partial page made this check flaky.
+        await page.locator('#student_main h1').waitFor();
+        await page.waitForFunction(()=>document.querySelector('#profile_city')?.value==='Coimbatore',null,{timeout:15000})
+            .catch(()=>{});
         assert.equal(await page.locator('#profile_city').inputValue(),'Coimbatore');
         assert.equal((await snapshot(page)).student.phone,'+91 90000 00123');
         await assert.rejects(()=>rpc(page,'campus.student.portal','act',['profile',{first_name:'Forged'}]));
