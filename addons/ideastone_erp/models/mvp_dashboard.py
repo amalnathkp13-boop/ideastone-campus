@@ -47,6 +47,9 @@ class OwnerDashboard(models.AbstractModel):
                 ref = self.env.ref(action if "." in action else "ideastone_erp." + action, raise_if_not_found=False)
                 if not ref:
                     continue
+                # Read only these code-owned action definitions. Target records
+                # continue to use the caller's ACLs and college record rules.
+                ref = ref.sudo()
                 if action in {"base.action_res_users", "base.action_sequence_form"} and not self.env.user.has_group("ideastone_erp.group_mvp_owner"):
                     continue
                 if action in {"mvp_college", "mvp_import_students", "mvp_requirements"} and not self.env.user.has_group("ideastone_erp.group_mvp_registrar"):
@@ -81,7 +84,7 @@ class OwnerDashboard(models.AbstractModel):
             if not year or year.company_id != self.env.company:
                 raise AccessError(_("Select an academic year in the active college."))
         return {"date_from": start, "date_to": end, "year_id": year_id,
-                **{key: int(filters.get(key) or 0) for key in ["course_id", "batch_id", "subject_id", "faculty_id", "student_id", "cashier_id", "source_id"]},
+                **{key: int(filters.get(key) or 0) for key in ["course_id", "batch_id", "subject_id", "faculty_id", "student_id", "cashier_id", "source_id", "exam_id", "fee_head_id", "department_id"]},
                 "status": str(filters.get("status") or ""), "method": str(filters.get("method") or "")}
 
     def _mvp_records(self, model, domain, limit=50000):
@@ -128,6 +131,20 @@ class OwnerDashboard(models.AbstractModel):
                 domain.append(("campus_method", "=", f["method"]))
             if f["cashier_id"]:
                 domain.append(("campus_cashier_id", "=", f["cashier_id"]))
+        if f["student_id"] and kind in {"students", "dues", "collection", "results"}:
+            path = {"students": "id", "dues": "campus_student_id", "collection": "campus_invoice_id.campus_student_id", "results": "student_id"}[kind]
+            domain.append((path, "=", f["student_id"]))
+        if kind == "results":
+            for key, path in [("exam_id", "exam_id"), ("subject_id", "exam_id.subject_id"), ("faculty_id", "exam_id.responsible_id")]:
+                if f[key]:
+                    domain.append((path, "=", f[key]))
+        if f["fee_head_id"] and kind in {"collection", "dues"}:
+            domain.append(("campus_invoice_id.invoice_line_ids.product_id" if kind == "collection" else "invoice_line_ids.product_id", "=", f["fee_head_id"]))
+        if kind == "faculty":
+            if f["faculty_id"]:
+                domain.append(("id", "=", f["faculty_id"]))
+            if f["department_id"]:
+                domain.append(("main_department_id", "=", f["department_id"]))
         return model, domain
 
     def _attendance_rows(self, records):
@@ -321,6 +338,9 @@ class CollegeReport(models.TransientModel):
     student_id = fields.Many2one("op.student")
     cashier_id = fields.Many2one("res.users")
     source_id = fields.Many2one("utm.source")
+    exam_id = fields.Many2one("op.exam")
+    fee_head_id = fields.Many2one("product.product", domain="[('campus_fee_head','=',True)]")
+    department_id = fields.Many2one("op.department")
     status = fields.Char(string="Status code (optional)")
     method = fields.Selection([("cash", "Cash"), ("upi", "UPI"), ("bank", "Bank transfer"), ("card", "Card"), ("other", "Other")])
     only_shortage = fields.Boolean(string="Only below attendance threshold")
@@ -331,7 +351,7 @@ class CollegeReport(models.TransientModel):
     def action_csv(self):
         self.ensure_one()
         dashboard = self.env["campus.dashboard"]
-        filters = {key: self[key].id if self._fields[key].type == "many2one" else str(self[key] or "") for key in ["date_from", "date_to", "year_id", "course_id", "batch_id", "subject_id", "faculty_id", "student_id", "cashier_id", "source_id", "status", "method"]}
+        filters = {key: self[key].id if self._fields[key].type == "many2one" else str(self[key] or "") for key in ["date_from", "date_to", "year_id", "course_id", "batch_id", "subject_id", "faculty_id", "student_id", "cashier_id", "source_id", "exam_id", "fee_head_id", "department_id", "status", "method"]}
         f = dashboard._mvp_filters(filters)
         model, _domain = dashboard._mvp_source(self.kind, f)
         self.env[model].check_access_rights("read")

@@ -15,6 +15,25 @@ class GradeConfiguration(models.Model):
 
     company_id = fields.Many2one("res.company", default=lambda self: self.env.company, index=True)
 
+    @api.constrains("min_per", "max_per")
+    def max_per_validation(self):
+        # The upstream constraint assumes a singleton, including during imports.
+        for rec in self:
+            if not 0 <= rec.min_per <= rec.max_per <= 100:
+                raise ValidationError(_("Grade percentages must satisfy 0 ≤ minimum ≤ maximum ≤ 100."))
+
+    def _check_locked_grade_scale(self):
+        if self.env["op.exam"].sudo().search_count([("campus_managed", "=", True), ("campus_grade_ids", "in", self.ids), ("campus_state", "in", ["locked", "published"])]):
+            raise ValidationError(_("This grade scale is used by locked results. Create a revised scale and explicitly reopen the affected examination."))
+
+    def write(self, vals):
+        self._check_locked_grade_scale()
+        return super().write(vals)
+
+    def unlink(self):
+        self._check_locked_grade_scale()
+        return super().unlink()
+
 
 class ExamType(models.Model):
     _inherit = "op.exam.type"

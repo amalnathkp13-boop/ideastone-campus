@@ -1718,6 +1718,9 @@
           <field name="method" />
           <field name="cashier_id" />
           <field name="only_shortage" />
+          <field name="exam_id" invisible="kind != 'results'" />
+          <field name="fee_head_id" invisible="kind not in ['collection','dues']" />
+          <field name="department_id" invisible="kind != 'faculty'" />
         </group>
         <p>CSV uses the same college, filters and record permissions as the source register. An empty period exports an explanation, not fabricated data.</p>
         <field name="summary" />

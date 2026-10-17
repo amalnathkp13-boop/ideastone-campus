@@ -806,15 +806,6 @@
     <field name="perm_create" eval="False" />
     <field name="perm_unlink" eval="False" />
   </record>
-  <record id="mvp_acl_campus_admission_document_hod" model="ir.model.access">
-    <field name="name">MVP campus.admission.document hod</field>
-    <field name="model_id" ref="ideastone_erp.model_campus_admission_document" />
-    <field name="group_id" ref="group_mvp_hod" />
-    <field name="perm_read" eval="True" />
-    <field name="perm_write" eval="False" />
-    <field name="perm_create" eval="False" />
-    <field name="perm_unlink" eval="False" />
-  </record>
   <record id="mvp_acl_crm_lead_hod" model="ir.model.access">
     <field name="name">MVP crm.lead hod</field>
     <field name="model_id" ref="crm.model_crm_lead" />
@@ -854,15 +845,6 @@
   <record id="mvp_acl_op_student_fees_details_hod" model="ir.model.access">
     <field name="name">MVP op.student.fees.details hod</field>
     <field name="model_id" ref="openeducat_fees.model_op_student_fees_details" />
-    <field name="group_id" ref="group_mvp_hod" />
-    <field name="perm_read" eval="True" />
-    <field name="perm_write" eval="False" />
-    <field name="perm_create" eval="False" />
-    <field name="perm_unlink" eval="False" />
-  </record>
-  <record id="mvp_acl_campus_mvp_audit_hod" model="ir.model.access">
-    <field name="name">MVP campus.mvp.audit hod</field>
-    <field name="model_id" ref="ideastone_erp.model_campus_mvp_audit" />
     <field name="group_id" ref="group_mvp_hod" />
     <field name="perm_read" eval="True" />
     <field name="perm_write" eval="False" />
@@ -1306,6 +1288,42 @@
     <field name="name">MVP enrolment reader exams</field>
     <field name="model_id" ref="openeducat_core.model_op_student_course" />
     <field name="group_id" ref="group_mvp_exams" />
+    <field name="perm_read" eval="True" />
+  </record>
+  <record id="mvp_faculty_exam_read_scope" model="ir.rule">
+    <field name="name">mvp faculty exam read scope</field>
+    <field name="model_id" ref="openeducat_exam.model_op_exam" />
+    <field name="domain_force">['|',('campus_managed','=',False),('responsible_id.user_id','=',user.id)] if user.has_group('openeducat_core.group_op_faculty') and not (user.has_group('ideastone_erp.group_mvp_exams') or user.has_group('ideastone_erp.group_mvp_registrar') or user.has_group('ideastone_erp.group_mvp_readonly') or user.has_group('ideastone_erp.group_mvp_hod') or user.has_group('openeducat_exam.group_op_exam_admin')) else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_faculty_result_read_scope" model="ir.rule">
+    <field name="name">mvp faculty result read scope</field>
+    <field name="model_id" ref="openeducat_exam.model_op_result_line" />
+    <field name="domain_force">['|',('exam_id.campus_managed','=',False),('exam_id.responsible_id.user_id','=',user.id)] if user.has_group('openeducat_core.group_op_faculty') and not (user.has_group('ideastone_erp.group_mvp_exams') or user.has_group('ideastone_erp.group_mvp_registrar') or user.has_group('ideastone_erp.group_mvp_readonly') or user.has_group('ideastone_erp.group_mvp_hod') or user.has_group('openeducat_exam.group_op_exam_admin')) else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_faculty_student_read_scope" model="ir.rule">
+    <field name="name">mvp faculty student read scope</field>
+    <field name="model_id" ref="openeducat_core.model_op_student" />
+    <field name="domain_force">['|','|',('course_detail_ids.batch_id.campus_year_id','=',False),('course_detail_ids.batch_id.campus_session_ids.faculty_id.user_id','=',user.id),('course_detail_ids.batch_id.campus_exam_ids.responsible_id.user_id','=',user.id)] if user.has_group('openeducat_core.group_op_faculty') and not (user.has_group('ideastone_erp.group_mvp_exams') or user.has_group('ideastone_erp.group_mvp_registrar') or user.has_group('ideastone_erp.group_mvp_readonly') or user.has_group('ideastone_erp.group_mvp_hod') or user.has_group('openeducat_exam.group_op_exam_admin') or user.has_group('ideastone_erp.group_mvp_admissions') or user.has_group('ideastone_erp.group_mvp_accountant')) else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_faculty_enrolment_read_scope" model="ir.rule">
+    <field name="name">mvp faculty enrolment read scope</field>
+    <field name="model_id" ref="openeducat_core.model_op_student_course" />
+    <field name="domain_force">['|','|',('batch_id.campus_year_id','=',False),('batch_id.campus_session_ids.faculty_id.user_id','=',user.id),('batch_id.campus_exam_ids.responsible_id.user_id','=',user.id)] if user.has_group('openeducat_core.group_op_faculty') and not (user.has_group('ideastone_erp.group_mvp_exams') or user.has_group('ideastone_erp.group_mvp_registrar') or user.has_group('ideastone_erp.group_mvp_readonly') or user.has_group('ideastone_erp.group_mvp_hod') or user.has_group('openeducat_exam.group_op_exam_admin') or user.has_group('ideastone_erp.group_mvp_admissions') or user.has_group('ideastone_erp.group_mvp_accountant')) else [(1,'=',1)]</field>
+  </record>
+  <record id="mvp_audit_role_scope" model="ir.rule">
+    <field name="name">mvp audit role scope</field>
+    <field name="model_id" ref="model_campus_mvp_audit" />
+    <field name="domain_force">[(1,'=',1)] if user.has_group('ideastone_erp.group_mvp_registrar') or user.has_group('ideastone_erp.group_mvp_readonly') else [('model_name','in',['account.payment','account.move','op.student.fees.details','campus.fee.assignment.wizard','campus.fee.payment.wizard'])] if user.has_group('ideastone_erp.group_mvp_accountant') else [('model_name','in',['op.exam','op.result.line','op.grade.configuration'])] if user.has_group('ideastone_erp.group_mvp_exams') else [('id','=',0)]</field>
+  </record>
+  <record id="mvp_notice_audience" model="ir.rule">
+    <field name="name">Managed notices: published audience and teaching allocation</field>
+    <field name="model_id" ref="model_campus_circular" />
+    <field name="domain_force">[(1,'=',1)] if user.has_group('ideastone_erp.group_mvp_registrar') or user.has_group('ideastone_erp.group_mvp_readonly') or user.has_group('ideastone_erp.group_manager') else ['|',('campus_managed','=',False),'&amp;','&amp;','&amp;','&amp;','&amp;','&amp;',('campus_status','=','published'),('audience','in',['all','faculty']),'|',('campus_group_id','=',False),('campus_group_id','in',user.groups_id.ids),'|','|',('campus_course_id','=',False),('campus_course_id.campus_section_ids.campus_session_ids.faculty_id.user_id','=',user.id),('campus_course_id.department_id','=',user.dept_id.id if user.has_group('ideastone_erp.group_mvp_hod') and user.dept_id else 0),'|','|',('campus_batch_id','=',False),('campus_batch_id.campus_session_ids.faculty_id.user_id','=',user.id),('campus_batch_id.course_id.department_id','=',user.dept_id.id if user.has_group('ideastone_erp.group_mvp_hod') and user.dept_id else 0),('date_from','&lt;=',time.strftime('%Y-%m-%d')),'|',('date_to','=',False),('date_to','&gt;=',time.strftime('%Y-%m-%d'))]</field>
+  </record>
+  <record id="mvp_notice_staff_reader" model="ir.model.access">
+    <field name="name">Published college notices for internal staff</field>
+    <field name="model_id" ref="model_campus_circular" />
+    <field name="group_id" ref="base.group_user" />
     <field name="perm_read" eval="True" />
   </record>
 </odoo>

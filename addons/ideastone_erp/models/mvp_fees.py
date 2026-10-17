@@ -104,6 +104,8 @@ class StudentFee(models.Model):
     def create(self, vals_list):
         if any(set(v).intersection({"campus_approved_by", "campus_approved_on"}) for v in vals_list):
             raise AccessError(_("Use concession approval to record the approver."))
+        if any(v.get("campus_managed") and v.get("invoice_id") for v in vals_list):
+            raise AccessError(_("Generate the fee invoice from the student assessment."))
         records = super().create(vals_list)
         records._mvp_company("student_id", "fees_line_id", "course_id", "batch_id", "campus_year_id")
         return records
@@ -118,7 +120,7 @@ class StudentFee(models.Model):
         if {"campus_approved_by", "campus_approved_on"}.intersection(vals):
             raise AccessError(_("Use concession approval."))
         managed = self.filtered("campus_managed")
-        if managed and {"student_id", "campus_year_id", "course_id", "batch_id", "fees_line_id", "campus_managed"}.intersection(vals):
+        if managed and {"student_id", "campus_year_id", "course_id", "batch_id", "fees_line_id", "campus_managed", "invoice_id"}.intersection(vals):
             raise ValidationError(_("Fee assessment identity is fixed. Create a separate assessment when needed."))
         if managed.invoice_id and set(vals) - {"message_follower_ids"}:
             raise ValidationError(_("Invoiced fees are immutable. Use an auditable accounting adjustment."))
@@ -346,6 +348,8 @@ class NativeFeePaymentRegister(models.TransientModel):
         self.ensure_one()
         invoices = self.line_ids.move_id.filtered("campus_student_id")
         if invoices:
+            if not self.env.su and not self.env.user.has_group("ideastone_erp.group_mvp_accountant"):
+                raise AccessError(_("College fee accountant permission is required to collect this invoice."))
             if len(invoices) != 1 or len(self.line_ids.move_id) != 1:
                 raise ValidationError(_("Record one college invoice per payment to retain its exact receipt allocation."))
             invoice = invoices[0]

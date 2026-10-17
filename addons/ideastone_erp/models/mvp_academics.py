@@ -55,6 +55,7 @@ class Programme(models.Model):
     company_id = fields.Many2one("res.company", default=lambda self: self.env.company, index=True)
     campus_duration = fields.Integer(string="Duration (semesters)", default=8)
     campus_award = fields.Char(string="Award / programme type")
+    campus_section_ids = fields.One2many("op.batch", "course_id", string="Programme sections")
 
     @api.constrains("department_id", "company_id", "campus_duration")
     def _check_programme_scope(self):
@@ -85,6 +86,8 @@ class Section(models.Model):
     company_id = fields.Many2one("res.company", default=lambda self: self.env.company, index=True)
     campus_year_id = fields.Many2one("op.academic.year", string="Academic year", ondelete="restrict")
     campus_term_id = fields.Many2one("op.academic.term", string="Semester", ondelete="restrict")
+    campus_session_ids = fields.One2many("op.session", "batch_id", string="Teaching sessions")
+    campus_exam_ids = fields.One2many("op.exam", "batch_id", string="Examinations")
 
     @api.constrains("campus_year_id", "campus_term_id", "course_id", "company_id")
     def _check_section_scope(self):
@@ -128,6 +131,8 @@ class Enrolment(models.Model):
         for rec in self:
             if rec.batch_id and rec.batch_id.course_id != rec.course_id:
                 raise ValidationError(_("Enrolment section must belong to the selected programme."))
+            if rec.batch_id.campus_year_id and (rec.academic_years_id != rec.batch_id.campus_year_id or rec.batch_id.campus_term_id and rec.academic_term_id != rec.batch_id.campus_term_id):
+                raise ValidationError(_("Enrolment academic year and semester must match the configured section."))
             if rec.campus_date_to and rec.campus_date_to < rec.campus_date_from:
                 raise ValidationError(_("Enrolment end must follow its start."))
             if rec.academic_term_id and rec.academic_term_id.academic_year_id != rec.academic_years_id:

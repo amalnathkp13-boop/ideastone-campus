@@ -197,12 +197,25 @@ class TestOwnerMVP(TransactionCase):
         officer.action_campus_publish()
         self.assertEqual(exam.campus_result_ids.grade, "P")
         with self.assertRaises(ValidationError):
+            officer.campus_grade_ids[:1].write({"result": "Changed after publication"})
+        with self.assertRaises(ValidationError):
             officer.campus_result_ids.write({"marks": 60})
         officer.campus_reopen_reason = "Approved revaluation request"
         officer.action_campus_reopen()
         exam.campus_result_ids.write({"marks": 80})
         self.assertEqual(exam.campus_result_ids.marks, 80)
         self.assertTrue(self.env["campus.mvp.audit"].search([("name", "=", "Examination reopened"), ("record_id", "=", exam.id)]))
+
+    def test_foreign_college_and_unassigned_faculty_are_denied(self):
+        self.enrolled()
+        exam = self.exam()
+        teacher = new_test_user(self.env, login="mvp_unassigned_teacher", groups="openeducat_exam.group_op_exam_user")
+        with self.assertRaises(AccessError):
+            exam.with_user(teacher).read(["name"])
+        other = self.env["res.company"].create({"name": "MVP foreign college"})
+        foreign = self.env["op.academic.year"].with_company(other).create({"name": "Foreign academic year", "start_date": self.year.start_date, "end_date": self.year.end_date})
+        with self.assertRaises(AccessError):
+            foreign.with_user(self.owner).with_context(allowed_company_ids=[self.env.company.id]).read(["name"])
 
     def test_role_boundaries_and_readonly_dashboard(self):
         app = self.enrolled()
@@ -216,6 +229,7 @@ class TestOwnerMVP(TransactionCase):
             self.env["op.result.line"].with_user(self.accountant).create({"marks": 50})
         overview = self.env["campus.dashboard"].with_user(self.readonly).get_overview()
         self.assertEqual(overview["faculty_modules"][0]["label"], "Dashboard")
+        self.env["campus.dashboard"].with_user(self.readonly).get_owner_metrics()
         with self.assertRaises(AccessError):
             self.env["campus.dashboard"].with_user(self.readonly).get_owner_action("base.action_res_users")
 
@@ -261,3 +275,10 @@ class TestOwnerMVP(TransactionCase):
         future = notice.sudo().copy({"reference": "MVPQA-F", "date_from": self.today + timedelta(days=1)})
         future.action_campus_publish()
         self.assertEqual(future.campus_status, "scheduled")
+        restricted = notice.copy({"reference": "MVPQA-G", "campus_group_id": self.env.ref("ideastone_erp.group_mvp_accountant").id})
+        restricted.action_campus_publish()
+        with self.assertRaises(AccessError):
+            restricted.with_user(self.outsider).read(["body"])
+        self.assertEqual(restricted.with_user(self.accountant).read(["name"])[0]["name"], restricted.name)
+        with self.assertRaises(AccessError):
+            future.with_user(self.outsider).read(["body"])
