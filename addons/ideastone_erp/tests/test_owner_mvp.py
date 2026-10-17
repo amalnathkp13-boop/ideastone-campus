@@ -217,6 +217,13 @@ class TestOwnerMVP(TransactionCase):
         with self.assertRaises(AccessError):
             foreign.with_user(self.owner).with_context(allowed_company_ids=[self.env.company.id]).read(["name"])
 
+    def test_withdrawal_ends_future_roster_eligibility_and_preserves_history(self):
+        student = self.enrolled().student_id.with_user(self.owner)
+        student.write({"campus_status": "withdrawn", "campus_status_reason": "Approved withdrawal", "campus_status_date": self.today})
+        self.assertEqual(student.course_detail_ids.state, "finished")
+        self.assertEqual(student.course_detail_ids.campus_date_to, self.today)
+        self.assertEqual(student.course_detail_ids.campus_reason, "Approved withdrawal")
+
     def test_role_boundaries_and_readonly_dashboard(self):
         app = self.enrolled()
         with self.assertRaises(AccessError):

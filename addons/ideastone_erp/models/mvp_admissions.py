@@ -257,6 +257,11 @@ class Student(models.Model):
                 raise ValidationError(_("Record a reason for changing student status or archiving."))
         result = super().write(vals)
         if {"campus_status", "active"}.intersection(vals):
+            if vals.get("campus_status") in {"withdrawn", "graduated"} or vals.get("active") is False:
+                for rec in self:
+                    rec.course_detail_ids.filtered(lambda e: e.academic_years_id and e.state == "running").write({
+                        "state": "finished", "campus_date_to": rec.campus_status_date or fields.Date.context_today(rec),
+                        "campus_reason": rec.campus_status_reason})
             self._mvp_log("Student status changed", details={k: str(v) for k, v in vals.items()})
         return result
 

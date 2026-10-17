@@ -148,8 +148,10 @@ class Enrolment(models.Model):
                     raise ValidationError(_("Retain this historic enrolment. Finish it and create a new placement with an effective date."))
         if vals.get("state") == "finished" and any(rec.academic_years_id for rec in self) and not (vals.get("campus_reason") or all(rec.campus_reason for rec in self)):
             raise ValidationError(_("Record a reason before finishing or transferring an enrolment."))
+        if vals.get("state") == "finished" and "campus_date_to" not in vals:
+            vals = dict(vals, campus_date_to=fields.Date.context_today(self))
         result = super().write(vals)
-        if {"state", "batch_id", "course_id"}.intersection(vals):
+        if {"state", "batch_id", "course_id", "campus_date_to"}.intersection(vals):
             self._mvp_log("Enrolment updated", details={k: str(v) for k, v in vals.items()})
         return result
 
