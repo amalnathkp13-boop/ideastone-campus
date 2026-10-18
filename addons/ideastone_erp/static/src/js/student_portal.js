@@ -4,6 +4,8 @@
     let pending = null;
     let retry = null;
     let lastToggle = null;
+    // Path + query of the view currently rendered; in-page anchors only change the hash.
+    let rendered = location.pathname + location.search;
     function closeMenu() {
         const workspace = root();
         workspace?.querySelector(".student_sidebar")?.classList.remove("is-open");
@@ -45,6 +47,7 @@
             if (!next) throw new Error("Student workspace unavailable");
             workspace.replaceWith(next);
             if (push) history.pushState({}, "", response.url);
+            rendered = location.pathname + location.search;
             document.title = html.title || document.title;
             enhance();
             document.getElementById("student_main")?.focus({preventScroll: true});
@@ -153,7 +156,11 @@
             if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
         }
     }, {capture: true});
-    window.addEventListener("popstate", () => { if (root()) navigate(location.href, {}, false); });
+    window.addEventListener("popstate", () => {
+        // Chrome fires popstate for same-page #anchor jumps; re-rendering then would discard unsaved form input.
+        if (!root() || location.pathname + location.search === rendered) return;
+        navigate(location.href, {}, false);
+    });
     window.addEventListener("pagehide", () => { if (root()) root().hidden = true; });
     window.addEventListener("pageshow", event => { if (event.persisted && root()) location.reload(); else if (root()) root().hidden = false; });
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", enhance); else enhance();
