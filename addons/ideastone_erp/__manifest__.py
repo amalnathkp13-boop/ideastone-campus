@@ -1,7 +1,7 @@
 {
     "name": "Ideastone Campus Operations",
     "summary": "Teaching, campus services, staff administration and institutional engagement",
-    "version": "17.0.1.0.6",
+    "version": "17.0.1.0.7",
     "category": "Education",
     "author": "Ideastone Technologies Pvt Ltd",
     "license": "OPL-1",
@@ -32,6 +32,9 @@
             "ideastone_erp/static/src/scss/dashboard.scss",
             "ideastone_erp/static/src/scss/faculty_workspace.scss",
             "ideastone_erp/static/src/scss/owner.scss",
+            "ideastone_erp/static/src/js/faculty_profile.js",
+            "ideastone_erp/static/src/xml/faculty_profile.xml",
+            "ideastone_erp/static/src/scss/faculty_profile.scss",
             "ideastone_erp/static/src/js/faculty_leave.js",
             "ideastone_erp/static/src/xml/faculty_leave.xml",
             "ideastone_erp/static/src/scss/faculty_leave.scss",
