@@ -7,13 +7,14 @@
         <i class="fa fa-laptop me-2 text-muted"/>
         <span class="fw-bold">Learning platform</span>
         <span class="text-muted ms-2 small">OpenOlat · same login (SSO)</span>
-        <button class="btn btn-sm btn-link ms-auto" t-on-click="openInNewTab"><i class="fa fa-external-link me-1"/>Open in new tab</button>
+        <button t-if="state.url &amp;&amp; !state.error" class="btn btn-sm btn-link ms-auto" t-on-click="openInNewTab"><i class="fa fa-external-link me-1"/>Open in new tab</button>
       </div>
       <div class="flex-grow-1 position-relative">
-        <div t-if="!state.loaded" class="position-absolute top-50 start-50 translate-middle text-muted">
+        <div t-if="state.error" class="alert alert-warning m-4" role="alert"><p t-esc="state.error"/><button class="btn btn-outline-primary" t-on-click="loadConfiguration">Retry learning configuration</button></div>
+        <div t-if="!state.loaded &amp;&amp; !state.error" class="position-absolute top-50 start-50 translate-middle text-muted">
           <i class="fa fa-circle-o-notch fa-spin me-2"/>Loading learning platform…
         </div>
-        <iframe t-att-src="state.url" t-on-load="onLoad" class="w-100 h-100 border-0" title="Learning platform" allow="fullscreen; camera; microphone"/>
+        <iframe t-if="state.url &amp;&amp; !state.error" t-att-src="state.url" t-on-load="onLoad" class="w-100 h-100 border-0" title="Learning platform" allow="fullscreen; camera; microphone"/>
       </div>
     </div>
   </t>

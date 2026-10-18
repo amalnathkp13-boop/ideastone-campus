@@ -48,7 +48,7 @@ async function markup(page) {
         if(await page.locator('.campus_dashboard').innerText().then(text=>/Â·|â€”|â†/.test(text))) throw Error('Owner template contains incorrectly decoded UTF-8 punctuation');
         await page.locator('.campus_dashboard').evaluate(element=>element.scrollTop=0);
         const modules = await page.locator('.campus_sidebar nav .campus_nav_link').allTextContents();
-        if(modules.length!==12) throw Error('Owner sidebar does not contain the 12 functional MVP modules');
+        if(modules.length!==13) throw Error('Owner sidebar does not contain the 13 functional MVP modules');
         const overview=await rpc(page,'campus.dashboard','get_overview');
         let checkedViews=0;
         for(const module of overview.faculty_modules) {

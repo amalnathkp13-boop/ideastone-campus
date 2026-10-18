@@ -17,4 +17,4 @@ class OpFaculty(models.Model):
     def _cron_provision_lms(self):
         if self.env["ir.config_parameter"].sudo().get_param("ideastone.lms_auto_provision") != "True":
             return
-        self.search([("active", "=", True), ("lms_identity_key", "=", False)], limit=200).action_provision_lms()
+        self.search([("active", "=", True), "|", ("lms_identity_key", "=", False), ("lms_sync_error", "!=", False)], limit=200).action_provision_lms()

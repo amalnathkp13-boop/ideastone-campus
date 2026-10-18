@@ -6,11 +6,11 @@
     <field name="inherit_id" ref="openeducat_core.view_op_faculty_form"/>
     <field name="arch" type="xml">
       <xpath expr="//div[@name='button_box']" position="inside">
-        <button class="oe_stat_button" type="object" name="action_open_lms" icon="fa-graduation-cap" invisible="not lms_identity_key">
+        <button class="oe_stat_button" type="object" name="action_open_lms" icon="fa-graduation-cap" invisible="not lms_identity_key or lms_sync_error">
           <div class="o_stat_info"><span class="o_stat_text">Learning</span><span class="o_stat_text">account ✓</span></div>
         </button>
-        <button class="oe_stat_button" type="object" name="action_provision_lms" icon="fa-plus-circle" invisible="lms_identity_key">
-          <div class="o_stat_info"><span class="o_stat_text">Create</span><span class="o_stat_text">LMS account</span></div>
+        <button class="oe_stat_button" type="object" name="action_provision_lms" icon="fa-plus-circle" invisible="lms_identity_key and not lms_sync_error">
+          <div class="o_stat_info"><span class="o_stat_text">Synchronize / retry</span><span class="o_stat_text">LMS account</span></div>
         </button>
       </xpath>
       <xpath expr="//notebook" position="inside">

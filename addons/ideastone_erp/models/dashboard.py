@@ -26,6 +26,7 @@ class Dashboard(models.AbstractModel):
             ("Examinations", "op.exam", "openeducat_exam.act_open_op_exam_view", "Academics"),
             ("Results", "op.result.line", "ideastone_erp.action_results", "Academics"),
             ("Assignments", "op.assignment", "openeducat_assignment.act_open_op_assignment_view", "Academics"),
+            ("Review submissions", "op.assignment.sub.line", "ideastone_erp.mvp_learning_submissions", "Academics"),
             ("Library catalogue", "op.media", "openeducat_library.act_open_op_media_view", "Library"),
             ("Library circulation", "op.media.movement", "ideastone_erp.action_circulation", "Library"),
             ("Fee terms", "op.fees.terms", "openeducat_fees.act_open_fees_terms_view", "Purchase and accounts"),

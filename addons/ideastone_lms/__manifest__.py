@@ -10,7 +10,7 @@ Makes the ERP and the LMS one platform:
 * **Provisioning**: students and faculty get OpenOlat accounts automatically (button on the record + nightly cron)
   through OpenOlat's REST API; programmes can be mapped to OpenOlat courses so students are enrolled on sync.
 """,
-    "version": "17.0.1.0.0",
+    "version": "17.0.1.0.1",
     "category": "Education",
     "author": "Ideastone Technologies Pvt Ltd",
     "license": "OPL-1",
