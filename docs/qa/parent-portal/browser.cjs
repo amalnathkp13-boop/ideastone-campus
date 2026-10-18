@@ -23,17 +23,24 @@ async function login(page,user) {
     assert([302,303].includes((await response).status()));
     await page.waitForURL(url=>!url.pathname.endsWith('/web/login'));
 }
+async function clickAndWaitForWorkspace(page,control) {
+    const previous=await page.locator('#campus_student_workspace').elementHandle();
+    try {
+        await control.click();
+        await page.waitForFunction(element=>!element.isConnected,previous);
+    } finally {await previous.dispose();}
+}
 async function visit(page,section) {
-    await page.locator(`.student_sidebar a[href*="/parent/${section}"]`).click();
+    // Revisiting the same URL must wait for the new form, not the old heading/URL.
+    await clickAndWaitForWorkspace(page,page.locator(`.student_sidebar a[href*="/parent/${section}"]`));
     await page.waitForURL(new RegExp('/parent/'+section));
     await page.locator('#student_main h1').waitFor();
     assert.equal(await page.locator('.student_network_error:visible').count(),0);
 }
 async function submit(page,button) {
-    const previous=await page.locator('#campus_student_workspace').elementHandle();
-    await button.click();
-    await page.waitForFunction(element=>!element.isConnected,previous);
-    await previous.dispose();
+    await clickAndWaitForWorkspace(page,button);
+    const errors=page.locator('.parent_workspace .alert-danger:visible');
+    assert.equal(await errors.count(),0,await errors.allTextContents().then(messages=>messages.join('\n')));
     await page.getByText('Your changes have been saved.',{exact:true}).waitFor();
 }
 (async()=>{
@@ -64,9 +71,7 @@ async function submit(page,button) {
         for(const child of [first,second]) {
             if(child!==first) {
                 await page.locator('#parent_child').selectOption(String(child));
-                const previous=await page.locator('#campus_student_workspace').elementHandle();
-                await page.getByRole('button',{name:'Switch child',exact:true}).click();
-                await page.waitForFunction(element=>!element.isConnected,previous); await previous.dispose();
+                await clickAndWaitForWorkspace(page,page.getByRole('button',{name:'Switch child',exact:true}));
             }
             for(const [section] of initial.navigation) {
                 await visit(page,section);
