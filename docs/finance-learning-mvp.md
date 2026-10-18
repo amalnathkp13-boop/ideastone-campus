@@ -57,4 +57,3 @@ The full ERP suite covers existing Faculty, Owner, Student and Parent behaviour 
 14. Open the learning frame as ordinary faculty. Only the public URL should be exposed; invalid configuration gives a retriable message. Verify live OpenOlat/SSO separately before presenting it as connected.
 15. Check desktop and 390px layouts, keyboard access, returned validation messages, file downloads, logout, and that all role palettes/navigation remain consistent.
 
-The separate [competitor assessment](impres-competitor-mvp-report.md) distinguishes verified public claims, customer feedback, delivered features and future opportunities.

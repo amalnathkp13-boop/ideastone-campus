@@ -35,7 +35,7 @@ class Dashboard(models.AbstractModel):
             ("Purchase orders", "purchase.order", "ideastone_erp.action_orders", "Purchase and accounts"),
             ("Stock movements", "stock.picking", "ideastone_erp.action_stock", "Purchase and accounts"),
             ("Maintenance", "maintenance.request", "ideastone_erp.action_maintenance", "Campus services"),
-            ("Leave requests", "hr.leave", "ideastone_erp.action_leave", "Staff"),
+            ("Leave requests", "hr.leave", "ideastone_erp.action_faculty_leave_page", "Staff"),
             ("Staff attendance", "hr.attendance", "ideastone_erp.action_staff_attendance", "Staff"),
             ("Admission leads / agents", "crm.lead", "ideastone_erp.action_leads", "Admissions"),
             ("Surveys", "survey.survey", "ideastone_erp.action_surveys", "Engagement"),
