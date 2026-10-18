@@ -1,0 +1,97 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.FacultyLeavePage">
+    <main class="campus_leave_page">
+      <header class="leave_heading">
+        <div>
+          <p>Staff <span>›</span> Leave requests</p>
+          <h1>Online Leave Apply &amp; Status</h1>
+        </div>
+        <button type="button" class="leave_refresh" t-on-click="load" t-att-disabled="state.loading"><i class="fa fa-refresh"/> Refresh</button>
+      </header>
+
+      <div t-if="state.error" class="leave_error" role="alert"><span t-esc="state.error"/><button type="button" t-on-click="load">Retry</button></div>
+      <div t-if="state.loading" class="leave_loading" role="status">Loading leave requests…</div>
+      <t t-elif="state.data">
+        <nav class="leave_tabs" aria-label="Leave management sections">
+          <button type="button" t-att-class="{active: state.tab === 'process'}" t-att-aria-current="state.tab === 'process' ? 'page' : undefined" t-on-click="() => this.setTab('process')">Online Leave Process</button>
+          <button type="button" t-att-class="{active: state.tab === 'approval'}" t-att-aria-current="state.tab === 'approval' ? 'page' : undefined" t-on-click="() => this.setTab('approval')">Online Leave Application Approval By HoD</button>
+        </nav>
+
+        <t t-if="state.tab === 'process'">
+          <section class="leave_kpis" aria-label="Leave account overview">
+            <article class="leave_kpi"><span class="leave_kpi_icon blue"><i class="fa fa-calendar"/></span><div><small>Available Casual Leave</small><strong t-esc="state.data.balance === null ? '—' : state.data.balance"/><span>Leaves available for application</span></div></article>
+            <article class="leave_kpi"><span class="leave_kpi_icon blue"><i class="fa fa-file-text-o"/></span><div><small>This Month Eligibility</small><strong t-esc="state.data.monthly_eligibility === null ? '—' : state.data.monthly_eligibility"/><span>Eligible leaves for this month</span></div></article>
+            <article class="leave_kpi"><span class="leave_kpi_icon green"><i class="fa fa-check"/></span><div><small>Approved Requests</small><strong t-esc="state.data.approved_count"/><span>Total approved leave applications</span></div></article>
+            <article class="leave_kpi"><span class="leave_kpi_icon amber"><i class="fa fa-clock-o"/></span><div><small>Pending Approval</small><strong t-esc="state.data.pending_count"/><span>Leave applications awaiting approval</span></div></article>
+          </section>
+
+          <div class="leave_work_grid">
+            <section class="leave_panel leave_form_panel" aria-labelledby="leave_form_title">
+              <h2 id="leave_form_title"><i class="fa fa-file-text-o"/> Apply for Leave</h2>
+              <div t-if="!state.data.can_apply" class="leave_notice" role="status">A linked employee and an available leave type are required to apply.</div>
+              <form t-on-submit="submit">
+                <div class="leave_field"><label for="leave_year">Academic Year</label><select id="leave_year" t-model="state.form.academicYear"><t t-foreach="state.data.academic_years" t-as="year" t-key="year"><option t-att-value="year">VCET : <t t-esc="yearLabel(year)"/></option></t></select></div>
+                <div class="leave_field"><label for="leave_type">Leave Type</label><select id="leave_type" t-model="state.form.leaveTypeId" t-att-disabled="!state.data.leave_types.length"><t t-foreach="state.data.leave_types" t-as="type" t-key="type.id"><option t-att-value="type.id" t-esc="type.name"/></t><option t-if="!state.data.leave_types.length" value="">No leave types available</option></select></div>
+                <fieldset class="leave_duration"><legend class="visually-hidden">Leave duration</legend><label><input type="radio" name="leaveDuration" value="one" t-att-checked="state.form.duration === 'one'" t-on-change="changeDuration"/> One day</label><label><input type="radio" name="leaveDuration" value="multiple" t-att-checked="state.form.duration === 'multiple'" t-on-change="changeDuration"/> Multiple days</label></fieldset>
+                <div class="leave_date_field"><label for="leave_from">From Date</label><input id="leave_from" type="date" t-att-value="state.form.fromDate" t-on-change="changeFromDate" required="required"/><label for="leave_from_session">Session</label><select id="leave_from_session" t-model="state.form.fromSession"><option value="FN">FN</option><option value="AN">AN</option></select></div>
+                <div class="leave_date_field"><label for="leave_to">To Date</label><input id="leave_to" type="date" t-model="state.form.toDate" t-att-disabled="state.form.duration === 'one'" required="required"/><label for="leave_to_session">Session</label><select id="leave_to_session" t-model="state.form.toSession"><option value="AN">AN</option><option value="FN">FN</option></select></div>
+                <div class="leave_field leave_reason"><label for="leave_reason">Reason</label><textarea id="leave_reason" rows="3" placeholder="Type reason for applying…" t-model="state.form.reason" required="required"></textarea></div>
+                <div class="leave_field"><label for="leave_authority">Reporting Authority</label><input id="leave_authority" type="text" t-att-value="state.data.reporting_authority" readonly="readonly"/></div>
+                <div class="leave_balance"><i class="fa fa-info-circle"/> Current leave balance: <strong><t t-esc="state.data.balance === null ? '—' : state.data.balance"/> days</strong></div>
+                <div class="leave_form_actions"><button type="submit" class="primary" t-att-disabled="state.saving || !state.data.can_apply"><i class="fa fa-paper-plane-o"/> <t t-esc="state.saving ? 'Submitting…' : 'Submit Request'"/></button><button type="button" t-on-click="resetForm"><i class="fa fa-undo"/> Reset</button></div>
+              </form>
+            </section>
+
+            <div class="leave_right_stack">
+              <section class="leave_panel leave_history" aria-labelledby="leave_history_title">
+                <header><h2 id="leave_history_title"><i class="fa fa-file-text-o"/> Leave Application History</h2><div><button type="button" class="icon" aria-label="Print leave history" t-on-click="printHistory"><i class="fa fa-print"/></button><button type="button" class="text" t-on-click="toggleHistory"><t t-esc="state.showAll ? 'Show recent' : 'View all'"/> <i class="fa fa-arrow-right"/></button></div></header>
+                <div class="leave_table_scroll"><table><thead><tr><th>Leave Type</th><th>Date</th><th>Days</th><th>Reason</th><th>Status</th><th>Action</th></tr></thead><tbody>
+                  <t t-foreach="historyRows" t-as="record" t-key="record.id"><tr><td t-esc="record.type"/><td t-esc="dateLabel(record)"/><td t-esc="record.days"/><td class="leave_ellipsis" t-att-title="record.reason" t-esc="record.reason"/><td><span class="leave_status" t-att-class="statusClass(record.status)" t-esc="record.status"/></td><td><button type="button" class="icon" t-att-aria-label="'View application ' + record.id" t-on-click="() => this.openDetails(record)"><i class="fa fa-eye"/></button></td></tr></t>
+                  <tr t-if="!historyRows.length"><td colspan="6" class="leave_empty">No leave requests recorded</td></tr>
+                </tbody></table></div>
+              </section>
+
+              <section class="leave_panel leave_attendance" aria-labelledby="leave_attendance_title">
+                <h2 id="leave_attendance_title"><i class="fa fa-calendar"/> Payroll Attendance Entry</h2>
+                <div class="leave_table_scroll"><table><thead><tr><th>Date</th><th>Day</th><th>FN</th><th>AN</th></tr></thead><tbody>
+                  <t t-foreach="state.data.attendance" t-as="entry" t-key="entry.date"><tr><td t-esc="formatDate(entry.date)"/><td t-esc="entry.day"/><td><span class="leave_att_tag" t-att-class="attendanceClass(entry.fn)" t-esc="entry.fn"/></td><td><span class="leave_att_tag" t-att-class="attendanceClass(entry.an)" t-esc="entry.an"/></td></tr></t>
+                  <tr t-if="!state.data.attendance.length"><td colspan="4" class="leave_empty">No attendance entries recorded</td></tr>
+                </tbody></table></div>
+              </section>
+
+              <section class="leave_panel leave_insights" aria-labelledby="leave_insights_title">
+                <header><h2 id="leave_insights_title"><i class="fa fa-magic"/> AI Insights for Leave Management</h2><button type="button" class="text" t-on-click="openInsights">View AI Insights <i class="fa fa-arrow-right"/></button></header>
+                <div class="leave_insight_grid">
+                  <div><i class="fa fa-line-chart"/> Approval Trend <strong t-esc="state.data.approval_percent === null ? '—' : state.data.approval_percent + '%'"/></div>
+                  <div><i class="fa fa-pie-chart"/> Most Common Leave <strong t-esc="state.data.most_common_leave"/></div>
+                  <div><i class="fa fa-exclamation-triangle"/> Leave Balance <strong t-esc="state.data.balance === null ? '—' : state.data.balance + ' days'"/></div>
+                  <div><i class="fa fa-check-circle"/> Payroll Sync <strong>Not configured</strong></div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </t>
+        <section t-else="" class="leave_panel leave_approval"><h2>Online Leave Application Approval By HoD</h2><p>Approval requests are handled through the authorized Odoo leave approval workflow. Your own submitted requests and their status are available in Online Leave Process.</p><button type="button" t-on-click="() => this.setTab('process')">Back to leave requests</button></section>
+      </t>
+
+      <div t-if="state.modal" class="leave_modal_backdrop" t-on-click="closeModal">
+        <section class="leave_modal" role="dialog" aria-modal="true" t-on-click.stop="stopModalClick">
+          <header><h2 t-esc="state.modal === 'details' ? 'Leave Application Details' : 'Leave Insights'"/><button type="button" aria-label="Close dialog" t-on-click="closeModal">×</button></header>
+          <dl t-if="state.modal === 'details' &amp;&amp; state.selected">
+            <dt>Leave Type</dt><dd t-esc="state.selected.type"/>
+            <dt>Date</dt><dd t-esc="dateLabel(state.selected)"/>
+            <dt>Days</dt><dd t-esc="state.selected.days"/>
+            <dt>Reason</dt><dd t-esc="state.selected.reason"/>
+            <dt>Status</dt><dd t-esc="state.selected.status"/>
+          </dl>
+          <dl t-if="state.modal === 'insights' &amp;&amp; state.data">
+            <dt>Approval Trend</dt><dd t-esc="state.data.approval_percent === null ? '—' : state.data.approval_percent + '%'"/>
+            <dt>Most Common Leave</dt><dd t-esc="state.data.most_common_leave"/>
+            <dt>Leave Balance</dt><dd t-esc="state.data.balance === null ? '—' : state.data.balance + ' days'"/>
+            <dt>Payroll Sync</dt><dd>Not configured</dd>
+          </dl>
+        </section>
+      </div>
+    </main>
+  </t>
+</templates>
