@@ -10,6 +10,8 @@
 <menuitem id="menu_digital_resource" name="Digital library" parent="menu_category_0" action="action_digital_resource"/>
 <menuitem id="menu_teaching_plan" name="Lesson plans" parent="menu_category_0" action="action_teaching_plan"/>
 <menuitem id="menu_faculty_detail" name="Staff qualifications and documents" parent="menu_category_1" action="action_faculty_profile"/>
+<record id="action_staff_profile" model="ir.actions.client"><field name="name">Staff Profile</field><field name="tag">ideastone_erp.faculty_profile</field></record>
+<menuitem id="menu_staff_profile" name="Staff Profile" parent="menu_category_1" action="action_staff_profile"/>
 <menuitem id="menu_faculty_achievement" name="Faculty development and appraisal" parent="menu_category_1" action="action_faculty_achievement"/>
 <menuitem id="menu_hostel_room" name="Hostel rooms" parent="menu_category_2" action="action_hostel_room"/>
 <menuitem id="menu_hostel_allocation" name="Hostel residents" parent="menu_category_2" action="action_hostel_allocation"/>
