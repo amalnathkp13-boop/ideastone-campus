@@ -45,7 +45,7 @@ published.action_campus_submit()
 published.action_campus_lock()
 published.action_campus_publish()
 notice = env["campus.circular"].with_user(owner).create({"name": "Student support and certificate desk", "reference": "STUDENT-QA", "audience": "student",
-    "body": "<p>The student portal now shows your published attendance, fee receipts and certificate requests. Contact the college office for official record corrections.</p>", "campus_managed": True})
+    "body": "<p>The student portal now shows your published attendance, fee receipts and certificate requests. Contact the college office for official record corrections.</p>", "campus_category": "Event", "campus_managed": True})
 notice.action_campus_publish()
 private = env["campus.circular"].with_user(owner).create({"name": "PRIVATE STAFF ONLY", "reference": "STUDENT-QA-PRIVATE", "audience": "faculty", "body": "Internal content", "campus_managed": True})
 private.action_campus_publish()
