@@ -54,6 +54,10 @@ async function markup(page) {
         for(const module of overview.faculty_modules) {
             for(const item of module.items.filter(item=>item.action)) {
                 const action=await rpc(page,'campus.dashboard','get_owner_action',[item.action]);
+                if(action.type==='ir.actions.client') {
+                    if(!action.tag) throw Error(`Client submodule ${item.action} has no action tag`);
+                    continue;
+                }
                 const views=action.views || action.view_mode.split(',').map(mode=>[false,mode]);
                 await rpc(page,action.res_model,'get_views',[views],{options:{toolbar:false,load_filters:false},context:action.context || {}});
                 checkedViews++;
