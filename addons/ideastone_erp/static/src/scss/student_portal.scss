@@ -45,6 +45,7 @@
 .student_main, .student_main section[id], .student_panel { scroll-margin-top: 148px; }
 .student_breadcrumb { display: flex; justify-content: space-between; gap: 12px; color: var(--student-muted); font-size: 12px; flex-wrap: wrap; margin-bottom: 24px; }
 .student_page_heading { display: flex; justify-content: space-between; gap: 18px; align-items: center; margin-bottom: 23px; p { color: var(--student-muted); font-size: 13px; margin-bottom: 0; } }
+.student_workspace .student_dashboard_title { font-weight: 700; }
 .student_demo { display: inline-block; font-size: 10px; letter-spacing: .8px; padding: 6px 9px; border: 1px solid #b7d2f5; color: #19548d; background: #eef6ff; border-radius: 6px; margin-bottom: 18px; }
 .student_panel { background: white; border: 1px solid #e0e8f2; border-radius: 14px; padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 25px #092f5007; min-width: 0; scroll-margin-top: 145px; }
 .student_panel_heading { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; margin-bottom: 10px; > a { white-space: nowrap; font-size: 12px; } h2 { margin-bottom: 10px; } }
