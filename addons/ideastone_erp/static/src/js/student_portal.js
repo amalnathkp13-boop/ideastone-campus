@@ -13,6 +13,32 @@
         workspace?.querySelector(".student_menu")?.setAttribute("aria-expanded", "false");
         lastToggle?.focus();
     }
+    function showProfilePage() {
+        const workspace = root();
+        const view = workspace?.querySelector(".student_profile_view");
+        if (!view) return;
+        const pageForHash = {
+            "#student_profile_overview": "overview",
+            "#student_personal": "personal",
+            "#student_guardians": "guardian",
+            "#student_documents": "documents",
+        };
+        const active = pageForHash[location.hash] || "overview";
+        const labels = {
+            overview: ["My Profile", "Your student identity, contact information and profile records in one place."],
+            personal: ["Personal details", "Review your identity, programme and contact details. Official fields may be locked by the college."],
+            guardian: ["Guardian contacts", "View parent or guardian information and emergency contact details."],
+            documents: ["Documents", "Review documents linked to your student record and check their current status."],
+        };
+        view.querySelectorAll("[data-profile-page]").forEach(page => { page.hidden = page.dataset.profilePage !== active; });
+        workspace.querySelector(".student_page_heading h1").textContent = labels[active][0];
+        view.querySelector(".profile_intro p").textContent = labels[active][1];
+        workspace.querySelector(".student_breadcrumb > span:first-child").textContent = `My campus / ${labels[active][0]}`;
+        workspace.querySelectorAll('.student_subnav a[href^="#student_"]').forEach(link => {
+            if (pageForHash[link.getAttribute("href")] === active) link.setAttribute("aria-current", "page");
+            else link.removeAttribute("aria-current");
+        });
+    }
     function enhance() {
         const workspace = root();
         if (!workspace) return;
@@ -26,6 +52,7 @@
             form.querySelector("input[type=file]").required = option?.dataset.required === "true";
             form.querySelector("button[type=submit]").disabled = !option;
         }
+        showProfilePage();
     }
     async function navigate(url, options = {}, push = true) {
         if (!root()) return;
@@ -84,6 +111,17 @@
         }
         if (event.target.closest(".student_backdrop")) { closeMenu(); return; }
         if (event.target.closest(".student_retry")) { retry?.(); return; }
+        const profileLink = event.target.closest('a[href^="#student_"]');
+        if (profileLink && workspace.querySelector(".student_profile_view")) {
+            const target = new URL(profileLink.href, location.href);
+            if (target.pathname === location.pathname && target.search === location.search) {
+                event.preventDefault();
+                history.pushState({}, "", target.href);
+                showProfilePage();
+                document.getElementById("student_main")?.scrollIntoView({block: "start"});
+                return;
+            }
+        }
         const range = event.target.closest("[data-timetable]");
         if (range) {
             const controls = range.closest(".student_timetable_controls");
@@ -158,9 +196,11 @@
     }, {capture: true});
     window.addEventListener("popstate", () => {
         // Chrome fires popstate for same-page #anchor jumps; re-rendering then would discard unsaved form input.
-        if (!root() || location.pathname + location.search === rendered) return;
+        if (!root()) return;
+        if (location.pathname + location.search === rendered) { showProfilePage(); return; }
         navigate(location.href, {}, false);
     });
+    window.addEventListener("hashchange", showProfilePage);
     window.addEventListener("pagehide", () => { if (root()) root().hidden = true; });
     window.addEventListener("pageshow", event => { if (event.persisted && root()) location.reload(); else if (root()) root().hidden = false; });
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", enhance); else enhance();

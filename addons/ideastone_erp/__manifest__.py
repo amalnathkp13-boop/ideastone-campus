@@ -23,6 +23,7 @@
     "assets": {
         "web.assets_frontend": [
             "ideastone_erp/static/src/scss/student_portal.scss",
+            "ideastone_erp/static/src/scss/student_profile.scss",
             "ideastone_erp/static/src/scss/parent_portal.scss",
             "ideastone_erp/static/src/js/student_portal.js",
         ],

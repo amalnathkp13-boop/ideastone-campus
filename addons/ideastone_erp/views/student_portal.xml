@@ -68,11 +68,107 @@
     <section class="student_panel student_quick"><h2>Quick actions</h2><a t-att-href="student_url_for('timetable')">View timetable</a><a t-att-href="student_url_for('attendance')">My attendance</a><a t-att-href="student_url_for('fees')">Fee details</a><a t-att-href="student_url_for('exams') + '#student_results'">My results</a><a t-att-href="student_url_for('requests')">Request a certificate</a></section>
   </template>
   <template id="student_profile">
-    <div class="student_grid">
-      <section class="student_panel" id="student_personal"><h2>Personal details</h2><dl class="student_details"><dt>Official name</dt><dd t-esc="d['student']['name']"/><dt>Student number</dt><dd t-esc="d['student']['number']"/><dt>Register / roll number</dt><dd t-esc="d['student']['register']"/><dt>Status</dt><dd t-esc="d['student']['status'].replace('_',' ').title()"/><dt>Admission date</dt><dd t-esc="d['student']['admitted'] or 'Not recorded'"/><dt>Email</dt><dd t-esc="d['student']['email'] or 'Not recorded'"/></dl><p class="student_muted">Official identity and academic details are maintained by the college.</p><a class="btn btn-outline-primary" t-att-href="student_url_for('requests')">Request a correction</a></section>
-      <section class="student_panel"><h2>Contact &amp; address</h2><form t-if="d['contact_edit']" action="/my/campus/student/action" method="post"><t t-call="ideastone_erp.student_action_fields"/><input type="hidden" name="operation" value="profile"/><input type="hidden" name="return_to" value="profile"/><label t-foreach="[('phone','Phone'),('mobile','Mobile'),('street','Address'),('street2','Address line 2'),('city','City'),('zip','Postal code')]" t-as="f" t-att-for="'profile_' + f[0]"><t t-esc="f[1]"/><input class="form-control" t-att-id="'profile_' + f[0]" t-att-name="f[0]" t-att-value="d['student'][f[0]]" maxlength="250"/></label><button type="submit" class="btn btn-primary">Save contact details</button></form><t t-else=""><p><strong>Phone:</strong> <t t-esc="d['student']['phone'] or d['student']['mobile'] or 'Not recorded'"/></p><p><strong>Address:</strong> <t t-esc="', '.join(v for v in [d['student']['street'],d['student']['street2'],d['student']['city'],d['student']['zip']] if v) or 'Not recorded'"/></p><p class="student_muted">Contact editing is controlled by your college. Submit a correction request to update locked details.</p></t></section>
-      <section class="student_panel" id="student_guardians"><h2>Guardian contacts</h2><article t-foreach="d['guardians']" t-as="g" class="student_record"><h3 t-esc="g['name']"/><p><t t-esc="g['phone']"/> <t t-esc="g['email']"/></p></article><p t-if="not d['guardians']" class="student_empty">No guardian contact is recorded. Ask the college office to update your profile.</p></section>
-      <section class="student_panel" id="student_documents"><h2>My documents</h2><article t-foreach="d['documents']" t-as="doc" class="student_record"><h3 t-esc="doc['name']"/><p t-esc="doc['state'].title()"/><a t-att-href="'/my/campus/student/download/document/%s' % doc['id']">Download <t t-esc="doc['filename']"/></a></article><p t-if="not d['documents']" class="student_empty">No documents are linked to your student record.</p></section>
+    <div class="student_profile_view" data-profile-view="true">
+      <div class="profile_intro"><p>Your student identity, contact information and profile records in one place.</p><span t-if="d['demo']" class="profile_sample_pill"><i class="fa fa-id-card-o" aria-hidden="true"/> FICTIONAL SAMPLE DATA · UI REVIEW</span></div>
+      <section id="student_profile_overview" class="profile_page" data-profile-page="overview">
+        <div class="profile_hero">
+          <span class="profile_photo" t-esc="d['student']['initials']"/>
+          <div class="profile_hero_copy"><span class="profile_eyebrow">STUDENT PROFILE</span><h2 t-esc="d['student']['name']"/><p><t t-esc="d['placement']['programme']"/> · <t t-esc="d['placement']['semester']"/> · <t t-esc="d['placement']['section']"/><br/>Register number: <t t-esc="d['student']['register']"/></p></div>
+          <span class="profile_hero_status" t-esc="d['student']['status'].replace('_',' ').title() + ' student'"/>
+        </div>
+        <div class="profile_metrics">
+          <article class="profile_metric"><span class="profile_metric_icon"><i class="fa fa-graduation-cap" aria-hidden="true"/></span><span class="profile_metric_label">Academic programme</span><strong t-esc="d['placement']['programme']"/><small t-esc="d['placement']['department']"/></article>
+          <article class="profile_metric"><span class="profile_metric_icon"><i class="fa fa-id-card-o" aria-hidden="true"/></span><span class="profile_metric_label">Profile records</span><strong><t t-esc="d['profile']['sections']"/> of 4 sections</strong><small>Recorded identity, contact, guardian and document areas</small></article>
+          <article class="profile_metric"><span class="profile_metric_icon"><i class="fa fa-user" aria-hidden="true"/></span><span class="profile_metric_label">Guardian contact</span><strong t-esc="d['guardians'][0]['name'] if d['guardians'] else 'Not recorded'"/><small t-esc="'Phone: ' + d['guardians'][0]['phone'] if d['guardians'] and d['guardians'][0]['phone'] else 'Ask the college office to update this record'"/></article>
+        </div>
+        <div class="profile_layout">
+          <div class="profile_stack">
+            <section class="profile_card">
+              <div class="profile_card_head"><h2>Student overview</h2><a href="#student_personal">View personal details <i class="fa fa-arrow-right" aria-hidden="true"/></a></div>
+              <dl class="profile_rows">
+                <dt>Official name</dt><dd t-esc="d['student']['name']"/>
+                <dt>Student number</dt><dd t-esc="d['student']['number']"/>
+                <dt>Register / roll number</dt><dd t-esc="d['student']['register']"/>
+                <dt>Programme &amp; section</dt><dd><t t-esc="d['placement']['programme']"/> · <t t-esc="d['placement']['section']"/></dd>
+                <dt>Current semester</dt><dd><t t-esc="d['placement']['semester']"/> · <t t-esc="d['placement']['year']"/></dd>
+                <dt>Student status</dt><dd><span t-att-class="'profile_status good' if d['student']['status'] == 'active' else 'profile_status neutral'" t-esc="d['student']['status'].replace('_',' ').title()"/></dd>
+              </dl>
+              <div class="profile_callout"><span class="profile_callout_icon"><i class="fa fa-info" aria-hidden="true"/></span><div><strong>Official details are managed by your college</strong><p>If your identity or academic details are incorrect, submit a correction request. Changes may require college approval.</p></div></div>
+            </section>
+            <section class="profile_card">
+              <div class="profile_card_head"><h2>Profile sections</h2><span class="profile_status neutral">3 submodules</span></div>
+              <a class="profile_list_row" href="#student_personal"><span class="profile_list_icon"><i class="fa fa-user" aria-hidden="true"/></span><span class="profile_list_copy"><strong>Personal details</strong><small>Identity, contact information, programme and admission details.</small></span><i class="fa fa-angle-right" aria-hidden="true"/></a>
+              <a class="profile_list_row" href="#student_guardians"><span class="profile_list_icon"><i class="fa fa-phone" aria-hidden="true"/></span><span class="profile_list_copy"><strong>Guardian contacts</strong><small>Parent or guardian details and emergency contact information.</small></span><i class="fa fa-angle-right" aria-hidden="true"/></a>
+              <a class="profile_list_row" href="#student_documents"><span class="profile_list_icon"><i class="fa fa-file-text-o" aria-hidden="true"/></span><span class="profile_list_copy"><strong>Documents</strong><small>Documents linked to your student record and their status.</small></span><i class="fa fa-angle-right" aria-hidden="true"/></a>
+            </section>
+          </div>
+          <div class="profile_stack">
+            <section class="profile_card">
+              <div class="profile_card_head"><h2>Profile completeness</h2><span t-att-class="'profile_status good' if d['profile']['complete'] else 'profile_status neutral'" t-esc="'Complete' if d['profile']['complete'] else 'In progress'"/></div>
+              <div class="profile_completeness"><strong><t t-esc="d['profile']['percent']"/>%</strong><span>from recorded profile areas</span></div>
+              <div class="profile_progress" role="img" t-att-aria-label="'Profile completeness ' + str(d['profile']['percent']) + ' percent'"><span t-att-style="'width: ' + str(d['profile']['percent']) + '%'"/></div>
+              <div class="profile_progress_meta"><span><t t-esc="d['profile']['sections']"/> of 4 profile areas populated</span><span><t t-esc="d['profile']['percent']"/>%</span></div>
+              <div class="profile_callout"><span class="profile_callout_icon"><i class="fa fa-check" aria-hidden="true"/></span><div><strong>Recommended next step</strong><p t-esc="d['profile']['next_step']"/></div></div>
+            </section>
+            <section class="profile_card">
+              <div class="profile_card_head"><h2>Contact &amp; address</h2><a href="#student_personal">View details <i class="fa fa-arrow-right" aria-hidden="true"/></a></div>
+              <dl class="profile_rows"><dt>Phone</dt><dd t-esc="d['student']['phone'] or d['student']['mobile'] or 'Not recorded'"/><dt>Email</dt><dd t-esc="d['student']['email'] or 'Not recorded'"/><dt>Address</dt><dd t-esc="', '.join(v for v in [d['student']['street'],d['student']['street2'],d['student']['city'],d['student']['zip']] if v) or 'Not recorded'"/></dl>
+              <p class="profile_hint">Contact editing is controlled by your college. Submit a correction request for locked details.</p>
+            </section>
+            <section class="profile_card">
+              <div class="profile_card_head"><h2>Documents on record</h2><a href="#student_documents">View documents <i class="fa fa-arrow-right" aria-hidden="true"/></a></div>
+              <a t-foreach="d['documents'][:3]" t-as="doc" class="profile_list_row" t-att-href="'/my/campus/student/download/document/%s' % doc['id']"><span class="profile_list_icon"><i class="fa fa-file-text-o" aria-hidden="true"/></span><span class="profile_list_copy"><strong t-esc="doc['name']"/><small><t t-esc="doc['uploaded']"/> · <t t-esc="doc['filename']"/></small></span><span t-att-class="'profile_status good' if doc['state'] == 'verified' else 'profile_status warning' if doc['state'] == 'rejected' else 'profile_status neutral'" t-esc="doc['state'].title()"/></a>
+              <p t-if="not d['documents']" class="profile_empty">No documents are linked to your student record.</p>
+            </section>
+          </div>
+        </div>
+      </section>
+      <section id="student_personal" class="profile_page" data-profile-page="personal" hidden="hidden">
+        <a class="profile_back" href="#student_profile_overview"><i class="fa fa-arrow-left" aria-hidden="true"/> My Profile</a>
+        <div class="profile_details_grid">
+          <section class="profile_card">
+            <div class="profile_card_head"><h2>Personal details</h2><span t-att-class="'profile_status good' if d['student']['status'] == 'active' else 'profile_status neutral'" t-esc="d['student']['status'].replace('_',' ').title()"/></div>
+            <dl class="profile_rows"><dt>Official name</dt><dd t-esc="d['student']['name']"/><dt>Student number</dt><dd t-esc="d['student']['number']"/><dt>Register / roll number</dt><dd t-esc="d['student']['register']"/><dt>Date of birth</dt><dd t-esc="d['student']['birth_date'] or 'Not recorded'"/><dt>Gender</dt><dd t-esc="d['student']['gender']"/><dt>Admission date</dt><dd t-esc="d['student']['admitted'] or 'Not recorded'"/><dt>Student status</dt><dd t-esc="d['student']['status'].replace('_',' ').title()"/></dl>
+            <div class="profile_callout"><span class="profile_callout_icon"><i class="fa fa-info" aria-hidden="true"/></span><div><strong>College-maintained information</strong><p>Official identity fields are read-only. Use a correction request if a value needs to change.</p></div></div>
+            <a class="profile_outline_button" t-att-href="student_url_for('requests')">Request a correction</a>
+          </section>
+          <section class="profile_card">
+            <div class="profile_card_head"><h2>Programme &amp; contact</h2><span class="profile_status neutral">College record</span></div>
+            <dl class="profile_rows"><dt>Programme</dt><dd t-esc="d['placement']['programme']"/><dt>Department</dt><dd t-esc="d['placement']['department']"/><dt>Section</dt><dd t-esc="d['placement']['section']"/><dt>Current semester</dt><dd><t t-esc="d['placement']['semester']"/> · <t t-esc="d['placement']['year']"/></dd><dt>Phone</dt><dd t-esc="d['student']['phone'] or d['student']['mobile'] or 'Not recorded'"/><dt>Email</dt><dd t-esc="d['student']['email'] or 'Not recorded'"/><dt>Address</dt><dd t-esc="', '.join(v for v in [d['student']['street'],d['student']['street2'],d['student']['city'],d['student']['zip']] if v) or 'Not recorded'"/></dl>
+            <details t-if="d['contact_edit']" class="profile_contact_edit"><summary>Edit permitted contact details</summary><form action="/my/campus/student/action" method="post"><t t-call="ideastone_erp.student_action_fields"/><input type="hidden" name="operation" value="profile"/><input type="hidden" name="return_to" value="profile"/><label t-foreach="[('phone','Phone'),('mobile','Mobile'),('street','Address'),('street2','Address line 2'),('city','City'),('zip','Postal code')]" t-as="f" t-att-for="'profile_' + f[0]"><t t-esc="f[1]"/><input class="form-control" t-att-id="'profile_' + f[0]" t-att-name="f[0]" t-att-value="d['student'][f[0]]" maxlength="250"/></label><button type="submit" class="btn btn-primary">Save contact details</button></form></details>
+            <p t-else="" class="profile_hint">Your college manages contact changes. Request a correction if any detail is wrong.</p>
+          </section>
+        </div>
+      </section>
+      <section id="student_guardians" class="profile_page" data-profile-page="guardian" hidden="hidden">
+        <a class="profile_back" href="#student_profile_overview"><i class="fa fa-arrow-left" aria-hidden="true"/> My Profile</a>
+        <div class="profile_details_grid">
+          <section class="profile_card">
+            <div class="profile_card_head"><h2>Guardian contacts</h2><span t-att-class="'profile_status good' if d['guardians'] else 'profile_status neutral'" t-esc="'On record' if d['guardians'] else 'Not recorded'"/></div>
+            <div t-foreach="d['guardians']" t-as="g" class="profile_guardian_record"><dl class="profile_rows"><dt>Guardian name</dt><dd t-esc="g['name']"/><dt>Phone</dt><dd t-esc="g['phone'] or 'Not recorded'"/><dt>Email</dt><dd t-esc="g['email'] or 'Not recorded'"/><dt>Address</dt><dd t-esc="g['address'] or 'Not recorded'"/></dl></div>
+            <p t-if="not d['guardians']" class="profile_empty">No guardian contact is recorded. Ask the college office to update your profile.</p>
+            <a class="profile_outline_button" t-att-href="student_url_for('requests')">Request guardian update</a>
+          </section>
+          <section class="profile_card">
+            <div class="profile_card_head"><h2>Emergency contact guidance</h2></div>
+            <div t-if="d['emergency']" class="profile_callout"><span class="profile_callout_icon"><i class="fa fa-phone" aria-hidden="true"/></span><div><strong t-esc="d['emergency']['name']"/><p t-esc="d['emergency']['phone'] or 'No phone number recorded'"/></div></div>
+            <div class="profile_list_row"><span class="profile_list_icon">1</span><span class="profile_list_copy"><strong>Primary guardian</strong><small>Keep one reachable parent or guardian contact on record.</small></span></div>
+            <div class="profile_list_row"><span class="profile_list_icon">2</span><span class="profile_list_copy"><strong>Verify phone number</strong><small>Use a current number that can receive calls from the college.</small></span></div>
+            <div class="profile_list_row"><span class="profile_list_icon">3</span><span class="profile_list_copy"><strong>College approval</strong><small>Changes may be verified by the student office before appearing here.</small></span></div>
+            <p class="profile_hint">Only information relevant to student support and emergencies is shown here.</p>
+          </section>
+        </div>
+      </section>
+      <section id="student_documents" class="profile_page" data-profile-page="documents" hidden="hidden">
+        <a class="profile_back" href="#student_profile_overview"><i class="fa fa-arrow-left" aria-hidden="true"/> My Profile</a>
+        <section class="profile_card">
+          <div class="profile_card_head"><h2>My documents</h2><span class="profile_status neutral"><t t-esc="len(d['documents'])"/> on record</span></div>
+          <p class="profile_hint">Documents associated with your student record. Missing documents are shown as not recorded.</p>
+          <a t-foreach="d['documents']" t-as="doc" class="profile_document_row" t-att-href="'/my/campus/student/download/document/%s' % doc['id']"><span class="profile_document_icon"><i class="fa fa-file-text-o" aria-hidden="true"/></span><span class="profile_list_copy"><strong t-esc="doc['name']"/><small><t t-esc="doc['uploaded']"/> · <t t-esc="doc['filename']"/></small></span><span t-att-class="'profile_status good' if doc['state'] == 'verified' else 'profile_status warning' if doc['state'] == 'rejected' else 'profile_status neutral'" t-esc="doc['state'].title()"/></a>
+          <p t-if="not d['documents']" class="profile_empty">No documents are linked to your student record.</p>
+          <div class="profile_callout"><span class="profile_callout_icon"><i class="fa fa-info" aria-hidden="true"/></span><div><strong>Document access</strong><p>This page displays records made available by the college. If a document is missing, contact the student office or submit a request.</p></div></div>
+        </section>
+      </section>
     </div>
   </template>
   <template id="student_academics">
