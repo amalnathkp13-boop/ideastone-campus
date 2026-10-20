@@ -162,6 +162,21 @@ class StudentPortal(models.AbstractModel):
         events = self._records("campus.student.request.event", [("request_id", "in", requests.ids)], limit=5000, order="id desc")
         states = dict(self.env["campus.service.request"]._fields["state"].selection)
         documents = self._records("campus.admission.document", [("student_id", "=", student.id), ("company_id", "=", company.id)], limit=500)
+        profile_sections = {
+            "identity": bool(student.name and student.gr_no and student.register_no),
+            "contact": bool((student.phone or student.mobile) and student.email and (student.street or student.city)),
+            "guardian": any(guardian.phone or guardian.mobile for guardian in student.campus_guardian_ids),
+            "documents": bool(documents),
+        }
+        profile_count = sum(profile_sections.values())
+        name_parts = (student.name or "").split()
+        profile_initials = (name_parts[0][:1] + name_parts[-1][:1]).upper() if name_parts else "S"
+        profile_next = next((message for key, message in [
+            ("identity", "Ask the college office to complete your official identity details."),
+            ("contact", "Add a reachable phone number, email, and address, or request a correction."),
+            ("guardian", "Ask the college office to record a reachable guardian contact."),
+            ("documents", "Ask the college office to link your admission documents."),
+        ] if not profile_sections[key]), "Your core profile areas have records. Review them for accuracy.")
         materials = self._materials(student, placement)
         loans = self._records("op.media.movement", [("student_id", "=", student.id), ("company_id", "=", company.id)], limit=500, order="issued_date desc")
         catalogue = self.env["op.media.unit"].sudo()._read_group([("campus_company_id", "=", company.id)], ["media_id"], ["__count"], limit=200, order="media_id")
@@ -171,8 +186,10 @@ class StudentPortal(models.AbstractModel):
             navigation.append(("library", "Library", "book"))
         navigation += [("help", "Help & Feedback", "question-circle-o"), ("account", "Account & Preferences", "cog")]
         return {"company": company.name, "demo": company.campus_demo, "today": self._dates(today), "today_iso": str(today), "timezone": self.env.user.tz or "UTC", "student_id": student.id,
-            "student": {"name": student.name, "number": student.gr_no or "Not assigned", "register": student.register_no or "Not assigned", "status": student.campus_status, "email": student.email or "", "phone": student.phone or "", "mobile": student.mobile or "", "street": student.street or "", "street2": student.street2 or "", "city": student.city or "", "zip": student.zip or "", "admitted": self._dates(student.campus_admission_date)},
-            "guardians": [{"name": g.name, "phone": g.phone or g.mobile or "", "email": g.email or ""} for g in student.campus_guardian_ids],
+            "student": {"name": student.name, "number": student.gr_no or "Not assigned", "register": student.register_no or "Not assigned", "status": student.campus_status, "email": student.email or "", "phone": student.phone or "", "mobile": student.mobile or "", "street": student.street or "", "street2": student.street2 or "", "city": student.city or "", "zip": student.zip or "", "admitted": self._dates(student.campus_admission_date), "birth_date": self._dates(student.birth_date), "gender": {"m": "Male", "f": "Female", "o": "Other"}.get(student.gender, "Not recorded"), "initials": profile_initials},
+            "profile": {"sections": profile_count, "percent": profile_count * 25, "complete": profile_count == 4, "next_step": profile_next},
+            "guardians": [{"name": g.name, "phone": g.phone or g.mobile or "", "email": g.email or "", "address": ", ".join(v for v in [g.street, g.street2, g.city, g.zip] if v)} for g in student.campus_guardian_ids],
+            "emergency": {"name": student.emergency_contact.name or "", "phone": student.emergency_contact.phone or student.emergency_contact.mobile or ""} if student.emergency_contact else None,
             "contact_edit": company.campus_student_contact_edit, "support_email": company.email or "", "support_phone": company.phone or "", "login": self.env.user.login,
             "notice_badge": student.campus_notice_badge, "navigation": navigation,
             "placement": {"id": placement.id, "programme": placement.course_id.name or "Not assigned", "department": placement.course_id.department_id.name or "Not assigned", "semester": placement.academic_term_id.name or "Not assigned", "section": placement.batch_id.name or "Not assigned", "year": placement.academic_years_id.name or "Not assigned"},
@@ -190,7 +207,7 @@ class StudentPortal(models.AbstractModel):
             "requests": [{"id": r.id, "reference": r.portal_reference, "name": r.name, "description": r.description, "type": r.portal_type_id.name, "type_id": r.portal_type_id.id, "date": self._dates(r.create_date), "status": states[r.state], "state": r.state, "reply": r.portal_reply or "", "student_reply": r.portal_student_reply or "", "can_cancel": r.portal_type_id.allow_cancel and r.state in {"draft", "submitted"}, "file": bool(r.portal_result_file and r.state in {"ready", "done"}), "events": [{"name": e.name, "date": self._dates(e.create_date), "response": e.response or ""} for e in r.portal_event_ids.sorted("id", reverse=True)]} for r in requests],
             "updates": len(events.filtered(lambda e: e.id > student.campus_request_seen_event)),
             "request_types": [{"id": t.id, "code": t.code, "name": t.name, "guidance": t.guidance, "fee": t.fee_guidance or "", "max_mb": t.max_upload_mb, "require_file": t.require_file} for t in self._types(student)], "submission_key": uuid.uuid4().hex,
-            "documents": [{"id": d.id, "name": d.name, "filename": d.filename, "state": d.state} for d in documents],
+            "documents": [{"id": d.id, "name": d.name, "filename": d.filename, "state": d.state, "uploaded": self._dates(d.create_date)} for d in documents],
             "materials": [{"id": m.id, "name": m.name, "filename": m.filename, "subject": m.subject_id.name or "General resource", "date": self._dates(m.approved_on)} for m in materials],
             "loans": [{"name": loan.media_id.name, "code": loan.media_id.internal_code, "issued": self._dates(loan.issued_date), "due": self._dates(loan.return_date), "state": loan.state, "penalty": loan.penalty, "overdue": loan.state == "issue" and loan.return_date < today} for loan in loans],
             "books": [{"name": book.name, "code": book.internal_code} for book in books[:200]],

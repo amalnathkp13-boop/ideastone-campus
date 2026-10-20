@@ -27,7 +27,7 @@
     "model": "campus.faculty.achievement",
     "label": "Faculty development and appraisal",
     "group": "Staff",
-    "action": "ideastone_erp.action_faculty_achievement"
+    "action": "ideastone_erp.action_faculty_appraisal_dashboard"
   },
   {
     "model": "campus.hostel.room",
