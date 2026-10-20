@@ -73,14 +73,22 @@ async function save(page, control) {
         await page.getByRole('button',{name:'Selected period',exact:true}).click();
         assert.equal(await page.locator('.student_timetable_row:visible').count(),initial.schedule.length);
         await visit(page,'profile');
+        assert.equal(await page.locator('.profile_metric').count(),3);
+        assert.match(await page.locator('.profile_completeness').innerText(),new RegExp(`${initial.profile.percent}%`));
+        assert.equal(await page.locator('.profile_status.good').first().evaluate(element=>getComputedStyle(element).color),'rgb(22, 131, 93)');
         await page.locator('.student_subnav').getByRole('link',{name:'Documents',exact:true}).click();
+        assert(await page.locator('#student_documents').isVisible());
         assert(await page.locator('#student_documents').evaluate(element=>element.getBoundingClientRect().top>=128),'Sticky header obscures the document anchor');
+        await page.locator('.student_subnav').getByRole('link',{name:'Personal details',exact:true}).click();
+        await page.locator('.profile_contact_edit summary').click();
         await page.locator('#profile_phone').fill('+91 90000 00123');
         await page.locator('#profile_city').fill('Coimbatore');
         await save(page,page.getByRole('button',{name:'Save contact details'}));
         await page.reload({waitUntil:'load'});
         // Read only after the reloaded profile form is rendered; a stale/partial page made this check flaky.
         await page.locator('#student_main h1').waitFor();
+        await page.locator('.student_subnav').getByRole('link',{name:'Personal details',exact:true}).click();
+        await page.locator('.profile_contact_edit summary').click();
         await page.waitForFunction(()=>document.querySelector('#profile_city')?.value==='Coimbatore',null,{timeout:15000})
             .catch(()=>{});
         assert.equal(await page.locator('#profile_city').inputValue(),'Coimbatore');
