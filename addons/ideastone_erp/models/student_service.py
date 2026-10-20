@@ -156,6 +156,73 @@ class StudentPortal(models.AbstractModel):
             return []
         return [("company_id", "=", student.company_id.id), ("batch_id", "=", enrolment.batch_id.id)]
 
+    def _exam_projection(self, exams, marks, materials, subjects):
+        """Shape already scoped, released records for the student examination view."""
+        now = fields.Datetime.now()
+        groups = {}
+        published_exam_ids = set(marks.exam_id.ids)
+        for exam in (exams | marks.exam_id).sorted(lambda item: (item.start_time, item.id)):
+            session = exam.session_id
+            key = session.id or -exam.id
+            label = session.name or exam.name
+            type_name = session.exam_type.name or ""
+            kind_text = f"{label} {type_name}".lower()
+            if re.search(r"\bcat(?:[-\s]?(?:[ivx]+|\d+))?\b", kind_text) or any(word in kind_text for word in ("internal", "continuous")):
+                kind = "internal"
+            elif any(word in kind_text for word in ("semester", "university", "end term", "end-term")):
+                kind = "semester"
+            else:
+                kind = "other"
+            group = groups.setdefault(key, {"id": key, "name": label, "type": type_name, "kind": kind, "exam_ids": set(), "subject_ids": set(), "published_ids": set(), "first": exam.start_time, "last": exam.end_time, "published_on": False, "upcoming": False})
+            group["exam_ids"].add(exam.id)
+            group["subject_ids"].add(exam.subject_id.id)
+            group["first"] = min(group["first"], exam.start_time)
+            group["last"] = max(group["last"], exam.end_time)
+            group["upcoming"] |= exam.start_time >= now
+            if exam.id in published_exam_ids:
+                group["published_ids"].add(exam.id)
+                if exam.campus_published_on and (not group["published_on"] or exam.campus_published_on > group["published_on"]):
+                    group["published_on"] = exam.campus_published_on
+        assessment_groups = []
+        for group in groups.values():
+            published = len(group["published_ids"])
+            status = "published" if published == len(group["exam_ids"]) else "partial" if published else "upcoming" if group["upcoming"] else "scheduled"
+            assessment_groups.append({"id": group["id"], "name": group["name"], "type": group["type"], "kind": group["kind"], "status": status,
+                                      "exam_count": len(group["exam_ids"]), "published_count": published, "subject_count": len(group["subject_ids"]),
+                                      "start": self._dates(group["first"]), "end": self._dates(group["last"]),
+                                      "published_on": self._dates(group["published_on"]), "upcoming": group["upcoming"]})
+        result_rows = []
+        for mark in marks:
+            maximum = mark.exam_id.total_marks
+            rate = round(mark.marks * 100 / maximum, 1) if maximum else None
+            result_rows.append({"exam": mark.exam_id.name, "assessment": mark.exam_id.session_id.name or mark.exam_id.name,
+                                "assessment_id": mark.exam_id.session_id.id or -mark.exam_id.id,
+                                "subject": mark.exam_id.subject_id.name, "code": mark.exam_id.subject_id.code,
+                                "marks": mark.marks, "maximum": maximum, "grade": mark.grade or "Not assigned",
+                                "status": mark.status or "Not published", "rate": rate,
+                                "tone": "good" if rate is not None and rate >= 70 else "warn" if rate is not None and rate >= 50 else "bad" if rate is not None else "neutral"})
+        scored = [row for row in result_rows if row["rate"] is not None]
+        upcoming = [exam for exam in exams if exam.start_time >= now and exam.id not in published_exam_ids]
+        upcoming.sort(key=lambda exam: (exam.start_time, exam.id))
+        exam_resources = []
+        for subject in subjects:
+            available = materials.filtered(lambda item, current=subject: item.subject_id == current and any(word in f"{item.name} {item.filename}".lower() for word in ("exam", "question", "paper", "practice", "model")))
+            exam_resources.append({"subject": subject.name, "files": [{"id": item.id, "name": item.name, "filename": item.filename, "date": self._dates(item.approved_on)} for item in available]})
+        return {"groups": assessment_groups, "internal": [group for group in assessment_groups if group["kind"] == "internal"],
+                "semester": [group for group in assessment_groups if group["kind"] == "semester"],
+                "other": [group for group in assessment_groups if group["kind"] == "other"],
+                "results": result_rows, "result_subjects": sorted({(row["code"] or row["subject"], row["subject"]) for row in result_rows}),
+                "published_groups": sum(bool(group["published_count"]) for group in assessment_groups),
+                "average": round(sum(row["rate"] for row in scored) / len(scored), 1) if scored else None,
+                "highest": max(scored, key=lambda row: row["rate"]) if scored else None,
+                "lowest": min(scored, key=lambda row: row["rate"]) if scored else None,
+                "next_exam": {"name": upcoming[0].name, "subject": upcoming[0].subject_id.name, "date": self._dates(upcoming[0].start_time)} if upcoming else None,
+                "upcoming": [{"name": exam.name, "subject": exam.subject_id.name, "start": self._dates(exam.start_time), "end": self._dates(exam.end_time),
+                              "day": fields.Datetime.context_timestamp(self, exam.start_time).strftime("%A"),
+                              "number": fields.Datetime.context_timestamp(self, exam.start_time).strftime("%d"),
+                              "month": fields.Datetime.context_timestamp(self, exam.start_time).strftime("%b").upper()} for exam in upcoming],
+                "resources": exam_resources}
+
     @api.model
     def snapshot(self, enrolment=None, date_from=None, date_to=None):
         student, placement, placements, first, last = self._portal_context(enrolment, date_from, date_to)
@@ -258,6 +325,7 @@ class StudentPortal(models.AbstractModel):
             ("documents", "Ask the college office to link your admission documents."),
         ] if not profile_sections[key]), "Your core profile areas have records. Review them for accuracy.")
         materials = self._materials(student, placement)
+        exam_ui = self._exam_projection(exams, marks, materials, subjects)
         loans = self._records("op.media.movement", [("student_id", "=", student.id), ("company_id", "=", company.id)], limit=500, order="issued_date desc")
         catalogue = self.env["op.media.unit"].sudo()._read_group([("campus_company_id", "=", company.id)], ["media_id"], ["__count"], limit=200, order="media_id")
         books = self.env["op.media"].sudo().browse([media.id for media, _count in catalogue if media])
@@ -284,7 +352,7 @@ class StudentPortal(models.AbstractModel):
                 "weekly_trend": [{"week": str(week), "label": week.strftime("%d %b"), "rate": round(n[0] * 100 / n[1], 1)} for week, n in sorted(weekly_trend.items())[-6:]],
                 "trend": [{"month": month, "rate": round(n[0] * 100 / n[1], 2)} for month, n in sorted(trend.items())]},
             "exams": [{"id": e.id, "name": e.name, "subject": e.subject_id.name, "code": e.subject_id.code, "start": self._dates(e.start_time), "end": self._dates(e.end_time), "upcoming": e.start_time >= fields.Datetime.now()} for e in exams],
-            "results": [{"exam": r.exam_id.name, "subject": r.exam_id.subject_id.name, "code": r.exam_id.subject_id.code, "marks": r.marks, "maximum": r.exam_id.total_marks, "grade": r.grade or "Not assigned", "status": r.status or "Not published"} for r in marks],
+            "results": exam_ui["results"], "exam_ui": exam_ui,
             "fees": {"assessed": assessed, "paid": assessed - due, "due": due, "recorded": bool(invoices), "symbol": company.currency_id.symbol, "progress": min(100, max(0, (assessed - due) * 100 / assessed)) if assessed else 0,
                 "invoices": [{"id": i.id, "name": i.name, "date": self._dates(i.invoice_date), "due_date": self._dates(i.invoice_date_due), "total": i.amount_total, "paid": i.amount_total - i.amount_residual, "balance": i.amount_residual, "heads": ", ".join(i.invoice_line_ids.mapped("name")), "year": i.campus_year_id.name or "Not assigned", "programme": i.campus_course_id.name or "Not assigned", "concession": i.currency_id.round(sum(line.quantity * line.price_unit * line.discount / 100 for line in i.invoice_line_ids if not line.display_type or line.display_type == "product")), "state": i.payment_state, "overdue": bool(i.amount_residual and i.invoice_date_due and i.invoice_date_due < today)} for i in invoices],
                 "payments": [{"id": p.id, "reference": p.campus_receipt_number, "date": self._dates(p.date), "amount": p.amount, "method": p.campus_method, "status": "Reversed" if p.campus_reversal_id else "Posted", "transaction": p.campus_reference or "", "url": f"/my/campus/student/download/receipt/{p.id}"} for p in payments]},
