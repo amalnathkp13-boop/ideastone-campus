@@ -213,6 +213,12 @@ class LearningPortal(models.AbstractModel):
         data = super().snapshot(enrolment, date_from, date_to)
         student, placement, _placements, _first, _last = self._portal_context(enrolment, date_from, date_to)
         data["assignments"] = self._learning_rows(student, placement)
+        data["placement"]["status"] = "Active" if placement and placement.state == "running" else "Finished" if placement else "Not recorded"
+        resources = {resource.id: resource for resource in self._materials(student, placement)}
+        for material in data["materials"]:
+            resource = resources.get(material["id"])
+            material["subject_id"] = resource.subject_id.id if resource else 0
+            material["code"] = (resource.subject_id.code or "") if resource else ""
         return data
 
     @api.model
