@@ -13,6 +13,9 @@ class FacultyAchievement(models.Model):
         ("fdp", "FDP / workshop"), ("paper", "Paper / publication"), ("training", "Industrial training"),
         ("guest", "Guest lecture"), ("mou", "MOU / institutional activity"), ("appraisal", "Self appraisal"),
         ("patent", "Patent / research"), ("award", "Award"),
+        ("mphil", "M.Phil supervision"), ("review", "Review / editorial / consultancy"),
+        ("vacation", "Vacation course"), ("mooc", "MOOC"),
+        ("qualified", "Qualified course"), ("resource", "Resource personnel"),
     ], required=True, default="fdp")
     date_from = fields.Date(required=True)
     date_to = fields.Date()

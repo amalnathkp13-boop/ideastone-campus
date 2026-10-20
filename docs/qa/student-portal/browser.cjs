@@ -23,7 +23,7 @@ async function login(page, name) {
 async function visit(page, section) {
     await page.locator(`.student_sidebar a[href*="/student/${section}"]`).click();
     await page.waitForURL(new RegExp(`/student/${section}`));
-    await page.locator('#student_main h1').waitFor();
+    await page.locator('#student_main h1:visible').waitFor();
     assert.equal(await page.locator('.student_network_error:visible').count(),0);
 }
 async function snapshot(page) {return rpc(page,'campus.student.portal','snapshot');}
@@ -51,31 +51,55 @@ async function save(page, control) {
         const initial=await snapshot(page);
         assert.equal(initial.fees.assessed,500); assert.equal(initial.fees.paid,400); assert.equal(initial.fees.due,100);
         assert.equal(initial.attendance.rate,100); assert.equal(initial.results.length,1); assert.equal(initial.results[0].marks,75);
-        assert.equal(await page.locator('.student_stat').count(),5);
+        assert.equal(await page.locator('.student_dashboard .student_stat').count(),4);
+        assert.equal(await page.locator('.student_filters').count(),0);
+        assert.equal(await page.locator('.student_page_heading h1').evaluate(element=>getComputedStyle(element).fontWeight),'700');
+        assert.equal(await page.locator('.student_dashboard .student_chart_row .student_progress span').first().evaluate(element=>getComputedStyle(element).backgroundColor),'rgb(54, 183, 120)');
+        assert.equal(await page.locator('.student_dashboard .student_notice_tag.event').first().evaluate(element=>getComputedStyle(element).backgroundColor),'rgb(232, 248, 239)');
+        assert.equal(await page.locator('.student_dashboard .student_notice_row .student_dot.red').first().evaluate(element=>getComputedStyle(element).backgroundColor),'rgb(227, 92, 80)');
         assert.equal(await page.locator('.campus_owner_actions,.o_menu_systray,.campus_owner_stat').count(),0);
         assert(!await page.locator('#student_main').innerText().then(s=>s.includes('PRIVATE STAFF ONLY')));
         const cache=await page.request.get(base+'/my/campus/student/dashboard');
         assert.match(cache.headers()['cache-control'],/no-store/);
         await page.screenshot({path:path.join(out,'student-dashboard-1440.png'),fullPage:true});
-        await page.locator('.student_grid section').first().evaluate(element=>element.scrollIntoView({block:'start'}));
+        await page.locator('.student_dashboard_grid section').first().evaluate(element=>element.scrollIntoView({block:'start'}));
         await page.screenshot({path:path.join(out,'student-dashboard-details-1440.png')});
         await page.evaluate(()=>{document.getElementById('wrapwrap')?.scrollTo({top:0});window.scrollTo(0,0);});
         const routes=initial.navigation.map(item=>item[0]);
         for(const route of routes) await visit(page,route);
+        await visit(page,'academics');
+        assert.equal(await page.locator('.academic_metric:visible').count(),3);
+        await page.locator('.student_subnav').getByRole('link',{name:'Subjects',exact:true}).click();
+        assert.equal(await page.locator('.academic_subject_row:visible').count(),initial.subjects.length);
+        await page.locator('.academic_search').fill(initial.subjects[0].code);
+        assert.equal(await page.locator('.academic_subject_row:visible').count(),1);
+        await page.getByRole('button',{name:'View details'}).click();
+        assert.equal(await page.locator('.academic_subject_detail:visible').count(),1);
+        await page.locator('.student_subnav').getByRole('link',{name:'Learning materials',exact:true}).click();
+        assert.equal(await page.locator('.academic_resources .academic_resource:visible').count(),initial.materials.length);
+        assert.equal(await page.locator('.academic_resources .academic_status.good').first().evaluate(element=>getComputedStyle(element).color),'rgb(22, 131, 93)');
         await visit(page,'timetable');
         await page.getByRole('button',{name:'Today',exact:true}).click();
         assert.equal(await page.locator('.student_timetable_row:visible').count(),initial.schedule.filter(row=>row.day===initial.today_iso).length);
         await page.getByRole('button',{name:'Selected period',exact:true}).click();
         assert.equal(await page.locator('.student_timetable_row:visible').count(),initial.schedule.length);
         await visit(page,'profile');
+        assert.equal(await page.locator('.profile_metric').count(),3);
+        assert.match(await page.locator('.profile_completeness').innerText(),new RegExp(`${initial.profile.percent}%`));
+        assert.equal(await page.locator('.profile_status.good').first().evaluate(element=>getComputedStyle(element).color),'rgb(22, 131, 93)');
         await page.locator('.student_subnav').getByRole('link',{name:'Documents',exact:true}).click();
+        assert(await page.locator('#student_documents').isVisible());
         assert(await page.locator('#student_documents').evaluate(element=>element.getBoundingClientRect().top>=128),'Sticky header obscures the document anchor');
+        await page.locator('.student_subnav').getByRole('link',{name:'Personal details',exact:true}).click();
+        await page.locator('.profile_contact_edit summary').click();
         await page.locator('#profile_phone').fill('+91 90000 00123');
         await page.locator('#profile_city').fill('Coimbatore');
         await save(page,page.getByRole('button',{name:'Save contact details'}));
         await page.reload({waitUntil:'load'});
         // Read only after the reloaded profile form is rendered; a stale/partial page made this check flaky.
-        await page.locator('#student_main h1').waitFor();
+        await page.locator('#student_main h1:visible').waitFor();
+        await page.locator('.student_subnav').getByRole('link',{name:'Personal details',exact:true}).click();
+        await page.locator('.profile_contact_edit summary').click();
         await page.waitForFunction(()=>document.querySelector('#profile_city')?.value==='Coimbatore',null,{timeout:15000})
             .catch(()=>{});
         assert.equal(await page.locator('#profile_city').inputValue(),'Coimbatore');
@@ -85,7 +109,7 @@ async function save(page, control) {
         await assert.rejects(()=>rpc(page,'campus.dashboard','get_owner_metrics'));
         await page.screenshot({path:path.join(out,'student-profile-1440.png'),fullPage:true});
         await visit(page,'notices');
-        assert(await page.locator('#student_main h1').evaluate(element=>element.getBoundingClientRect().top>=120),'Navigation did not reset the native portal scroll container');
+        assert(await page.locator('#student_main h1:visible').evaluate(element=>element.getBoundingClientRect().top>=120),'Navigation did not reset the native portal scroll container');
         await save(page,page.getByRole('button',{name:'Mark read',exact:true}).first());
         assert.equal((await snapshot(page)).unread,initial.unread-1);
         await visit(page,'requests');

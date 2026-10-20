@@ -14,7 +14,7 @@ class Responsibility(models.Model):
     account_id = fields.Many2one("res.users", required=True, readonly=True, copy=False, ondelete="restrict")
     role = fields.Selection([("library", "Library In-charge")], required=True, default="library")
     media_type_ids = fields.Many2many("op.media.type", string="Permitted collections", required=True)
-    date_from = fields.Date(required=True, default=fields.Date.context_today)
+    date_from = fields.Date(required=True, default=lambda self: self._college_today())
     date_to = fields.Date(required=True)
     justification = fields.Text(required=True)
     state = fields.Selection([
@@ -27,8 +27,13 @@ class Responsibility(models.Model):
     decision_reason = fields.Text(readonly=True, copy=False)
     effective = fields.Boolean(compute="_compute_effective")
 
+    def _college_today(self):
+        # Appointment validity is institution-wide: use the college's timezone, not each user's.
+        tz = self.env.company.partner_id.tz or "Asia/Kolkata"
+        return fields.Date.context_today(self.with_context(tz=tz))
+
     def _compute_effective(self):
-        today = fields.Date.context_today(self)
+        today = self._college_today()
         for rec in self:
             rec.effective = bool(rec.state == "approved" and rec.active and rec.faculty_id.active
                                  and rec.account_id.active and rec.account_id == rec.faculty_id.user_id
@@ -106,7 +111,7 @@ class Responsibility(models.Model):
     def _library_scope(self):
         if not self.env.user.active or not self.env.user.has_group("base.group_user"):
             raise AccessError(_("An active internal account is required."))
-        today = fields.Date.context_today(self)
+        today = self._college_today()
         # Evaluate on every call: expiry and revocation do not wait for a cron or a new login.
         grants = self.sudo().search([
             ("account_id", "=", self.env.uid), ("faculty_id.user_id", "=", self.env.uid),

@@ -1,7 +1,7 @@
 {
     "name": "Ideastone Campus Operations",
     "summary": "Teaching, campus services, staff administration and institutional engagement",
-    "version": "17.0.1.0.8",
+    "version": "17.0.1.0.10",
     "category": "Education",
     "author": "Ideastone Technologies Pvt Ltd",
     "license": "OPL-1",
@@ -16,15 +16,18 @@
         "security/workspace.xml", "views/workspace.xml", "views/faculty_workspace.xml",
         "security/faculty_tools.xml", "views/faculty_tools.xml", "views/student_leave.xml", "views/faculty_reports.xml",
         "security/mvp.xml", "data/mvp.xml", "views/mvp.xml", "views/mvp_search.xml", "views/mvp_reports.xml",
-        "security/student_portal.xml", "data/student_portal.xml", "views/student_operations.xml", "views/student_portal.xml",
+        "security/student_portal.xml", "data/student_portal.xml", "views/student_operations.xml", "views/student_portal.xml", "views/student_academics.xml",
         "data/parent_portal.xml", "views/parent_operations.xml", "views/parent_portal.xml",
         "security/learning.xml", "views/mvp_learning.xml",
     ],
     "assets": {
         "web.assets_frontend": [
             "ideastone_erp/static/src/scss/student_portal.scss",
+            "ideastone_erp/static/src/scss/student_profile.scss",
             "ideastone_erp/static/src/scss/parent_portal.scss",
+            "ideastone_erp/static/src/scss/student_academics.scss",
             "ideastone_erp/static/src/js/student_portal.js",
+            "ideastone_erp/static/src/js/student_academics.js",
         ],
         "web.assets_backend": [
             "ideastone_erp/static/src/js/dashboard.js",
@@ -39,6 +42,9 @@
             "ideastone_erp/static/src/js/faculty_leave.js",
             "ideastone_erp/static/src/xml/faculty_leave.xml",
             "ideastone_erp/static/src/scss/faculty_leave.scss",
+            "ideastone_erp/static/src/js/faculty_appraisal.js",
+            "ideastone_erp/static/src/xml/faculty_appraisal.xml",
+            "ideastone_erp/static/src/scss/faculty_appraisal.scss",
         ],
     },
     "application": True,

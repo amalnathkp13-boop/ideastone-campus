@@ -69,6 +69,7 @@ async function savePortal(page,button) {
         }
         const student=current=await login(browser,'student.ui.qa');
         await student.goto(base+'/my/campus/student/academics');
+        await student.locator('.student_subnav').getByRole('link',{name:'Assignments & feedback',exact:true}).click();
         const work=student.locator(`.student_assignment[data-assignment="${scenario.task}"]`);
         await work.locator('textarea[name=description]').fill('My explanation includes the algorithm and boundary tests.');
         await work.locator('input[type=file]').setInputFiles({name:'coursework.txt',mimeType:'text/plain',buffer:Buffer.from('Synthetic submitted coursework')});
@@ -87,6 +88,7 @@ async function savePortal(page,button) {
         row=snapshot.assignments.find(item=>item.id===scenario.task);
         assert.equal(row.state,'accept'); assert.equal(row.marks,0); assert.match(row.feedback,/Good solution/);
         await student.reload();
+        await student.locator('.student_subnav').getByRole('link',{name:'Assignments & feedback',exact:true}).click();
         await work.getByText('Released grade:',{exact:false}).waitFor();
         await work.scrollIntoViewIfNeeded();
         await student.screenshot({path:path.join(out,'coursework-feedback-1440.png')});
