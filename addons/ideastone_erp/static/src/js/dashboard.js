@@ -99,6 +99,7 @@ class CampusBase extends Component {
                     "ideastone_erp.action_faculty_leave_page", "ideastone_erp.action_faculty_appraisal_dashboard", "ideastone_erp.action_staff_profile",
                 ].includes(item.action) ?
                     await this.orm.call("campus.dashboard", "get_owner_action", [item.action]) : item.action;
+                if (this.state.is_owner_workspace && action.context) action.context.campus_module = this.state.module;
                 if (action.help) action.help = markup(action.help);
                 await this.action.doAction(action);
             }

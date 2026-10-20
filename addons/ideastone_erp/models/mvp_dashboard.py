@@ -303,7 +303,7 @@ class OwnerDashboard(models.AbstractModel):
         model.check_access_rights("read")
         if xmlid == "ideastone_erp.mvp_college":
             action["res_id"] = self.env.company.id
-        elif xmlid == "ideastone_erp.mvp_student_request_types":
+        elif xmlid in {"ideastone_erp.mvp_student_request_types", "ideastone_erp.mvp_fee_heads"}:
             action["domain"] = ["|", ("company_id", "=", False), ("company_id", "=", self.env.company.id)]
         elif "company_id" in model._fields:
             domain = safe_eval(action.get("domain") or "[]") if isinstance(action.get("domain"), str) else action.get("domain") or []
