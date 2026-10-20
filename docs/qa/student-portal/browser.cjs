@@ -23,7 +23,7 @@ async function login(page, name) {
 async function visit(page, section) {
     await page.locator(`.student_sidebar a[href*="/student/${section}"]`).click();
     await page.waitForURL(new RegExp(`/student/${section}`));
-    await page.locator('#student_main h1').waitFor();
+    await page.locator('#student_main h1:visible').waitFor();
     assert.equal(await page.locator('.student_network_error:visible').count(),0);
 }
 async function snapshot(page) {return rpc(page,'campus.student.portal','snapshot');}
@@ -97,7 +97,7 @@ async function save(page, control) {
         await save(page,page.getByRole('button',{name:'Save contact details'}));
         await page.reload({waitUntil:'load'});
         // Read only after the reloaded profile form is rendered; a stale/partial page made this check flaky.
-        await page.locator('#student_main h1').waitFor();
+        await page.locator('#student_main h1:visible').waitFor();
         await page.locator('.student_subnav').getByRole('link',{name:'Personal details',exact:true}).click();
         await page.locator('.profile_contact_edit summary').click();
         await page.waitForFunction(()=>document.querySelector('#profile_city')?.value==='Coimbatore',null,{timeout:15000})
@@ -109,7 +109,7 @@ async function save(page, control) {
         await assert.rejects(()=>rpc(page,'campus.dashboard','get_owner_metrics'));
         await page.screenshot({path:path.join(out,'student-profile-1440.png'),fullPage:true});
         await visit(page,'notices');
-        assert(await page.locator('#student_main h1').evaluate(element=>element.getBoundingClientRect().top>=120),'Navigation did not reset the native portal scroll container');
+        assert(await page.locator('#student_main h1:visible').evaluate(element=>element.getBoundingClientRect().top>=120),'Navigation did not reset the native portal scroll container');
         await save(page,page.getByRole('button',{name:'Mark read',exact:true}).first());
         assert.equal((await snapshot(page)).unread,initial.unread-1);
         await visit(page,'requests');
