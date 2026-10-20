@@ -5,9 +5,9 @@ from collections import defaultdict
 from datetime import date, datetime, time, timedelta
 
 import pytz
+from odoo.exceptions import AccessError, UserError
 
 from odoo import _, api, fields, models
-from odoo.exceptions import AccessError, UserError
 
 
 class FacultyAttendanceUI(models.AbstractModel):
@@ -97,8 +97,14 @@ class FacultyAttendanceUI(models.AbstractModel):
             ("employee_id", "=", selected.id), ("state", "=", "validate"),
         ])
         for leave_type in leave_types:
-            allocated = sum(allocations.filtered(lambda a: a.holiday_status_id == leave_type).mapped("number_of_days"))
-            used = sum(all_used.filtered(lambda l: l.holiday_status_id == leave_type).mapped("number_of_days"))
+            allocated = sum(
+                allocation.number_of_days for allocation in allocations
+                if allocation.holiday_status_id == leave_type
+            )
+            used = sum(
+                leave.number_of_days for leave in all_used
+                if leave.holiday_status_id == leave_type
+            )
             balance = round(allocated - used, 2)
             result["leave_balances"].append({"name": leave_type.name, "balance": balance,
                                               "eligible": balance > 0 or leave_type.requires_allocation == "no"})
