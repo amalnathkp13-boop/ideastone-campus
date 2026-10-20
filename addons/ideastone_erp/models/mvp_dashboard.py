@@ -2,7 +2,7 @@ import base64
 import csv
 import io
 from collections import defaultdict
-from datetime import timedelta
+from datetime import date, timedelta
 
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tools.safe_eval import safe_eval
@@ -12,9 +12,10 @@ from odoo import _, api, fields, models
 ROLES = ("owner", "registrar", "admissions", "accountant", "exams", "readonly", "hod")
 # Client (OWL) actions have no res_model; access is checked against the model they edit.
 CLIENT_ACTION_MODELS = {
-    "action_staff_profile": "op.faculty",
+    "action_staff_profile": "campus.faculty.detail",
     "action_faculty_appraisal_dashboard": "campus.faculty.achievement",
     "action_faculty_leave_page": "hr.leave",
+    "action_faculty_attendance_page": "hr.attendance",
 }
 
 MODULES = [
@@ -24,13 +25,13 @@ MODULES = [
     ("academics", "Academics", "university", [("Academic years", "mvp_years"), ("Departments", "mvp_departments"), ("Programmes", "mvp_programmes"), ("Semesters", "mvp_terms"), ("Sections", "mvp_sections"), ("Subjects & curriculum", "mvp_subjects")]),
     ("staff", "Faculty & Staff", "users", [("Staff directory", "mvp_faculty"), ("Teaching allocation", "mvp_timetable"), ("Staff Profile", "action_staff_profile"), ("Faculty development and appraisal", "action_faculty_appraisal_dashboard"), ("Leave Management", "action_faculty_leave_page")]),
     ("timetable", "Timetable", "calendar", [("Class timetable", "mvp_timetable"), ("Faculty timetable", "mvp_faculty_timetable"), ("Rooms", "mvp_rooms")]),
-    ("attendance", "Attendance", "calendar-check-o", [("Take attendance", "mvp_attendance"), ("Attendance register", "mvp_attendance_registers"), ("Student summary & shortage", "mvp_report_attendance")]),
+    ("attendance", "Attendance", "calendar-check-o", [("Staff attendance", "action_faculty_attendance_page"), ("Take attendance", "mvp_attendance"), ("Attendance register", "mvp_attendance_registers"), ("Student summary & shortage", "mvp_report_attendance")]),
     ("fees", "Fees & Payments", "inr", [("Fee heads", "mvp_fee_heads"), ("Fee structures", "mvp_structures"), ("Student fee accounts", "mvp_fees"), ("Assign fee structure", "mvp_assign_fees"), ("Invoices & dues", "mvp_invoices"), ("Overdue follow-up", "mvp_overdue_invoices"), ("Receipts", "mvp_receipts")]),
     ("learning", "Learning & LMS", "book", [("Assignments", "mvp_learning_assignments"), ("Review submissions", "mvp_learning_submissions"), ("LMS accounts & retries", "mvp_lms_accounts")]),
     ("exams", "Examinations", "file-text-o", [("Exam sessions", "mvp_exam_sessions"), ("Schedule & marks entry", "mvp_exams"), ("Grade rules", "mvp_grades"), ("Results & missing entries", "mvp_results")]),
     ("communication", "Communication", "bullhorn", [("Notices & audiences", "mvp_notices"), ("Student requests & support", "mvp_student_requests")]),
     ("reports", "Reports", "bar-chart", [("Admissions", "mvp_report_admissions"), ("Students", "mvp_report_students"), ("Attendance", "mvp_report_attendance"), ("Fee collection", "mvp_report_collection"), ("Outstanding dues", "mvp_report_dues"), ("Results", "mvp_report_results"), ("Faculty workload", "mvp_report_faculty")]),
-    ("settings", "Settings", "cog", [("College profile & attendance policy", "mvp_college"), ("Document requirements", "mvp_requirements"), ("Student request catalogue", "mvp_student_request_types"), ("Audit log", "mvp_audit"), ("Users & roles", "base.action_res_users"), ("ID & receipt numbering", "base.action_sequence_form"), ("Import students", "mvp_import_students")]),
+    ("settings", "Settings", "cog", [("College profile & attendance policy", "mvp_college"), ("Document requirements", "mvp_requirements"), ("Student request catalogue", "mvp_student_request_types"), ("Audit log", "mvp_audit"), ("Users & roles", "base.action_res_users"), ("ID & receipt numbering", "base.ir_sequence_form"), ("Import students", "mvp_import_students")]),
 ]
 
 
@@ -58,7 +59,7 @@ class OwnerDashboard(models.AbstractModel):
                 # Read only these code-owned action definitions. Target records
                 # continue to use the caller's ACLs and college record rules.
                 ref = ref.sudo()
-                if action in {"base.action_res_users", "base.action_sequence_form"} and not self.env.user.has_group("ideastone_erp.group_mvp_owner"):
+                if action in {"base.action_res_users", "base.ir_sequence_form"} and not self.env.user.has_group("ideastone_erp.group_mvp_owner"):
                     continue
                 if action in {"mvp_college", "mvp_import_students", "mvp_requirements", "mvp_lms_accounts"} and not self.env.user.has_group("ideastone_erp.group_mvp_registrar"):
                     continue
@@ -83,20 +84,29 @@ class OwnerDashboard(models.AbstractModel):
     def _mvp_filters(self, filters=None):
         if not self._is_mvp_user():
             raise AccessError(_("College reporting permission is required."))
-        filters = filters or {}
+        if filters is None:
+            filters = {}
+        if not isinstance(filters, dict):
+            raise ValidationError(_("Use valid college report filters."))
         today = fields.Date.context_today(self)
-        start = fields.Date.to_date(filters.get("date_from") or today.replace(day=1))
-        end = fields.Date.to_date(filters.get("date_to") or today)
-        if start > end or (end - start).days > 1096:
+        id_keys = ["year_id", "course_id", "batch_id", "subject_id", "faculty_id", "student_id", "cashier_id", "source_id", "exam_id", "fee_head_id", "department_id"]
+        try:
+            start = fields.Date.to_date(filters.get("date_from") or today.replace(day=1))
+            end = fields.Date.to_date(filters.get("date_to") or today)
+            ids = {key: int(filters.get(key) or 0) for key in id_keys}
+        except (ValueError, TypeError, OverflowError) as exc:
+            raise ValidationError(_("Select valid report dates and record filters.")) from exc
+        if start > end or (end - start).days > 1096 or end == date.max:
             raise ValidationError(_("Select a valid reporting period of at most three years."))
-        year_id = int(filters.get("year_id") or 0)
+        if any(value < 0 or value > 2147483647 or (filters.get(key) is True or not isinstance(filters.get(key), (str, int, type(None)))) for key, value in ids.items()):
+            raise ValidationError(_("Select valid records for the report filters."))
+        year_id = ids["year_id"]
         if year_id:
             year = self.env["op.academic.year"].browse(year_id).exists()
             year.check_access_rule("read")
             if not year or year.company_id != self.env.company:
                 raise AccessError(_("Select an academic year in the active college."))
-        return {"date_from": start, "date_to": end, "year_id": year_id,
-                **{key: int(filters.get(key) or 0) for key in ["course_id", "batch_id", "subject_id", "faculty_id", "student_id", "cashier_id", "source_id", "exam_id", "fee_head_id", "department_id"]},
+        return {"date_from": start, "date_to": end, **ids,
                 "status": str(filters.get("status") or ""), "method": str(filters.get("method") or "")}
 
     def _mvp_records(self, model, domain, limit=50000):
@@ -123,13 +133,17 @@ class OwnerDashboard(models.AbstractModel):
         if kind not in mapping:
             raise ValidationError(_("Unknown college report."))
         model, domain = mapping[kind]
-        year_paths = {"admissions": "campus_year_id", "students": "course_detail_ids.academic_years_id", "attendance": "batch_id.campus_year_id",
+        year_paths = {"admissions": "campus_year_id", "attendance": "batch_id.campus_year_id",
                       "collection": "campus_invoice_id.campus_year_id", "dues": "campus_year_id", "results": "exam_id.campus_year_id"}
-        course_paths = {"admissions": "course_id", "students": "course_detail_ids.course_id", "attendance": "course_id", "collection": "campus_invoice_id.campus_course_id", "dues": "campus_course_id", "results": "exam_id.course_id"}
-        batch_paths = {"admissions": "batch_id", "students": "course_detail_ids.batch_id", "attendance": "batch_id", "results": "exam_id.batch_id"}
+        course_paths = {"admissions": "course_id", "attendance": "course_id", "collection": "campus_invoice_id.campus_course_id", "dues": "campus_course_id", "results": "exam_id.course_id"}
+        batch_paths = {"admissions": "batch_id", "attendance": "batch_id", "results": "exam_id.batch_id"}
         for key, paths in [("year_id", year_paths), ("course_id", course_paths), ("batch_id", batch_paths)]:
             if f[key] and kind in paths:
                 domain.append((paths[kind], "=", f[key]))
+        if kind == "students":
+            placement = [(path, "=", f[key]) for key, path in [("year_id", "academic_years_id"), ("course_id", "course_id"), ("batch_id", "batch_id")] if f[key]]
+            if placement:
+                domain.append(("course_detail_ids", "any", placement))
         if f["source_id"] and kind == "admissions":
             domain.append(("campus_source_id", "=", f["source_id"]))
         if f["status"] and kind in {"admissions", "students"}:
@@ -208,7 +222,7 @@ class OwnerDashboard(models.AbstractModel):
         funnel = [{"label": label, "value": sum(r.campus_stage == state for r in admission)} for state, label in self.env["op.admission"]._fields["campus_stage"].selection]
         programme = defaultdict(int)
         for student in students:
-            matching = student.course_detail_ids.filtered(lambda e: e.state == "running" and (not f["year_id"] or e.academic_years_id.id == f["year_id"]))
+            matching = student.course_detail_ids.filtered(lambda e: e.state == "running" and (not f["year_id"] or e.academic_years_id.id == f["year_id"]) and (not f["course_id"] or e.course_id.id == f["course_id"]) and (not f["batch_id"] or e.batch_id.id == f["batch_id"]))
             for course in matching.course_id:
                 programme[course.name] += 1
         collection = defaultdict(lambda: {"collected": 0, "dues": 0})
@@ -290,7 +304,7 @@ class OwnerDashboard(models.AbstractModel):
         model.check_access_rights("read")
         if xmlid == "ideastone_erp.mvp_college":
             action["res_id"] = self.env.company.id
-        elif xmlid == "ideastone_erp.mvp_student_request_types":
+        elif xmlid in {"ideastone_erp.mvp_student_request_types", "ideastone_erp.mvp_fee_heads"}:
             action["domain"] = ["|", ("company_id", "=", False), ("company_id", "=", self.env.company.id)]
         elif "company_id" in model._fields:
             domain = safe_eval(action.get("domain") or "[]") if isinstance(action.get("domain"), str) else action.get("domain") or []

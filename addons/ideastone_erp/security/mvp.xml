@@ -38,7 +38,7 @@
   <record id="group_mvp_owner" model="res.groups">
     <field name="name">MVP Owner</field>
     <field name="category_id" ref="ideastone_erp.category_campus" />
-    <field name="implied_ids" eval="[(4,ref('ideastone_erp.group_mvp_registrar')),(4,ref('ideastone_erp.group_mvp_accountant')),(4,ref('ideastone_erp.group_mvp_exams')),(4,ref('ideastone_erp.group_mvp_concession')),(4,ref('base.group_system'))]" />
+    <field name="implied_ids" eval="[(4,ref('ideastone_erp.group_mvp_registrar')),(4,ref('ideastone_erp.group_mvp_accountant')),(4,ref('ideastone_erp.group_mvp_exams')),(4,ref('ideastone_erp.group_mvp_concession')),(4,ref('ideastone_erp.group_people')),(4,ref('base.group_system'))]" />
     <field name="users" eval="[(4,ref('base.user_admin'))]" />
   </record>
   <record id="mvp_acl_op_academic_year_registrar" model="ir.model.access">

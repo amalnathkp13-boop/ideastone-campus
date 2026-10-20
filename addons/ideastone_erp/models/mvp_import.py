@@ -32,7 +32,7 @@ class StudentImport(models.TransientModel):
             if len(raw) > 2_000_000:
                 raise ValidationError(_("Import at most 2 MB per file."))
             mapping = json.loads(self.mapping)
-            if set(mapping) != {"number", "first", "last", "phone", "section"}:
+            if not isinstance(mapping, dict) or set(mapping) != {"number", "first", "last", "phone", "section"} or any(not isinstance(header, str) or not header.strip() for header in mapping.values()):
                 raise ValueError()
             reader = csv.DictReader(io.StringIO(raw.decode("utf-8-sig")))
             if not reader.fieldnames or any(header not in reader.fieldnames for header in mapping.values()):
