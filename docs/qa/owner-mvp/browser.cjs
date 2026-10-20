@@ -114,18 +114,15 @@ async function markup(page) {
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'College profile & attendance policy',exact:true}).click();
         const threshold=page.locator('.o_field_widget[name=campus_attendance_threshold] input');
         await threshold.fill('76');
-        let policySave=page.waitForResponse(r=>r.url().includes('/res.company/web_save'));
-        await page.locator('.o_form_button_save:visible').click();
-        let policyResult=await(await policySave).json();
-        if(policyResult.error) throw Error(policyResult.error.data?.message || policyResult.error.message);
+        // Saving a company reloads Odoo; wait before issuing the next RPC.
+        await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}), page.locator('.o_form_button_save:visible').click()]);
+        await threshold.waitFor();
         const collegeAction=await rpc(page,'campus.dashboard','get_owner_action',['ideastone_erp.mvp_college']);
         let savedPolicy=await rpc(page,'res.company','read',[[collegeAction.res_id]],{fields:['campus_attendance_threshold']});
         if(savedPolicy[0].campus_attendance_threshold!==76) throw Error('College policy did not persist');
         await threshold.fill('75');
-        policySave=page.waitForResponse(r=>r.url().includes('/res.company/web_save'));
-        await page.locator('.o_form_button_save:visible').click();
-        policyResult=await(await policySave).json();
-        if(policyResult.error) throw Error(policyResult.error.data?.message || policyResult.error.message);
+        await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}), page.locator('.o_form_button_save:visible').click()]);
+        await threshold.waitFor();
         savedPolicy=await rpc(page,'res.company','read',[[collegeAction.res_id]],{fields:['campus_attendance_threshold']});
         if(savedPolicy[0].campus_attendance_threshold!==75) throw Error('College policy was not restored');
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'ID & receipt numbering',exact:true}).click();
