@@ -1679,6 +1679,7 @@
             <field name="city" />
             <field name="phone" />
             <field name="email" />
+            <field name="parent_id" invisible="True" />
             <field name="currency_id" />
             <field name="campus_attendance_threshold" />
             <field name="campus_excused_policy" />
