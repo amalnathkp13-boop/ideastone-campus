@@ -34,7 +34,7 @@
               <t t-elif="section == 'academics'" t-call="ideastone_erp.student_academics"/>
               <t t-elif="section == 'timetable'" t-call="ideastone_erp.student_timetable"/>
               <t t-elif="section == 'attendance'" t-call="ideastone_erp.student_attendance"/>
-              <t t-elif="section == 'exams'" t-call="ideastone_erp.student_exams"/>
+              <t t-elif="section == 'exams'" t-call="ideastone_erp.student_examinations_content"/>
               <t t-elif="section == 'fees'" t-call="ideastone_erp.student_fees"/>
               <t t-elif="section == 'notices'" t-call="ideastone_erp.student_notices"/>
               <t t-elif="section == 'requests'" t-call="ideastone_erp.student_requests"/>
