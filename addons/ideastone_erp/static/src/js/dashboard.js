@@ -84,6 +84,10 @@ class CampusBase extends Component {
     async open(item) {
         if (item.allowed === false) return;
         try {
+            if (item.action === "ideastone_erp.action_faculty_appraisal_dashboard" && item.action_id) {
+                window.location.assign(`/web#action=${item.action_id}`);
+                return;
+            }
             if (item.url) {
                 await this.action.doAction({type: "ir.actions.act_url", url: item.url, target: "new"});
             } else if (item.tool) {
@@ -91,7 +95,9 @@ class CampusBase extends Component {
             } else if (item.profile_id) {
                 await this.action.doAction({ type: "ir.actions.act_window", res_model: "op.faculty", res_id: item.profile_id, views: [[false, "form"]], target: "current" });
             } else {
-                await this.action.doAction(this.state.is_owner_workspace && item.action !== "ideastone_erp.action_faculty_leave_page" ?
+                await this.action.doAction(this.state.is_owner_workspace && ![
+                    "ideastone_erp.action_faculty_leave_page", "ideastone_erp.action_faculty_appraisal_dashboard",
+                ].includes(item.action) ?
                     await this.orm.call("campus.dashboard", "get_owner_action", [item.action]) : item.action);
             }
             this.state.open = false;

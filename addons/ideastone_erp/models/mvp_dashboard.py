@@ -15,7 +15,7 @@ MODULES = [
     ("admissions", "Admissions", "address-card-o", [("Enquiries", "mvp_enquiries"), ("Applications & review", "mvp_applications"), ("Documents", "mvp_documents"), ("Admission register", "mvp_intakes")]),
     ("students", "Students", "graduation-cap", [("Student directory", "mvp_students"), ("Enrolments & transfers", "mvp_enrolments")]),
     ("academics", "Academics", "university", [("Academic years", "mvp_years"), ("Departments", "mvp_departments"), ("Programmes", "mvp_programmes"), ("Semesters", "mvp_terms"), ("Sections", "mvp_sections"), ("Subjects & curriculum", "mvp_subjects")]),
-    ("staff", "Faculty & Staff", "users", [("Staff directory", "mvp_faculty"), ("Teaching allocation", "mvp_timetable")]),
+    ("staff", "Faculty & Staff", "users", [("Staff directory", "mvp_faculty"), ("Teaching allocation", "mvp_timetable"), ("Faculty development and appraisal", "action_faculty_appraisal_dashboard")]),
     ("timetable", "Timetable", "calendar", [("Class timetable", "mvp_timetable"), ("Faculty timetable", "mvp_faculty_timetable"), ("Rooms", "mvp_rooms")]),
     ("attendance", "Attendance", "calendar-check-o", [("Take attendance", "mvp_attendance"), ("Attendance register", "mvp_attendance_registers"), ("Student summary & shortage", "mvp_report_attendance")]),
     ("fees", "Fees & Payments", "inr", [("Fee heads", "mvp_fee_heads"), ("Fee structures", "mvp_structures"), ("Student fee accounts", "mvp_fees"), ("Assign fee structure", "mvp_assign_fees"), ("Invoices & dues", "mvp_invoices"), ("Overdue follow-up", "mvp_overdue_invoices"), ("Receipts", "mvp_receipts")]),
@@ -58,9 +58,10 @@ class OwnerDashboard(models.AbstractModel):
                 report_model = {"mvp_report_admissions": "op.admission", "mvp_report_students": "op.student", "mvp_report_attendance": "op.attendance.line", "mvp_report_collection": "account.payment", "mvp_report_dues": "account.move", "mvp_report_results": "op.result.line", "mvp_report_faculty": "op.faculty"}.get(action)
                 if report_model and not self.env[report_model].check_access_rights("read", raise_exception=False):
                     continue
-                if not self.env[ref.res_model].check_access_rights("read", raise_exception=False):
+                target_model = "campus.faculty.achievement" if action == "action_faculty_appraisal_dashboard" else ref.res_model
+                if not self.env[target_model].check_access_rights("read", raise_exception=False):
                     continue
-                item = {"label": title, "action": ref.get_external_id()[ref.id], "action_id": ref.id, "model": ref.res_model, "group": label, "allowed": True}
+                item = {"label": title, "action": ref.get_external_id()[ref.id], "action_id": ref.id, "model": target_model, "group": label, "allowed": True}
                 items.append(item)
                 navigation.append(item)
             if items:
@@ -277,7 +278,8 @@ class OwnerDashboard(models.AbstractModel):
         if xmlid not in allowed:
             raise AccessError(_("This action is outside your permitted college workspace."))
         action = self.env["ir.actions.actions"]._for_xml_id(xmlid)
-        model = self.env[action["res_model"]]
+        target_model = "campus.faculty.achievement" if xmlid == "ideastone_erp.action_faculty_appraisal_dashboard" else action["res_model"]
+        model = self.env[target_model]
         model.check_access_rights("read")
         if xmlid == "ideastone_erp.mvp_college":
             action["res_id"] = self.env.company.id
