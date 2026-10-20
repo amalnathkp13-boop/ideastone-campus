@@ -92,16 +92,11 @@ class FacultyLeaveUI(models.AbstractModel):
 
         casual_type = next((item for item in leave_types if "casual" in item.name.lower()), None)
         if casual_type:
-            allocations = self.env["hr.leave.allocation"].sudo().search([
-                ("employee_id", "=", employee.id),
-                ("holiday_status_id", "=", casual_type.id),
-                ("state", "=", "validate"),
-            ])
-            used = leave_model.search(own_domain + [
-                ("holiday_status_id", "=", casual_type.id), ("state", "=", "validate"),
-            ])
-            result["balance"] = round(sum(allocations.mapped("number_of_days"))
-                                      - sum(used.mapped("number_of_days")), 2)
+            balances = casual_type.get_allocation_data(employee, today)[employee]
+            if balances:
+                result["balance"] = round(balances[0][1]["virtual_remaining_leaves"], 2)
+            elif casual_type.requires_allocation == "yes":
+                result["balance"] = 0
 
         attendance = self.env["hr.attendance"].sudo().search([
             ("employee_id", "=", employee.id),
@@ -126,10 +121,22 @@ class FacultyLeaveUI(models.AbstractModel):
     @api.model
     def submit_leave(self, values):
         self._check_staff()
+        allowed = {"leave_type_id", "date_from", "date_to", "from_session", "to_session", "reason"}
+        if not isinstance(values, dict) or set(values) - allowed:
+            raise UserError(_("Submit only the leave type, dates, sessions and reason."))
+        if not isinstance(values.get("reason"), str) or len(values["reason"]) > 5000:
+            raise UserError(_("Enter a reason of at most 5,000 characters."))
+        try:
+            type_id = values.get("leave_type_id")
+            if isinstance(type_id, bool) or not isinstance(type_id, (int, str)):
+                raise ValueError()
+            type_id = int(type_id)
+        except (TypeError, ValueError) as exc:
+            raise UserError(_("Choose an available leave type.")) from exc
         employee = self._employee()
         if not employee:
             raise UserError(_("Your account must be linked to an employee before you can request leave."))
-        leave_type = self._leave_types().filtered(lambda item: item.id == int(values.get("leave_type_id") or 0))[:1]
+        leave_type = self._leave_types().filtered(lambda item: item.id == type_id)[:1]
         if not leave_type:
             raise UserError(_("Choose an available leave type."))
         try:
