@@ -31,6 +31,9 @@ task = env["op.assignment"].create({"name": "Programming exercise for QA Arun", 
     "assignment_type": kind.id, "description": "Review the published course guide and complete the programming exercise.",
     "issued_date": fields.Datetime.now(), "submission_date": fields.Datetime.now() + timedelta(days=2), "allocation_ids": [(6, 0, arun.ids)]})
 task.act_publish()
+env["op.assignment.sub.line"].create({"assignment_id": task.id, "student_id": arun.id,
+    "description": "PRIVATE STUDENT DRAFT", "note": "PRIVATE FACULTY DRAFT",
+    "campus_file": base64.b64encode(b"Private student coursework"), "campus_filename": "private-coursework.txt"})
 requirement = env["campus.admission.requirement"].create({"name": "Parent-released college letter", "required": False})
 admission = env["op.admission"].search([("student_id", "=", arun.id)], limit=1)
 doc = env["campus.admission.document"].create({"admission_id": admission.id, "requirement_id": requirement.id,

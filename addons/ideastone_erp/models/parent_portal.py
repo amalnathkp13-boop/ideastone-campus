@@ -105,7 +105,7 @@ class ParentPortal(models.AbstractModel):
     def _identity(self):
         children = self._children()
         value = self.env.context.get("parent_child")
-        if value:
+        if value not in (None, ""):
             try:
                 selected = children.filtered(lambda s: s.id == int(value))
             except (ValueError, TypeError):
@@ -165,6 +165,8 @@ class ParentPortal(models.AbstractModel):
                     unread=len(notices - reads), notice_badge=self.env.user.campus_parent_notice_badge,
                     contact_edit=False, guardians=[], books=[], loans=[], updates=0)
         data["student"] = {key: value for key, value in data["student"].items() if key in {"name", "number", "register", "status", "admitted"}}
+        # Parent learning uses the released homework projection, not student submission drafts.
+        data.pop("assignments", None)
         data["filters"]["child"] = str(student.id)
         pending = [item for item in homework if item["pending"]]
         data["nearest_work"] = pending[0]["due"] if pending else ""
@@ -196,6 +198,11 @@ class ParentPortal(models.AbstractModel):
                 upcoming.append({"key": "exam-%s" % record.id, "name": exam["name"], "kind": "Examination", "when": exam["start"], "sort": record.start_time.isoformat(), "target": "exams"})
         data["upcoming"] = sorted(upcoming, key=lambda item: item["sort"])[:12]
         return data
+
+    def _download(self, kind, record_id):
+        if kind not in {"receipt", "resource", "document", "request", "notice"}:
+            raise AccessError(_("This document type is not available to parents."))
+        return super()._download(kind, record_id)
 
     @api.model
     def act(self, operation, child=None, payload=None):

@@ -58,6 +58,9 @@ async function submit(page,button) {
         assert.equal(initial.children.length,2);
         assert.equal(initial.pending_work,1);
         assert(!('phone' in initial.student));
+        assert(!('assignments' in initial));
+        assert(!JSON.stringify(initial).includes('PRIVATE STUDENT DRAFT'));
+        assert(!JSON.stringify(initial).includes('PRIVATE FACULTY DRAFT'));
         assert(!initial.navigation.some(row=>row[0]==='transport'));
         assert(!initial.notices.some(row=>row.name==='PRIVATE STAFF ONLY'));
         for(const notice of initial.notices) await rpc(page,'campus.parent.portal','act',['notice',initial.student_id,{notice_id:notice.id,read:false}]);
@@ -103,6 +106,9 @@ async function submit(page,button) {
         const staff=await browser.newPage(); staff.setDefaultTimeout(60000); await login(staff,'owner.ui.qa');
         await staff.goto(base+'/web#action=ideastone_erp.action_dashboard',{waitUntil:'domcontentloaded'});
         await staff.locator('.campus_owner_stat').first().waitFor();
+        const studentWork=await rpc(staff,'op.assignment.sub.line','search_read',[[['student_id','=',first],['assignment_id','=',initial.homework[0].id]]],{fields:['id']});
+        assert.equal(studentWork.length,1);
+        assert.equal((await page.request.get(base+`/my/campus/parent/download/assignment/${studentWork[0].id}?child=${first}`)).status(),404);
         await rpc(staff,'campus.service.request','write',[[request.id],{portal_reply:'Please confirm the preferred contact time.'}]);
         await rpc(staff,'campus.service.request','action_portal_information',[[request.id]]);
         await visit(page,'requests');

@@ -34,7 +34,7 @@ class TestParentPortal(OwnerMVPFixture, TransactionCase):
         self.assertEqual(len(self.portal.snapshot()["children"]), 2)
         self.assertEqual(self.portal.snapshot(self.second.id)["student_id"], self.second.id)
         self.assertNotIn("phone", self.portal.snapshot()["student"])
-        for child in [self.foreign.id, "bad-id", -1]:
+        for child in [self.foreign.id, "bad-id", -1, 0, False]:
             with self.assertRaises(AccessError):
                 self.portal.snapshot(child)
         with self.assertRaises(AccessError):
@@ -188,6 +188,23 @@ class TestParentPortal(OwnerMVPFixture, TransactionCase):
         self.env["op.assignment.sub.line"].create({"assignment_id": task.id, "student_id": self.first.id, "state": "submit"})
         self.assertEqual(self.portal.snapshot(self.first.id)["pending_work"], 0)
         self.assertEqual(self.portal.snapshot(self.first.id)["homework"][0]["status"], "Submitted")
+
+    def test_student_submission_evidence_is_not_shared_with_parents(self):
+        kind = self.env["grading.assignment.type"].create({"name": "Private coursework audit"})
+        task = self.env["op.assignment"].create({"name": "Published parent homework", "course_id": self.course.id,
+            "batch_id": self.section.id, "subject_id": self.subject.id, "faculty_id": self.faculty.id,
+            "assignment_type": kind.id, "description": "Public instructions", "issued_date": self.today,
+            "submission_date": self.today + timedelta(days=2), "allocation_ids": [(6, 0, self.first.ids)]})
+        task.act_publish()
+        work = self.env["op.assignment.sub.line"].create({"assignment_id": task.id, "student_id": self.first.id,
+            "state": "submit", "description": "PRIVATE STUDENT EXPLANATION", "note": "PRIVATE FACULTY DRAFT",
+            "campus_file": base64.b64encode(b"Private student evidence"), "campus_filename": "private.txt"})
+        data = self.portal.snapshot(self.first.id)
+        self.assertNotIn("assignments", data)
+        self.assertEqual(data["homework"][0]["status"], "Submitted")
+        self.assertFalse(data["homework"][0]["feedback"])
+        with self.assertRaises(AccessError):
+            self.portal.with_context(parent_child=self.first.id)._download("assignment", work.id)
 
     def test_transport_requires_enabled_current_approved_allocation(self):
         manager = new_test_user(self.env, login="parent_transport_manager", groups="ideastone_erp.group_manager")
