@@ -63,6 +63,52 @@ async function markup(page) {
                 checkedViews++;
             }
         }
+        for (const module of overview.faculty_modules.filter(module=>module.key!=='home')) {
+            await page.locator('.campus_sidebar').getByRole('button',{name:module.label,exact:true}).click();
+            await page.getByRole('heading',{name:module.label,exact:true,level:1}).waitFor();
+        }
+        await page.locator('.campus_sidebar').getByRole('button',{name:'Faculty & Staff',exact:true}).click();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Staff Profile',exact:true}).click();
+        await page.locator('#staff_profile_select option').waitFor();
+        await page.locator('.staff_profile_alert').waitFor({state:'hidden'});
+        if(await page.locator('#staff_profile_select option').count()!==1) throw Error('Owner staff profile includes staff outside the active college');
+        await page.getByRole('button',{name:'Add qualification',exact:false}).click();
+        await page.locator('.o_list_button_add:visible').click();
+        await page.locator('.o_field_widget[name=name] input').fill('Owner QA qualification');
+        await page.locator('.o_field_widget[name=institution] input').fill('QA college');
+        const detailSave=page.waitForResponse(r=>r.url().includes('/campus.faculty.detail/web_save'));
+        await page.locator('.o_form_button_save:visible').click();
+        const detailResult=await(await detailSave).json();
+        if(detailResult.error) throw Error(detailResult.error.data?.message || detailResult.error.message);
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Staff Profile',exact:true}).click();
+        await page.getByText('Owner QA qualification',{exact:true}).waitFor();
+        if(await page.locator('.staff_profile_alert').count()) throw Error('Owner profile displays a record access error');
+        await page.screenshot({path:path.join(out,'owner-staff-profile.png'),fullPage:true});
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Faculty development and appraisal',exact:true}).click();
+        await page.getByRole('heading',{name:'Professional Development and Appraisal',exact:true}).waitFor();
+        await page.locator('.appraisal_loading').waitFor({state:'hidden'});
+        if(await page.locator('.appraisal_error').count()) throw Error('Owner appraisal failed to load');
+        await page.getByLabel('Name of the student',{exact:true}).fill('Owner QA portfolio entry');
+        await page.locator('.appraisal_entry').getByRole('button',{name:'Save',exact:true}).click();
+        await page.getByRole('cell',{name:'Owner QA portfolio entry',exact:true}).waitFor();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Leave Management',exact:true}).click();
+        await page.getByRole('heading',{name:'Online Leave Apply & Status',exact:true}).waitFor();
+        await page.locator('.leave_loading').waitFor({state:'hidden'});
+        if(await page.locator('.leave_error').count()) throw Error('Owner leave page failed to load');
+        await page.locator('.campus_sidebar').getByRole('button',{name:'Settings',exact:true}).click();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'ID & receipt numbering',exact:true}).click();
+        await page.waitForURL(url=>url.hash.includes('model=ir.sequence'));
+        await page.locator('.o_list_view').waitFor();
+        await page.locator('.campus_sidebar').getByRole('button',{name:'Dashboard',exact:true}).click();
+        await page.getByLabel('From',{exact:true}).fill('9999-12-01');
+        await page.getByLabel('Through',{exact:true}).fill('9999-12-31');
+        await page.getByRole('button',{name:'Apply filters',exact:true}).click();
+        await page.getByText('Select a valid reporting period of at most three years.',{exact:true}).waitFor();
+        const today=new Date().toISOString().slice(0,10);
+        await page.getByLabel('From',{exact:true}).fill(today.slice(0,8)+'01');
+        await page.getByLabel('Through',{exact:true}).fill(today);
+        await page.getByRole('button',{name:'Apply filters',exact:true}).click();
+        await page.locator('.campus_owner_stat').first().waitFor();
         for(const kind of ['admissions','students','attendance','collection','dues','results','faculty']) {
             const report=await rpc(page,'campus.mvp.report','create',[{kind}]);
             await rpc(page,'campus.mvp.report','action_csv',[[report]]);
@@ -119,7 +165,7 @@ async function markup(page) {
         if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)) throw Error('Owner dashboard overflows the mobile viewport');
         await page.screenshot({path:path.join(out,'owner-mobile-390.png')});
         if(errors.length) throw Error(errors.join('\n'));
-        await fs.writeFile(path.join(out,'verification.json'),JSON.stringify({passed:true,checkedViews,checks:['12 owner modules','all permitted submodule views','7 real CSV exports','faculty shell reused','live KPI reconciliation','real subject form save and reload','concurrent admission conversion','concurrent payment posting','receipt PDF','1024 desktop','390 mobile drawer and overflow','browser console'],metrics,errors},null,2));
+        await fs.writeFile(path.join(out,'verification.json'),JSON.stringify({passed:true,checkedViews,checks:['13 owner modules','all permitted submodule views','7 real CSV exports','owner staff qualification save and reload','owner appraisal save','owner leave page','numbering settings','invalid reporting period recovery','faculty shell reused','live KPI reconciliation','real subject form save and reload','concurrent admission conversion','concurrent payment posting','receipt PDF','1024 desktop','390 mobile drawer and overflow','browser console'],metrics,errors},null,2));
     } catch(error) {
         await page.screenshot({path:path.join(out,'failure.png'),fullPage:true}).catch(()=>{});
         await fs.writeFile(path.join(out,'failure-dom.html'),await markup(page));

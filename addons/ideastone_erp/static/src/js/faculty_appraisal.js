@@ -26,6 +26,7 @@ export class FacultyAppraisal extends Component {
         this.orm = useService("orm");
         this.notification = useService("notification");
         this.action = useService("action");
+        this.company = useService("company");
         this.state = useState({
             loading: true, saving: false, error: "", staff: [], records: [],
             section: "research", companyId: "", departmentId: "", facultyId: "", form: emptyForm(),
@@ -75,9 +76,9 @@ export class FacultyAppraisal extends Component {
         this.state.error = "";
         try {
             const [staff, records] = await Promise.all([
-                this.orm.searchRead("op.faculty", [["active", "=", true]],
+                this.orm.searchRead("op.faculty", [["active", "=", true], ["company_id", "=", this.company.currentCompany.id]],
                     ["display_name", "company_id", "main_department_id"], { order: "display_name" }),
-                this.orm.searchRead("campus.faculty.achievement", [],
+                this.orm.searchRead("campus.faculty.achievement", [["company_id", "=", this.company.currentCompany.id]],
                     ["name", "faculty_id", "kind", "date_from", "description", "filename", "state"],
                     { order: "date_from desc, id desc", limit: 500 }),
             ]);
