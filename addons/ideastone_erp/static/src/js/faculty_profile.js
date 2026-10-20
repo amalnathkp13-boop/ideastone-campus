@@ -40,6 +40,7 @@ export class CampusFacultyProfile extends Component {
         this.action = useService("action");
         this.notification = useService("notification");
         this.user = useService("user");
+        this.company = useService("company");
         this.state = useState({
             loading: true, loadingProfile: false, error: "", staff: [], selectedId: null,
             profile: null, partner: null, details: [], canManage: false, activeSection: "overview",
@@ -57,7 +58,7 @@ export class CampusFacultyProfile extends Component {
                 "campus_pf_reference", "campus_esi_reference", "campus_identification_marks",
             ].includes(name));
             this.facultyFields = fields;
-            this.state.staff = await this.orm.searchRead("op.faculty", [["active", "=", true]], fields, {
+            this.state.staff = await this.orm.searchRead("op.faculty", [["active", "=", true], ["company_id", "=", this.company.currentCompany.id]], fields, {
                 order: "display_name",
             });
             if (this.state.staff.length) {
@@ -75,6 +76,10 @@ export class CampusFacultyProfile extends Component {
         if (!id) return;
         this.state.loadingProfile = true;
         this.state.selectedId = Number(id);
+        this.state.error = "";
+        this.state.profile = null;
+        this.state.partner = null;
+        this.state.details = [];
         try {
             const profile = this.state.staff.find((item) => item.id === this.state.selectedId);
             if (!profile) return;
