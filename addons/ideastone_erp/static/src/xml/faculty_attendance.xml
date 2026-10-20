@@ -1,0 +1,45 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.FacultyAttendancePage">
+    <main class="campus_attendance_page">
+      <div t-if="state.error" class="attendance_error" role="alert"><t t-esc="state.error"/><button type="button" t-on-click="load">Retry</button></div>
+      <div t-if="state.loading" class="attendance_loading" role="status">Loading attendance…</div>
+      <t t-elif="state.data">
+        <section class="attendance_heading">
+          <div class="attendance_heading_icon"><i class="fa fa-users"/></div>
+          <h1>Attendance</h1>
+          <span t-if="state.data.last_login">Last Login: <t t-esc="state.data.last_login"/></span>
+        </section>
+
+        <section class="attendance_filters" aria-label="Attendance filters">
+          <label>Institution <select aria-label="Institution"><option t-esc="state.data.company"/></select></label>
+          <label>Department <select aria-label="Department" t-att-value="state.departmentId" t-on-change="changeDepartment"><option value="">All departments</option><t t-foreach="state.data.departments" t-as="department" t-key="department.id"><option t-att-value="department.id" t-att-selected="department.id == state.departmentId" t-esc="department.name"/></t></select></label>
+          <label>Staff <select aria-label="Staff" t-att-value="state.employeeId" t-on-change="changeEmployee"><t t-foreach="visibleStaff" t-as="person" t-key="person.id"><option t-att-value="person.id" t-att-selected="person.id == state.employeeId" t-esc="person.name"/></t></select></label>
+          <button type="button" class="attendance_download" title="Download attendance CSV" aria-label="Download attendance CSV" t-on-click="exportCsv"><i class="fa fa-download"/></button>
+        </section>
+
+        <section class="attendance_analytics attendance_panel">
+          <div class="attendance_section_title"><span class="attendance_title_icon"><i class="fa fa-bar-chart"/></span><div><h2>Attendance Analytics</h2><p>Monthly attendance insights and key metrics for <t t-esc="state.data.month_name"/> <t t-esc="state.data.year"/></p></div></div>
+          <div class="attendance_metrics">
+            <article class="attendance_metric"><span class="attendance_metric_icon blue"><i class="fa fa-users"/></span><div><small>Monthly Attendance Rate</small><strong><t t-esc="state.data.metrics.rate === null ? '—' : state.data.metrics.rate + '%'"/></strong><span>Of scheduled working days</span></div></article>
+            <article class="attendance_metric"><span class="attendance_metric_icon purple"><i class="fa fa-clock-o"/></span><div><small>Average Check-in Time</small><strong><t t-esc="state.data.metrics.average_check_in || '—'"/></strong><span>Local time for recorded check-ins</span></div></article>
+            <article class="attendance_metric"><span class="attendance_metric_icon red"><i class="fa fa-bell-o"/></span><div><small>Late Marks</small><strong><t t-esc="state.data.metrics.late_marks === null ? '—' : state.data.metrics.late_marks"/></strong><span>Based on assigned work schedule</span></div></article>
+            <article class="attendance_metric"><span class="attendance_metric_icon green"><i class="fa fa-calendar"/></span><div><small>Leave Utilization</small><strong><t t-esc="state.data.metrics.leave_utilization === null ? '—' : state.data.metrics.leave_utilization + '%'"/></strong><span>Of allocated leave used</span></div></article>
+          </div>
+        </section>
+
+        <div class="attendance_main_grid">
+          <section class="attendance_panel attendance_balance"><h2><i class="fa fa-file-text"/> Attendance Summary for current month &amp; Acad Year</h2><div class="attendance_table_wrap"><table><thead><tr><th>#</th><th>Attendance Type</th><th>Balance</th><th>Status</th></tr></thead><tbody><t t-foreach="state.data.leave_balances" t-as="row" t-key="row.name"><tr><td t-esc="row_index + 1"/><td t-esc="row.name"/><td t-esc="row.balance.toFixed(2)"/><td><span class="attendance_pill" t-att-class="row.eligible ? 'present' : 'absent'" t-esc="row.eligible ? 'Eligible' : 'Not Eligible'"/></td></tr></t><tr t-if="!state.data.leave_balances.length"><td colspan="4" class="attendance_empty">No leave balances available</td></tr></tbody></table></div></section>
+          <section class="attendance_panel attendance_records"><header><h2><i class="fa fa-file-text"/> Attendance</h2><div class="attendance_date_filters"><select aria-label="Month" t-on-change="changeMonth"><t t-foreach="months" t-as="name" t-key="name"><option t-att-value="name_index + 1" t-att-selected="name_index + 1 === state.month" t-esc="name"/></t></select><select aria-label="Year" t-on-change="changeYear"><t t-foreach="years" t-as="year" t-key="year"><option t-att-value="year" t-att-selected="year === state.year" t-esc="year"/></t></select></div></header><div class="attendance_table_wrap"><table><thead><tr><th>#</th><th>Date</th><th>Day</th><th>Status</th><th>Check-in</th><th>Check-out</th><th>Late Mark</th></tr></thead><tbody><t t-foreach="state.data.attendance" t-as="row" t-key="row.date"><tr><td t-esc="row_index + 1"/><td t-esc="row.date"/><td class="attendance_blue" t-esc="row.day"/><td><span class="attendance_pill" t-att-class="statusClass(row.status)" t-esc="row.status"/></td><td t-esc="row.check_in"/><td t-esc="row.check_out"/><td t-att-class="row.late ? 'attendance_late' : 'attendance_green'" t-esc="row.late"/></tr></t><tr t-if="!state.data.attendance.length"><td colspan="7" class="attendance_empty">No attendance days in this range</td></tr></tbody></table></div></section>
+          <section class="attendance_panel attendance_summary"><h2><i class="fa fa-file-text"/> Attendance Summary</h2><div class="attendance_table_wrap"><table><thead><tr><th>Attendance</th><th>Total</th></tr></thead><tbody><t t-foreach="state.data.summary" t-as="row" t-key="row.label"><tr t-att-class="row.label === 'Total' ? 'total' : ''"><td t-esc="row.label"/><td t-esc="row.total"/></tr></t></tbody></table></div></section>
+        </div>
+
+        <div class="attendance_lower_grid">
+          <section class="attendance_panel attendance_holidays"><h2><i class="fa fa-file-text"/> Eligible Holidays List for selected month</h2><div class="attendance_table_wrap"><table><thead><tr><th>#</th><th>Date</th><th>Holiday</th><th>Day</th><th>Eligible</th></tr></thead><tbody><t t-foreach="state.data.holidays" t-as="row" t-key="row.date"><tr><td t-esc="row_index + 1"/><td t-esc="row.date"/><td t-esc="row.name"/><td class="attendance_blue" t-esc="row.day"/><td class="attendance_green">Yes</td></tr></t><tr t-if="!state.data.holidays.length"><td colspan="5" class="attendance_empty">No holidays configured for this month</td></tr></tbody></table></div></section>
+          <section class="attendance_panel attendance_trend"><header><h2><i class="fa fa-line-chart"/> <t t-esc="state.chart === 'weekly' ? 'Weekly' : 'Monthly'"/> Attendance Trend - <t t-esc="state.data.month_name"/> <t t-esc="state.data.year"/></h2><div class="attendance_toggle"><button type="button" t-att-class="state.chart === 'monthly' ? 'active' : ''" t-on-click="() => this.setChart('monthly')">Monthly</button><button type="button" t-att-class="state.chart === 'weekly' ? 'active' : ''" t-on-click="() => this.setChart('weekly')">Weekly</button></div></header><div class="attendance_chart" role="img" aria-label="Attendance percentage bar chart"><div class="attendance_chart_grid"><span>100%</span><span>80%</span><span>60%</span><span>40%</span><span>20%</span><span>0%</span></div><div class="attendance_chart_bars"><t t-foreach="chartBars" t-as="bar" t-key="bar.label"><div class="attendance_bar_group"><span class="attendance_bar_value"><t t-esc="bar.rate"/>%</span><div class="attendance_bar" t-att-style="'height: ' + bar.rate + '%'"/><span class="attendance_bar_label" t-esc="bar.label"/></div></t><div t-if="!chartBars.length" class="attendance_empty">No scheduled days in this range</div></div></div></section>
+        </div>
+
+        <section class="attendance_panel attendance_insights"><header><div class="attendance_insight_star"><i class="fa fa-magic"/></div><div><h2>Attendance Insights</h2><p>Insights based on attendance and leave records</p></div></header><div class="attendance_insight_cards"><t t-foreach="state.data.insights" t-as="insight" t-key="insight.title"><article><i class="fa fa-line-chart"/><div><h3 t-esc="insight.title"/><p t-esc="insight.text"/></div></article></t></div></section>
+      </t>
+    </main>
+  </t>
+</templates>
