@@ -166,12 +166,14 @@ class StudentPortal(models.AbstractModel):
         attendance = self._records("op.attendance.line", [("company_id", "=", company.id), ("student_id", "=", student.id), ("attendance_id.state", "=", "done"),
             "|", ("attendance_id.session_id", "=", False), ("attendance_id.session_id.state", "!=", "cancel")] + dates + ([("batch_id", "=", placement.batch_id.id)] if placement else []), order="attendance_date desc, id desc")
         policy = company.campus_excused_policy
-        grouped, trend = {}, defaultdict(lambda: [0, 0])
+        grouped, trend, weekly_trend = {}, defaultdict(lambda: [0, 0]), defaultdict(lambda: [0, 0])
+        status_counts = {"present": 0, "late": 0, "absent": 0, "excused": 0}
         attendance_rows = []
         for line in attendance:
             subject = line.attendance_id.campus_subject_id or line.attendance_id.campus_manual_subject_id
             eligible = not line.excused or policy != "exclude"
             present = bool(line.present or line.late or line.excused and policy == "present")
+            status_counts[line.campus_status] = status_counts.get(line.campus_status, 0) + 1
             row = grouped.setdefault(subject.id, {"id": subject.id, "name": subject.name or "Recorded class", "attended": 0, "eligible": 0})
             if eligible:
                 row["eligible"] += 1
@@ -179,10 +181,27 @@ class StudentPortal(models.AbstractModel):
                 key = line.attendance_date.strftime("%Y-%m")
                 trend[key][0] += int(present)
                 trend[key][1] += 1
-            attendance_rows.append({"id": line.id, "subject": subject.name or "Recorded class", "date": self._dates(line.attendance_date), "status": line.campus_status, "eligible": eligible})
+                week_start = line.attendance_date - timedelta(days=line.attendance_date.weekday())
+                weekly_trend[week_start][0] += int(present)
+                weekly_trend[week_start][1] += 1
+            session = line.attendance_id.session_id
+            attendance_rows.append({"id": line.id, "subject": subject.name or "Recorded class", "subject_id": subject.id,
+                                    "date": self._dates(line.attendance_date), "date_iso": str(line.attendance_date),
+                                    "time": fields.Datetime.context_timestamp(self, session.start_datetime).strftime("%I:%M %p") if session and session.start_datetime else "—",
+                                    "faculty": line.attendance_id.faculty_id.name or "Not assigned",
+                                    "room": session.classroom_id.name if session and session.classroom_id else "Not assigned",
+                                    "status": line.campus_status, "eligible": eligible, "attended": present,
+                                    "note": "Excused under college policy" if line.excused else "Submitted attendance record"})
+        palette = ("blue", "purple", "teal", "amber", "green")
+        for index, row in enumerate(grouped.values()):
+            row["color"] = palette[index % len(palette)]
+        for row in attendance_rows:
+            row["color"] = grouped[row["subject_id"]]["color"]
         for row in grouped.values():
             row["rate"] = round(row["attended"] * 100 / row["eligible"], 2) if row["eligible"] else None
             row["shortage"] = row["eligible"] and row["attended"] * 100 < company.campus_attendance_threshold * row["eligible"]
+        rated_subjects = [row for row in grouped.values() if row["rate"] is not None]
+        lowest_subject = min(rated_subjects, key=lambda row: row["rate"]) if rated_subjects else None
         conducted = sum(row["eligible"] for row in grouped.values())
         attended = sum(row["attended"] for row in grouped.values())
         rate = round(attended * 100 / conducted, 2) if conducted else None
@@ -201,6 +220,15 @@ class StudentPortal(models.AbstractModel):
                      "day": str(fields.Datetime.context_timestamp(self, s.start_datetime).date()), "room": s.classroom_id.name or "Room not assigned", "faculty": s.faculty_id.name,
                      "status": s.state, "updated": self._dates(s.write_date)} for s in sessions]
         timetable = self._timetable_projection(schedule, today, first, last)
+        week_start = today - timedelta(days=today.weekday())
+        week_end = week_start + timedelta(days=6)
+        week_utc_start = timezone.localize(datetime.combine(week_start, time.min)).astimezone(pytz.UTC).replace(tzinfo=None)
+        week_utc_end = timezone.localize(datetime.combine(week_end + timedelta(days=1), time.min)).astimezone(pytz.UTC).replace(tzinfo=None)
+        week_sessions = self._records("op.session", self._scope(student, placement) + [("start_datetime", ">=", week_utc_start),
+            ("start_datetime", "<", week_utc_end), ("state", "=", "confirm")], order="start_datetime") if placement else self.env["op.session"]
+        week_sessions = week_sessions.filtered(lambda s: s.subject_id in subjects and (not placement.campus_date_from or fields.Datetime.context_timestamp(self, s.start_datetime).date() >= placement.campus_date_from) and (not placement.campus_date_to or fields.Datetime.context_timestamp(self, s.start_datetime).date() <= placement.campus_date_to))
+        classes_this_week = len(week_sessions)
+        next_session = next((s for s in week_sessions if s.start_datetime >= fields.Datetime.now()), None)
         exam_domain = self._scope(student, placement) + [("subject_id", "in", subjects.ids), ("state", "!=", "cancel"), "|", "&", ("campus_managed", "=", True), ("campus_schedule_published", "=", True), "&", ("campus_managed", "=", False), ("state", "in", ["schedule", "held", "result_updated", "done"])]
         exams = self._records("op.exam", exam_domain, order="start_time") if placement else self.env["op.exam"]
         marks = self._records("op.result.line", [("student_id", "=", student.id), ("company_id", "=", company.id), ("exam_id.state", "=", "done"),
@@ -249,7 +277,12 @@ class StudentPortal(models.AbstractModel):
             "filters": {"enrolment": str(placement.id or ""), "date_from": str(first), "date_to": str(last)},
             "subjects": [{"id": s.id, "name": s.name, "code": s.code, "credits": s.campus_credits, "type": s.type, "faculty": ", ".join(sessions.filtered(lambda p, subject=s: p.subject_id == subject).faculty_id.mapped("name")) or "Not allocated"} for s in subjects],
             "schedule": schedule, "timetable": timetable, "today_classes": [row for row, session in zip(schedule, sessions, strict=True) if row["day"] == str(today) and session.state != "cancel" and session.end_datetime > fields.Datetime.now()],
-            "attendance": {"attended": attended, "conducted": conducted, "rate": rate, "threshold": company.campus_attendance_threshold, "policy": policy, "shortage": conducted and attended * 100 < company.campus_attendance_threshold * conducted, "subjects": list(grouped.values()), "rows": attendance_rows, "trend": [{"month": month, "rate": round(n[0] * 100 / n[1], 2)} for month, n in sorted(trend.items())]},
+            "attendance": {"attended": attended, "conducted": conducted, "rate": rate, "threshold": company.campus_attendance_threshold, "policy": policy,
+                "shortage": conducted and attended * 100 < company.campus_attendance_threshold * conducted,
+                "subjects": list(grouped.values()), "lowest_subject": lowest_subject, "rows": attendance_rows, "status_counts": status_counts,
+                "classes_this_week": classes_this_week, "next_class": self._dates(next_session.start_datetime) if next_session else "",
+                "weekly_trend": [{"week": str(week), "label": week.strftime("%d %b"), "rate": round(n[0] * 100 / n[1], 1)} for week, n in sorted(weekly_trend.items())[-6:]],
+                "trend": [{"month": month, "rate": round(n[0] * 100 / n[1], 2)} for month, n in sorted(trend.items())]},
             "exams": [{"id": e.id, "name": e.name, "subject": e.subject_id.name, "code": e.subject_id.code, "start": self._dates(e.start_time), "end": self._dates(e.end_time), "upcoming": e.start_time >= fields.Datetime.now()} for e in exams],
             "results": [{"exam": r.exam_id.name, "subject": r.exam_id.subject_id.name, "code": r.exam_id.subject_id.code, "marks": r.marks, "maximum": r.exam_id.total_marks, "grade": r.grade or "Not assigned", "status": r.status or "Not published"} for r in marks],
             "fees": {"assessed": assessed, "paid": assessed - due, "due": due, "recorded": bool(invoices), "symbol": company.currency_id.symbol, "progress": min(100, max(0, (assessed - due) * 100 / assessed)) if assessed else 0,
