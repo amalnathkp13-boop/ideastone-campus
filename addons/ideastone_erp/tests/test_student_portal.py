@@ -54,6 +54,33 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         self.portal.act("preferences", {"notice_badge": False})
         self.assertFalse(self.portal.snapshot()["notice_badge"])
 
+    def test_help_feedback_category_receipt_and_student_scope(self):
+        period = self.portal.snapshot()["help_ui"]["period"]
+        payload = {"period": period, "score": 4, "category": "services", "comments": "Please improve service hours. <b>Student suggestion</b>"}
+        with self.assertRaises(ValidationError):
+            self.portal.act("feedback", dict(payload, category="invalid"))
+        with self.assertRaises(ValidationError):
+            self.portal.act("feedback", dict(payload, comments="short"))
+        self.portal.act("feedback", payload)
+        receipt = self.portal.snapshot()["help_ui"]["feedback"]
+        self.assertEqual(receipt["category"], "Student services")
+        self.assertEqual(receipt["score"], 4)
+        self.assertEqual(receipt["comments"], payload["comments"])
+        self.assertFalse(self.env["campus.student.portal"].with_user(self.other_user).snapshot()["help_ui"]["feedback"])
+        with self.assertRaises(ValidationError):
+            self.portal.act("feedback", payload)
+        record = self.env["campus.feedback"].search([("respondent_id", "=", self.student_user.id), ("period", "=", period)])
+        self.assertEqual(record.student_category, "services")
+        record.active = False
+        self.assertTrue(self.portal.snapshot()["help_ui"]["feedback"])
+        with self.assertRaises(ValidationError):
+            self.portal.act("feedback", payload)
+        rendered = str(self.env["ir.ui.view"]._render_template("ideastone_erp.student_help_content", {
+            "d": self.portal.snapshot(), "student_url_for": lambda section: "/my/campus/student/" + section}))
+        self.assertIn("&lt;b&gt;Student suggestion&lt;/b&gt;", rendered)
+        self.env["campus.student.portal"].with_user(self.other_user).act("feedback", {"period": period, "score": 3})
+        self.assertEqual(self.env["campus.feedback"].search([("respondent_id", "=", self.other_user.id)]).student_category, "other")
+
     def test_attendance_matches_college_policy_and_cancellation(self):
         session = self.session()
         sheet = self.sheet(session)

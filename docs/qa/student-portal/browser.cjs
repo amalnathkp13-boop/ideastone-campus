@@ -227,6 +227,25 @@ async function save(page, control) {
         assert.equal(simultaneous[0].reference,simultaneous[1].reference);
         assert.equal((await snapshot(page)).requests.filter(item=>item.type_id===support.id).length,1);
         await page.screenshot({path:path.join(out,'student-requests-1440.png'),fullPage:true});
+        await visit(page,'help');
+        assert.match(await page.locator('.help_view h1').evaluate(element=>getComputedStyle(element).fontFamily),/Roboto/);
+        assert.equal(await page.locator('.help_view h1').evaluate(element=>getComputedStyle(element).fontSize),'31px');
+        await page.locator('.help_view .faq summary').first().click();
+        assert(await page.locator('.help_view .faq .answer').first().isVisible());
+        for(const width of [320,390,768,1440]) {
+            await page.setViewportSize({width,height:900});
+            assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Help form overflow at ${width}`);
+        }
+        await page.locator('#student_feedback_category').selectOption('services');
+        await page.locator('#student_feedback_score').selectOption('4');
+        await page.locator('#student_feedback_comments').fill('Please extend the student services help desk hours.');
+        await save(page,page.getByRole('button',{name:'Submit feedback',exact:true}));
+        assert.equal((await snapshot(page)).help_ui.feedback.category,'Student services');
+        await page.reload();
+        await page.locator('.feedback-receipt').waitFor();
+        assert.equal(await page.locator('.feedback-receipt .saved-comments').evaluate(element=>getComputedStyle(element).color),'rgb(22, 118, 74)');
+        assert.equal(await page.locator('#student_help_feedback_form').count(),0);
+        await page.screenshot({path:path.join(out,'student-help-feedback-1440.png'),fullPage:true});
         await visit(page,'fees');
         const receipts=(await snapshot(page)).fees.payments;
         assert.equal(receipts.length,2);

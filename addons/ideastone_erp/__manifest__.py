@@ -19,6 +19,7 @@
         "security/student_portal.xml", "data/student_portal.xml", "views/student_operations.xml", "views/student_portal.xml", "views/student_academics.xml", "views/student_timetable.xml", "views/student_examinations.xml", "views/student_attendance.xml",
         "data/parent_portal.xml", "views/parent_operations.xml", "views/parent_portal.xml",
         "security/learning.xml", "views/mvp_learning.xml", "views/student_notices.xml", "views/student_fees.xml",
+        "views/student_help.xml",
     ],
     "assets": {
         "web.assets_frontend": [
@@ -31,6 +32,7 @@
             "ideastone_erp/static/src/scss/student_examinations.scss",
             "ideastone_erp/static/src/scss/student_attendance.scss",
             "ideastone_erp/static/src/scss/student_notices.scss",
+            "ideastone_erp/static/src/scss/student_help.scss",
             "ideastone_erp/static/src/js/student_portal.js",
             "ideastone_erp/static/src/js/student_academics.js",
             "ideastone_erp/static/src/js/student_timetable.js",
