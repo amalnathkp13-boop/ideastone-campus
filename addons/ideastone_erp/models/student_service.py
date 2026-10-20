@@ -143,8 +143,11 @@ class StudentPortal(models.AbstractModel):
         attended = sum(row["attended"] for row in grouped.values())
         rate = round(attended * 100 / conducted, 2) if conducted else None
         timezone = pytz.timezone(self.env.user.tz or "UTC")
-        utc_first = timezone.localize(datetime.combine(first, time.min)).astimezone(pytz.UTC).replace(tzinfo=None)
-        utc_last = timezone.localize(datetime.combine(last + timedelta(days=1), time.min)).astimezone(pytz.UTC).replace(tzinfo=None)
+        try:
+            utc_first = timezone.localize(datetime.combine(first, time.min)).astimezone(pytz.UTC).replace(tzinfo=None)
+            utc_last = timezone.localize(datetime.combine(last + timedelta(days=1), time.min)).astimezone(pytz.UTC).replace(tzinfo=None)
+        except (OverflowError, ValueError) as exc:
+            raise ValidationError(_("Choose dates within the supported calendar range.")) from exc
         sessions = self._records("op.session", self._scope(student, placement) + [("start_datetime", ">=", utc_first), ("start_datetime", "<", utc_last), ("state", "in", ["confirm", "cancel"])], order="start_datetime") if placement else self.env["op.session"]
         # A section can run electives: only the student's authoritative subject list.
         sessions = sessions.filtered(lambda s: s.subject_id in subjects and (not placement.campus_date_from or fields.Datetime.context_timestamp(self, s.start_datetime).date() >= placement.campus_date_from) and (not placement.campus_date_to or fields.Datetime.context_timestamp(self, s.start_datetime).date() <= placement.campus_date_to))

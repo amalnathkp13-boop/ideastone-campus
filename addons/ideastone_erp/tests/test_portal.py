@@ -70,3 +70,13 @@ class TestCampusPortal(HttpCase):
         self.assertEqual(urlsplit(response.headers["Location"]).path, "/my/campus")
         response = self.url_open("/my")
         self.assertIn('href="/my/campus"', response.text)
+
+    def test_student_calendar_extremes_are_recoverable(self):
+        self.student_user.tz = "Asia/Kolkata"
+        self.authenticate("qa_http_student", "qa-http-fixture")
+        for first, last in [("0001-01-01", "0001-01-02"), ("9999-12-30", "9999-12-31")]:
+            response = self.url_open(f"/my/campus/student/timetable?date_from={first}&date_to={last}")
+            self.assertEqual(response.status_code, 400)
+            self.assertIn("Choose dates within the supported calendar range.", response.text)
+            self.assertIn("Retry student access", response.text)
+            self.assertIn("no-store", response.headers["Cache-Control"])
