@@ -14,9 +14,16 @@ Audit of all 13 owner workspace modules on the local Odoo 17 / OpenEduCat app, u
 
 6. **Empty module screens displayed raw HTML.** Owner navigation supplies action objects directly to Odoo; these bypass its normal action-loader HTML conversion. The shared navigation and dashboard drill-down now use Odoo OWL markup for trusted action help. The browser regression checks the rendered Rooms empty-state paragraph.
 
+7. **Class timetable switched to the wrong module.** The same action appears in Staff and Timetable. Server metadata selected the first module, so opening Class timetable hid Faculty timetable and Rooms. Owner navigation now retains the selected module when opening shared actions. Browser coverage checks the timetable subnavigation remains available.
+
+8. **Student support opened an unusable blank form.** Its form view binding preceded the unbound tree view, bypassing the review register. An explicit sequence-one tree binding restores the list and its disabled creation controls.
+9. **Existing shared fee heads were hidden.** The owner action incorrectly excluded global products used by saved college fee structures. It now includes shared and active-college fee heads while excluding foreign-college products, consistent with native Odoo product access.
+
+10. **College profile could not render.** Odoo currency editability depends on `parent_id`, which the simplified college form omitted. An invisible parent field supplies the native condition. Browser coverage opens and saves/restores the attendance policy.
+
 ## Verification
 
-- Local full Odoo suite: **89 tests, zero failures/errors**. Additional owner test run after the numbering fix: **16 tests, zero failures/errors**.
+- Local full Odoo suite: **90 tests, zero failures/errors**. Final focused owner test run after the settings fixes: **17 tests, zero failures/errors**.
 - Browser: signed in as the owner, opened all 13 module pages, inspected native admissions screens, saved and reloaded a staff qualification, saved an appraisal entry, and checked desktop/mobile behavior.
 - All available action definitions and native views compile with owner permissions. The CI owner suite checks all 53 submodule actions, all 13 module pages, seven CSV exports, native subject save/reload, staff qualification save/reload, appraisal save, leave page, numbering settings, reporting error recovery, admission/payment idempotency and receipt PDF.
 - Security regressions cover owner HR records, read-only denial, foreign college denial, and restricted staff-profile navigation.

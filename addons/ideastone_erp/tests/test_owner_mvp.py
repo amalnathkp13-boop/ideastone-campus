@@ -288,6 +288,19 @@ class TestOwnerMVP(OwnerMVPFixture, TransactionCase):
         with self.assertRaises(AccessError):
             detail.with_user(self.readonly).write({"institution": "Unauthorized"})
 
+    def test_owner_registers_show_existing_requests_and_shared_fee_heads(self):
+        dash = self.env["campus.dashboard"].with_user(self.owner)
+        requests = dash.get_owner_action("ideastone_erp.mvp_student_requests")
+        self.assertEqual(requests["views"][0], (self.env.ref("ideastone_erp.student_requests_tree").id, "tree"))
+        heads = dash.get_owner_action("ideastone_erp.mvp_fee_heads")
+        visible = self.env[heads["res_model"]].with_user(self.owner).search(heads["domain"])
+        self.assertIn(self.product.product_tmpl_id, visible)
+        other = self.env["res.company"].create({"name": "Foreign fee head college"})
+        foreign = self.env["product.template"].create({"name": "Foreign fee head", "campus_fee_head": True, "company_id": other.id})
+        self.assertNotIn(foreign, self.env[heads["res_model"]].with_user(self.owner).search(heads["domain"]))
+        view = self.env["res.company"].with_user(self.owner).get_view(self.env.ref("ideastone_erp.mvp_college_form").id, "form")
+        self.assertIn('name="parent_id"', view["arch"])
+
     def test_owner_report_invalid_filters_are_recoverable(self):
         dash = self.env["campus.dashboard"].with_user(self.owner)
         for filters in [[], "invalid", {"date_from": "not-a-date"}, {"date_to": "2026-02-30"},
