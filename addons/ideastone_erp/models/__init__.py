@@ -42,3 +42,4 @@ from . import student_portal, student_service
 
 from . import parent_portal
 from . import mvp_learning
+from . import student_notices_ui
