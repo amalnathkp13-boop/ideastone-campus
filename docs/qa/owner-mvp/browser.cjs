@@ -93,7 +93,7 @@ async function markup(page) {
         await page.locator('.appraisal_loading').waitFor({state:'hidden'});
         if(await page.locator('.appraisal_error').count()) throw Error('Owner appraisal failed to load');
         await page.getByLabel('Name of the student',{exact:true}).fill('Owner QA portfolio entry');
-        await page.locator('.appraisal_entry').getByRole('button',{name:'Save',exact:true}).click();
+        await page.locator('.appraisal_entry button[type=submit]').click();
         await page.getByRole('cell',{name:'Owner QA portfolio entry',exact:true}).waitFor();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Leave Management',exact:true}).click();
         await page.getByRole('heading',{name:'Online Leave Apply & Status',exact:true}).waitFor();
