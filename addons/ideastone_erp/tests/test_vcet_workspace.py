@@ -28,7 +28,7 @@ class TestVcetWorkspace(TransactionCase):
         cls.card = cls.env["op.library.card"].create({"partner_id": cls.student.partner_id.id, "student_id": cls.student.id, "type": "student", "library_card_type_id": kind.id})
 
     def appointment(self, **changes):
-        today = fields.Date.context_today(self.env.user)
+        today = self.env["campus.responsibility"]._college_today()
         vals = {"faculty_id": self.faculty.id, "media_type_ids": [(6, 0, self.collection.ids)], "date_from": today, "date_to": today + timedelta(days=10), "justification": "QA appointment authority"}
         vals.update(changes)
         return self.env["campus.responsibility"].with_user(self.admin).create(vals)
@@ -72,7 +72,7 @@ class TestVcetWorkspace(TransactionCase):
         rec.action_revoke()
         with self.assertRaises(AccessError):
             desk.get_desk()
-        yesterday = fields.Date.today() - timedelta(days=1)
+        yesterday = self.env["campus.responsibility"]._college_today() - timedelta(days=1)
         expired = self.approve(self.appointment(date_from=yesterday, date_to=yesterday))
         self.assertFalse(expired.effective)
         with self.assertRaises(AccessError):

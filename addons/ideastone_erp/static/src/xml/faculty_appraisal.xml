@@ -1,0 +1,54 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.FacultyAppraisal">
+    <main class="campus_appraisal">
+      <nav class="appraisal_tabs" aria-label="Professional development sections">
+        <t t-foreach="sections" t-as="section" t-key="section.key">
+          <button type="button" t-att-class="{active: state.section === section.key}" t-on-click="() => this.selectSection(section.key)" t-esc="section.label"/>
+        </t>
+      </nav>
+      <section class="appraisal_hero">
+        <div class="appraisal_hero_icon"><i class="fa fa-users"/></div>
+        <h1>Professional Development and Appraisal</h1>
+        <span class="appraisal_hero_meta">Staff portfolio · live campus records</span>
+      </section>
+      <div t-if="state.error" class="appraisal_error" role="alert"><span t-esc="state.error"/><button type="button" t-on-click="load">Retry</button></div>
+      <div t-if="state.loading" class="appraisal_loading" role="status">Loading staff development records…</div>
+      <t t-else="">
+        <section class="appraisal_filters" aria-label="Select staff portfolio">
+          <label>Institution <select t-on-change="selectCompany"><option value="" t-att-selected="!state.companyId">All institutions</option><t t-foreach="companies" t-as="company" t-key="company.id"><option t-att-value="company.id" t-att-selected="company.id == state.companyId" t-esc="company.name"/></t></select></label>
+          <label>Department <select t-on-change="selectDepartment"><option value="" t-att-selected="!state.departmentId">All departments</option><t t-foreach="departments" t-as="department" t-key="department.id"><option t-att-value="department.id" t-att-selected="department.id == state.departmentId" t-esc="department.name"/></t></select></label>
+          <label>Staff <select t-on-change="selectFaculty"><option value="" t-att-selected="!state.facultyId">Select staff</option><t t-foreach="visibleStaff" t-as="staff" t-key="staff.id"><option t-att-value="staff.id" t-att-selected="staff.id == state.facultyId" t-esc="staff.display_name"/></t></select></label>
+          <button type="button" class="appraisal_export" t-on-click="openRecords" title="Open records and export"><i class="fa fa-download"/><span class="visually-hidden">Open records for export</span></button>
+        </section>
+        <div class="appraisal_grid">
+          <section class="appraisal_panel appraisal_entry">
+            <h2><i class="fa fa-file-text"/> Add / Edit <t t-esc="activeSection.title"/></h2>
+            <form t-on-submit="save">
+              <label><span t-esc="state.section === 'research' ? 'Name of the student' : 'Activity / record name'"/><input type="text" t-model="state.form.name" placeholder="Enter name" required="required"/></label>
+              <label><span>Date</span><input type="date" t-model="state.form.date" required="required"/></label>
+              <label><span>Remark</span><textarea t-model="state.form.remarks" rows="4" placeholder="Add details or progress"/></label>
+              <div class="appraisal_form_actions"><button class="primary" type="submit" t-att-disabled="state.saving || !state.facultyId"><i class="fa fa-save"/> <t t-esc="state.saving ? 'Saving…' : 'Save'"/></button><button type="button" t-on-click="refresh"><i class="fa fa-refresh"/> Refresh</button></div>
+            </form>
+          </section>
+          <section class="appraisal_panel appraisal_register">
+            <h2><i class="fa fa-file-text"/> <t t-esc="activeSection.title"/></h2>
+            <div class="appraisal_table_wrap"><table><thead><tr><th aria-label="Select"/><th>Name</th><th>Date</th><th>Remarks</th></tr></thead><tbody>
+              <t t-foreach="rows" t-as="record" t-key="record.id"><tr t-att-class="{selected: state.form.id === record.id}" t-on-click="() => this.selectRecord(record.id)"><td><input type="radio" name="appraisal_record" t-att-checked="state.form.id === record.id" t-att-aria-label="'Edit ' + record.name"/></td><td t-esc="record.name"/><td t-esc="record.date_from"/><td t-esc="record.description || '—'"/></tr></t>
+              <tr t-if="!rows.length"><td colspan="4" class="appraisal_empty">No records in this section for the selected staff member.</td></tr>
+            </tbody></table></div>
+          </section>
+        </div>
+        <div class="appraisal_insights">
+          <section class="appraisal_panel appraisal_coach">
+            <header><i class="fa fa-magic"/><div><h2>AI Appraisal Coach</h2><p>Review the evidence in this staff portfolio.</p></div></header>
+            <div class="appraisal_coach_cards"><div><i class="fa fa-file-text-o"/><strong>Evidence Gaps</strong><span><t t-esc="portfolio.total - portfolio.evidenced"/> activities have no supporting file.</span></div><div><i class="fa fa-line-chart"/><strong>Recommended Next Step</strong><span t-esc="portfolio.total ? 'Attach evidence to completed activities.' : 'Add your first professional development activity.'"/></div><div><i class="fa fa-bar-chart"/><strong>Readiness Guidance</strong><span>Based on the saved portfolio records.</span></div></div>
+          </section>
+          <section class="appraisal_panel appraisal_readiness">
+            <header><i class="fa fa-bar-chart"/><div><h2>AI Appraisal Readiness</h2><p>Portfolio activity and evidence overview</p></div><button type="button" t-on-click="openRecords">View Records</button></header>
+            <div class="appraisal_metrics"><div><span>Publications</span><strong t-esc="portfolio.publications"/></div><div><span>Participation</span><strong t-esc="portfolio.conferences"/></div><div><span>Courses Completed</span><strong t-esc="portfolio.courses"/></div><div><span>Evidence completeness</span><strong class="appraisal_gauge"><t t-esc="portfolio.score"/>%</strong></div></div>
+          </section>
+        </div>
+      </t>
+    </main>
+  </t>
+</templates>
