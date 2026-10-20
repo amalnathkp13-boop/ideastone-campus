@@ -1,4 +1,5 @@
 import base64
+from datetime import timedelta
 from urllib.parse import urlencode
 
 from markupsafe import Markup
@@ -6,7 +7,7 @@ from odoo.exceptions import AccessError, UserError
 from odoo.http import content_disposition, request
 from odoo.tools.misc import format_amount
 
-from odoo import http
+from odoo import fields, http
 
 from .portal import CampusPortal
 
@@ -29,6 +30,11 @@ class StudentWorkspace(CampusPortal):
     @http.route("/my/campus/student/<string:section>", type="http", auth="user", website=True, methods=["GET"])
     def student_page(self, section="dashboard", **kw):
         service = request.env["campus.student.portal"]
+        if section == "timetable" and not kw.get("date_from") and not kw.get("date_to"):
+            today = fields.Date.context_today(service)
+            monday = today - timedelta(days=today.weekday())
+            kw["date_from"] = str(monday)
+            kw["date_to"] = str(monday + timedelta(days=6))
         data, error = None, ""
         status = 200
         try:
@@ -42,10 +48,15 @@ class StudentWorkspace(CampusPortal):
         filters = data["filters"] if data else {}
         suffix = "?" + urlencode(filters) if filters else ""
         company = service._identity().company_id if data else request.env.company
+
+        def student_url_for(page):
+            if page == "timetable" and section != "timetable" and filters.get("enrolment"):
+                return "/my/campus/student/timetable?" + urlencode({"enrolment": filters["enrolment"]})
+            return "/my/campus/student/" + page + suffix
         response = request.render("ideastone_erp.student_workspace", {
             "portal_data": data, "portal_error": error, "section": section,
             "saved": bool(kw.get("saved")), "form_error": str(kw.get("form_error") or "")[:500],
-            "student_url_for": lambda page: "/my/campus/student/" + page + suffix,
+            "student_url_for": student_url_for,
             "money": lambda amount: format_amount(request.env, amount, company.currency_id),
             "notice_body": lambda text: Markup(text), "enrolment_value": kw.get("enrolment", ""),
         }, status=status)
