@@ -384,9 +384,10 @@ class StudentPortal(models.AbstractModel):
             student.write(payload)
             self.env["campus.mvp.audit"]._log(student, "Student contact details updated", details={"fields": sorted(payload)})
         elif operation == "preferences":
-            if set(payload) != {"notice_badge"} or not isinstance(payload["notice_badge"], bool):
+            preferences = {"notice_badge": "campus_notice_badge", "academic_reminders": "campus_academic_reminders", "compact_cards": "campus_compact_cards"}
+            if not payload or set(payload) - preferences.keys() or any(not isinstance(value, bool) for value in payload.values()):
                 raise ValidationError(_("Invalid preference."))
-            student.campus_notice_badge = payload["notice_badge"]
+            student.write({preferences[key]: value for key, value in payload.items()})
         elif operation == "notice":
             if not isinstance(payload.get("read", True), bool):
                 raise ValidationError(_("Notice read state must be true or false."))

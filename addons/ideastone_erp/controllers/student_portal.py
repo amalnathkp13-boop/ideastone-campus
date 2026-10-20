@@ -74,6 +74,8 @@ class StudentWorkspace(CampusPortal):
                 payload = {key: value for key, value in kw.items() if key not in ignored}
             elif operation == "preferences":
                 payload = {"notice_badge": kw.get("notice_badge") == "on"}
+                if kw.get("preferences_version") == "2":
+                    payload.update({key: kw.get(key) == "on" for key in ("academic_reminders", "compact_cards")})
             else:
                 payload = {key: value for key, value in kw.items() if key not in {"csrf_token", "enrolment", "date_from", "date_to", "file"}}
                 if operation == "notice":
