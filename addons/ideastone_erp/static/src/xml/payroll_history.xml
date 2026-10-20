@@ -1,0 +1,53 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.PayrollHistoryPage">
+    <main class="campus_payroll_history">
+      <section class="payroll_hero">
+        <div class="payroll_hero_icon"><i class="fa fa-users"/></div>
+        <div><span class="payroll_eyebrow">STAFF · PAYROLL</span><h1>Payroll History</h1><p>A clear view of your salary, contributions and payslips.</p></div>
+        <span class="payroll_hero_note"><i class="fa fa-lock"/> Your payroll records</span>
+      </section>
+
+      <section class="payroll_filters" aria-label="Payroll report options">
+        <label>Report Options<select aria-label="Report options" t-on-change="changeMode"><option value="history">Complete History</option><option value="selected">Selected Month Payslip</option></select></label>
+        <label>Year<select aria-label="Year" t-on-change="changeYear"><option value="all" t-att-selected="state.year === 'all'">All</option><t t-foreach="years" t-as="year" t-key="year"><option t-att-value="year" t-att-selected="year == state.year" t-esc="year"/></t></select></label>
+        <label>Month<select aria-label="Month" t-on-change="changeMonth"><option value="all" t-att-selected="state.month === 'all'">All</option><t t-foreach="months" t-as="month" t-key="month"><option t-att-value="month_index + 1" t-att-selected="month_index + 1 == state.month" t-esc="month"/></t></select></label>
+        <button type="button" class="payroll_export" t-on-click="exportCsv" t-att-disabled="!visibleRows.length"><i class="fa fa-download"/> Download / Export</button>
+      </section>
+
+      <div t-if="state.error" class="payroll_message payroll_error" role="alert"><span t-esc="state.error"/><button type="button" t-on-click="load">Retry</button></div>
+      <div t-if="state.loading" class="payroll_message" role="status">Loading payroll records…</div>
+      <t t-else="">
+        <section class="payroll_metrics" aria-label="Payroll summary">
+          <article class="payroll_metric payroll_metric_green"><div class="payroll_metric_icon"><i class="fa fa-money"/></div><div><span>Latest Net Salary</span><strong t-esc="formatMoney(latest ? latest.net : 0)"/><small t-esc="latestLabel"/></div></article>
+          <article class="payroll_metric payroll_metric_purple"><div class="payroll_metric_icon"><i class="fa fa-database"/></div><div><span>YTD PF Contribution</span><strong t-esc="formatMoney(yearPf)"/><small><t t-esc="selectedYear"/> · <t t-esc="yearRows.length"/> payslips</small></div></article>
+          <article class="payroll_metric payroll_metric_red"><div class="payroll_metric_icon"><i class="fa fa-percent"/></div><div><span>YTD TDS Deducted</span><strong t-esc="formatMoney(yearTds)"/><small>For <t t-esc="selectedYear"/></small></div></article>
+          <article class="payroll_metric payroll_metric_blue"><div class="payroll_metric_icon"><i class="fa fa-file-text"/></div><div><span>Payslips Available</span><strong t-esc="state.records.length"/><small t-esc="coverage"/></div></article>
+        </section>
+
+        <div class="payroll_dashboard_grid">
+          <section class="payroll_history_panel">
+            <div class="payroll_history_header"><div class="payroll_heading_icon"><i class="fa fa-file-text"/></div><div><span class="payroll_eyebrow">YOUR RECORDS</span><h2>Payroll History</h2><p>Monthly take-home pay and deductions, all in one place.</p></div><span class="payroll_record_count"><t t-esc="visibleRows.length"/> payslips</span></div>
+            <div t-if="latest" class="payroll_featured"><div><span>LATEST PAYSLIP</span><strong t-esc="latestLabel"/><small>Approved payroll record</small></div><div class="payroll_featured_amount"><span>NET PAY</span><strong t-esc="formatMoney(latest.net)"/></div></div>
+            <div class="payroll_table_scroller" tabindex="0" aria-label="Scrollable payroll history"><table><thead><tr><th>#</th><th>Month</th><th>Year</th><th>Net Salary (₹)</th><th>P.F (₹)</th><th>T.D.S (₹)</th></tr></thead><tbody>
+              <t t-foreach="visibleRows" t-as="row" t-key="row.id"><tr t-att-class="latest &amp;&amp; row.id === latest.id ? 'payroll_latest_row' : ''"><td><span class="payroll_row_number" t-esc="row_index + 1"/></td><td class="payroll_month" t-esc="rowMonth(row)"/><td t-esc="rowYear(row)"/><td class="payroll_net" t-esc="formatMoney(row.net)"/><td t-esc="formatMoney(row.pf)"/><td t-esc="formatMoney(row.tds)"/></tr></t>
+              <tr t-if="!visibleRows.length"><td colspan="6" class="payroll_empty">No approved payslips match these filters.</td></tr>
+            </tbody></table></div>
+            <div class="payroll_table_footer"><span><i class="fa fa-shield"/> Values come from approved campus payslips.</span><span t-if="visibleRows.length > 9">Scroll for earlier months</span><span>Showing <t t-esc="visibleRows.length"/> of <t t-esc="state.records.length"/></span></div>
+          </section>
+
+          <div class="payroll_right_column">
+            <section class="payroll_panel payroll_trend"><header><div class="payroll_panel_icon"><i class="fa fa-bar-chart"/></div><div><h2>Salary Trend</h2><p>Latest 12 payslips</p></div></header>
+              <div t-if="trend.length" class="payroll_chart" role="img" aria-label="Net salary over the latest 12 payslips"><div class="payroll_chart_axis"><span t-esc="formatMoney(chartMax)"/><span t-esc="formatMoney(chartMax * 2 / 3)"/><span t-esc="formatMoney(chartMax / 3)"/><span>₹ 0</span></div><div class="payroll_chart_body"><div class="payroll_chart_grid"><i/><i/><i/><i/></div><div class="payroll_chart_bars"><t t-foreach="trend" t-as="bar" t-key="bar.id"><div class="payroll_bar_group" t-att-title="bar.label + ' ' + bar.year + ': ' + formatMoney(bar.value)"><div class="payroll_bar_track"><div class="payroll_bar" t-att-style="'height: ' + bar.height + '%'"/></div><span t-esc="bar.label"/><small t-esc="bar.year"/></div></t></div></div></div>
+              <div t-else="" class="payroll_empty">Salary trend will appear when payslips are available.</div>
+            </section>
+            <section class="payroll_panel payroll_insights"><header><div class="payroll_panel_icon sparkle"><i class="fa fa-magic"/></div><div><h2>Payroll Insights</h2><p>Highlights from your recorded salary and deductions.</p></div></header>
+              <article class="payroll_insight payroll_insight_green"><div class="payroll_insight_icon"><i class="fa fa-line-chart"/></div><div><h3>Salary Trend</h3><p t-esc="trendInsight"/></div></article>
+              <article class="payroll_insight payroll_insight_red"><div class="payroll_insight_icon"><i class="fa fa-percent"/></div><div><h3>Tax Insight</h3><p t-esc="taxInsight"/></div></article>
+              <article class="payroll_insight payroll_insight_blue"><div class="payroll_insight_icon"><i class="fa fa-file-text"/></div><div><h3>Payslip Status</h3><p t-esc="statusInsight"/></div></article>
+            </section>
+          </div>
+        </div>
+      </t>
+    </main>
+  </t>
+</templates>
