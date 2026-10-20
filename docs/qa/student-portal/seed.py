@@ -45,10 +45,16 @@ published.action_campus_submit()
 published.action_campus_lock()
 published.action_campus_publish()
 notice = env["campus.circular"].with_user(owner).create({"name": "Student support and certificate desk", "reference": "STUDENT-QA", "audience": "student",
-    "body": "<p>The student portal now shows your published attendance, fee receipts and certificate requests. Contact the college office for official record corrections.</p>", "campus_category": "Event", "campus_managed": True})
+    "body": "<p><span style='color:#ff00ff;font-family:Courier New;font-size:30px'>The student portal now shows your published attendance, fee receipts and certificate requests.</span> Contact the college office for official record corrections.</p>", "campus_category": "Event", "campus_managed": True, "campus_portal_priority": "important"})
 notice.action_campus_publish()
 private = env["campus.circular"].with_user(owner).create({"name": "PRIVATE STAFF ONLY", "reference": "STUDENT-QA-PRIVATE", "audience": "faculty", "body": "Internal content", "campus_managed": True})
 private.action_campus_publish()
+event_start = datetime.combine(today + timedelta(days=1), time(12))
+env["event.event"].create({"name": "Student campus cultural event QA", "company_id": company.id, "website_id": False,
+    "date_begin": event_start, "date_end": event_start + timedelta(hours=2), "is_published": True,
+    "description": "<p>Published student event for calendar QA.</p>"})
+env["event.event"].create({"name": "PRIVATE DRAFT EVENT QA", "company_id": company.id, "website_id": False,
+    "date_begin": event_start, "date_end": event_start + timedelta(hours=2), "is_published": False})
 resource = env["campus.digital.resource"].create({"name": "Programming foundations — course guide", "subject_id": subject.id, "batch_ids": [(6, 0, placement.batch_id.ids)],
     "document": base64.b64encode(b"Synthetic approved course guide for student portal QA."), "filename": "course-guide.txt"})
 resource.action_submit()

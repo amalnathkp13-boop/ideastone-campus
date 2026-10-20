@@ -128,7 +128,7 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
 
     def test_notice_audience_and_durable_acknowledgement(self):
         model = self.env["campus.circular"].with_user(self.owner)
-        notice = model.create({"name": "Student publication QA", "reference": "STUP-QA", "body": "<p>Published student notice</p>", "audience": "student", "campus_managed": True})
+        notice = model.create({"name": "Student publication QA", "reference": "STUP-QA", "body": "<p>Published student notice</p>", "audience": "student", "campus_managed": True, "campus_portal_priority": "important"})
         notice.action_campus_publish()
         private = model.create({"name": "PRIVATE FACULTY NOTICE", "reference": "STUP-F", "body": "Private staff content", "audience": "faculty", "campus_managed": True})
         private.action_campus_publish()
@@ -141,6 +141,27 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         self.assertEqual(self.portal.snapshot()["unread"], before - 1)
         with self.assertRaises(AccessError):
             self.portal.act("notice", {"notice_id": private.id})
+        start = datetime.combine(self.today + timedelta(days=1), time(12))
+        public_event = self.env["event.event"].create({"name": "PUBLIC STUDENT EVENT", "company_id": self.student.company_id.id,
+            "website_id": False, "date_begin": start, "date_end": start + timedelta(hours=2), "is_published": True})
+        self.env["event.event"].create({"name": "DRAFT STUDENT EVENT", "company_id": self.student.company_id.id,
+            "website_id": False, "date_begin": start, "date_end": start + timedelta(hours=2), "is_published": False})
+        foreign_company = self.env["res.company"].create({"name": "Other event college"})
+        self.env["event.event"].create({"name": "FOREIGN STUDENT EVENT", "company_id": foreign_company.id,
+            "website_id": False, "date_begin": start, "date_end": start + timedelta(hours=2), "is_published": True})
+        data = self.portal.snapshot()
+        event_names = [row["name"] for row in data["notice_ui"]["events"]]
+        self.assertIn(public_event.name, event_names)
+        self.assertNotIn("DRAFT STUDENT EVENT", event_names)
+        self.assertNotIn("FOREIGN STUDENT EVENT", event_names)
+        item = self.portal.with_context(tz="UTC")._calendar_item("boundary", "Year boundary", datetime(2026, 12, 31, 12), datetime(2027, 1, 1), "Academic")
+        self.assertEqual(item["end_day"], "2026-12-31")
+        self.assertEqual(item["end_utc"], "20270101T000000Z")
+        rendered = str(self.env["ir.ui.view"]._render_template("ideastone_erp.student_notice_card", {
+            "n": next(row for row in data["notice_ui"]["notices"] if row["id"] == notice.id), "preview": True}))
+        self.assertIn("badge urgent", rendered)
+        self.assertNotIn(private.name, rendered)
+        self.assertNotIn("FOREIGN STUDENT EVENT", rendered)
 
     def test_request_retry_staff_workflow_notifications_and_document_scope(self):
         payload = self.request_payload()
