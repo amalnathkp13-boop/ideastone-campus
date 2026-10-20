@@ -64,6 +64,50 @@ class StudentPortal(models.AbstractModel):
             return fields.Datetime.context_timestamp(self, value).strftime("%d %b %Y, %H:%M")
         return value.strftime("%d %b %Y")
 
+    def _timetable_projection(self, schedule, today, first, last):
+        """Shape the student's scoped sessions for the weekly portal planner."""
+        anchor = today if first <= today <= last else first
+        monday = anchor - timedelta(days=anchor.weekday())
+        sunday = monday + timedelta(days=6)
+        week = [row for row in schedule if monday.isoformat() <= row["day"] <= sunday.isoformat()]
+        active = [row for row in week if row["status"] != "cancel"]
+        used_days = 7 if any(row["day"] > (monday + timedelta(days=4)).isoformat() for row in week) else 5
+        display_end = monday + timedelta(days=used_days - 1)
+        days = [{"date": (monday + timedelta(days=index)).isoformat(),
+                 "name": (monday + timedelta(days=index)).strftime("%a").upper(),
+                 "number": (monday + timedelta(days=index)).strftime("%d")}
+                for index in range(used_days)]
+        times = sorted({row["start_time"] for row in week}) or ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00"]
+        palette = ("blue", "purple", "teal", "amber", "green")
+        subjects = sorted({row["code"] or row["subject"] for row in schedule})
+        colors = {subject: palette[index % len(palette)] for index, subject in enumerate(subjects)}
+        for row in schedule:
+            row["color"] = "neutral" if row["status"] == "cancel" else colors[row["code"] or row["subject"]]
+        legend, seen_subjects = [], set()
+        for row in week:
+            if row["status"] != "cancel" and row["subject"] not in seen_subjects:
+                legend.append({"label": row["subject"], "color": row["color"]})
+                seen_subjects.add(row["subject"])
+        rows = [{"time": slot, "cells": [[row for row in week if row["day"] == day["date"] and row["start_time"] == slot] for day in days]} for slot in times]
+        def hours(items):
+            return round(sum(max(0, (datetime.fromisoformat(row["end_at"]) - datetime.fromisoformat(row["start_at"])).total_seconds()) for row in items) / 3600, 1)
+        now = fields.Datetime.context_timestamp(self, fields.Datetime.now())
+        upcoming = [row for row in schedule if row["status"] != "cancel" and datetime.fromisoformat(row["start_at"]) > now][:3]
+        conflicts = sum(1 for index, left in enumerate(active) for right in active[index + 1:]
+                        if left["day"] == right["day"] and left["start_at"] < right["end_at"] and right["start_at"] < left["end_at"])
+        rooms = sorted({row["room"] for row in active if row["room"] != "Room not assigned"})
+        faculty = sorted({row["faculty"] for row in active if row["faculty"]})
+        rhythm = [{"name": day["name"].title(), "count": len(day_rows), "hours": hours(day_rows),
+                   "percent": round(100 * len(day_rows) / max(1, max(sum(row["day"] == item["date"] for row in active) for item in days))),
+                   "color": palette[index % len(palette)]}
+                  for index, day in enumerate(days)
+                  for day_rows in [[row for row in active if row["day"] == day["date"]]]]
+        return {"start": monday.isoformat(), "end": sunday.isoformat(), "label": f"{monday.strftime('%d %b')}–{display_end.strftime('%d %b %Y')}",
+                "previous_start": (monday - timedelta(days=7)).isoformat(), "previous_end": (sunday - timedelta(days=7)).isoformat(),
+                "next_start": (monday + timedelta(days=7)).isoformat(), "next_end": (sunday + timedelta(days=7)).isoformat(),
+                "days": days, "rows": rows, "week": week, "active": active, "legend": legend, "hours": hours(active), "subjects": len({row["code"] or row["subject"] for row in active}),
+                "rooms": rooms, "faculty": faculty, "upcoming": upcoming, "conflicts": conflicts, "rhythm": rhythm}
+
     def _notice_records(self, student):
         today = fields.Date.context_today(self)
         enrolments = student.course_detail_ids.filtered(lambda e: e.state == "running")
@@ -151,7 +195,12 @@ class StudentPortal(models.AbstractModel):
         sessions = self._records("op.session", self._scope(student, placement) + [("start_datetime", ">=", utc_first), ("start_datetime", "<", utc_last), ("state", "in", ["confirm", "cancel"])], order="start_datetime") if placement else self.env["op.session"]
         # A section can run electives: only the student's authoritative subject list.
         sessions = sessions.filtered(lambda s: s.subject_id in subjects and (not placement.campus_date_from or fields.Datetime.context_timestamp(self, s.start_datetime).date() >= placement.campus_date_from) and (not placement.campus_date_to or fields.Datetime.context_timestamp(self, s.start_datetime).date() <= placement.campus_date_to))
-        schedule = [{"id": s.id, "subject": s.subject_id.name, "code": s.subject_id.code, "start": self._dates(s.start_datetime), "end": self._dates(s.end_datetime), "day": str(fields.Datetime.context_timestamp(self, s.start_datetime).date()), "room": s.classroom_id.name or "Room not assigned", "faculty": s.faculty_id.name, "status": s.state, "updated": self._dates(s.write_date)} for s in sessions]
+        schedule = [{"id": s.id, "subject": s.subject_id.name, "code": s.subject_id.code, "start": self._dates(s.start_datetime), "end": self._dates(s.end_datetime),
+                     "start_at": fields.Datetime.context_timestamp(self, s.start_datetime).isoformat(), "end_at": fields.Datetime.context_timestamp(self, s.end_datetime).isoformat(),
+                     "start_time": fields.Datetime.context_timestamp(self, s.start_datetime).strftime("%H:%M"), "end_time": fields.Datetime.context_timestamp(self, s.end_datetime).strftime("%H:%M"),
+                     "day": str(fields.Datetime.context_timestamp(self, s.start_datetime).date()), "room": s.classroom_id.name or "Room not assigned", "faculty": s.faculty_id.name,
+                     "status": s.state, "updated": self._dates(s.write_date)} for s in sessions]
+        timetable = self._timetable_projection(schedule, today, first, last)
         exam_domain = self._scope(student, placement) + [("subject_id", "in", subjects.ids), ("state", "!=", "cancel"), "|", "&", ("campus_managed", "=", True), ("campus_schedule_published", "=", True), "&", ("campus_managed", "=", False), ("state", "in", ["schedule", "held", "result_updated", "done"])]
         exams = self._records("op.exam", exam_domain, order="start_time") if placement else self.env["op.exam"]
         marks = self._records("op.result.line", [("student_id", "=", student.id), ("company_id", "=", company.id), ("exam_id.state", "=", "done"),
@@ -199,7 +248,7 @@ class StudentPortal(models.AbstractModel):
             "placements": [{"id": e.id, "label": " / ".join(filter(None, [e.academic_years_id.name, e.academic_term_id.name, e.course_id.name, e.batch_id.name])) or "Recorded enrolment"} for e in placements],
             "filters": {"enrolment": str(placement.id or ""), "date_from": str(first), "date_to": str(last)},
             "subjects": [{"id": s.id, "name": s.name, "code": s.code, "credits": s.campus_credits, "type": s.type, "faculty": ", ".join(sessions.filtered(lambda p, subject=s: p.subject_id == subject).faculty_id.mapped("name")) or "Not allocated"} for s in subjects],
-            "schedule": schedule, "today_classes": [row for row, session in zip(schedule, sessions, strict=True) if row["day"] == str(today) and session.state != "cancel" and session.end_datetime > fields.Datetime.now()],
+            "schedule": schedule, "timetable": timetable, "today_classes": [row for row, session in zip(schedule, sessions, strict=True) if row["day"] == str(today) and session.state != "cancel" and session.end_datetime > fields.Datetime.now()],
             "attendance": {"attended": attended, "conducted": conducted, "rate": rate, "threshold": company.campus_attendance_threshold, "policy": policy, "shortage": conducted and attended * 100 < company.campus_attendance_threshold * conducted, "subjects": list(grouped.values()), "rows": attendance_rows, "trend": [{"month": month, "rate": round(n[0] * 100 / n[1], 2)} for month, n in sorted(trend.items())]},
             "exams": [{"id": e.id, "name": e.name, "subject": e.subject_id.name, "code": e.subject_id.code, "start": self._dates(e.start_time), "end": self._dates(e.end_time), "upcoming": e.start_time >= fields.Datetime.now()} for e in exams],
             "results": [{"exam": r.exam_id.name, "subject": r.exam_id.subject_id.name, "code": r.exam_id.subject_id.code, "marks": r.marks, "maximum": r.exam_id.total_marks, "grade": r.grade or "Not assigned", "status": r.status or "Not published"} for r in marks],

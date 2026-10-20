@@ -79,10 +79,15 @@ async function save(page, control) {
         assert.equal(await page.locator('.academic_resources .academic_resource:visible').count(),initial.materials.length);
         assert.equal(await page.locator('.academic_resources .academic_status.good').first().evaluate(element=>getComputedStyle(element).color),'rgb(22, 131, 93)');
         await visit(page,'timetable');
+        assert.equal(await page.locator('.timetable_stat:visible').count(),4);
+        assert.equal(await page.locator('.timetable_class:visible').count(),initial.timetable.week.length);
         await page.getByRole('button',{name:'Today',exact:true}).click();
-        assert.equal(await page.locator('.student_timetable_row:visible').count(),initial.schedule.filter(row=>row.day===initial.today_iso).length);
-        await page.getByRole('button',{name:'Selected period',exact:true}).click();
-        assert.equal(await page.locator('.student_timetable_row:visible').count(),initial.schedule.length);
+        assert.equal(await page.locator('.timetable_agenda_item:visible').count(),initial.timetable.week.filter(row=>row.day===initial.today_iso).length);
+        await page.getByRole('button',{name:'Agenda view',exact:true}).click();
+        assert.equal(await page.locator('.timetable_agenda_item:visible').count(),initial.timetable.week.length);
+        await page.locator('.student_subnav').getByRole('link',{name:'Overview',exact:true}).click();
+        assert(await page.locator('#student_timetable_overview').isVisible());
+        await page.getByRole('button',{name:'Timetable',exact:true}).click();
         await visit(page,'profile');
         assert.equal(await page.locator('.profile_metric').count(),3);
         assert.match(await page.locator('.profile_completeness').innerText(),new RegExp(`${initial.profile.percent}%`));

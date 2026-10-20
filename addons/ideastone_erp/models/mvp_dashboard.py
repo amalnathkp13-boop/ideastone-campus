@@ -15,6 +15,7 @@ CLIENT_ACTION_MODELS = {
     "action_staff_profile": "campus.faculty.detail",
     "action_faculty_appraisal_dashboard": "campus.faculty.achievement",
     "action_faculty_leave_page": "hr.leave",
+    "action_faculty_attendance_page": "hr.attendance",
 }
 
 MODULES = [
@@ -24,7 +25,7 @@ MODULES = [
     ("academics", "Academics", "university", [("Academic years", "mvp_years"), ("Departments", "mvp_departments"), ("Programmes", "mvp_programmes"), ("Semesters", "mvp_terms"), ("Sections", "mvp_sections"), ("Subjects & curriculum", "mvp_subjects")]),
     ("staff", "Faculty & Staff", "users", [("Staff directory", "mvp_faculty"), ("Teaching allocation", "mvp_timetable"), ("Staff Profile", "action_staff_profile"), ("Faculty development and appraisal", "action_faculty_appraisal_dashboard"), ("Leave Management", "action_faculty_leave_page")]),
     ("timetable", "Timetable", "calendar", [("Class timetable", "mvp_timetable"), ("Faculty timetable", "mvp_faculty_timetable"), ("Rooms", "mvp_rooms")]),
-    ("attendance", "Attendance", "calendar-check-o", [("Take attendance", "mvp_attendance"), ("Attendance register", "mvp_attendance_registers"), ("Student summary & shortage", "mvp_report_attendance")]),
+    ("attendance", "Attendance", "calendar-check-o", [("Staff attendance", "action_faculty_attendance_page"), ("Take attendance", "mvp_attendance"), ("Attendance register", "mvp_attendance_registers"), ("Student summary & shortage", "mvp_report_attendance")]),
     ("fees", "Fees & Payments", "inr", [("Fee heads", "mvp_fee_heads"), ("Fee structures", "mvp_structures"), ("Student fee accounts", "mvp_fees"), ("Assign fee structure", "mvp_assign_fees"), ("Invoices & dues", "mvp_invoices"), ("Overdue follow-up", "mvp_overdue_invoices"), ("Receipts", "mvp_receipts")]),
     ("learning", "Learning & LMS", "book", [("Assignments", "mvp_learning_assignments"), ("Review submissions", "mvp_learning_submissions"), ("LMS accounts & retries", "mvp_lms_accounts")]),
     ("exams", "Examinations", "file-text-o", [("Exam sessions", "mvp_exam_sessions"), ("Schedule & marks entry", "mvp_exams"), ("Grade rules", "mvp_grades"), ("Results & missing entries", "mvp_results")]),
