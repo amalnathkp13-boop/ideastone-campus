@@ -94,7 +94,7 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
     def test_native_ledger_and_cross_student_receipt_denial(self):
         fee = self.fee(self.student)
         fee.action_campus_post()
-        self.payment(fee.invoice_id, 300)
+        payment = self.payment(fee.invoice_id, 300).payment_id
         other_fee = self.fee(self.other)
         other_fee.action_campus_post()
         foreign = self.payment(other_fee.invoice_id, 100).payment_id
@@ -103,10 +103,24 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         self.assertEqual(data["fees"]["paid"], 300)
         self.assertEqual(data["fees"]["due"], 200)
         self.assertEqual(len(data["fees"]["payments"]), 1)
+        self.assertEqual(data["fee_ui"]["status"], "Partially paid")
+        self.assertEqual(data["fee_ui"]["posted_total"], 300)
+        self.assertEqual(data["fee_ui"]["invoices"][0]["progress"], 60)
+        markup = self.env["ir.ui.view"]._render_template("ideastone_erp.student_fees_content", {
+            "d": data, "money": lambda amount: str(amount), "student_url_for": lambda page: "/my/campus/student/" + page})
+        self.assertIn("badge tone-warn", str(markup))
+        self.assertIn("Download receipt", str(markup))
         with self.assertRaises(AccessError):
             self.portal._download("receipt", foreign.id)
         with self.assertRaises(AccessError):
             other_fee.invoice_id.with_user(self.student_user).read(["amount_total"])
+        payment.campus_reversal_reason = "QA payment correction"
+        payment.action_campus_reverse()
+        corrected = self.portal.snapshot()
+        self.assertEqual(corrected["fees"]["due"], 500)
+        self.assertEqual(corrected["fee_ui"]["posted_total"], 0)
+        self.assertEqual(corrected["fee_ui"]["posted_count"], 0)
+        self.assertEqual(corrected["fee_ui"]["payments"][0]["status"], "Reversed")
 
     def test_notice_audience_and_durable_acknowledgement(self):
         model = self.env["campus.circular"].with_user(self.owner)
