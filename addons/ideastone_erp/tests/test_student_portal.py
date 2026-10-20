@@ -164,18 +164,31 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         self.assertNotIn("FOREIGN STUDENT EVENT", rendered)
 
     def test_request_retry_staff_workflow_notifications_and_document_scope(self):
-        payload = self.request_payload()
+        payload = self.request_payload(requested_office="academic", priority="deadline")
         first = self.portal.act("request", payload)
         self.assertEqual(first, self.portal.act("request", payload))
         self.assertTrue(self.portal.act("request", self.request_payload())["existing"])
         rec = self.env["campus.service.request"].search([("portal_reference", "=", first["reference"])]).with_user(self.owner)
         self.assertEqual(rec.requester_id, self.student_user)
+        self.assertEqual(rec.portal_requested_office, "academic")
+        self.assertEqual(rec.portal_priority, "deadline")
+        ui = self.portal.snapshot()["request_ui"]
+        self.assertEqual(ui["total"], 1)
+        self.assertEqual(ui["review"], 1)
+        self.assertEqual(ui["rows"][0]["office"], "Academic office")
+        self.assertEqual(ui["rows"][0]["priority"], "Deadline approaching")
+        self.assertEqual(ui["rows"][0]["tone"], "closed")
+        self.assertFalse(self.env["campus.student.portal"].with_user(self.other_user).snapshot()["request_ui"]["rows"])
+        with self.assertRaises(ValidationError):
+            rec.write({"portal_priority": "normal"})
         with self.assertRaises(ValidationError):
             rec.action_portal_information()
         rec.write({"portal_reply": "Please confirm the intended recipient."})
         rec.action_portal_information()
+        self.assertEqual(self.portal.snapshot()["request_ui"]["rows"][0]["tone"], "review")
         self.portal.act("reply", {"request_id": rec.id, "reply": "Scholarship office"})
         rec.action_approve()
+        self.assertEqual(self.portal.snapshot()["request_ui"]["completed"], 0)
         with self.assertRaises(ValidationError):
             self.portal.act("cancel", {"request_id": rec.id})
         rec.write({"portal_result_file": base64.b64encode(b"Official QA document"), "portal_result_filename": "issued.txt", "portal_reply": "The official document is available."})
@@ -188,10 +201,16 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         self.assertGreater(self.portal.snapshot()["updates"], 0)
         self.portal.act("updates")
         self.assertEqual(self.portal.snapshot()["updates"], 0)
+        rec.action_done()
+        self.assertEqual(self.portal.snapshot()["request_ui"]["completed"], 1)
         with self.assertRaises(ValidationError):
             rec.unlink()
 
     def test_upload_and_request_identity_validation(self):
+        with self.assertRaises(ValidationError):
+            self.portal.act("request", self.request_payload(priority="unrecognised"))
+        with self.assertRaises(ValidationError):
+            self.portal.act("request", self.request_payload(requested_office="other-college-office"))
         with self.assertRaises(ValidationError):
             self.portal.act("request", self.request_payload(file=base64.b64encode(b"<html>unsafe</html>"), filename="fake.pdf"))
         with self.assertRaises(AccessError):
