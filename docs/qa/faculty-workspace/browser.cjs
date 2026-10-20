@@ -81,6 +81,31 @@ async function diagnosticMarkup(page) {
         await page.screenshot({path:path.join(out,'faculty-assessment-1440.png')});
         await page.reload();
         await page.getByRole('button',{name:'Reopen calculation',exact:true}).waitFor();
+        await page.locator('.campus_sidebar').getByRole('button',{name:'My profile & payroll',exact:true}).click();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Leave requests',exact:true}).click();
+        await page.getByRole('heading',{name:'Online Leave Apply & Status',exact:true}).waitFor();
+        if(!await page.locator('.leave_balance').innerText().then(text=>text.includes('5 days'))) throw Error('Expired leave allocation inflated available balance');
+        const leaveDay=new Date(); leaveDay.setUTCDate(leaveDay.getUTCDate()+7);
+        leaveDay.setUTCDate(leaveDay.getUTCDate()+(7-leaveDay.getUTCDay()+1)%7);
+        await page.locator('#leave_from').fill(leaveDay.toISOString().slice(0,10));
+        await page.locator('#leave_reason').fill('QA browser leave request');
+        await page.getByRole('button',{name:'Submit Request',exact:false}).click();
+        await page.locator('.leave_history tr').filter({hasText:'QA browser leave request'}).waitFor();
+        if(!await page.locator('.leave_balance').innerText().then(text=>text.includes('4 days'))) throw Error('Pending leave did not reserve balance');
+        await page.reload();
+        await page.locator('.leave_history tr').filter({hasText:'QA browser leave request'}).waitFor();
+        await page.screenshot({path:path.join(out,'faculty-leave-1440.png')});
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Faculty development and appraisal',exact:true}).click();
+        await page.getByRole('heading',{name:'Professional Development and Appraisal',exact:true}).waitFor();
+        await page.getByRole('button',{name:'Training Programmes',exact:true}).click();
+        await page.getByLabel('Activity / record name',{exact:true}).fill('QA browser appraisal');
+        await page.getByLabel('Remark',{exact:true}).fill('Synthetic saved training activity');
+        await page.locator('.campus_appraisal button[type=submit]').click();
+        await page.getByRole('cell',{name:'QA browser appraisal',exact:true}).waitFor();
+        await page.reload();
+        await page.getByRole('button',{name:'Training Programmes',exact:true}).click();
+        await page.getByRole('cell',{name:'QA browser appraisal',exact:true}).waitFor();
+        await page.locator('.campus_sidebar').getByRole('button',{name:'My task list',exact:true}).click();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Internal mark generation',exact:true}).waitFor();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My tasks & e-diary',exact:true}).click();
         await page.locator('.o_list_view:visible .o_data_row').filter({hasText:'QA browser persisted diary'}).waitFor();
@@ -101,7 +126,7 @@ async function diagnosticMarkup(page) {
         if(overflow) throw Error('Faculty document overflows mobile viewport');
         if(errors.length) throw Error(errors.join('\n'));
         await fs.writeFile(path.join(out,'verification.json'),JSON.stringify({passed:true,
-            checks:['faculty-only shell','main module and topbar navigation','diary form persistence','weighted assessment PDF','reopen and complete assessment form','reload navigation','mobile drawer Escape','mobile overflow','browser console'],errors},null,2));
+            checks:['faculty-only shell','main module and topbar navigation','diary form persistence','weighted assessment PDF','reopen and complete assessment form','current leave balance','leave form persistence and pending balance','appraisal form persistence','reload navigation','mobile drawer Escape','mobile overflow','browser console'],errors},null,2));
     } catch (error) {
         if (page) {
             await page.screenshot({path:path.join(out,'failure.png')}).catch(()=>{});

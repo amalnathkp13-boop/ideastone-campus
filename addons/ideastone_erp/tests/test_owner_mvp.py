@@ -1,4 +1,5 @@
 import base64
+import json
 from datetime import datetime, time, timedelta
 
 from odoo.exceptions import AccessError, ValidationError
@@ -244,6 +245,7 @@ class TestOwnerMVP(OwnerMVPFixture, TransactionCase):
         admission_overview = self.env["campus.dashboard"].with_user(self.admissions).get_overview()
         actions = {item.get("action") for module in admission_overview["faculty_modules"] for item in module["items"]}
         self.assertNotIn("ideastone_erp.mvp_report_collection", actions)
+        self.assertNotIn("ideastone_erp.action_staff_profile", actions)
 
     def test_dashboard_kpi_reconciles_with_saved_records_and_source(self):
         app = self.enrolled()
@@ -263,6 +265,81 @@ class TestOwnerMVP(OwnerMVPFixture, TransactionCase):
         action = dash.get_owner_source_action("active_students", filters)
         self.assertEqual(self.env[action["res_model"]].search_count(action["domain"]), 1)
         self.assertEqual(sum(p["value"] for p in metrics["programmes"]), 1)
+
+    def test_owner_staff_records_and_appraisal_are_usable_and_college_scoped(self):
+        detail = self.env["campus.faculty.detail"].with_user(self.owner).create({
+            "name": "Owner reviewed qualification", "faculty_id": self.faculty.id,
+            "kind": "qualification", "year": self.today.year,
+        })
+        detail.write({"institution": "QA college"})
+        self.assertEqual(detail.read(["institution"])[0]["institution"], "QA college")
+        detail.action_verify()
+        self.assertEqual(detail.reviewer_id, self.owner)
+        overview = self.env["campus.dashboard"].with_user(self.owner).get_overview()
+        actions = {item.get("action") for module in overview["faculty_modules"] for item in module["items"]}
+        self.assertIn("ideastone_erp.action_faculty_appraisal_dashboard", actions)
+        self.assertIn("base.ir_sequence_form", actions)
+        action = self.env["campus.dashboard"].with_user(self.owner).get_owner_action("base.ir_sequence_form")
+        self.assertEqual(action["res_model"], "ir.sequence")
+        other = self.env["res.company"].create({"name": "Owner HR foreign college"})
+        foreign = detail.sudo().with_company(other).copy({"company_id": other.id, "verification": "pending", "reviewer_id": False})
+        with self.assertRaises(AccessError):
+            foreign.with_user(self.owner).with_context(allowed_company_ids=[self.env.company.id]).read(["name"])
+        with self.assertRaises(AccessError):
+            detail.with_user(self.readonly).write({"institution": "Unauthorized"})
+
+    def test_owner_registers_show_existing_requests_and_shared_fee_heads(self):
+        dash = self.env["campus.dashboard"].with_user(self.owner)
+        requests = dash.get_owner_action("ideastone_erp.mvp_student_requests")
+        self.assertEqual(requests["views"][0], (self.env.ref("ideastone_erp.student_requests_tree").id, "tree"))
+        heads = dash.get_owner_action("ideastone_erp.mvp_fee_heads")
+        visible = self.env[heads["res_model"]].with_user(self.owner).search(heads["domain"])
+        self.assertIn(self.product.product_tmpl_id, visible)
+        other = self.env["res.company"].create({"name": "Foreign fee head college"})
+        foreign = self.env["product.template"].create({"name": "Foreign fee head", "campus_fee_head": True, "company_id": other.id})
+        self.assertNotIn(foreign, self.env[heads["res_model"]].with_user(self.owner).search(heads["domain"]))
+        view = self.env["res.company"].with_user(self.owner).get_view(self.env.ref("ideastone_erp.mvp_college_form").id, "form")
+        self.assertIn('name="parent_id"', view["arch"])
+
+    def test_owner_report_invalid_filters_are_recoverable(self):
+        dash = self.env["campus.dashboard"].with_user(self.owner)
+        for filters in [[], "invalid", {"date_from": "not-a-date"}, {"date_to": "2026-02-30"},
+                        {"date_from": "9999-12-01", "date_to": "9999-12-31"},
+                        {"year_id": "invalid"}, {"course_id": []}, {"batch_id": -1},
+                        {"student_id": 1.5}, {"year_id": True}, {"year_id": 10 ** 30}]:
+            with self.subTest(filters=filters), self.assertRaises(ValidationError):
+                dash.get_owner_metrics(filters)
+        self.assertTrue(dash.get_owner_metrics({"year_id": False})["stats"])
+
+    def test_student_report_filters_match_one_enrolment(self):
+        student = self.enrolled().student_id
+        other_year = self.year.copy({"name": "Other year", "code": "MVP-QA2"})
+        other_course = self.course.copy({"name": "Other programme", "code": "MVPQA2"})
+        other_section = self.section.copy({"name": "Other section", "code": "MVPQA2", "course_id": other_course.id,
+                                           "campus_year_id": other_year.id, "campus_term_id": False})
+        self.env["op.student.course"].create({"student_id": student.id, "course_id": other_course.id,
+            "batch_id": other_section.id, "academic_years_id": other_year.id})
+        dash = self.env["campus.dashboard"].with_user(self.owner)
+        for filters in [{"year_id": self.year.id, "course_id": other_course.id},
+                        {"year_id": self.year.id, "batch_id": other_section.id}]:
+            action = dash.get_owner_source_action("active_students", filters)
+            self.assertFalse(self.env[action["res_model"]].search(action["domain"]))
+            metrics = dash.get_owner_metrics(filters)
+            self.assertEqual(next(s["value"] for s in metrics["stats"] if s["kind"] == "active_students"), 0)
+            self.assertFalse(metrics["programmes"])
+        metrics = dash.get_owner_metrics({"course_id": other_course.id})
+        self.assertEqual(metrics["programmes"], [{"label": other_course.name, "value": 1}])
+
+    def test_student_import_rejects_non_object_column_mapping(self):
+        payload = "student_number,first_name,last_name,phone,section_code\nMVP-JSON,QA,Imported,9000000001,MVPQA\n"
+        model = self.env["campus.student.import"].with_user(self.owner)
+        for mapping in [None, ["number", "first", "last", "phone", "section"],
+                        {key: [] for key in ["number", "first", "last", "phone", "section"]}]:
+            wizard = model.create({"file": base64.b64encode(payload.encode()), "mapping": json.dumps(mapping)})
+            with self.subTest(mapping=mapping), self.assertRaises(ValidationError):
+                wizard.action_preview()
+            self.assertFalse(wizard.checksum)
+        self.assertFalse(self.env["op.student"].search([("gr_no", "=", "MVP-JSON")]))
 
     def test_import_preview_duplicates_and_atomic_commit(self):
         payload = "student_number,first_name,last_name,phone,section_code\nMVP-IMPORT,QA,Imported,9000000001,MVPQA\n"
