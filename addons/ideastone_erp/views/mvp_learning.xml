@@ -60,8 +60,8 @@
   </record>
   <record id="mvp_overdue_invoices" model="ir.actions.act_window"><field name="name">Overdue fee follow-up</field><field name="res_model">account.move</field><field name="view_mode">tree,form</field><field name="view_id" ref="mvp_overdue_invoices_tree"/><field name="domain">[('campus_student_id','!=',False),('move_type','=','out_invoice')]</field><field name="context">{'search_default_overdue': 1}</field><field name="search_view_id" ref="mvp_invoice_followup_search"/></record>
 
-  <template id="student_learning" inherit_id="ideastone_erp.student_academics">
-    <xpath expr="//section[@id='student_materials']" position="before"><section id="student_assignments" class="student_panel"><h2>Assignments &amp; faculty feedback</h2>
+  <template id="student_learning" inherit_id="ideastone_erp.student_academics_content">
+    <xpath expr="//div[hasclass('academic_submission_slot')]" position="replace"><section t-if="d['assignments']" class="academic_card academic_submission_card"><h2>My coursework</h2>
       <p>Work allocated to your selected academic placement. Grades and feedback appear only when released by faculty.</p>
       <article t-foreach="d['assignments']" t-as="work" class="student_record student_assignment" t-att-data-assignment="work['id']">
         <h3 t-esc="work['name']"/><span class="student_chip" t-esc="work['status']"/><p><t t-esc="work['subject']"/> · <t t-esc="work['teacher']"/> · Due <t t-esc="work['due']"/></p><p t-esc="work['instructions']"/>

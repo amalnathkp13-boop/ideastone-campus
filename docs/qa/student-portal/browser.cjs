@@ -62,6 +62,17 @@ async function save(page, control) {
         await page.evaluate(()=>{document.getElementById('wrapwrap')?.scrollTo({top:0});window.scrollTo(0,0);});
         const routes=initial.navigation.map(item=>item[0]);
         for(const route of routes) await visit(page,route);
+        await visit(page,'academics');
+        assert.equal(await page.locator('.academic_metric:visible').count(),3);
+        await page.locator('.student_subnav').getByRole('link',{name:'Subjects',exact:true}).click();
+        assert.equal(await page.locator('.academic_subject_row:visible').count(),initial.subjects.length);
+        await page.locator('.academic_search').fill(initial.subjects[0].code);
+        assert.equal(await page.locator('.academic_subject_row:visible').count(),1);
+        await page.getByRole('button',{name:'View details'}).click();
+        assert.equal(await page.locator('.academic_subject_detail:visible').count(),1);
+        await page.locator('.student_subnav').getByRole('link',{name:'Learning materials',exact:true}).click();
+        assert.equal(await page.locator('.academic_resources .academic_resource:visible').count(),initial.materials.length);
+        assert.equal(await page.locator('.academic_resources .academic_status.good').first().evaluate(element=>getComputedStyle(element).color),'rgb(22, 131, 93)');
         await visit(page,'timetable');
         await page.getByRole('button',{name:'Today',exact:true}).click();
         assert.equal(await page.locator('.student_timetable_row:visible').count(),initial.schedule.filter(row=>row.day===initial.today_iso).length);
