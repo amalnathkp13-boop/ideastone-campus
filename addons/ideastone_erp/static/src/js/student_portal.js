@@ -54,12 +54,13 @@
         }
         showProfilePage();
     }
-    async function navigate(url, options = {}, push = true) {
+    async function navigate(url, options = {}, push = true, form = null) {
         if (!root()) return;
         pending?.abort();
         const controller = new AbortController();
         pending = controller;
         const workspace = root();
+        const previous = new URL(location.href);
         workspace.querySelector(".student_network_error").hidden = true;
         workspace.querySelector(".student_busy").hidden = false;
         try {
@@ -72,8 +73,25 @@
             const html = new DOMParser().parseFromString(await response.text(), "text/html");
             const next = html.getElementById("campus_student_workspace");
             if (!next) throw new Error("Student workspace unavailable");
+            const destination = new URL(response.url);
+            if (form && destination.pathname === previous.pathname) destination.hash = previous.hash;
+            if (form && destination.searchParams.has("form_error")) {
+                const target = [...next.querySelectorAll("form")].find(candidate =>
+                    ["operation", "assignment_id", "request_id", "notice_id"].every(key =>
+                        candidate.elements.namedItem(key)?.value === form.elements.namedItem(key)?.value));
+                if (target) {
+                    for (const field of target.elements) {
+                        const original = form.elements.namedItem(field.name);
+                        if (!original || !field.name || field.type === "hidden" || field.type === "submit") continue;
+                        if (field.type === "file") field.files = original.files;
+                        else if (field.type === "checkbox" || field.type === "radio") field.checked = original.checked;
+                        else field.value = original.value;
+                    }
+                    target.closest("details")?.setAttribute("open", "");
+                }
+            }
             workspace.replaceWith(next);
-            if (push) history.pushState({}, "", response.url);
+            if (push) history.pushState({}, "", destination.href);
             rendered = location.pathname + location.search;
             document.title = html.title || document.title;
             enhance();
@@ -88,7 +106,7 @@
                 banner.querySelector("span").textContent = "The next view could not be loaded. You are viewing the last loaded records. Check your connection and retry. ";
                 banner.hidden = false;
                 banner.scrollIntoView({block: "center"});
-                retry = () => navigate(url, options, push);
+                retry = () => navigate(url, options, push, form);
             }
         } finally {
             if (pending === controller) {
@@ -166,7 +184,7 @@
             form.dataset.saving = "true";
             const buttons = [...form.querySelectorAll("button[type=submit]")];
             buttons.forEach(button => { button.disabled = true; button.dataset.original = button.textContent; button.textContent = "Saving…"; });
-            navigate(action.href, {method: "POST", body: data}).finally(() => {
+            navigate(action.href, {method: "POST", body: data}, true, form).finally(() => {
                 delete form.dataset.saving;
                 buttons.forEach(button => { button.disabled = false; button.textContent = button.dataset.original; });
             });

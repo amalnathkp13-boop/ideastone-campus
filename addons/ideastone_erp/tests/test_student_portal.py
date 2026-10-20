@@ -184,6 +184,12 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         with self.assertRaises(AccessError):
             self.portal.snapshot()
 
+    def test_calendar_extremes_return_validation_errors(self):
+        self.student_user.tz = "Asia/Kolkata"
+        for first, last in [("0001-01-01", "0001-01-02"), ("9999-12-30", "9999-12-31")]:
+            with self.subTest(first=first, last=last), self.assertRaises(ValidationError):
+                self.portal.snapshot(date_from=first, date_to=last)
+
     def test_material_publication_and_college_download_scope(self):
         model = self.env["campus.digital.resource"]
         publisher = new_test_user(self.env, login="student_material_publisher", groups="ideastone_erp.group_manager")

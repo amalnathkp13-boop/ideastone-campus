@@ -74,6 +74,8 @@ async function savePortal(page,button) {
         await work.locator('textarea[name=description]').fill('My explanation includes the algorithm and boundary tests.');
         await work.locator('input[type=file]').setInputFiles({name:'coursework.txt',mimeType:'text/plain',buffer:Buffer.from('Synthetic submitted coursework')});
         await savePortal(student,work.getByRole('button',{name:'Submit my work',exact:true}));
+        assert.equal(new URL(student.url()).hash,'#student_assignments');
+        assert(await student.locator('#student_assignments').isVisible());
         let snapshot=await rpc(student,'campus.student.portal','snapshot');
         let row=snapshot.assignments.find(item=>item.id===scenario.task);
         assert.equal(row.state,'submit'); assert.equal(row.marks,null); assert(!row.feedback);

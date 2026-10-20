@@ -92,14 +92,23 @@ async function save(page, control) {
         assert(await page.locator('#student_documents').evaluate(element=>element.getBoundingClientRect().top>=128),'Sticky header obscures the document anchor');
         await page.locator('.student_subnav').getByRole('link',{name:'Personal details',exact:true}).click();
         await page.locator('.profile_contact_edit summary').click();
+        await page.locator('#profile_phone').fill('invalid');
+        await page.locator('#profile_city').fill('Coimbatore');
+        await page.getByRole('button',{name:'Save contact details'}).click();
+        await page.getByText('Enter a valid contact phone number.',{exact:true}).waitFor();
+        assert.equal(new URL(page.url()).hash,'#student_personal');
+        assert(await page.locator('#profile_phone').isVisible());
+        assert.equal(await page.locator('#profile_phone').inputValue(),'invalid');
+        assert.equal(await page.locator('#profile_city').inputValue(),'Coimbatore');
         await page.locator('#profile_phone').fill('+91 90000 00123');
         await page.locator('#profile_city').fill('Coimbatore');
         await save(page,page.getByRole('button',{name:'Save contact details'}));
+        assert.equal(new URL(page.url()).hash,'#student_personal');
         await page.reload({waitUntil:'load'});
         // Read only after the reloaded profile form is rendered; a stale/partial page made this check flaky.
         await page.locator('#student_main h1:visible').waitFor();
         await page.locator('.student_subnav').getByRole('link',{name:'Personal details',exact:true}).click();
-        await page.locator('.profile_contact_edit summary').click();
+        if(!await page.locator('#profile_phone').isVisible()) await page.locator('.profile_contact_edit summary').click();
         await page.waitForFunction(()=>document.querySelector('#profile_city')?.value==='Coimbatore',null,{timeout:15000})
             .catch(()=>{});
         assert.equal(await page.locator('#profile_city').inputValue(),'Coimbatore');
@@ -117,6 +126,11 @@ async function save(page, control) {
         await page.locator('#student_request_type').selectOption(String(kind.id));
         await page.locator('#student_request_title').fill('Bonafide for scholarship verification');
         await page.locator('#student_request_description').fill('Please issue an official bonafide certificate for the scholarship office.');
+        await page.locator('#student_request_file').setInputFiles({name:'fake.pdf',mimeType:'application/pdf',buffer:Buffer.from('Not a PDF')});
+        await page.getByRole('button',{name:'Submit request',exact:true}).click();
+        await page.getByText('Only PDF, PNG, JPEG or UTF-8 text with matching content is permitted.',{exact:true}).waitFor();
+        assert.equal(await page.locator('#student_request_title').inputValue(),'Bonafide for scholarship verification');
+        assert.equal(await page.locator('#student_request_file').evaluate(input=>input.files[0]?.name),'fake.pdf');
         await page.locator('#student_request_file').setInputFiles({name:'support.txt',mimeType:'text/plain',buffer:Buffer.from('Synthetic student supporting document.')});
         await save(page,page.getByRole('button',{name:'Submit request',exact:true}));
         let data=await snapshot(page);
@@ -202,7 +216,7 @@ async function save(page, control) {
         assert.equal(await page.locator('#student_main').count(),0);
         assert.deepEqual(errors,[]);
         await fs.writeFile(path.join(out,'verification.json'),JSON.stringify({source:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID,
-            routes,profileReload:true,noticePersistence:true,requestConcurrentRetry:true,staffRequestWorkflow:true,
+            routes,profileReload:true,profileValidationRecovery:true,noticePersistence:true,requestConcurrentRetry:true,staffRequestWorkflow:true,
             receiptPdf:true,studentIDOR:true,csrf:true,networkRetry:true,logoutBack:true,responsive:[1440,768,390],
             ledger:{assessed:initial.fees.assessed,paid:initial.fees.paid,due:initial.fees.due},attendance:initial.attendance.rate,consoleErrors:errors},null,2));
         console.log('Student Portal: all scoped routes, saved workflows, PDF, IDOR, CSRF, retry, logout and responsive checks passed.');
