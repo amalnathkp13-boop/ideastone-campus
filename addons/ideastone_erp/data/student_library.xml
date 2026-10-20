@@ -1,0 +1,7 @@
+<odoo noupdate="1">
+  <record id="student_request_library" model="campus.student.request.type">
+    <field name="name">Library enquiry</field><field name="code">library</field><field name="company_id" eval="False"/>
+    <field name="kind">grievance</field><field name="sequence">70</field>
+    <field name="guidance">Provide the book title, catalogue code and your question. Library staff must confirm renewals and reservations; submission does not change a due date or reserve a copy.</field>
+  </record>
+</odoo>

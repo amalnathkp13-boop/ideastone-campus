@@ -64,5 +64,20 @@ resource.with_user(publisher).action_approve()
 requirement = env["campus.admission.requirement"].create({"name": "QA admission confirmation"})
 admission = env["op.admission"].search([("student_id", "=", student.id)], limit=1)
 env["campus.admission.document"].create({"admission_id": admission.id, "requirement_id": requirement.id, "filename": "admission-confirmation.txt", "file": base64.b64encode(b"Synthetic admission confirmation.")})
+# Physical library records for the student-facing catalogue and renewal checks.
+library_author = env["op.author"].create({"name": "Student Library QA Author"})
+library_publisher = env["op.publisher"].create({"name": "Student Library QA Publisher"})
+library_books = env["op.media"].create([{"name": title, "internal_code": code,
+    "author_ids": [(4, library_author.id)], "publisher_ids": [(4, library_publisher.id)], "subject_ids": [(4, subject.id)]}
+    for title, code in [("Student Library QA Programming", "STUDENT-LIB-1"), ("Student Library QA Reference", "STUDENT-LIB-2")]])
+library_units = env["op.media.unit"].create([{"name": book.name + " copy", "media_id": book.id, "campus_company_id": company.id} for book in library_books])
+library_card_type = env["op.library.card.type"].create({"name": "Student Library QA Card", "allow_media": 3, "duration": 7, "penalty_amt_per_day": 1})
+library_card = env["op.library.card"].create({"partner_id": student.partner_id.id, "student_id": student.id,
+    "type": "student", "library_card_type_id": library_card_type.id})
+library_loan = env["op.media.movement"].create({"media_id": library_books[0].id, "media_unit_id": library_units[0].id,
+    "library_card_id": library_card.id, "type": "student", "student_id": student.id, "company_id": company.id,
+    "issued_date": today - timedelta(days=10), "return_date": today - timedelta(days=3)})
+library_loan.issue_media()
+
 env.cr.commit()
 print("Student QA scenarios saved; no production accounts or data used.")

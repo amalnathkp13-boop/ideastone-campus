@@ -227,6 +227,35 @@ async function save(page, control) {
         assert.equal(simultaneous[0].reference,simultaneous[1].reference);
         assert.equal((await snapshot(page)).requests.filter(item=>item.type_id===support.id).length,1);
         await page.screenshot({path:path.join(out,'student-requests-1440.png'),fullPage:true});
+        await visit(page,'library');
+        await page.locator('[data-library-page="overview"]').waitFor({state:'visible'});
+        await page.getByRole('searchbox',{name:'Search the catalogue',exact:true}).fill('STUDENT-LIB-2');
+        await page.getByRole('button',{name:'Search catalogue →',exact:true}).click();
+        assert.equal(await page.locator('[data-library-book]:visible').count(),1);
+        await page.locator('[data-library-reset]').click();
+        const library=(await snapshot(page)).library_ui;
+        const libraryLoan=library.current.find(row=>row.code==='STUDENT-LIB-1');
+        assert(libraryLoan.overdue);
+        await page.locator('.student_subnav').getByRole('link',{name:'My loans',exact:true}).click();
+        assert.equal(await page.locator('#student_library_loans .status.overdue').first().evaluate(element=>getComputedStyle(element).color),'rgb(183, 53, 61)');
+        await page.getByRole('button',{name:'Request renewal',exact:true}).click();
+        assert.equal(await page.locator('#library_request_loan').inputValue(),String(libraryLoan.id));
+        await page.locator('#library_request_note').fill('Synthetic renewal enquiry for library staff review.');
+        await save(page,page.getByRole('button',{name:'Submit library enquiry',exact:true}));
+        const afterLibrary=(await snapshot(page)).library_ui;
+        assert(afterLibrary.active_enquiry);
+        assert.equal(afterLibrary.current.find(row=>row.id===libraryLoan.id).due,libraryLoan.due);
+        await save(page,page.getByRole('button',{name:'Cancel enquiry',exact:true}));
+        assert.equal((await snapshot(page)).library_ui.active_enquiry,null);
+        for(const width of [320,390,768,1440]) {
+            await page.setViewportSize({width,height:900});
+            for(const label of ['Overview','Catalogue','My loans','Reservations & requests','Digital resources']) {
+                await page.locator('.student_subnav').getByRole('link',{name:label,exact:true}).click();
+                assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Library overflow at ${width}: ${label}`);
+            }
+        }
+        await page.locator('.student_subnav').getByRole('link',{name:'Overview',exact:true}).click();
+        await page.screenshot({path:path.join(out,'student-library-1440.png'),fullPage:true});
         await visit(page,'fees');
         const receipts=(await snapshot(page)).fees.payments;
         assert.equal(receipts.length,2);
