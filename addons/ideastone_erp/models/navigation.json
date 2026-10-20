@@ -162,6 +162,12 @@
     "action": "ideastone_erp.action_payslip"
   },
   {
+    "model": "campus.payslip",
+    "label": "Payroll History",
+    "group": "Staff",
+    "action": "ideastone_erp.action_payroll_history_page"
+  },
+  {
     "model": "campus.biometric.event",
     "label": "Device attendance imports",
     "group": "Staff",

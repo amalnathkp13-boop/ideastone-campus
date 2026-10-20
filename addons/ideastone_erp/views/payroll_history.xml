@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="action_payroll_history_page" model="ir.actions.client">
+    <field name="name">Payroll History</field>
+    <field name="tag">ideastone_erp.payroll_history_page</field>
+  </record>
+</odoo>

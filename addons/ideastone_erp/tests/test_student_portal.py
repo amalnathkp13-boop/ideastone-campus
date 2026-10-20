@@ -83,6 +83,7 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         exam.with_user(self.teacher).action_campus_roster()
         exam.with_user(self.teacher).campus_result_ids.write({"marks": 75})
         self.assertFalse(self.portal.snapshot()["results"])
+        self.assertFalse(self.portal.snapshot()["exam_ui"]["results"])
         exam.with_user(self.teacher).action_campus_submit()
         exam.with_user(self.examiner).action_campus_lock()
         exam.with_user(self.examiner).action_campus_publish()
@@ -90,6 +91,9 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["marks"], 75)
         self.assertEqual(results[0]["grade"], "P")
+        self.assertEqual(results[0]["rate"], 75.0)
+        self.assertEqual(results[0]["tone"], "good")
+        self.assertEqual(self.portal.snapshot()["exam_ui"]["published_groups"], 1)
 
     def test_native_ledger_and_cross_student_receipt_denial(self):
         fee = self.fee(self.student)

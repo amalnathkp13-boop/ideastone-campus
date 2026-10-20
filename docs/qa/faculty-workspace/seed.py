@@ -1,7 +1,10 @@
 """Disposable CI database only; executed through Odoo shell, never installed as an addon."""
 import os
+from datetime import timedelta
 
 from odoo.tests import new_test_user
+
+from odoo import fields
 
 assert env.cr.dbname == "ci", "Disposable CI database required"  # noqa: F821
 user = new_test_user(env, login="faculty.ui.qa", name="QA Faculty",  # noqa: F821
@@ -27,5 +30,17 @@ assessment = env["campus.faculty.assessment"].with_user(user).create({  # noqa: 
                       (0, 0, {"name": "Practical", "score": 45, "maximum": 50, "weight": 60})],
 })
 assessment.write({"state": "done"})
+employee = env["hr.employee"].create({"name": "QA Faculty employee", "user_id": user.id})
+leave_type = env["hr.leave.type"].create({"name": "QA Casual leave", "sequence": -999,
+    "requires_allocation": "yes", "allocation_validation_type": "no", "leave_validation_type": "hr"})
+today = fields.Date.today()
+for days, first, last in [(10, today - timedelta(days=500), today - timedelta(days=100)),
+                          (5, today - timedelta(days=10), today + timedelta(days=365))]:
+    allocation = env["hr.leave.allocation"].create({"name": "QA leave allocation", "employee_id": employee.id,
+        "holiday_status_id": leave_type.id, "number_of_days": days, "date_from": first, "date_to": last})
+    if allocation.state == "draft":
+        allocation.action_confirm()
+    if allocation.state != "validate":
+        allocation.action_validate()
 env["ir.config_parameter"].sudo().set_param("report.url", "http://127.0.0.1:18069")  # noqa: F821
 env.cr.commit()  # noqa: F821

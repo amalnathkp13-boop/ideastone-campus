@@ -6,3 +6,4 @@ from . import test_student_portal
 
 from . import test_parent_portal
 from . import test_finance_learning
+from . import test_faculty_leave_ui
