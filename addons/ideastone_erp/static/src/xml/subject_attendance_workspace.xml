@@ -1,0 +1,49 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.SubjectAttendanceWorkspace">
+    <main class="campus_subject_attendance">
+      <div t-if="state.error" class="swa_error" role="alert"><t t-esc="state.error"/><button type="button" t-on-click="load">Retry</button></div>
+      <div t-if="state.loading" class="swa_loading" role="status">Loading subject attendance…</div>
+      <t t-elif="state.data">
+        <section class="swa_heading">
+          <span class="swa_heading_icon"><i class="fa fa-users"/></span>
+          <div><h1>Subject wise Attendance</h1><p>Mark and manage subject wise attendance for your classes</p></div>
+          <small t-if="state.data.last_login">Last Login: <t t-esc="state.data.last_login"/></small>
+        </section>
+
+        <section class="swa_filters" aria-label="Subject attendance filters">
+          <label>Institution <select aria-label="Institution"><option t-esc="state.data.company"/></select></label>
+          <label>Semester / Period <select aria-label="Semester or period" t-on-change="changeTerm"><t t-foreach="state.data.terms" t-as="term" t-key="term.id"><option t-att-value="term.id" t-att-selected="String(term.id) === state.termId" t-esc="term.name"/></t></select></label>
+          <label>Date <input type="date" aria-label="Attendance date" t-att-value="state.date" t-on-change="changeDate"/></label>
+          <label>Staff <select aria-label="Staff" t-on-change="changeFaculty"><t t-foreach="state.data.faculty" t-as="person" t-key="person.id"><option t-att-value="person.id" t-att-selected="String(person.id) === state.facultyId" t-esc="person.name"/></t></select></label>
+          <button type="button" class="swa_primary swa_load" t-on-click="load"><i class="fa fa-search"/> Load</button>
+        </section>
+
+        <div class="swa_main_grid">
+          <section class="swa_panel swa_subjects">
+            <header class="swa_panel_header"><h2><i class="fa fa-book"/> Subject List <span t-if="state.data.term_id">for <t t-esc="state.data.terms.find((item) => item.id === state.data.term_id)?.name"/></span></h2><button type="button" class="swa_icon_button" aria-label="Download subject list" title="Download subject list" t-on-click="exportSubjects"><i class="fa fa-download"/></button></header>
+            <div class="swa_table_wrap"><table><thead><tr><th aria-label="Select subject"></th><th>#</th><th>Clf.</th><th>Subject Code</th><th>Subject Name</th><th>Students</th></tr></thead><tbody>
+              <t t-foreach="state.data.subjects" t-as="subject" t-key="subject.key"><tr t-att-class="subject.key === state.subjectKey ? 'swa_selected' : ''" t-on-click="() => this.chooseSubject(subject.key)"><td><input type="radio" name="swa-subject" t-att-checked="subject.key === state.subjectKey" aria-label="Select subject"/></td><td t-esc="subject_index + 1"/><td><span t-att-class="subject.kind.toLowerCase() === 'elective' ? 'swa_badge elective' : 'swa_badge'" t-esc="subject.kind"/></td><td t-esc="subject.code"/><td class="swa_subject_name"><strong t-esc="subject.name"/><small t-esc="subject.class"/></td><td class="swa_count" t-esc="subject.students"/></tr></t>
+              <tr t-if="!state.data.subjects.length"><td colspan="6" class="swa_empty">No subjects are allocated to this staff member for the selected period.</td></tr>
+            </tbody></table></div>
+            <footer>Showing <t t-esc="state.data.subjects.length"/> subjects</footer>
+          </section>
+
+          <section class="swa_panel swa_students">
+            <header class="swa_panel_header"><h2><i class="fa fa-users"/> Student(s) Info</h2><button type="button" class="swa_primary" t-att-disabled="!state.data.can_save || state.saving" t-on-click="save"><i class="fa fa-save"/> <t t-esc="state.saving ? 'Saving…' : 'Save Attendance'"/></button></header>
+            <div class="swa_table_wrap"><table><thead><tr><th>#</th><th>Roll No</th><th>Student Name</th><th>Class</th><th>Status (Today)</th></tr></thead><tbody>
+              <t t-foreach="visibleStudents" t-as="student" t-key="student.id"><tr><td t-esc="(state.page - 1) * 8 + student_index + 1"/><td t-esc="student.roll"/><td t-esc="student.name"/><td t-esc="student.class"/><td><select t-att-class="'swa_status ' + student.status" t-att-disabled="!state.data.can_save" t-on-change="(event) => this.changeStatus(student.id, event)"><option value="present" t-att-selected="student.status === 'present'">Present</option><option value="absent" t-att-selected="student.status === 'absent'">Absent</option><option value="late" t-att-selected="student.status === 'late'">Late</option><option value="excused" t-att-selected="student.status === 'excused'">Excused</option></select></td></tr></t>
+              <tr t-if="!state.data.students.length"><td colspan="5" class="swa_empty">Select a subject with enrolled students to mark attendance.</td></tr>
+            </tbody></table></div>
+            <footer><span t-esc="studentRange"/><nav class="swa_pagination" aria-label="Student pages"><button type="button" t-att-disabled="state.page === 1" t-on-click="() => this.setPage(1)">«</button><button type="button" t-att-disabled="state.page === 1" t-on-click="() => this.setPage(state.page - 1)">‹</button><t t-foreach="pageNumbers" t-as="page" t-key="page"><button type="button" t-att-class="page === state.page ? 'active' : ''" t-on-click="() => this.setPage(page)" t-esc="page"/></t><button type="button" t-att-disabled="state.page === pageCount" t-on-click="() => this.setPage(state.page + 1)">›</button><button type="button" t-att-disabled="state.page === pageCount" t-on-click="() => this.setPage(pageCount)">»</button></nav></footer>
+          </section>
+        </div>
+
+        <div class="swa_bottom_grid">
+          <section class="swa_panel"><header class="swa_panel_header"><h2><i class="fa fa-clock-o"/> Allocated Hour(s)</h2></header><div class="swa_hour_controls"><label>Date <input type="date" t-att-value="state.date" t-att-disabled="state.holdDate" t-on-change="changeDate"/></label><label class="swa_check"><input type="checkbox" t-att-checked="state.holdDate" t-on-change="changeHoldDate"/> Hold Date</label></div><div class="swa_table_wrap"><table><thead><tr><th>#</th><th>Hour</th><th>Time</th><th>Tot.Cls.</th><th>Present</th><th>Absent</th></tr></thead><tbody><t t-foreach="state.data.hours" t-as="hour" t-key="hour.id"><tr><td t-esc="hour_index + 1"/><td><label class="swa_hour_choice"><input type="radio" name="swa-hour" t-att-value="hour.id" t-att-checked="String(hour.id) === state.sessionId" t-on-change="chooseHour"/> <t t-esc="hour.number"/></label></td><td t-esc="hour.time"/><td t-esc="hour.total"/><td t-esc="hour.present"/><td t-esc="hour.absent"/></tr></t><tr t-if="!state.data.hours.length"><td colspan="6" class="swa_empty">No allocated hour for this subject on the selected date.</td></tr></tbody></table></div><p t-if="state.data.sheet_state === 'done'" class="swa_notice">Submitted attendance is read only. Use the authorized correction flow to edit it.</p></section>
+          <section class="swa_panel"><header class="swa_panel_header"><h2><i class="fa fa-users"/> Allocated Class</h2></header><div class="swa_table_wrap"><table><thead><tr><th>#</th><th>Class</th><th>Sem.</th><th>Tot.</th></tr></thead><tbody><tr t-if="state.data.allocated_class"><td>1</td><td t-esc="state.data.allocated_class.name"/><td t-esc="state.data.allocated_class.semester"/><td t-esc="state.data.allocated_class.total"/></tr><tr t-else=""><td colspan="4" class="swa_empty">Select a subject to view its class.</td></tr></tbody></table></div></section>
+          <section class="swa_panel"><header class="swa_panel_header"><h2><i class="fa fa-file-text"/> Notes of Lesson</h2></header><textarea maxlength="500" placeholder="Enter notes of lesson conducted today…" t-att-value="state.notes" t-att-disabled="!state.data.can_save" t-on-input="changeNotes"/><div class="swa_char_count"><t t-esc="state.notes.length"/>/500</div></section>
+        </div>
+      </t>
+    </main>
+  </t>
+</templates>
