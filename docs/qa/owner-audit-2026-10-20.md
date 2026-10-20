@@ -12,6 +12,8 @@ Audit of all 13 owner workspace modules on the local Odoo 17 / OpenEduCat app, u
 4. **Invalid report filters caused server errors.** The maximum calendar end date overflowed when building an exclusive upper bound; malformed dates/record IDs produced raw exceptions. The common filter boundary now raises actionable validation errors, including checks for invalid ID types and database integer bounds. Normal empty selections still work.
 5. **Invalid JSON mappings crashed student import preview.** A JSON array or null passed the initial mapping logic and raised attribute/type errors. Preview now requires an object with named, nonempty string headers before reading rows. Failed preview creates no students.
 
+6. **Empty module screens displayed raw HTML.** Owner navigation supplies action objects directly to Odoo; these bypass its normal action-loader HTML conversion. The shared navigation and dashboard drill-down now use Odoo OWL markup for trusted action help. The browser regression checks the rendered Rooms empty-state paragraph.
+
 ## Verification
 
 - Local full Odoo suite: **89 tests, zero failures/errors**. Additional owner test run after the numbering fix: **16 tests, zero failures/errors**.

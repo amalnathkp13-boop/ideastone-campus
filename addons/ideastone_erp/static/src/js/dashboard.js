@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { Component, onWillStart, onWillUnmount, useExternalListener, useRef, useState } from "@odoo/owl";
+import { Component, onWillStart, onWillUnmount, useExternalListener, useRef, useState, markup } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 
@@ -95,10 +95,12 @@ class CampusBase extends Component {
             } else if (item.profile_id) {
                 await this.action.doAction({ type: "ir.actions.act_window", res_model: "op.faculty", res_id: item.profile_id, views: [[false, "form"]], target: "current" });
             } else {
-                await this.action.doAction(this.state.is_owner_workspace && ![
+                const action = this.state.is_owner_workspace && ![
                     "ideastone_erp.action_faculty_leave_page", "ideastone_erp.action_faculty_appraisal_dashboard", "ideastone_erp.action_staff_profile",
                 ].includes(item.action) ?
-                    await this.orm.call("campus.dashboard", "get_owner_action", [item.action]) : item.action);
+                    await this.orm.call("campus.dashboard", "get_owner_action", [item.action]) : item.action;
+                if (action.help) action.help = markup(action.help);
+                await this.action.doAction(action);
             }
             this.state.open = false;
         } catch (error) {
@@ -130,7 +132,9 @@ class CampusBase extends Component {
     async ownerSource(card) {
         if (!card.allowed) return;
         try {
-            await this.action.doAction(await this.orm.call("campus.dashboard", "get_owner_source_action", [card.kind, this.state.ownerFilters]));
+            const action = await this.orm.call("campus.dashboard", "get_owner_source_action", [card.kind, this.state.ownerFilters]);
+            if (action.help) action.help = markup(action.help);
+            await this.action.doAction(action);
         } catch (error) { this.notification.add(error.data?.message || "The source register is unavailable.", {type: "danger"}); }
     }
     chartWidth(value, rows, field = "value") {
