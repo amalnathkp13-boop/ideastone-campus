@@ -7,13 +7,6 @@
     <t t-set="at_risk" t-value="recorded and a['shortage']"/>
     <t t-set="lowest" t-value="a['lowest_subject']"/>
     <div class="attendance_view" t-att-data-today="d['today_iso']" t-att-data-period-start="d['filters']['date_from']" t-att-data-period-end="d['filters']['date_to']">
-      <nav class="attendance_tabs" aria-label="Attendance views">
-        <a href="#student_attendance_overview" data-attendance-tab="overview">Overview</a>
-        <a href="#student_attendance_summary" data-attendance-tab="summary">Summary</a>
-        <a href="#student_attendance_register" data-attendance-tab="register">Session register</a>
-        <a href="#student_attendance_calendar" data-attendance-tab="calendar">Attendance calendar</a>
-      </nav>
-
       <section id="student_attendance_overview" class="attendance_page" data-attendance-page="overview">
         <div class="attendance_pagehead"><div><h1>My Attendance</h1><p>Track attendance, monitor subject-wise eligibility, and plan your next classes.</p></div><span t-att-class="'attendance_pill red' if at_risk else 'attendance_pill green' if recorded else 'attendance_pill'" t-esc="'Below threshold' if at_risk else 'Submitted records · Selected period' if recorded else 'Awaiting attendance records'"/></div>
         <form class="attendance_filter_card" method="get" action="/my/campus/student/attendance"><div class="attendance_filter_top"><div class="attendance_filter_title"><span class="attendance_filter_symbol"><i class="fa fa-search" aria-hidden="true"/></span>Refine attendance view</div><span>Choose a placement and reporting period</span></div><div class="attendance_filter_fields"><label>Academic placement<select name="enrolment"><option t-foreach="d['placements']" t-as="p" t-att-value="p['id']" t-att-selected="p['id'] == d['placement']['id']" t-esc="p['label']"/></select></label><label>From date<input type="date" name="date_from" t-att-value="d['filters']['date_from']" required="required"/></label><label>Through date<input type="date" name="date_to" t-att-value="d['filters']['date_to']" required="required"/></label><div class="attendance_filter_actions"><button type="submit" class="attendance_button primary">Apply filters</button><a class="attendance_button clear" t-att-href="'/my/campus/student/attendance?enrolment=%s' % d['placement']['id']">Reset</a></div></div></form>

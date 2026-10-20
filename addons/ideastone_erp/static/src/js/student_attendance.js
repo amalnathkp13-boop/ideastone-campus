@@ -22,7 +22,6 @@
         if (!attendance) return;
         const active = pages[location.hash] || "overview";
         attendance.querySelectorAll("[data-attendance-page]").forEach(page => { page.hidden = page.dataset.attendancePage !== active; });
-        attendance.querySelectorAll("[data-attendance-tab]").forEach(link => link.classList.toggle("active", link.dataset.attendanceTab === active));
         const crumb = attendance.closest("#campus_student_workspace")?.querySelector(".student_breadcrumb > span:first-child");
         if (crumb) crumb.textContent = `My campus / ${labels[active]}`;
         attendance.closest("#campus_student_workspace")?.querySelectorAll('.student_subnav a[href^="#student_attendance_"]').forEach(link => {

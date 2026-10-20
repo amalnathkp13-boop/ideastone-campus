@@ -92,11 +92,13 @@ async function save(page, control) {
         assert.equal(await page.locator('.attendance_kpi:visible').count(),4);
         assert.equal(await page.locator('.attendance_register_row').count(),initial.attendance.rows.length);
         assert.equal(await page.locator('.attendance_status.present').first().evaluate(element=>getComputedStyle(element).color),'rgb(22, 118, 74)');
-        await page.locator('.attendance_tabs').getByRole('link',{name:'Summary',exact:true}).click();
+        assert.equal(await page.locator('.attendance_tabs').count(),0);
+        assert.equal(await page.locator('.student_subnav a').count(),4);
+        await page.locator('.student_subnav').getByRole('link',{name:'Summary',exact:true}).click();
         assert(await page.locator('#student_attendance_summary').isVisible());
-        await page.locator('.attendance_tabs').getByRole('link',{name:'Session register',exact:true}).click();
+        await page.locator('.student_subnav').getByRole('link',{name:'Session register',exact:true}).click();
         assert.equal(await page.locator('.attendance_register_row:visible').count(),initial.attendance.rows.length);
-        await page.locator('.attendance_tabs').getByRole('link',{name:'Attendance calendar',exact:true}).click();
+        await page.locator('.student_subnav').getByRole('link',{name:'Attendance calendar',exact:true}).click();
         assert(await page.locator('.attendance_month_grid .attendance_day').count() >= 35);
         await page.setViewportSize({width:390,height:844});
         assert(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth),'Attendance page overflows phone viewport');
