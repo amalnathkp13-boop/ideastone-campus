@@ -22,7 +22,7 @@ class Dashboard(models.AbstractModel):
             ("Faculty", "op.faculty", "openeducat_core.act_open_op_faculty_view", "Staff"),
             ("Subjects", "op.subject", "ideastone_erp.action_subjects", "Academics"),
             ("Timetable", "op.session", "openeducat_timetable.act_open_op_session_view", "Academics"),
-            ("Class attendance", "op.attendance.sheet", "openeducat_attendance.act_open_op_attendance_sheet_view", "Academics"),
+            ("Student Attendance", "op.attendance.sheet", "ideastone_erp.action_student_attendance_workspace", "Academics"),
             ("Subject-wise Attendance", "op.attendance.sheet", "ideastone_erp.action_subject_attendance_workspace", "Academics"),
             ("Examinations", "op.exam", "openeducat_exam.act_open_op_exam_view", "Academics"),
             ("Results", "op.result.line", "ideastone_erp.action_results", "Academics"),

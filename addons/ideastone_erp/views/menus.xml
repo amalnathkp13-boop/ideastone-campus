@@ -3,7 +3,8 @@
 <menuitem id="menu_operations" name="Campus Operations" sequence="2" web_icon="ideastone_campus,static/description/icon.png"/>
 <menuitem id="menu_overview" name="Campus overview" parent="menu_operations" sequence="1" action="action_dashboard"/>
 <menuitem id="menu_category_0" name="Academics" parent="menu_operations" sequence="10"/>
-<menuitem id="menu_subject_attendance_workspace" name="Subject-wise Attendance" parent="menu_category_0" sequence="25" action="action_subject_attendance_workspace"/>
+<menuitem id="menu_student_attendance_workspace" name="Student Attendance" parent="menu_category_0" sequence="25" action="action_student_attendance_workspace"/>
+<menuitem id="menu_subject_attendance_workspace" name="Subject-wise Attendance" parent="menu_category_0" sequence="26" action="action_subject_attendance_workspace"/>
 <menuitem id="menu_category_1" name="Staff" parent="menu_operations" sequence="11"/>
 <menuitem id="menu_category_2" name="Campus services" parent="menu_operations" sequence="12"/>
 <menuitem id="menu_category_3" name="Engagement" parent="menu_operations" sequence="13"/>
