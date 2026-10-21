@@ -45,6 +45,7 @@
             "ideastone_erp/static/src/js/student_attendance.js",
             "ideastone_erp/static/src/js/student_notices.js",
             "ideastone_erp/static/src/js/student_library.js", "ideastone_erp/static/src/js/student_requests.js",
+            "ideastone_erp/static/src/js/student_od.js",
         ],
         "web.assets_backend": [
             "ideastone_erp/static/src/js/dashboard.js",

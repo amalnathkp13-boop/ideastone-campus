@@ -10,11 +10,11 @@
 
 ## Student stage
 
-- A portal student can submit a Special OD for dates within an active semester and enrolment. The request starts at Pending Mentor and reserves its token cost.
+- A portal student can save a complete OD request as a draft or submit it for dates within an active semester and enrolment. Submitted requests start at Pending Mentor and reserve their token cost. The category remains undetermined until the later Mentor/HOD decision stage.
 - Repeated submissions with the same form key are idempotent. Overlapping active requests are blocked.
-- The student can cancel while Pending Mentor, releasing the reservation. Once a later HOD stage places a Special OD in Withheld, the student can upload validated proof before the separately recorded deadline.
+- The student can submit a saved draft, or cancel while Pending Mentor to release the reservation. Initial supporting documents are optional and validated by the existing portal upload service. Once a later HOD stage places a Special OD in Withheld, the student can upload validated proof before the separately recorded deadline.
 - The portal shows the 30-token college default, optional per-enrolment override, used/reserved/remaining counters, route availability, application history, and immutable action events.
-- General OD is visible as a staff-initiated category only; this stage does not let a student initiate it.
+- The finalized student screen shows a common OD form, assistant, approval path, request history, and pending actions. General OD remains a staff-initiated path in the later decision stage; students cannot classify their own request as General OD.
 
 ## Next stage and institutional decisions
 
