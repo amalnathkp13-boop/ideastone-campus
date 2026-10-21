@@ -30,6 +30,12 @@
     "action": "ideastone_erp.action_faculty_appraisal_dashboard"
   },
   {
+    "model": "op.faculty",
+    "label": "OD Management",
+    "group": "Staff",
+    "action": "ideastone_erp.action_staff_od_management"
+  },
+  {
     "model": "campus.hostel.room",
     "label": "Hostel rooms",
     "group": "Campus services",

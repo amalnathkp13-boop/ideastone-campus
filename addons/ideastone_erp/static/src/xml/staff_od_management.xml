@@ -1,0 +1,5 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.StaffODManagement">
+    <main class="campus_staff_od_management" aria-label="OD Management work area"/>
+  </t>
+</templates>
