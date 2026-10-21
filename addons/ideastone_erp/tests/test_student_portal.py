@@ -1,6 +1,7 @@
 import base64
 import uuid
 from datetime import datetime, time, timedelta
+from types import SimpleNamespace
 
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import TransactionCase, new_test_user, tagged
@@ -335,3 +336,35 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         for record in draft | foreign:
             with self.assertRaises(AccessError):
                 self.portal._download("resource", record.id)
+
+    def test_account_preferences_are_scoped_validated_and_rendered(self):
+        defaults = self.portal.snapshot()["account_ui"]
+        self.assertTrue(defaults["academic_reminders"])
+        self.assertFalse(defaults["compact_cards"])
+        for payload in ({}, {"compact_cards": "on"}, {"student_id": self.other.id}, {"password": "invalid"}):
+            with self.assertRaises(ValidationError):
+                self.portal.act("preferences", payload)
+        self.portal.act("preferences", {"notice_badge": False, "academic_reminders": False, "compact_cards": True})
+        data = self.portal.snapshot()
+        self.assertFalse(data["notice_badge"])
+        self.assertFalse(data["account_ui"]["academic_reminders"])
+        self.assertTrue(data["account_ui"]["compact_cards"])
+        other = self.env["campus.student.portal"].with_user(self.other_user).snapshot()
+        self.assertTrue(other["notice_badge"])
+        self.assertTrue(other["account_ui"]["academic_reminders"])
+        self.assertFalse(other["account_ui"]["compact_cards"])
+        self.portal.act("preferences", {"notice_badge": True})
+        self.assertTrue(self.portal.snapshot()["account_ui"]["compact_cards"])
+        self.assertFalse(self.portal.snapshot()["account_ui"]["academic_reminders"])
+        data["login"] = '<b style="color:red">student@example.test</b>'
+        rendered = str(self.env["ir.ui.view"].with_context(minimal_qcontext=True)._render_template("ideastone_erp.student_account_content", {
+            "d": data, "portal_data": data, "request": SimpleNamespace(csrf_token=lambda: "test-token"),
+            "student_url_for": lambda section: "/my/campus/student/" + section}))
+        self.assertIn("&lt;b style=", rendered)
+        self.assertIn('href="/my/security"', rendered)
+        self.assertNotIn("Today, 9:14 AM", rendered)
+        dashboard = str(self.env["ir.ui.view"]._render_template("ideastone_erp.student_dashboard", {
+            "d": data, "student_url_for": lambda section: "/my/campus/student/" + section, "money": str}))
+        self.assertNotIn("Your study assistant", dashboard)
+        self.assertNotIn("Upcoming examinations", dashboard)
+        self.assertIn("Today's classes", dashboard)

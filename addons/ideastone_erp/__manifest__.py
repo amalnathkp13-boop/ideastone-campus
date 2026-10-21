@@ -17,6 +17,7 @@
         "security/faculty_tools.xml", "views/faculty_tools.xml", "views/student_leave.xml", "views/faculty_reports.xml",
         "security/mvp.xml", "data/mvp.xml", "views/mvp.xml", "views/mvp_search.xml", "views/mvp_reports.xml",
         "security/student_portal.xml", "data/student_portal.xml", "views/student_operations.xml", "views/student_portal.xml", "views/student_academics.xml", "views/student_timetable.xml", "views/student_examinations.xml", "views/student_attendance.xml",
+        "views/student_account.xml",
         "data/parent_portal.xml", "views/parent_operations.xml", "views/parent_portal.xml",
         "security/learning.xml", "views/mvp_learning.xml", "views/student_notices.xml", "views/student_fees.xml",
         "views/student_help.xml",
@@ -27,6 +28,7 @@
         "web.assets_frontend": [
             "ideastone_erp/static/src/scss/student_portal.scss",
             "ideastone_erp/static/src/scss/student_profile.scss",
+            "ideastone_erp/static/src/scss/student_account.scss",
             "ideastone_erp/static/src/scss/parent_portal.scss",
             "ideastone_erp/static/src/scss/student_academics.scss",
             "ideastone_erp/static/src/scss/student_timetable.scss",
