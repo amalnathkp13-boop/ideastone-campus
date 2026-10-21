@@ -30,12 +30,27 @@ async function clickAndWaitForWorkspace(page,control) {
         await page.waitForFunction(element=>!element.isConnected,previous);
     } finally {await previous.dispose();}
 }
+async function assertParentTheme(page) {
+    const theme=await page.evaluate(()=>{
+        const style=selector=>getComputedStyle(document.querySelector(selector));
+        const primary=document.querySelector('.parent_workspace .btn-primary');
+        return {sidebar:style('.student_sidebar').backgroundImage,
+            selected:style('.student_nav_link.active').backgroundColor,
+            selectedText:style('.student_nav_link.active').color,
+            primary:primary?getComputedStyle(primary).backgroundColor:null};
+    });
+    assert.match(theme.sidebar,/rgb\(9, 47, 80\)/,'Parent sidebar must retain the shared navy surface');
+    assert.equal(theme.selected,'rgb(22, 104, 223)');
+    assert.equal(theme.selectedText,'rgb(255, 255, 255)');
+    if(theme.primary) assert.equal(theme.primary,'rgb(6, 102, 231)','Parent primary controls must retain the shared campus blue');
+}
 async function visit(page,section) {
     // Revisiting the same URL must wait for the new form, not the old heading/URL.
     await clickAndWaitForWorkspace(page,page.locator(`.student_sidebar a[href*="/parent/${section}"]`));
     await page.waitForURL(new RegExp('/parent/'+section));
     await page.locator('#student_main h1').waitFor();
     assert.equal(await page.locator('.student_network_error:visible').count(),0);
+    await assertParentTheme(page);
 }
 async function submit(page,button) {
     await clickAndWaitForWorkspace(page,button);
