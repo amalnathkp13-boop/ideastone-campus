@@ -13,7 +13,7 @@ company = env["res.company"].create({  # noqa: F821
 })
 env = env(context=dict(env.context, allowed_company_ids=[company.id], no_reset_password=True, mail_create_nosubscribe=True, mail_notrack=True))  # noqa: F821
 owner = new_test_user(env, login="owner.ui.qa", name="College Owner", password=os.environ["FACULTY_QA_PASSWORD"],
-                     company_id=company.id, company_ids=[(6, 0, company.ids)], groups="ideastone_erp.group_mvp_owner")
+                     company_id=company.id, company_ids=[(6, 0, company.ids)], groups="ideastone_erp.group_mvp_owner,event.group_event_manager")
 today = fields.Date.today()
 year = env["op.academic.year"].create({"name": str(today.year) + " Academic Year", "code": "OWNERQA", "start_date": today.replace(month=1, day=1), "end_date": today.replace(month=12, day=31), "campus_current": True})
 department = env["op.department"].create({"name": "Computer Science", "code": "OWNERQA"})
@@ -72,6 +72,15 @@ exam = env["op.exam"].create({"name": "Programming internal assessment", "exam_c
     "total_marks": 100, "min_marks": 40, "start_time": datetime.combine(today + timedelta(days=7), time(14, 0)), "end_time": datetime.combine(today + timedelta(days=7), time(15, 0))})
 notice = env["campus.circular"].with_user(owner).create({"name": "Welcome to the new academic year", "reference": "OWNERQA", "body": "<p>Synthetic demo notice. Complete admission and fee formalities before your first class.</p>", "campus_managed": True})
 notice.action_campus_publish()
+
+venue = env["res.partner"].create({"name": "QA Main Auditorium", "company_id": company.id})
+for offset, name, category in [(4, "QA Freshers’ Day", "Student life"), (9, "QA Innovation Expo", "Technology"),
+                               (18, "QA Cultural Fest", "Cultural"), (25, "QA Sports Meet", "Sports")]:
+    template = env["event.type"].create({"name": category})
+    env["event.event"].create({"name": name, "company_id": company.id, "event_type_id": template.id,
+        "date_begin": datetime.combine(today + timedelta(days=offset), time(9, 30)),
+        "date_end": datetime.combine(today + timedelta(days=offset), time(16, 0)), "address_id": venue.id,
+        "description": "<p>Synthetic campus event for layout verification. Student performances, club showcases and community activities.</p>"})
 env["ir.config_parameter"].sudo().set_param("report.url", "http://127.0.0.1:18069")
 env.cr.commit()
 print("Owner QA demo seeded in company", company.id)
