@@ -47,3 +47,4 @@ from . import mvp_learning
 from . import student_notices_ui
 from . import student_requests_ui
 from . import student_fees_ui
+from . import student_library_ui
