@@ -69,13 +69,16 @@ class StudentOD(models.Model):
         ("draft", "Draft"),
         ("pending_mentor", "Pending Mentor"), ("pending_hod", "Pending HOD"),
         ("withheld", "Withheld / Proof Pending"), ("proof_review", "Proof Under Review"),
-        ("completed", "Completed"), ("rejected", "Rejected"),
+        ("completed", "Completed"), ("rejected", "Rejected"), ("returned", "Returned to Student"),
         ("invalid", "Invalid / Proof Missing"), ("cancelled", "Cancelled"),
     ], required=True, default="pending_mentor", tracking=True, readonly=True)
     proof_requirements = fields.Text(readonly=True)
     proof_deadline = fields.Date(readonly=True)
     proof_file = fields.Binary(attachment=True, readonly=True)
     proof_filename = fields.Char(readonly=True)
+    mentor_note = fields.Text(readonly=True)
+    mentor_reviewed_by_id = fields.Many2one("res.users", readonly=True)
+    mentor_reviewed_at = fields.Datetime(readonly=True)
     support_file = fields.Binary(attachment=True, readonly=True)
     support_filename = fields.Char(readonly=True)
     event_ids = fields.One2many("campus.student.od.event", "od_id", readonly=True)
@@ -99,21 +102,31 @@ class StudentOD(models.Model):
         return records
 
     def write(self, vals):
-        allowed = ({"state"} if self.env.context.get("campus_od_student_cancel")
+        allowed = ({"state", "mentor_note", "mentor_reviewed_by_id", "mentor_reviewed_at"}
+                   if self.env.context.get("campus_od_mentor_review") else
+                   {"state"} if self.env.context.get("campus_od_student_cancel")
                    or self.env.context.get("campus_od_student_activate") else
                    {"proof_file", "proof_filename", "state"} if self.env.context.get("campus_od_student_proof") else set())
         if not self.env.su or not set(vals) <= allowed:
             raise AccessError(_("OD decisions and submitted details cannot be edited here."))
         for rec in self:
+            if self.env.context.get("campus_od_mentor_review") and (
+                rec.state != "pending_mentor" or rec.mentor_id != self.env.user
+                or rec.routing_id.advisor_id != self.env.user or not rec.routing_id.active
+                or rec.company_id != self.env.company or vals.get("state") not in {"pending_hod", "returned"}
+                or vals.get("mentor_reviewed_by_id") != self.env.uid or not vals.get("mentor_reviewed_at")
+                or not self.env.user.has_group("openeducat_core.group_op_faculty")
+            ):
+                raise AccessError(_("Only the assigned mentor may decide a pending OD request."))
             if self.env.context.get("campus_od_student_cancel") and (rec.state != "pending_mentor" or vals != {"state": "cancelled"}):
                 raise AccessError(_("Only a request awaiting mentor review may be cancelled by the student."))
-            if self.env.context.get("campus_od_student_activate") and (rec.state != "draft" or vals != {"state": "pending_mentor"}):
-                raise AccessError(_("Only a saved draft may be submitted for mentor review."))
+            if self.env.context.get("campus_od_student_activate") and (rec.state not in {"draft", "returned"} or vals != {"state": "pending_mentor"}):
+                raise AccessError(_("Only a saved draft or returned request may be submitted for mentor review."))
             if self.env.context.get("campus_od_student_proof") and (rec.category != "special" or rec.state != "withheld" or vals.get("state") != "proof_review"
                     or not vals.get("proof_file") or not rec.proof_deadline or fields.Date.context_today(rec) > rec.proof_deadline):
                 raise AccessError(_("Proof can be submitted only while an approved Special OD is awaiting evidence."))
         result = super().write(vals)
-        if "state" in vals:
+        if "state" in vals and not self.env.context.get("campus_od_mentor_review"):
             self._record_event({"cancelled": "Cancelled by student", "pending_mentor": "Submitted for mentor review",
                                 "proof_review": "Proof submitted for HOD review"}[vals["state"]])
         return result
@@ -186,7 +199,8 @@ class StudentODPortal(models.AbstractModel):
                       "venue": rec.venue, "purpose": rec.purpose, "date_from": self._dates(rec.date_from),
                       "date_to": self._dates(rec.date_to), "tokens": rec.token_cost, "state": rec.state,
                       "status": states[rec.state], "can_cancel": rec.state == "pending_mentor",
-                      "can_submit_draft": rec.state == "draft", "has_support": bool(rec.support_file),
+                      "can_submit_draft": rec.state in {"draft", "returned"}, "has_support": bool(rec.support_file),
+                      "mentor_note": rec.mentor_note or "",
                       "can_upload": rec.category == "special" and rec.state == "withheld" and rec.proof_deadline and fields.Date.context_today(self) <= rec.proof_deadline,
                       "proof_requirements": rec.proof_requirements or "", "proof_deadline": self._dates(rec.proof_deadline),
                       "events": [{"action": event.action, "by": event.actor_id.name, "at": self._dates(event.create_date)}
@@ -195,11 +209,11 @@ class StudentODPortal(models.AbstractModel):
         data["od"]["actions"] = [
             {"id": row["id"], "reference": row["reference"], "name": row["name"],
              "state": row["state"], "deadline": row["proof_deadline"],
-             "title": {"draft": "Draft ready to submit", "pending_mentor": "Mentor review pending",
+             "title": {"draft": "Draft ready to submit", "returned": "Mentor requested changes", "pending_mentor": "Mentor review pending",
                        "pending_hod": "HOD review pending", "withheld": "Proof requested",
                        "proof_review": "Proof under review"}[row["state"]]}
             for row in data["od"]["rows"]
-            if row["state"] in {"draft", "pending_mentor", "pending_hod", "withheld", "proof_review"}
+            if row["state"] in {"draft", "returned", "pending_mentor", "pending_hod", "withheld", "proof_review"}
         ][:4]
         data["od"]["proof_ready"] = any(row["can_upload"] for row in data["od"]["rows"])
         index = next((index for index, item in enumerate(data["navigation"]) if item[0] == "requests"), len(data["navigation"]))
@@ -226,7 +240,7 @@ class StudentODPortal(models.AbstractModel):
         rec._lock()
         if operation == "od_activate":
             placement = rec.enrolment_id
-            if placement.state != "running" or rec.term_id != placement.academic_term_id or not rec.routing_id.active:
+            if placement.state != "running" or rec.term_id != placement.academic_term_id or not rec.routing_id.active or rec.mentor_id != rec.routing_id.advisor_id:
                 raise ValidationError(_("The saved draft needs an active semester and approval route before submission."))
             self._check_od_allowance(student, placement, rec.date_from, rec.date_to, rec.token_cost, rec.id)
             rec.with_context(campus_od_student_activate=True).write({"state": "pending_mentor"})
