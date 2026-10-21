@@ -36,8 +36,14 @@
             <input type="hidden" name="key" t-att-value="od['submission_key']"/>
             <label for="od_event">Request Title / Purpose <b>*</b><input id="od_event" name="name" type="text" maxlength="160" required="required" placeholder="Enter purpose (e.g., Conference, Workshop, Sports Event, etc.)"/></label>
             <div class="od_date_fields">
-              <label for="od_from">From Date <b>*</b><input id="od_from" name="od_date_from" type="date" required="required"/></label>
-              <label for="od_to">To Date <b>*</b><input id="od_to" name="od_date_to" type="date" required="required"/></label>
+              <div class="od_date_pair">
+                <label for="od_from">From Date <b>*</b><input id="od_from" name="od_date_from" type="date" required="required"/></label>
+                <label for="od_from_session">From Session <b>*</b><select id="od_from_session" name="od_from_session" required="required"><option value="" selected="selected" disabled="disabled">Select</option><option value="forenoon">Forenoon</option><option value="afternoon">Afternoon</option></select></label>
+              </div>
+              <div class="od_date_pair">
+                <label for="od_to">To Date <b>*</b><input id="od_to" name="od_date_to" type="date" required="required"/></label>
+                <label for="od_to_session">To Session <b>*</b><select id="od_to_session" name="od_to_session" required="required"><option value="" selected="selected" disabled="disabled">Select</option><option value="forenoon">Forenoon</option><option value="afternoon">Afternoon</option></select></label>
+              </div>
             </div>
             <label for="od_venue">Destination / Venue <b>*</b><input id="od_venue" name="venue" type="text" maxlength="200" required="required" placeholder="Enter destination / venue (e.g., City, College, Organization)"/></label>
             <label for="od_purpose">Reason / Description <b>*</b><textarea id="od_purpose" name="purpose" maxlength="5000" rows="4" required="required" placeholder="Provide a brief and clear reason for your OD request..."/></label>

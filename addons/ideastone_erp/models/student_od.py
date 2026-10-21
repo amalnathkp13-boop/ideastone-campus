@@ -62,6 +62,8 @@ class StudentOD(models.Model):
     venue = fields.Char(required=True, readonly=True)
     date_from = fields.Date(required=True, readonly=True)
     date_to = fields.Date(required=True, readonly=True)
+    session_from = fields.Selection([("forenoon", "Forenoon"), ("afternoon", "Afternoon")], required=True, readonly=True)
+    session_to = fields.Selection([("forenoon", "Forenoon"), ("afternoon", "Afternoon")], required=True, readonly=True)
     token_cost = fields.Integer(required=True, readonly=True)
     state = fields.Selection([
         ("draft", "Draft"),
@@ -271,9 +273,15 @@ class StudentODPortal(models.AbstractModel):
             end = fields.Date.to_date(payload.get("od_date_to"))
         except (ValueError, TypeError) as exc:
             raise ValidationError(_("Choose valid OD dates.")) from exc
+        session_from = payload.get("od_from_session")
+        session_to = payload.get("od_to_session")
+        if session_from not in {"forenoon", "afternoon"} or session_to not in {"forenoon", "afternoon"}:
+            raise ValidationError(_("Choose a forenoon or afternoon session for both dates."))
         term = placement.academic_term_id
         if not start or not end or end < start or not term.term_start_date or not term.term_end_date or start < term.term_start_date or end > term.term_end_date:
             raise ValidationError(_("OD dates must fall within your active semester."))
+        if start == end and session_from == "afternoon" and session_to == "forenoon":
+            raise ValidationError(_("On the same date, the end session cannot precede the start session."))
         if placement.campus_date_from and start < placement.campus_date_from or placement.campus_date_to and end > placement.campus_date_to:
             raise ValidationError(_("OD dates must fall within your active enrolment."))
         cost = 1 if student.company_id.campus_od_token_rule == "request" else (end - start).days + 1
@@ -290,7 +298,8 @@ class StudentODPortal(models.AbstractModel):
             "company_id": student.company_id.id, "routing_id": route.id, "mentor_id": route.advisor_id.id,
             "hod_id": route.hod_id.id, "initiated_by_id": self.env.uid, "submission_key": key,
             "category": "undetermined", "purpose": purpose, "venue": venue, "date_from": start,
-            "date_to": end, "token_cost": cost, "state": "draft" if draft else "pending_mentor",
+            "date_to": end, "session_from": session_from, "session_to": session_to,
+            "token_cost": cost, "state": "draft" if draft else "pending_mentor",
             **support,
         })
         return {"saved": True}

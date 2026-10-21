@@ -35,12 +35,13 @@
   }
   .od_form { display: grid; gap: 10px;
     label { color: #101b36; font-size: 11px; font-weight: 700; margin: 0; b { color: #e33441; } }
-    input:not([type="hidden"]):not([type="file"]), textarea { display: block; width: 100%; border: 1px solid #cbddf6; border-radius: 5px; color: #182b50; background: white; padding: 9px 10px; margin-top: 5px; min-height: 35px; font: inherit; font-size: 11px; font-weight: 400; }
+    input:not([type="hidden"]):not([type="file"]), select, textarea { display: block; width: 100%; min-width: 0; border: 1px solid #cbddf6; border-radius: 5px; color: #182b50; background: white; padding: 9px 10px; margin-top: 5px; min-height: 35px; font: inherit; font-size: 11px; font-weight: 400; }
     textarea { min-height: 77px; resize: vertical; }
-    input:focus, textarea:focus { outline: 2px solid #b5d4ff; border-color: #3a88ed; }
+    input:focus, select:focus, textarea:focus { outline: 2px solid #b5d4ff; border-color: #3a88ed; }
     input::placeholder, textarea::placeholder { color: #8ba0c3; }
   }
   .od_date_fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .od_date_pair { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(96px, .85fr); align-items: end; gap: 8px; min-width: 0; }
   .od_file_label { display: block;
     span { color: #7885a5; font-weight: 400; }
     input { display: block; font-size: 11px; max-width: 100%; margin: 6px 0 0; }
@@ -134,5 +135,6 @@
 @keyframes od-step-arrive { 0%, 100% { box-shadow: 0 0 0 0 #075aff00; } 45% { box-shadow: 0 0 0 6px #075aff40; } }
 @media (max-width: 800px) { .student_od_view { .od_upper_grid, .od_lower_grid { grid-template-columns: 1fr; } .od_right_column { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto; } } }
 @media (max-width: 730px) { .student_od_view { .od_token_grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .od_page_intro small { display: none; } .od_right_column { grid-template-columns: 1fr; } .od_workflow ol { min-width: 770px; } } }
-@media (max-width: 460px) { .student_od_view { .od_token_grid, .od_date_fields { grid-template-columns: 1fr; } .od_page_intro h2 { font-size: 21px; } .od_form_actions { justify-content: flex-start; } } }
+@media (max-width: 600px) { .student_od_view .od_date_fields { grid-template-columns: 1fr; } }
+@media (max-width: 460px) { .student_od_view { .od_token_grid { grid-template-columns: 1fr; } .od_page_intro h2 { font-size: 21px; } .od_form_actions { justify-content: flex-start; } } }
 @media (prefers-reduced-motion: reduce) { .student_od_view .od_workflow ol li.is-current span, .student_od_view .od_workflow ol li.is-complete span { animation: none; } .student_od_view .od_workflow ol li.is-current span { outline: 2px solid #075aff; outline-offset: 3px; } }
