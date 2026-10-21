@@ -1,0 +1,125 @@
+<odoo>
+  <record id="student_request_preferences_form" model="ir.ui.view">
+    <field name="name">Student request office and priority</field><field name="model">campus.service.request</field>
+    <field name="inherit_id" ref="ideastone_erp.student_requests_form"/>
+    <field name="arch" type="xml"><field name="portal_type_id" position="after"><field name="portal_requested_office" readonly="True"/><field name="portal_priority" readonly="True"/></field></field>
+  </record>
+  <template id="student_requests_workspace" inherit_id="ideastone_erp.student_workspace" name="Student requests reference content">
+    <xpath expr="//t[@t-elif=&quot;section == 'requests'&quot;][@t-call]" position="attributes"><attribute name="t-call">ideastone_erp.student_requests_content</attribute></xpath>
+    <xpath expr="//nav[hasclass('student_subnav')]/t[@t-elif=&quot;section == 'requests'&quot;]" position="replace">
+      <t t-elif="section == 'requests'"><a href="#student_requests_overview">Overview</a><a href="#student_request_new">New request</a><a href="#student_request_history">My requests</a><a href="#student_certificates">Certificates &amp; documents</a></t>
+    </xpath>
+  </template>
+  <template id="student_requests_content" name="Student Requests and Certificates">
+    <t t-set="u" t-value="d['request_ui']"/>
+    <div class="requests_view">
+      <section id="student_requests_overview" data-requests-page="overview">
+        <div class="pagehead"><div><h1>Requests &amp; Certificates</h1><p>Submit student-service requests, track progress and access approved certificates.</p></div><span class="pill violet">Student services</span></div>
+        <div class="kpis">
+          <article class="kpi"><span class="kicon"><i class="fa fa-envelope-o" aria-hidden="true"/></span><div class="kpi-label">Requests submitted</div><p class="value" t-esc="u['total']"/><div class="foot">Recorded requests for your account</div></article>
+          <article class="kpi amber"><span class="kicon"><i class="fa fa-clock-o" aria-hidden="true"/></span><div class="kpi-label">Awaiting review</div><p class="value" t-esc="u['review']"/><div class="foot">Open requests and information follow-ups</div></article>
+          <article class="kpi green"><span class="kicon"><i class="fa fa-check" aria-hidden="true"/></span><div class="kpi-label">Completed</div><p class="value" t-esc="u['completed']"/><div class="foot">Fulfilled by the college office</div></article>
+          <article class="kpi violet"><span class="kicon"><i class="fa fa-file-text-o" aria-hidden="true"/></span><div class="kpi-label">Certificate types</div><p class="value" t-esc="u['certificate_count']"/><div class="foot">Enabled document request categories</div></article>
+        </div>
+        <div class="grid2">
+          <section class="panel"><div class="panel-head"><h2>Start a request</h2><a class="btn primary" href="#student_request_new">New request →</a></div>
+            <div class="request-type-grid">
+              <article class="request-type-card"><span class="symbol"><i class="fa fa-file-text-o" aria-hidden="true"/></span><div><h3>Certificate request</h3><p>Bonafide, conduct, course completion and other official documents.</p></div></article>
+              <article class="request-type-card"><span class="symbol"><i class="fa fa-check-square-o" aria-hidden="true"/></span><div><h3>Record correction</h3><p>Attendance, profile details or academic record correction with evidence.</p></div></article>
+              <article class="request-type-card"><span class="symbol"><i class="fa fa-inr" aria-hidden="true"/></span><div><h3>Fee-related request</h3><p>Fee receipt clarification, payment verification or concession follow-up.</p></div></article>
+              <article class="request-type-card"><span class="symbol"><i class="fa fa-exchange" aria-hidden="true"/></span><div><h3>General student service</h3><p>Letters, ID card issues, access requests and other campus support.</p></div></article>
+            </div>
+          </section>
+          <section class="panel"><h2>Before you submit</h2><div class="checklist">
+            <div class="checkitem"><span>1</span><div><b>Choose the closest request type.</b><br/>It helps staff review and route your request.</div></div>
+            <div class="checkitem"><span>2</span><div><b>Include exact details.</b><br/>Add dates, course/subject, reference numbers and what needs to change.</div></div>
+            <div class="checkitem"><span>3</span><div><b>Attach supporting evidence.</b><br/>Use a clear PDF, PNG, JPEG or text file when required.</div></div>
+            <div class="checkitem"><span>4</span><div><b>Track the request ID.</b><br/>Approval time and fees depend on college policy.</div></div>
+          </div></section>
+        </div>
+        <section class="panel"><div class="panel-head"><h2>Recent requests</h2><a class="btn" href="#student_request_history">View all requests</a></div>
+          <div t-foreach="u['recent']" t-as="r" class="mini-stat"><span><a t-att-href="'#student_request_detail_%s' % r['id']"><b t-esc="r['name']"/></a><br/><span class="subtle"><t t-esc="r['reference']"/> · <t t-esc="r['date']"/></span></span><span t-att-class="'status ' + r['tone']" t-esc="r['status']"/></div>
+          <p t-if="not u['recent']" class="empty">No requests have been submitted from your account yet.</p>
+        </section>
+      </section>
+
+      <section id="student_request_new" data-requests-page="new" hidden="hidden">
+        <div class="pagehead"><div><h1>New request</h1><p>Provide the required details so the relevant college office can review your request.</p></div><span class="pill">Response time depends on request type</span></div>
+        <div class="grid2"><section class="panel"><div class="panel-head"><h2>Submit a student request</h2><span class="subtle small">Required fields marked *</span></div>
+          <form action="/my/campus/student/action" method="post" enctype="multipart/form-data" data-student-request-create="">
+            <t t-call="ideastone_erp.student_action_fields"/><input type="hidden" name="operation" value="request"/><input type="hidden" name="return_to" value="requests"/><input type="hidden" name="key" t-att-value="d['submission_key']"/>
+            <div class="formgrid">
+              <div class="field span2"><label for="student_request_type">Request type *</label><select id="student_request_type" class="student_request_type" name="type_id" required="required"><option t-foreach="d['request_types']" t-as="kind" t-att-value="kind['id']" t-att-data-guidance="kind['guidance']" t-att-data-fee="kind['fee']" t-att-data-limit="kind['max_mb']" t-att-data-required="'true' if kind['require_file'] else 'false'" t-esc="kind['name']"/></select></div>
+              <div class="callout span2"><i class="fa fa-info-circle" aria-hidden="true"/><div><div class="student_type_guidance"/><div class="student_type_fee"/></div></div>
+              <div class="field span2"><label for="student_request_title">Request title *</label><input id="student_request_title" name="title" required="required" maxlength="200" placeholder="Briefly describe what you need"/></div>
+              <div class="field"><label for="student_request_office">Related office (if known)</label><select id="student_request_office" name="requested_office"><option t-foreach="u['offices']" t-as="office" t-att-value="office[0]" t-esc="office[1]"/></select></div>
+              <div class="field"><label for="student_request_priority">Priority *</label><select id="student_request_priority" name="priority" required="required"><option t-foreach="u['priorities']" t-as="priority" t-att-value="priority[0]" t-esc="priority[1]"/></select></div>
+              <div class="field span2"><label for="student_request_description">Details *</label><textarea id="student_request_description" name="description" required="required" maxlength="5000" placeholder="Include relevant dates, subject/course, record or receipt number, what happened and the action requested."/><div class="foot">Avoid including passwords, OTPs or unnecessary sensitive personal information.</div></div>
+              <div class="field span2"><label for="student_request_file">Supporting file</label><input id="student_request_file" type="file" name="file" accept=".pdf,.png,.jpg,.jpeg,.txt"/><div class="foot student_upload_guidance">PDF, PNG, JPEG or UTF-8 text. The college's upload policy applies.</div></div>
+              <div class="field span2"><label class="request-confirmation" for="student_request_accuracy"><input id="student_request_accuracy" name="confirm_accuracy" type="checkbox" required="required" value="yes"/>I confirm the information is accurate and understand that submission does not guarantee approval.</label></div>
+            </div>
+            <div class="form-actions"><button class="btn primary" type="submit" t-att-disabled="'disabled' if not d['request_types'] else None">Submit request</button><button class="btn" type="reset">Clear form</button><span class="small subtle">A request ID is issued after your submission is saved.</span></div>
+          </form>
+          <p t-if="not d['request_types']" class="empty">No request types are enabled. Contact the college office.</p>
+        </section><div><section class="panel"><h2>What to include</h2><div class="checklist">
+          <div class="checkitem"><span>✓</span><div><b>Attendance correction</b><br/>Class date, period, subject and supporting evidence.</div></div>
+          <div class="checkitem"><span>✓</span><div><b>Certificate</b><br/>Purpose, required document, number of copies and any deadline.</div></div>
+          <div class="checkitem"><span>✓</span><div><b>Fee/payment query</b><br/>Fee head, amount, transaction/receipt reference and date.</div></div>
+          <div class="checkitem"><span>✓</span><div><b>Record correction</b><br/>Current value, correct value and evidence supporting the change.</div></div>
+        </div></section><div class="callout"><i class="fa fa-info-circle" aria-hidden="true"/><div><strong>College review</strong><p>Your request and supporting file are saved for review. The office preference helps staff route your request; it does not assign an officer or guarantee a response time. Official records change only through authorised college workflows.</p></div></div></div></div>
+      </section>
+
+      <section id="student_request_history" data-requests-page="mine" hidden="hidden">
+        <div class="pagehead"><div><h1>My requests</h1><p>Review submitted requests, current status, office preference and recent updates.</p></div><a class="btn primary" href="#student_request_new">+ New request</a></div>
+        <div class="request-filterbox"><div class="filters">
+          <div class="field"><label for="student_request_search">Search request</label><input id="student_request_search" type="search" data-request-filter="search" placeholder="Request ID, title or type"/></div>
+          <div class="field"><label for="student_request_status">Status</label><select id="student_request_status" data-request-filter="status"><option value="all">All statuses</option><option t-foreach="u['states']" t-as="state" t-att-value="state[0]" t-esc="state[1]"/></select></div>
+          <div class="field"><label for="student_request_category">Request type</label><select id="student_request_category" data-request-filter="type"><option value="all">All types</option><option t-foreach="u['categories']" t-as="category" t-att-value="category[0]" t-esc="category[1]"/></select></div>
+          <button class="btn" type="button" data-request-reset="">Reset filters</button>
+        </div></div>
+        <section class="panel"><div class="panel-head"><h2>Request history</h2><div class="history-actions"><span class="subtle small" data-request-count=""><t t-esc="u['total']"/> requests</span><form t-if="d['updates']" action="/my/campus/student/action" method="post"><t t-call="ideastone_erp.student_action_fields"/><input type="hidden" name="operation" value="updates"/><input type="hidden" name="return_to" value="requests"/><button class="btn light" type="submit">Mark updates read</button></form></div></div>
+          <div class="table-wrap" tabindex="0" aria-label="Request history; scroll horizontally on smaller screens"><table><thead><tr><th scope="col">Request ID</th><th scope="col">Request details</th><th scope="col">Submitted</th><th scope="col">Related office</th><th scope="col">Priority</th><th scope="col">Status</th><th scope="col">Action</th></tr></thead><tbody>
+            <tr t-foreach="u['rows']" t-as="r" data-request-row="" t-att-data-state="r['state']" t-att-data-type="r['type_id']"><td><b t-esc="r['reference']"/></td><td><div class="request-row-title" t-esc="r['name']"/><div class="subtle request-row-type" t-esc="r['type']"/></td><td t-esc="r['date']"/><td t-esc="r['office']"/><td t-esc="r['priority']"/><td><span t-att-class="'status ' + r['tone']" t-esc="r['status']"/></td><td><a class="btn" t-att-href="'#student_request_detail_%s' % r['id']" t-att-aria-label="'View request ' + r['reference']">View</a></td></tr>
+          </tbody></table></div>
+          <p class="empty" data-request-empty="" t-att-hidden="'hidden' if u['rows'] else None" t-esc="'No requests match these filters.' if u['rows'] else 'No requests found. Submit a new request to see it listed here.'"/>
+          <div class="foot">Status changes and official documents are published by the college. Your office preference is shown as submitted and may differ from the team handling the request.</div>
+        </section>
+        <section class="panel"><h2>Understanding request status</h2><div class="grid3 request-status-guide">
+          <div><span class="pill">Submitted</span><p class="small subtle">Request received in the portal; it may not yet have been reviewed.</p></div>
+          <div><span class="pill amber">More information requested</span><p class="small subtle">Open the request and send the details requested by the college office.</p></div>
+          <div><span class="pill green">Completed</span><p class="small subtle">The college has completed the service. An approval alone does not mean a certificate has been issued.</p></div>
+        </div></section>
+        <t t-foreach="u['rows']" t-as="r"><t t-call="ideastone_erp.student_request_details"/></t>
+      </section>
+
+      <section id="student_certificates" data-requests-page="certificates" hidden="hidden">
+        <div class="pagehead"><div><h1>Certificates &amp; documents</h1><p>Choose the right document request and understand what information may be required.</p></div><span class="pill violet">Availability follows college policy</span></div>
+        <div class="grid3">
+          <section t-foreach="u['cards']" t-as="card" class="panel certificate-card">
+            <span t-att-class="'kicon ' + card['tone']"><i t-att-class="'fa fa-' + card['icon']" aria-hidden="true"/></span>
+            <h2 t-esc="card['name']"/><p class="small subtle" t-esc="card['description']"/><div class="foot" t-esc="card['note']"/>
+            <div t-if="card['enquiry']" class="foot">This document is not separately listed in the enabled catalogue. Ask the college office about availability.</div>
+            <button type="button" t-att-class="'btn ' + ('light' if card['enquiry'] else 'primary')" t-att-data-certificate-type="card['type_id'] or ''" t-att-data-certificate-title="card['title']" t-att-disabled="'disabled' if not card['type_id'] else None" t-esc="'Start enquiry' if card['type_id'] and card['enquiry'] else card['button'] if card['type_id'] else 'Contact college office'"/>
+          </section>
+        </div>
+        <div class="callout"><i class="fa fa-info-circle" aria-hidden="true"/><div><strong>Document safety</strong><p>A submitted request is not itself a certificate. Open My requests to download documents made available by authorised college staff.</p></div></div>
+        <section t-if="any(row['file'] for row in u['rows'])" class="panel issued-documents"><div class="panel-head"><h2>Issued documents</h2><span class="pill green">Published by your college</span></div><div t-foreach="[row for row in u['rows'] if row['file']]" t-as="issued" class="mini-stat"><div><b t-esc="issued['name']"/><p class="small subtle" t-esc="issued['reference']"/></div><a class="btn" t-att-href="'/my/campus/student/download/request/%s' % issued['id']">Download official document</a></div></section>
+      </section>
+    </div>
+  </template>
+
+  <template id="student_request_details">
+    <dialog class="request-dialog" t-att-data-request-dialog="r['id']" t-att-aria-labelledby="'request_dialog_title_%s' % r['id']">
+      <div class="panel-head"><div><span class="small subtle" t-esc="r['reference']"/><h2 t-att-id="'request_dialog_title_%s' % r['id']" t-esc="r['name']"/></div><button class="btn light" type="button" data-request-close="" aria-label="Close request details">✕</button></div>
+      <p t-if="form_error" class="request-form-error" role="alert" t-esc="form_error"/>
+      <dl class="request-metadata"><div><dt>Request type</dt><dd t-esc="r['type']"/></div><div><dt>Submitted</dt><dd t-esc="r['date']"/></div><div><dt>Related office</dt><dd t-esc="r['office']"/></div><div><dt>Priority</dt><dd t-esc="r['priority']"/></div><div><dt>Status</dt><dd><span t-att-class="'status ' + r['tone']" t-esc="r['status']"/></dd></div></dl>
+      <h3>Submitted details</h3><p class="request-prose" t-esc="r['description']"/>
+      <div t-if="r['reply']" class="request-response"><h3>College response</h3><p class="request-prose" t-esc="r['reply']"/></div>
+      <div t-if="r['student_reply']" class="request-response"><h3>Your additional information</h3><p class="request-prose" t-esc="r['student_reply']"/></div>
+      <a t-if="r['file']" class="btn primary request-document" t-att-href="'/my/campus/student/download/request/%s' % r['id']">Download official document</a>
+      <form t-if="r['state'] == 'information'" action="/my/campus/student/action" method="post" class="request-reply-form"><t t-call="ideastone_erp.student_action_fields"/><input type="hidden" name="operation" value="reply"/><input type="hidden" name="return_to" value="requests"/><input type="hidden" name="request_id" t-att-value="r['id']"/><div class="field"><label t-att-for="'student_reply_%s' % r['id']">Requested information *</label><textarea t-att-id="'student_reply_%s' % r['id']" name="reply" required="required" maxlength="5000"/></div><button class="btn primary" type="submit">Send information</button></form>
+      <form t-if="r['can_cancel']" action="/my/campus/student/action" method="post" class="request-cancel-form"><t t-call="ideastone_erp.student_action_fields"/><input type="hidden" name="operation" value="cancel"/><input type="hidden" name="return_to" value="requests"/><input type="hidden" name="request_id" t-att-value="r['id']"/><button class="btn request-danger" type="submit">Cancel request</button></form>
+      <h3 class="request-timeline-title">Status history</h3><ol class="request-timeline"><li t-foreach="r['events']" t-as="event"><b t-esc="event['name']"/><span class="small subtle" t-esc="event['date']"/><p t-if="event['response']" class="request-prose" t-esc="event['response']"/></li></ol>
+    </dialog>
+  </template>
+</odoo>

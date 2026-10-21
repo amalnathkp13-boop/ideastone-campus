@@ -12,7 +12,7 @@
     ],
     "data": [
         "security/groups.xml", "security/directory.xml", "security/ir.model.access.csv", "security/rules.xml",
-        "views/operations.xml", "views/faculty.xml", "views/faculty_leave.xml", "views/faculty_attendance.xml", "views/payroll_history.xml", "views/menus.xml", "views/portal.xml", "views/reports.xml",
+        "views/operations.xml", "views/faculty.xml", "views/faculty_leave.xml", "views/faculty_attendance.xml", "views/student_attendance_workspace.xml", "views/subject_attendance_workspace.xml", "views/payroll_history.xml", "views/menus.xml", "views/portal.xml", "views/reports.xml",
         "security/workspace.xml", "views/workspace.xml", "views/faculty_workspace.xml",
         "security/faculty_tools.xml", "views/faculty_tools.xml", "views/student_leave.xml", "views/faculty_reports.xml",
         "security/mvp.xml", "data/mvp.xml", "views/mvp.xml", "views/mvp_search.xml", "views/mvp_reports.xml",
@@ -20,6 +20,7 @@
         "data/parent_portal.xml", "views/parent_operations.xml", "views/parent_portal.xml",
         "security/learning.xml", "views/mvp_learning.xml", "views/student_notices.xml", "views/student_fees.xml",
         "data/student_library.xml", "views/student_library.xml",
+        "security/learning.xml", "views/mvp_learning.xml", "views/student_notices.xml", "views/student_fees.xml", "views/student_requests.xml",
     ],
     "assets": {
         "web.assets_frontend": [
@@ -32,7 +33,7 @@
             "ideastone_erp/static/src/scss/student_examinations.scss",
             "ideastone_erp/static/src/scss/student_attendance.scss",
             "ideastone_erp/static/src/scss/student_notices.scss",
-            "ideastone_erp/static/src/scss/student_library.scss",
+            "ideastone_erp/static/src/scss/student_library.scss", "ideastone_erp/static/src/scss/student_requests.scss",
             "ideastone_erp/static/src/js/student_portal.js",
             "ideastone_erp/static/src/js/student_academics.js",
             "ideastone_erp/static/src/js/student_timetable.js",
@@ -40,7 +41,7 @@
             "ideastone_erp/static/src/js/student_examinations.js",
             "ideastone_erp/static/src/js/student_attendance.js",
             "ideastone_erp/static/src/js/student_notices.js",
-            "ideastone_erp/static/src/js/student_library.js",
+            "ideastone_erp/static/src/js/student_library.js", "ideastone_erp/static/src/js/student_requests.js",
         ],
         "web.assets_backend": [
             "ideastone_erp/static/src/js/dashboard.js",
@@ -58,6 +59,12 @@
             "ideastone_erp/static/src/js/faculty_attendance.js",
             "ideastone_erp/static/src/xml/faculty_attendance.xml",
             "ideastone_erp/static/src/scss/faculty_attendance.scss",
+            "ideastone_erp/static/src/xml/subject_attendance_workspace.xml",
+            "ideastone_erp/static/src/scss/subject_attendance_workspace.scss",
+            "ideastone_erp/static/src/xml/student_attendance_workspace.xml",
+            "ideastone_erp/static/src/scss/student_attendance_workspace.scss",
+            "ideastone_erp/static/src/js/subject_attendance_workspace.js",
+            "ideastone_erp/static/src/js/student_attendance_workspace.js",
             "ideastone_erp/static/src/js/faculty_appraisal.js",
             "ideastone_erp/static/src/xml/faculty_appraisal.xml",
             "ideastone_erp/static/src/scss/faculty_appraisal.scss",

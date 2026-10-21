@@ -450,6 +450,9 @@ class StudentPortal(models.AbstractModel):
         if duplicate:
             return {"saved": True, "reference": duplicate[0].portal_reference, "existing": True}
         model = self.env["campus.service.request"].sudo()
+        office, priority = payload.get("requested_office", "auto"), payload.get("priority", "normal")
+        if not isinstance(office, str) or office not in dict(model._fields["portal_requested_office"].selection) or not isinstance(priority, str) or priority not in dict(model._fields["portal_priority"].selection):
+            raise ValidationError(_("Choose a valid office preference and priority."))
         content, filename = model._portal_upload(payload.get("file"), payload.get("filename"), kind.max_upload_mb)
         if kind.require_file and not content:
             raise ValidationError(_("Attach the required supporting file."))
@@ -460,7 +463,8 @@ class StudentPortal(models.AbstractModel):
                 raise AccessError(_("The attendance reference does not belong to your account."))
         rec = model.create({"name": title, "description": description, "kind": kind.kind, "portal_type_id": kind.id,
             "portal_key": key, "student_id": student.id, "requester_id": self.env.uid, "company_id": student.company_id.id,
-            "document": content, "filename": filename, "portal_attendance_id": attendance.id})
+            "document": content, "filename": filename, "portal_attendance_id": attendance.id,
+            "portal_requested_office": office, "portal_priority": priority})
         rec.action_submit()
         return {"saved": True, "reference": rec.portal_reference}
 
