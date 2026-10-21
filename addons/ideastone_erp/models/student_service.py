@@ -422,12 +422,17 @@ class StudentPortal(models.AbstractModel):
         elif operation == "feedback":
             period, comments = str(payload.get("period") or "").strip(), str(payload.get("comments") or "")
             score = int(payload.get("score") or 0)
+            category = payload.get("category", "other")
+            if not isinstance(category, str) or category not in dict(self.env["campus.feedback"]._fields["student_category"].selection):
+                raise ValidationError(_("Choose a valid feedback category."))
+            if "category" in payload and len(comments.strip()) < 10:
+                raise ValidationError(_("Enter at least 10 characters of comments or suggestions."))
             if not period or len(period) > 80 or not 1 <= score <= 5 or len(comments) > 5000:
                 raise ValidationError(_("Enter a period, a rating from 1 to 5 and comments within 5,000 characters."))
             self._serialize(student)
-            if self.env["campus.feedback"].sudo().search_count([("respondent_id", "=", self.env.uid), ("company_id", "=", student.company_id.id), ("kind", "=", "student"), ("period", "=", period), ("faculty_id", "=", False)]):
+            if self.env["campus.feedback"].sudo().with_context(active_test=False).search_count([("respondent_id", "=", self.env.uid), ("company_id", "=", student.company_id.id), ("kind", "=", "student"), ("period", "=", period), ("faculty_id", "=", False)]):
                 raise ValidationError(_("Feedback has already been submitted for this period."))
-            self.env["campus.feedback"].sudo().create({"name": "Student feedback: " + period, "student_id": student.id, "respondent_id": self.env.uid, "company_id": student.company_id.id, "kind": "student", "period": period, "score": score, "comments": comments})
+            self.env["campus.feedback"].sudo().create({"name": "Student feedback: " + period, "student_id": student.id, "respondent_id": self.env.uid, "company_id": student.company_id.id, "kind": "student", "period": period, "score": score, "comments": comments, "student_category": category})
         else:
             raise AccessError(_("This student action is not supported."))
         return {"saved": True}
