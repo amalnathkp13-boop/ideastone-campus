@@ -242,6 +242,14 @@ async function save(page, control) {
         assert.equal(simultaneous[0].reference,simultaneous[1].reference);
         assert.equal((await snapshot(page)).requests.filter(item=>item.type_id===support.id).length,1);
         await page.screenshot({path:path.join(out,'student-requests-1440.png'),fullPage:true});
+        await page.getByRole('button',{name:'Close request details',exact:true}).click();
+        for (const width of [320,390,768,1440]) {
+            await page.setViewportSize({width,height:900});
+            for (const label of ['Overview','New request','My requests','Certificates & documents']) {
+                await page.locator('.student_subnav').getByRole('link',{name:label,exact:true}).click();
+                assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Requests overflow at ${width}: ${label}`);
+            }
+        }
         await visit(page,'library');
         await page.locator('[data-library-page="overview"]').waitFor({state:'visible'});
         await page.getByRole('searchbox',{name:'Search the catalogue',exact:true}).fill('STUDENT-LIB-2');
@@ -271,14 +279,6 @@ async function save(page, control) {
         }
         await page.locator('.student_subnav').getByRole('link',{name:'Overview',exact:true}).click();
         await page.screenshot({path:path.join(out,'student-library-1440.png'),fullPage:true});
-        await page.getByRole('button',{name:'Close request details',exact:true}).click();
-        for (const width of [320,390,768,1440]) {
-            await page.setViewportSize({width,height:900});
-            for (const label of ['Overview','New request','My requests','Certificates & documents']) {
-                await page.locator('.student_subnav').getByRole('link',{name:label,exact:true}).click();
-                assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Requests overflow at ${width}: ${label}`);
-            }
-        }
         await visit(page,'fees');
         const receipts=(await snapshot(page)).fees.payments;
         assert.equal(receipts.length,2);
