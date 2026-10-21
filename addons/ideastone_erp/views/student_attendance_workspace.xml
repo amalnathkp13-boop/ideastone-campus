@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="action_student_attendance_workspace" model="ir.actions.client">
+    <field name="name">Student Attendance</field>
+    <field name="tag">ideastone_erp.student_attendance_workspace</field>
+  </record>
+</odoo>

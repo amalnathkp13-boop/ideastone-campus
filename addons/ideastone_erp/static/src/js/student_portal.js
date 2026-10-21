@@ -74,7 +74,10 @@
             const next = html.getElementById("campus_student_workspace");
             if (!next) throw new Error("Student workspace unavailable");
             const destination = new URL(response.url);
-            if (form && destination.pathname === previous.pathname) destination.hash = previous.hash;
+            if (form && destination.pathname === previous.pathname) {
+                destination.hash = previous.hash;
+                if (form.matches('[data-student-request-create]') && destination.searchParams.has('saved')) destination.hash = '#student_request_history';
+            }
             if (form && destination.searchParams.has("form_error")) {
                 const target = [...next.querySelectorAll("form")].find(candidate =>
                     ["operation", "assignment_id", "request_id", "notice_id"].every(key =>

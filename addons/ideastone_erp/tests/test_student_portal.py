@@ -26,6 +26,46 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         payload.update(changes)
         return payload
 
+    def test_library_projection_and_enquiry_do_not_change_circulation(self):
+        author = self.env["op.author"].create({"name": "Library QA author"})
+        publisher = self.env["op.publisher"].create({"name": "Library QA publisher"})
+        media = self.env["op.media"].create({"name": "Library QA title <safe>", "internal_code": "LIB-STUDENT-QA",
+            "author_ids": [(4, author.id)], "publisher_ids": [(4, publisher.id)]})
+        units = self.env["op.media.unit"].create([{"name": "Library QA copy %s" % index, "media_id": media.id} for index in range(2)])
+        card_type = self.env["op.library.card.type"].create({"name": "Library QA card", "allow_media": 3, "duration": 7, "penalty_amt_per_day": 1})
+        card = self.env["op.library.card"].create({"partner_id": self.student.partner_id.id, "student_id": self.student.id,
+            "type": "student", "library_card_type_id": card_type.id})
+        today = self.env["op.media.movement"]._fields["issued_date"].default(self.env["op.media.movement"])
+        loan = self.env["op.media.movement"].create({"media_id": media.id, "media_unit_id": units[0].id,
+            "library_card_id": card.id, "type": "student", "student_id": self.student.id, "company_id": self.env.company.id,
+            "issued_date": today - timedelta(days=10), "return_date": today - timedelta(days=3)})
+        loan.issue_media()
+        foreign_company = self.env["res.company"].create({"name": "Foreign Library QA"})
+        self.env["op.media.unit"].create({"name": "Foreign copy", "media_id": media.id, "campus_company_id": foreign_company.id})
+        self.env["op.media.queue"].create({"media_id": media.id, "user_id": self.other_user.id,
+            "partner_id": self.other.partner_id.id, "date_to": today + timedelta(days=7)})
+        data = self.portal.snapshot()
+        book = next(row for row in data["library_ui"]["books"] if row["id"] == media.id)
+        self.assertEqual((book["copies"], book["available"]), (2, 1))
+        self.assertEqual(data["library_ui"]["overdue"], 1)
+        self.assertFalse(data["library_ui"]["reservations"])
+        self.assertFalse(self.env["campus.student.portal"].with_user(self.other_user).snapshot()["library_ui"]["loans"])
+        payload = {"intent": "renew", "loan_id": loan.id, "book_title": media.name, "note": "Please review.", "key": uuid.uuid4().hex}
+        with self.assertRaises(AccessError):
+            self.env["campus.student.portal"].with_user(self.other_user).act("library_enquiry", payload)
+        result = self.portal.act("library_enquiry", payload)
+        self.assertEqual(self.portal.act("library_enquiry", payload), result)
+        self.assertEqual(loan.state, "issue")
+        self.assertEqual(loan.return_date, today - timedelta(days=3))
+        enquiry = self.portal.snapshot()["library_ui"]["active_enquiry"]
+        self.assertEqual(enquiry["reference"], result["reference"])
+        self.portal.act("cancel", {"request_id": enquiry["id"]})
+        self.assertFalse(self.portal.snapshot()["library_ui"]["active_enquiry"])
+        rendered = str(self.env["ir.ui.view"]._render_template("ideastone_erp.student_library_book_card", {"book": book}))
+        self.assertIn("&lt;safe&gt;", rendered)
+        with self.assertRaises(ValidationError):
+            self.portal.act("library_enquiry", dict(payload, intent="approve"))
+
     def test_identity_context_and_direct_model_boundaries(self):
         self.assertEqual(self.portal.snapshot()["student"]["number"], self.student.gr_no)
         with self.assertRaises(AccessError):
@@ -191,18 +231,31 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         self.assertNotIn("FOREIGN STUDENT EVENT", rendered)
 
     def test_request_retry_staff_workflow_notifications_and_document_scope(self):
-        payload = self.request_payload()
+        payload = self.request_payload(requested_office="academic", priority="deadline")
         first = self.portal.act("request", payload)
         self.assertEqual(first, self.portal.act("request", payload))
         self.assertTrue(self.portal.act("request", self.request_payload())["existing"])
         rec = self.env["campus.service.request"].search([("portal_reference", "=", first["reference"])]).with_user(self.owner)
         self.assertEqual(rec.requester_id, self.student_user)
+        self.assertEqual(rec.portal_requested_office, "academic")
+        self.assertEqual(rec.portal_priority, "deadline")
+        ui = self.portal.snapshot()["request_ui"]
+        self.assertEqual(ui["total"], 1)
+        self.assertEqual(ui["review"], 1)
+        self.assertEqual(ui["rows"][0]["office"], "Academic office")
+        self.assertEqual(ui["rows"][0]["priority"], "Deadline approaching")
+        self.assertEqual(ui["rows"][0]["tone"], "closed")
+        self.assertFalse(self.env["campus.student.portal"].with_user(self.other_user).snapshot()["request_ui"]["rows"])
+        with self.assertRaises(ValidationError):
+            rec.write({"portal_priority": "normal"})
         with self.assertRaises(ValidationError):
             rec.action_portal_information()
         rec.write({"portal_reply": "Please confirm the intended recipient."})
         rec.action_portal_information()
+        self.assertEqual(self.portal.snapshot()["request_ui"]["rows"][0]["tone"], "review")
         self.portal.act("reply", {"request_id": rec.id, "reply": "Scholarship office"})
         rec.action_approve()
+        self.assertEqual(self.portal.snapshot()["request_ui"]["completed"], 0)
         with self.assertRaises(ValidationError):
             self.portal.act("cancel", {"request_id": rec.id})
         rec.write({"portal_result_file": base64.b64encode(b"Official QA document"), "portal_result_filename": "issued.txt", "portal_reply": "The official document is available."})
@@ -215,10 +268,16 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         self.assertGreater(self.portal.snapshot()["updates"], 0)
         self.portal.act("updates")
         self.assertEqual(self.portal.snapshot()["updates"], 0)
+        rec.action_done()
+        self.assertEqual(self.portal.snapshot()["request_ui"]["completed"], 1)
         with self.assertRaises(ValidationError):
             rec.unlink()
 
     def test_upload_and_request_identity_validation(self):
+        with self.assertRaises(ValidationError):
+            self.portal.act("request", self.request_payload(priority="unrecognised"))
+        with self.assertRaises(ValidationError):
+            self.portal.act("request", self.request_payload(requested_office="other-college-office"))
         with self.assertRaises(ValidationError):
             self.portal.act("request", self.request_payload(file=base64.b64encode(b"<html>unsafe</html>"), filename="fake.pdf"))
         with self.assertRaises(AccessError):

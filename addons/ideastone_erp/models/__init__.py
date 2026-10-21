@@ -32,6 +32,8 @@ from . import academic_security
 from . import faculty_task
 from . import faculty_leave_ui
 from . import faculty_attendance_ui
+from . import subject_attendance_ui
+from . import student_attendance_ui
 from . import faculty_activity, faculty_document, faculty_assessment
 from . import student_leave
 from . import student_education
@@ -43,5 +45,7 @@ from . import student_portal, student_service
 from . import parent_portal
 from . import mvp_learning
 from . import student_notices_ui
+from . import student_requests_ui
 from . import student_fees_ui
 from . import student_help_ui
+from . import student_library_ui

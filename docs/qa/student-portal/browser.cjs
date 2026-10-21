@@ -183,20 +183,35 @@ async function save(page, control) {
         assert(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth),'Calendar overflows phone viewport');
         await page.setViewportSize({width:1440,height:1000});
         await visit(page,'requests');
+        await page.locator('.student_subnav').getByRole('link',{name:'New request',exact:true}).click();
         const kind=initial.request_types.find(item=>item.code==='bonafide') || initial.request_types[0];
         await page.locator('#student_request_type').selectOption(String(kind.id));
         await page.locator('#student_request_title').fill('Bonafide for scholarship verification');
         await page.locator('#student_request_description').fill('Please issue an official bonafide certificate for the scholarship office.');
+        await page.locator('#student_request_office').selectOption('academic');
+        await page.locator('#student_request_priority').selectOption('deadline');
+        await page.locator('#student_request_accuracy').check();
         await page.locator('#student_request_file').setInputFiles({name:'fake.pdf',mimeType:'application/pdf',buffer:Buffer.from('Not a PDF')});
         await page.getByRole('button',{name:'Submit request',exact:true}).click();
         await page.getByText('Only PDF, PNG, JPEG or UTF-8 text with matching content is permitted.',{exact:true}).waitFor();
         assert.equal(await page.locator('#student_request_title').inputValue(),'Bonafide for scholarship verification');
         assert.equal(await page.locator('#student_request_file').evaluate(input=>input.files[0]?.name),'fake.pdf');
+        assert.equal(await page.locator('#student_request_office').inputValue(),'academic');
+        assert.equal(await page.locator('#student_request_priority').inputValue(),'deadline');
+        assert(await page.locator('#student_request_accuracy').isChecked());
         await page.locator('#student_request_file').setInputFiles({name:'support.txt',mimeType:'text/plain',buffer:Buffer.from('Synthetic student supporting document.')});
         await save(page,page.getByRole('button',{name:'Submit request',exact:true}));
         let data=await snapshot(page);
         assert.equal(data.requests.length,1);
         const record=data.requests[0];
+        assert.equal(new URL(page.url()).hash,'#student_request_history');
+        assert.equal(data.request_ui.rows[0].office,'Academic office');
+        assert.equal(data.request_ui.rows[0].priority,'Deadline approaching');
+        assert.equal(await page.locator('[data-request-row] .status').first().evaluate(element=>getComputedStyle(element).color),'rgb(91, 117, 146)');
+        await page.locator('[data-request-filter="search"]').fill('no-such-student-request');
+        assert.equal(await page.locator('[data-request-row]:visible').count(),0);
+        await page.locator('[data-request-reset]').click();
+        await page.locator(`[data-request-row] a[href="#student_request_detail_${record.id}"]`).click();
         const retry={type_id:kind.id,key:data.submission_key,title:'Retry request',description:'Retry after a network interruption.'};
         const duplicate=await Promise.all([rpc(page,'campus.student.portal','act',['request',retry]),rpc(page,'campus.student.portal','act',['request',retry])]);
         assert(duplicate.every(item=>item.reference===record.reference));
@@ -207,7 +222,7 @@ async function save(page, control) {
         await rpc(staff,'campus.service.request','write',[[record.id],{portal_reply:'Confirm the institution receiving the certificate.'}]);
         await rpc(staff,'campus.service.request','action_portal_information',[[record.id]]);
         await page.reload();
-        await page.locator('.student_case summary').first().click();
+        await page.locator(`[data-request-dialog="${record.id}"][open]`).waitFor();
         await page.locator('textarea[name=reply]').fill('Scholarship office, QA Demo College');
         await save(page,page.getByRole('button',{name:'Send information',exact:true}));
         assert.equal((await snapshot(page)).requests.find(item=>item.id===record.id).state,'submitted');
@@ -215,7 +230,7 @@ async function save(page, control) {
         await rpc(staff,'campus.service.request','write',[[record.id],{portal_reply:'Your bonafide certificate is ready.',portal_result_file:Buffer.from('Official synthetic certificate for QA Arun.').toString('base64'),portal_result_filename:'bonafide.txt'}]);
         await rpc(staff,'campus.service.request','action_portal_ready',[[record.id]]);
         await page.reload();
-        await page.locator('.student_case summary').first().click();
+        await page.locator(`[data-request-dialog="${record.id}"][open]`).waitFor();
         const final=await page.request.get(base+`/my/campus/student/download/request/${record.id}`);
         assert.equal(final.status(),200); assert.match(await final.text(),/QA Arun/);
         const support=initial.request_types.find(item=>item.code==='support');
@@ -227,6 +242,43 @@ async function save(page, control) {
         assert.equal(simultaneous[0].reference,simultaneous[1].reference);
         assert.equal((await snapshot(page)).requests.filter(item=>item.type_id===support.id).length,1);
         await page.screenshot({path:path.join(out,'student-requests-1440.png'),fullPage:true});
+        await page.getByRole('button',{name:'Close request details',exact:true}).click();
+        for (const width of [320,390,768,1440]) {
+            await page.setViewportSize({width,height:900});
+            for (const label of ['Overview','New request','My requests','Certificates & documents']) {
+                await page.locator('.student_subnav').getByRole('link',{name:label,exact:true}).click();
+                assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Requests overflow at ${width}: ${label}`);
+            }
+        }
+        await visit(page,'library');
+        await page.locator('[data-library-page="overview"]').waitFor({state:'visible'});
+        await page.getByRole('searchbox',{name:'Search the catalogue',exact:true}).fill('STUDENT-LIB-2');
+        await page.getByRole('button',{name:'Search catalogue →',exact:true}).click();
+        assert.equal(await page.locator('[data-library-book]:visible').count(),1);
+        await page.locator('[data-library-reset]').click();
+        const library=(await snapshot(page)).library_ui;
+        const libraryLoan=library.current.find(row=>row.code==='STUDENT-LIB-1');
+        assert(libraryLoan.overdue);
+        await page.locator('.student_subnav').getByRole('link',{name:'My loans',exact:true}).click();
+        assert.equal(await page.locator('#student_library_loans .status.overdue').first().evaluate(element=>getComputedStyle(element).color),'rgb(183, 53, 61)');
+        await page.getByRole('button',{name:'Request renewal',exact:true}).click();
+        assert.equal(await page.locator('#library_request_loan').inputValue(),String(libraryLoan.id));
+        await page.locator('#library_request_note').fill('Synthetic renewal enquiry for library staff review.');
+        await save(page,page.getByRole('button',{name:'Submit library enquiry',exact:true}));
+        const afterLibrary=(await snapshot(page)).library_ui;
+        assert(afterLibrary.active_enquiry);
+        assert.equal(afterLibrary.current.find(row=>row.id===libraryLoan.id).due,libraryLoan.due);
+        await save(page,page.getByRole('button',{name:'Cancel enquiry',exact:true}));
+        assert.equal((await snapshot(page)).library_ui.active_enquiry,null);
+        for(const width of [320,390,768,1440]) {
+            await page.setViewportSize({width,height:900});
+            for(const label of ['Overview','Catalogue','My loans','Reservations & requests','Digital resources']) {
+                await page.locator('.student_subnav').getByRole('link',{name:label,exact:true}).click();
+                assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Library overflow at ${width}: ${label}`);
+            }
+        }
+        await page.locator('.student_subnav').getByRole('link',{name:'Overview',exact:true}).click();
+        await page.screenshot({path:path.join(out,'student-library-1440.png'),fullPage:true});
         await visit(page,'help');
         assert.match(await page.locator('.help_view h1').evaluate(element=>getComputedStyle(element).fontFamily),/Roboto/);
         assert.equal(await page.locator('.help_view h1').evaluate(element=>getComputedStyle(element).fontSize),'31px');
