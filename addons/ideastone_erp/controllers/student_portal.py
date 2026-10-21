@@ -64,7 +64,7 @@ class StudentWorkspace(CampusPortal):
 
     @http.route("/my/campus/student/action", type="http", auth="user", website=True, methods=["POST"], csrf=True)
     def student_action(self, operation="", return_to="dashboard", **kw):
-        allowed = {"dashboard", "profile", "academics", "timetable", "attendance", "exams", "fees", "notices", "requests", "library", "help", "account"}
+        allowed = {"dashboard", "profile", "academics", "timetable", "attendance", "exams", "fees", "notices", "requests", "on-duty", "library", "help", "account"}
         return_to = return_to if return_to in allowed else "dashboard"
         service = request.env["campus.student.portal"]
         try:

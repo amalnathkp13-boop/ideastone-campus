@@ -1,0 +1,23 @@
+<odoo>
+  <record id="student_od_college_policy_form" model="ir.ui.view">
+    <field name="name">College semester OD token policy</field>
+    <field name="model">res.company</field>
+    <field name="inherit_id" ref="ideastone_erp.mvp_college_form"/>
+    <field name="arch" type="xml">
+      <field name="campus_excused_policy" position="after">
+        <field name="campus_od_default_tokens" groups="ideastone_erp.group_mvp_registrar,ideastone_erp.group_manager"/>
+        <field name="campus_od_token_rule" groups="ideastone_erp.group_mvp_registrar,ideastone_erp.group_manager"/>
+      </field>
+    </field>
+  </record>
+  <record id="student_od_enrolment_allocation_form" model="ir.ui.view">
+    <field name="name">Student semester OD allowance override</field>
+    <field name="model">op.student.course</field>
+    <field name="inherit_id" ref="ideastone_erp.mvp_enrolments_form"/>
+    <field name="arch" type="xml">
+      <field name="academic_term_id" position="after">
+        <field name="campus_od_tokens_override" groups="ideastone_erp.group_mvp_registrar,ideastone_erp.group_manager"/>
+      </field>
+    </field>
+  </record>
+</odoo>

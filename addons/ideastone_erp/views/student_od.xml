@@ -1,0 +1,55 @@
+<odoo>
+  <template id="student_od_workspace" inherit_id="ideastone_erp.student_workspace" name="Student On Duty Management">
+    <xpath expr="//nav[hasclass('student_subnav')]/t[@t-elif=&quot;section == 'requests'&quot;]" position="before">
+      <t t-elif="section == 'on-duty'"><a href="#student_od_summary">Token balance</a><a href="#student_od_apply">Apply for Special OD</a><a href="#student_od_history">Application history</a></t>
+    </xpath>
+    <xpath expr="//t[@t-elif=&quot;section == 'requests'&quot;][@t-call]" position="before">
+      <t t-elif="section == 'on-duty'" t-call="ideastone_erp.student_od_content"/>
+    </xpath>
+  </template>
+
+  <template id="student_od_content" name="Student On Duty content">
+    <t t-set="od" t-value="d['od']"/>
+    <div class="student_od_view">
+      <div class="od_intro"><div><span class="od_eyebrow">STUDENT SERVICES / ACADEMIC PERMISSIONS</span><h2>On Duty Management</h2><p>Apply for an academic event, follow approvals, and track your semester OD allowance.</p></div><span class="od_term"><i class="fa fa-calendar-o" aria-hidden="true"/> <t t-esc="od['term']"/></span></div>
+
+      <section id="student_od_summary" class="student_panel" aria-label="Semester OD token summary">
+        <div class="od_section_head"><div><h3>Semester token balance</h3><p>One token is reserved when a request is submitted. This college currently counts <t t-esc="'each OD day' if od['charge_rule'] == 'day' else 'each OD request'"/>.</p></div><span class="od_balance_note">Remaining = Total − Used − Reserved</span></div>
+        <div class="od_token_grid">
+          <div class="od_token od_total"><span class="od_token_icon"><i class="fa fa-ticket" aria-hidden="true"/></span><span>Total Tokens</span><strong t-esc="od['total']"/><small>Semester allowance</small></div>
+          <div class="od_token od_used"><span class="od_token_icon"><i class="fa fa-check-circle-o" aria-hidden="true"/></span><span>Used Tokens</span><strong t-esc="od['used']"/><small>Valid completed ODs</small></div>
+          <div class="od_token od_reserved"><span class="od_token_icon"><i class="fa fa-hourglass-half" aria-hidden="true"/></span><span>Reserved Tokens</span><strong t-esc="od['reserved']"/><small>Requests in progress</small></div>
+          <div class="od_token od_remaining"><span class="od_token_icon"><i class="fa fa-bolt" aria-hidden="true"/></span><span>Remaining Tokens</span><strong t-esc="od['remaining']"/><small>Available to request</small></div>
+        </div>
+        <p t-if="not od['route']" class="od_alert">Your mentor and HOD have not yet been assigned in the college approval route. Contact the college office before applying.</p>
+        <p t-elif="od['total'] == 0" class="od_alert">Your semester OD allowance has not been configured. Contact the college office.</p>
+      </section>
+
+      <div class="od_columns">
+        <section id="student_od_apply" class="student_panel">
+          <div class="od_section_head"><div><h3>New Special OD request</h3><p>For workshops, competitions, technical events, and other academic activities.</p></div><span class="od_badge blue">Student initiated</span></div>
+          <form action="/my/campus/student/action" method="post" class="od_form">
+            <t t-call="ideastone_erp.student_action_fields"/><input type="hidden" name="operation" value="od_submit"/><input type="hidden" name="return_to" value="on-duty"/><input type="hidden" name="category" value="special"/><input type="hidden" name="key" t-att-value="od['submission_key']"/>
+            <div class="od_field"><label for="od_event">Event or activity name <span>*</span></label><input id="od_event" name="name" type="text" maxlength="160" required="required" placeholder="e.g. Inter-college robotics workshop"/></div>
+            <div class="od_field"><label for="od_venue">Venue <span>*</span></label><input id="od_venue" name="venue" type="text" maxlength="200" required="required" placeholder="Venue or host institution"/></div>
+            <div class="od_date_fields"><div class="od_field"><label for="od_from">Start date <span>*</span></label><input id="od_from" name="od_date_from" type="date" required="required"/></div><div class="od_field"><label for="od_to">End date <span>*</span></label><input id="od_to" name="od_date_to" type="date" required="required"/></div></div>
+            <div class="od_field"><label for="od_purpose">Reason and event details <span>*</span></label><textarea id="od_purpose" name="purpose" rows="4" maxlength="5000" required="required" placeholder="Explain the event, your participation, and why OD is requested."/></div>
+            <div class="od_submission_note"><i class="fa fa-info-circle" aria-hidden="true"/><span>Submitting reserves the applicable token allowance. Your mentor reviews first, followed by the HOD. Final OD attendance requires HOD proof verification.</span></div>
+            <button class="od_button" type="submit" t-att-disabled="None if od['can_submit'] else 'disabled'">Submit for mentor review <i class="fa fa-arrow-right" aria-hidden="true"/></button>
+            <p t-if="not od['can_submit']" class="od_form_hint">An active semester with configured dates, an assigned approval route, and available tokens are required before submission.</p>
+          </form>
+        </section>
+
+        <div class="od_right_column">
+          <section class="student_panel od_path"><div class="od_section_head"><div><h3>How Special OD works</h3><p>Each decision is recorded against your application.</p></div></div><ol><li><span>1</span><div><strong>Submit request</strong><small>Your semester tokens are reserved.</small></div></li><li><span>2</span><div><strong>Mentor approval</strong><small>Your assigned mentor reviews the academic purpose.</small></div></li><li><span>3</span><div><strong>HOD approval</strong><small>The HOD sets any proof requirements and deadline.</small></div></li><li><span>4</span><div><strong>Proof and completion</strong><small>Upload evidence after the event. OD attendance is finalized only after HOD verification.</small></div></li></ol></section>
+          <section class="student_panel od_general"><span class="od_badge violet">Staff initiated</span><h3>General OD</h3><p>When you are assigned college work, your mentor or HOD starts the request. It still requires mentor authorization and final HOD approval. No post-event certificate is required.</p><p class="od_small">Approved General ODs will appear in your application history.</p></section>
+        </div>
+      </div>
+
+      <section id="student_od_history" class="student_panel"><div class="od_section_head"><div><h3>My OD applications</h3><p>Track approval progress, proof requests, and the allowance committed to each request.</p></div><span class="od_badge blue"><t t-esc="len(od['rows'])"/> applications</span></div>
+        <div t-if="od['rows']" class="od_table_wrap"><table><thead><tr><th scope="col">Activity</th><th scope="col">Category</th><th scope="col">Dates</th><th scope="col">Tokens</th><th scope="col">Status</th><th scope="col">Details</th></tr></thead><tbody><tr t-foreach="od['rows']" t-as="row"><td><strong t-esc="row['name']"/><small t-esc="row['venue']"/></td><td t-esc="row['category']"/><td><t t-esc="row['date_from']"/> – <t t-esc="row['date_to']"/></td><td t-esc="row['tokens']"/><td><span t-att-class="'od_badge ' + ('green' if row['state'] == 'completed' else 'red' if row['state'] in ('rejected','invalid','cancelled') else 'amber')" t-esc="row['status']"/></td><td><details class="od_details"><summary>View</summary><p t-esc="row['purpose']"/><p t-if="row['proof_requirements']"><strong>Proof required:</strong> <t t-esc="row['proof_requirements']"/></p><p t-if="row['proof_deadline']"><strong>Proof deadline:</strong> <t t-esc="row['proof_deadline']"/></p><form t-if="row['can_upload']" action="/my/campus/student/action" method="post" enctype="multipart/form-data"><t t-call="ideastone_erp.student_action_fields"/><input type="hidden" name="operation" value="od_proof"/><input type="hidden" name="return_to" value="on-duty"/><input type="hidden" name="od_id" t-att-value="row['id']"/><label t-att-for="'od_proof_' + str(row['id'])">Evidence file</label><input t-att-id="'od_proof_' + str(row['id'])" type="file" name="file" accept=".pdf,.png,.jpg,.jpeg,.txt" required="required"/><button type="submit" class="od_button">Send proof to HOD</button></form><form t-if="row['can_cancel']" action="/my/campus/student/action" method="post"><t t-call="ideastone_erp.student_action_fields"/><input type="hidden" name="operation" value="od_cancel"/><input type="hidden" name="return_to" value="on-duty"/><input type="hidden" name="od_id" t-att-value="row['id']"/><button type="submit" class="od_text_button">Cancel request</button></form><div class="od_timeline"><strong>Status history</strong><div t-foreach="row['events']" t-as="event"><span t-esc="event['action']"/><small><t t-esc="event['by']"/> · <t t-esc="event['at']"/></small></div></div></details></td></tr></tbody></table></div>
+        <div t-if="not od['rows']" class="od_empty"><span><i class="fa fa-folder-open-o" aria-hidden="true"/></span><h4>No OD applications yet</h4><p>When you submit a Special OD, its mentor review and token reservation will appear here.</p></div>
+      </section>
+    </div>
+  </template>
+</odoo>
