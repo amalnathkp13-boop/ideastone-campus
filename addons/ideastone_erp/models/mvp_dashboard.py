@@ -12,6 +12,8 @@ from odoo import _, api, fields, models
 ROLES = ("owner", "registrar", "admissions", "accountant", "exams", "readonly", "hod")
 # Client (OWL) actions have no res_model; access is checked against the model they edit.
 CLIENT_ACTION_MODELS = {
+    "action_students_directory": "op.student",
+    "action_students_enrolments": "op.student.course",
     "action_staff_profile": "campus.faculty.detail",
     "action_faculty_appraisal_dashboard": "campus.faculty.achievement",
     "action_faculty_leave_page": "hr.leave",
@@ -298,7 +300,8 @@ class OwnerDashboard(models.AbstractModel):
     def get_owner_action(self, xmlid):
         if not self._is_mvp_user():
             raise AccessError(_("College workspace permission is required."))
-        allowed = {item["action"] for module in self.get_overview()["faculty_modules"] for item in module["items"] if item.get("action")}
+        allowed = {action for module in self.get_overview()["faculty_modules"] for item in module["items"]
+                   for action in (item.get("action"), item.get("source_action")) if action}
         if xmlid not in allowed:
             raise AccessError(_("This action is outside your permitted college workspace."))
         action = self.env["ir.actions.actions"]._for_xml_id(xmlid)

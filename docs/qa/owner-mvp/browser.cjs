@@ -81,8 +81,23 @@ async function markup(page) {
         }
         for (const module of overview.faculty_modules.filter(module=>module.key!=='home')) {
             await page.locator('.campus_sidebar').getByRole('button',{name:module.label,exact:true}).click();
-            await page.getByRole('heading',{name:module.label,exact:true,level:1}).waitFor();
+            await page.getByRole('heading',{name:module.key==='students'?'Student directory':module.label,exact:true,level:1}).waitFor();
         }
+        await page.locator('.campus_sidebar').getByRole('button',{name:'Students',exact:true}).click();
+        await page.getByRole('heading',{name:'Student directory',exact:true,level:1}).waitFor();
+        if(await page.locator('.campus_students_workspace .kpi').count()!==4) throw Error('Students directory does not show four indicators');
+        if(await page.locator('.campus_students_workspace h1').evaluate(el=>getComputedStyle(el).fontSize)!=='27px') throw Error('Students heading differs from the established typography');
+        const directoryDepartment=await page.locator('.campus_students_workspace .dept h3').first().innerText();
+        await page.locator('.campus_students_workspace .dept .textbtn').first().click();
+        await page.getByRole('heading',{name:directoryDepartment,exact:true,level:1}).waitFor();
+        await page.locator('.campus_students_workspace .sectiontiles').waitFor();
+        await page.getByRole('button',{name:'← Student directory',exact:true}).click();
+        await page.getByRole('heading',{name:'Student directory',exact:true,level:1}).waitFor();
+        await page.getByRole('button',{name:'View all students ↗',exact:true}).click();
+        await page.getByRole('heading',{name:'All students',exact:true,level:1}).waitFor();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Enrolments & transfers',exact:true}).click();
+        await page.getByRole('heading',{name:'Enrolments & Transfers',exact:true,level:1}).waitFor();
+        if(await page.locator('.campus_students_workspace .alert-danger').count()) throw Error('Enrolments workspace failed to load');
         await page.locator('.campus_sidebar').getByRole('button',{name:'Timetable',exact:true}).click();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Class timetable',exact:true}).click();
         await page.locator('.o_control_panel').getByText('Class timetable',{exact:true}).last().waitFor();

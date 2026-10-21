@@ -1,7 +1,7 @@
 {
     "name": "Ideastone Campus Operations",
     "summary": "Teaching, campus services, staff administration and institutional engagement",
-    "version": "17.0.1.0.12",
+    "version": "17.0.1.0.13",
     "category": "Education",
     "author": "Ideastone Technologies Pvt Ltd",
     "license": "OPL-1",
@@ -18,7 +18,7 @@
         "security/mvp.xml", "data/mvp.xml", "views/mvp.xml", "views/mvp_search.xml", "views/mvp_reports.xml",
         "security/student_portal.xml", "data/student_portal.xml", "views/student_operations.xml", "views/student_portal.xml", "views/student_academics.xml", "views/student_timetable.xml", "views/student_examinations.xml", "views/student_attendance.xml",
         "views/student_account.xml",
-        "data/parent_portal.xml", "views/parent_operations.xml", "views/parent_portal.xml",
+        "data/parent_portal.xml", "views/parent_operations.xml", "views/parent_portal.xml", "views/students_directory_ui.xml",
         "security/learning.xml", "views/mvp_learning.xml", "views/student_notices.xml", "views/student_fees.xml",
         "views/student_help.xml",
         "data/student_library.xml", "views/student_library.xml",
@@ -47,6 +47,9 @@
             "ideastone_erp/static/src/js/student_library.js", "ideastone_erp/static/src/js/student_requests.js",
         ],
         "web.assets_backend": [
+            "ideastone_erp/static/src/js/students_directory.js",
+            "ideastone_erp/static/src/xml/students_directory.xml",
+            "ideastone_erp/static/src/scss/students_directory.scss",
             "ideastone_erp/static/src/js/dashboard.js",
             "ideastone_erp/static/src/xml/dashboard.xml",
             "ideastone_erp/static/src/xml/owner.xml",

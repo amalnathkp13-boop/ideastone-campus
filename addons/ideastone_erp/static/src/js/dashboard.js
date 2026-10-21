@@ -88,6 +88,10 @@ class CampusBase extends Component {
         return this.state.page === "library" ? "Library circulation desk" : "Reports & exports";
     }
     async chooseModule(module) {
+        if (this.state.is_owner_workspace && module.key === "students" && module.items?.[0]?.action) {
+            this.state.module = module.key;
+            return this.open(module.items[0]);
+        }
         await this.action.doAction("ideastone_erp.action_dashboard", {
             additionalContext: { campus_page: module.key === "home" ? (this.state.is_owner_workspace ? "owner-overview" : "overview") : "faculty-module", campus_module: module.key },
         });
@@ -101,6 +105,9 @@ class CampusBase extends Component {
     async open(item) {
         if (item.allowed === false) return;
         try {
+            if (["ideastone_erp.action_students_directory", "ideastone_erp.action_students_enrolments"].includes(item.action)) {
+                this.router.pushState({students_screen: item.action.endsWith("enrolments") ? "enrolments" : "directory", students_department_id: "", students_batch_id: ""});
+            }
             if (["ideastone_erp.action_faculty_appraisal_dashboard", "ideastone_erp.action_staff_profile"].includes(item.action) && item.action_id) {
                 window.location.assign(`/web#action=${item.action_id}`);
                 return;
