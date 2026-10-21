@@ -67,6 +67,34 @@ async function save(page, control) {
         await page.evaluate(()=>{document.getElementById('wrapwrap')?.scrollTo({top:0});window.scrollTo(0,0);});
         const routes=initial.navigation.map(item=>item[0]);
         for(const route of routes) await visit(page,route);
+        await page.locator('.account_view').waitFor();
+        assert.equal(await page.getByRole('switch').count(),3);
+        assert.equal(await page.locator('.account_view h1').evaluate(el=>getComputedStyle(el).fontSize),'31px');
+        assert.match(await page.locator('.account_view h1').evaluate(el=>getComputedStyle(el).fontFamily),/Roboto/);
+        assert.equal(await page.locator('.account_view h2').first().evaluate(el=>getComputedStyle(el).fontSize),'17px');
+        assert.equal(await page.locator('#student_account_security a[href="/my/security"]').count(),1);
+        for(const width of [320,390,768,1440]) {
+            await page.setViewportSize({width,height:1000});
+            assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Account page overflows at ${width}`);
+        }
+        await page.locator('#student_notice_badge').uncheck();
+        await page.locator('#student_academic_reminders').uncheck();
+        await page.locator('#student_compact_cards').check();
+        await save(page,page.getByRole('button',{name:'Save preferences',exact:true}));
+        await page.reload({waitUntil:'load'});
+        await page.locator('.account_view').waitFor();
+        assert.equal(await page.locator('#student_preferences_form input:checked').count(),1);
+        assert.equal(await page.locator('#student_main').getAttribute('data-compact'),'true');
+        assert.equal(await page.locator('.account_view .panel').first().evaluate(el=>getComputedStyle(el).paddingTop),'15px');
+        await visit(page,'dashboard');
+        assert.equal(await page.locator('.student_assistant').count(),0);
+        assert.equal(await page.getByRole('heading',{name:'Upcoming examinations',exact:true}).count(),0);
+        await visit(page,'account');
+        await save(page,page.getByRole('button',{name:'Reset',exact:true}));
+        const preferences=await snapshot(page);
+        assert.equal(preferences.notice_badge,true);
+        assert.equal(preferences.account_ui.academic_reminders,true);
+        assert.equal(preferences.account_ui.compact_cards,false);
         await visit(page,'exams');
         assert.equal(await page.locator('.exam_result_row').count(),initial.results.length);
         assert.equal(await page.locator('.student_sidebar .student_nav_link.active').count(),1);
@@ -250,6 +278,54 @@ async function save(page, control) {
                 assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Requests overflow at ${width}: ${label}`);
             }
         }
+        await visit(page,'library');
+        await page.locator('[data-library-page="overview"]').waitFor({state:'visible'});
+        await page.getByRole('searchbox',{name:'Search the catalogue',exact:true}).fill('STUDENT-LIB-2');
+        await page.getByRole('button',{name:'Search catalogue →',exact:true}).click();
+        assert.equal(await page.locator('[data-library-book]:visible').count(),1);
+        await page.locator('[data-library-reset]').click();
+        const library=(await snapshot(page)).library_ui;
+        const libraryLoan=library.current.find(row=>row.code==='STUDENT-LIB-1');
+        assert(libraryLoan.overdue);
+        await page.locator('.student_subnav').getByRole('link',{name:'My loans',exact:true}).click();
+        assert.equal(await page.locator('#student_library_loans .status.overdue').first().evaluate(element=>getComputedStyle(element).color),'rgb(183, 53, 61)');
+        await page.getByRole('button',{name:'Request renewal',exact:true}).click();
+        assert.equal(await page.locator('#library_request_loan').inputValue(),String(libraryLoan.id));
+        await page.locator('#library_request_note').fill('Synthetic renewal enquiry for library staff review.');
+        await save(page,page.getByRole('button',{name:'Submit library enquiry',exact:true}));
+        const afterLibrary=(await snapshot(page)).library_ui;
+        assert(afterLibrary.active_enquiry);
+        assert.equal(afterLibrary.current.find(row=>row.id===libraryLoan.id).due,libraryLoan.due);
+        await save(page,page.getByRole('button',{name:'Cancel enquiry',exact:true}));
+        assert.equal((await snapshot(page)).library_ui.active_enquiry,null);
+        for(const width of [320,390,768,1440]) {
+            await page.setViewportSize({width,height:900});
+            for(const label of ['Overview','Catalogue','My loans','Reservations & requests','Digital resources']) {
+                await page.locator('.student_subnav').getByRole('link',{name:label,exact:true}).click();
+                assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Library overflow at ${width}: ${label}`);
+            }
+        }
+        await page.locator('.student_subnav').getByRole('link',{name:'Overview',exact:true}).click();
+        await page.screenshot({path:path.join(out,'student-library-1440.png'),fullPage:true});
+        await visit(page,'help');
+        assert.match(await page.locator('.help_view h1').evaluate(element=>getComputedStyle(element).fontFamily),/Roboto/);
+        assert.equal(await page.locator('.help_view h1').evaluate(element=>getComputedStyle(element).fontSize),'31px');
+        await page.locator('.help_view .faq summary').first().click();
+        assert(await page.locator('.help_view .faq .answer').first().isVisible());
+        for(const width of [320,390,768,1440]) {
+            await page.setViewportSize({width,height:900});
+            assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Help form overflow at ${width}`);
+        }
+        await page.locator('#student_feedback_category').selectOption('services');
+        await page.locator('#student_feedback_score').selectOption('4');
+        await page.locator('#student_feedback_comments').fill('Please extend the student services help desk hours.');
+        await save(page,page.getByRole('button',{name:'Submit feedback',exact:true}));
+        assert.equal((await snapshot(page)).help_ui.feedback.category,'Student services');
+        await page.reload();
+        await page.locator('.feedback-receipt').waitFor();
+        assert.equal(await page.locator('.feedback-receipt .saved-comments').evaluate(element=>getComputedStyle(element).color),'rgb(22, 118, 74)');
+        assert.equal(await page.locator('#student_help_feedback_form').count(),0);
+        await page.screenshot({path:path.join(out,'student-help-feedback-1440.png'),fullPage:true});
         await visit(page,'fees');
         const receipts=(await snapshot(page)).fees.payments;
         assert.equal(receipts.length,2);
@@ -321,7 +397,7 @@ async function save(page, control) {
         assert.equal(await page.locator('#student_main').count(),0);
         assert.deepEqual(errors,[]);
         await fs.writeFile(path.join(out,'verification.json'),JSON.stringify({source:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID,
-            routes,profileReload:true,profileValidationRecovery:true,noticePersistence:true,requestConcurrentRetry:true,staffRequestWorkflow:true,
+            routes,accountPreferencesPersistence:true,accountPreferencesReset:true,profileReload:true,profileValidationRecovery:true,noticePersistence:true,requestConcurrentRetry:true,staffRequestWorkflow:true,
             receiptPdf:true,studentIDOR:true,csrf:true,networkRetry:true,logoutBack:true,responsive:[1440,768,390],
             ledger:{assessed:initial.fees.assessed,paid:initial.fees.paid,due:initial.fees.due},attendance:initial.attendance.rate,consoleErrors:errors},null,2));
         console.log('Student Portal: all scoped routes, saved workflows, PDF, IDOR, CSRF, retry, logout and responsive checks passed.');

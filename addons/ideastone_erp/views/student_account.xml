@@ -1,0 +1,43 @@
+<odoo>
+  <template id="student_account_workspace" inherit_id="ideastone_erp.student_workspace" name="Student Account and Preferences main content">
+    <xpath expr="//t[@t-elif=&quot;section == 'account'&quot;][@t-call]" position="attributes"><attribute name="t-call">ideastone_erp.student_account_content</attribute></xpath>
+    <xpath expr="//main[@id='student_main']" position="attributes"><attribute name="t-att-data-compact">'true' if d and d['account_ui']['compact_cards'] else 'false'</attribute></xpath>
+  </template>
+  <template id="student_account_dashboard_reminders" inherit_id="ideastone_erp.student_dashboard" name="Student academic reminder preference">
+    <xpath expr="//section[hasclass('student_assistant')]" position="attributes"><attribute name="t-if">d['account_ui']['academic_reminders']</attribute></xpath>
+    <xpath expr="//section[.//a[@t-att-href=&quot;student_url_for('exams')&quot;]]" position="attributes"><attribute name="t-if">d['account_ui']['academic_reminders']</attribute></xpath>
+  </template>
+  <template id="student_account_content" name="Student Account and Preferences">
+    <t t-set="u" t-value="d['account_ui']"/>
+    <div class="account_view">
+      <div class="pagehead"><div><h1>Account &amp; Preferences</h1><p>Manage your sign-in security and student portal preferences.</p></div><span class="pill"><i class="fa fa-cog" aria-hidden="true"/> Account settings</span></div>
+      <div class="settings-grid"><div>
+        <section class="panel" id="student_account_security"><h2>Account &amp; security</h2><p class="intro">Review the account currently signed in and manage secure access.</p>
+          <dl class="data-list"><div class="data-line"><dt>Signed in as</dt><dd t-esc="d['login']"/></div><div class="data-line"><dt>Account type</dt><dd>Student</dd></div><div class="data-line"><dt>Last sign-in</dt><dd t-esc="u['last_sign_in']"/></div><div class="data-line"><dt>Current session</dt><dd><span class="status-dot" aria-hidden="true"/>Active · This device</dd></div></dl>
+          <div class="security-banner"><span class="security-icon"><i class="fa fa-check" aria-hidden="true"/></span><div><strong>Keep your account secure</strong><p>Password updates and recovery are handled through the college ERP’s secure account flow. Never share your password or OTP.</p></div></div>
+          <div class="actions"><a class="btn primary" href="/my/security">Manage account security</a><a class="btn danger" href="/web/session/logout?redirect=/web/login">Sign out</a></div>
+        </section>
+        <section class="panel" id="student_account_preferences"><h2>In-app preferences</h2><p class="intro">Choose what you want to see while using the student portal.</p>
+          <form id="student_preferences_form" action="/my/campus/student/action" method="post"><t t-call="ideastone_erp.student_action_fields"/><input type="hidden" name="operation" value="preferences"/><input type="hidden" name="return_to" value="account"/><input type="hidden" name="preferences_version" value="2"/>
+            <div class="setting-row"><label class="setting-copy" for="student_notice_badge"><strong>Show unread notice count</strong><span id="student_notice_badge_hint">Display the unread notices count in the header.</span></label><input class="toggle" type="checkbox" role="switch" id="student_notice_badge" name="notice_badge" t-att-checked="d['notice_badge']" aria-describedby="student_notice_badge_hint"/></div>
+            <div class="setting-row"><label class="setting-copy" for="student_academic_reminders"><strong>Show academic reminders</strong><span id="student_academic_reminders_hint">Display study-assistant and upcoming exam reminders on your dashboard.</span></label><input class="toggle" type="checkbox" role="switch" id="student_academic_reminders" name="academic_reminders" t-att-checked="u['academic_reminders']" aria-describedby="student_academic_reminders_hint"/></div>
+            <div class="setting-row"><label class="setting-copy" for="student_compact_cards"><strong>Compact information cards</strong><span id="student_compact_cards_hint">Use a denser card layout to fit more information on screen.</span></label><input class="toggle" type="checkbox" role="switch" id="student_compact_cards" name="compact_cards" t-att-checked="u['compact_cards']" aria-describedby="student_compact_cards_hint"/></div>
+            <div class="actions"><button class="btn primary" type="submit">Save preferences</button><button class="btn" type="submit" form="student_preferences_defaults">Reset</button></div>
+          </form>
+          <form id="student_preferences_defaults" action="/my/campus/student/action" method="post" hidden="hidden"><t t-call="ideastone_erp.student_action_fields"/><input type="hidden" name="operation" value="preferences"/><input type="hidden" name="return_to" value="account"/><input type="hidden" name="preferences_version" value="2"/><input type="hidden" name="notice_badge" value="on"/><input type="hidden" name="academic_reminders" value="on"/></form>
+          <p class="preference-note">Preferences are saved to your student account. Reset restores the default settings. Email and SMS delivery are managed separately by the college.</p>
+        </section>
+      </div><div>
+        <section class="panel" id="student_account_privacy"><h2>Privacy &amp; visibility</h2><p class="intro">Your student information is shown according to college access policies.</p>
+          <div class="setting-row"><div class="setting-copy"><strong>Profile visibility</strong><span>Your official student record remains controlled by authorised college staff.</span></div><span class="pill">College-managed</span></div>
+          <div class="setting-row"><div class="setting-copy"><strong>Feedback identity</strong><span>Institutional feedback is associated with your student account.</span></div><span class="pill">Identified</span></div>
+          <div class="setting-row"><div class="setting-copy"><strong>Session privacy</strong><span>Sign out when using a shared or public computer.</span></div><span class="recommended">Recommended</span></div>
+        </section>
+        <section class="panel" id="student_account_details"><h2>Account details</h2><p class="intro">These details are shown for reference. Contact the college office to correct official records.</p>
+          <dl class="data-list"><div class="data-line"><dt>Student name</dt><dd t-esc="d['student']['name']"/></div><div class="data-line"><dt>Programme</dt><dd t-esc="d['placement']['programme']"/></div><div class="data-line"><dt>Batch</dt><dd t-esc="d['placement']['section']"/></div><div class="data-line"><dt>Student ID</dt><dd t-esc="d['student']['number']"/></div><div class="data-line"><dt>Academic period</dt><dd t-esc="d['placement']['year']"/></div></dl>
+          <div class="account-note"><t t-if="d['demo']">Demonstration college · sample records. </t>Official record corrections are reviewed by the college office through <a t-att-href="student_url_for('requests') + '#student_request_new'">Requests &amp; Certificates</a>.</div>
+        </section>
+      </div></div>
+    </div>
+  </template>
+</odoo>

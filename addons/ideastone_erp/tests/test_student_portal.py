@@ -1,6 +1,7 @@
 import base64
 import uuid
 from datetime import datetime, time, timedelta
+from types import SimpleNamespace
 
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import TransactionCase, new_test_user, tagged
@@ -25,6 +26,46 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
                    "key": uuid.uuid4().hex, "title": "QA bonafide", "description": "For education verification."}
         payload.update(changes)
         return payload
+
+    def test_library_projection_and_enquiry_do_not_change_circulation(self):
+        author = self.env["op.author"].create({"name": "Library QA author"})
+        publisher = self.env["op.publisher"].create({"name": "Library QA publisher"})
+        media = self.env["op.media"].create({"name": "Library QA title <safe>", "internal_code": "LIB-STUDENT-QA",
+            "author_ids": [(4, author.id)], "publisher_ids": [(4, publisher.id)]})
+        units = self.env["op.media.unit"].create([{"name": "Library QA copy %s" % index, "media_id": media.id} for index in range(2)])
+        card_type = self.env["op.library.card.type"].create({"name": "Library QA card", "allow_media": 3, "duration": 7, "penalty_amt_per_day": 1})
+        card = self.env["op.library.card"].create({"partner_id": self.student.partner_id.id, "student_id": self.student.id,
+            "type": "student", "library_card_type_id": card_type.id})
+        today = self.env["op.media.movement"]._fields["issued_date"].default(self.env["op.media.movement"])
+        loan = self.env["op.media.movement"].create({"media_id": media.id, "media_unit_id": units[0].id,
+            "library_card_id": card.id, "type": "student", "student_id": self.student.id, "company_id": self.env.company.id,
+            "issued_date": today - timedelta(days=10), "return_date": today - timedelta(days=3)})
+        loan.issue_media()
+        foreign_company = self.env["res.company"].create({"name": "Foreign Library QA"})
+        self.env["op.media.unit"].create({"name": "Foreign copy", "media_id": media.id, "campus_company_id": foreign_company.id})
+        self.env["op.media.queue"].create({"media_id": media.id, "user_id": self.other_user.id,
+            "partner_id": self.other.partner_id.id, "date_to": today + timedelta(days=7)})
+        data = self.portal.snapshot()
+        book = next(row for row in data["library_ui"]["books"] if row["id"] == media.id)
+        self.assertEqual((book["copies"], book["available"]), (2, 1))
+        self.assertEqual(data["library_ui"]["overdue"], 1)
+        self.assertFalse(data["library_ui"]["reservations"])
+        self.assertFalse(self.env["campus.student.portal"].with_user(self.other_user).snapshot()["library_ui"]["loans"])
+        payload = {"intent": "renew", "loan_id": loan.id, "book_title": media.name, "note": "Please review.", "key": uuid.uuid4().hex}
+        with self.assertRaises(AccessError):
+            self.env["campus.student.portal"].with_user(self.other_user).act("library_enquiry", payload)
+        result = self.portal.act("library_enquiry", payload)
+        self.assertEqual(self.portal.act("library_enquiry", payload), result)
+        self.assertEqual(loan.state, "issue")
+        self.assertEqual(loan.return_date, today - timedelta(days=3))
+        enquiry = self.portal.snapshot()["library_ui"]["active_enquiry"]
+        self.assertEqual(enquiry["reference"], result["reference"])
+        self.portal.act("cancel", {"request_id": enquiry["id"]})
+        self.assertFalse(self.portal.snapshot()["library_ui"]["active_enquiry"])
+        rendered = str(self.env["ir.ui.view"]._render_template("ideastone_erp.student_library_book_card", {"book": book}))
+        self.assertIn("&lt;safe&gt;", rendered)
+        with self.assertRaises(ValidationError):
+            self.portal.act("library_enquiry", dict(payload, intent="approve"))
 
     def test_identity_context_and_direct_model_boundaries(self):
         self.assertEqual(self.portal.snapshot()["student"]["number"], self.student.gr_no)
@@ -53,6 +94,33 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         self.assertEqual(self.portal.snapshot()["student"]["city"], "Erode")
         self.portal.act("preferences", {"notice_badge": False})
         self.assertFalse(self.portal.snapshot()["notice_badge"])
+
+    def test_help_feedback_category_receipt_and_student_scope(self):
+        period = self.portal.snapshot()["help_ui"]["period"]
+        payload = {"period": period, "score": 4, "category": "services", "comments": "Please improve service hours. <b>Student suggestion</b>"}
+        with self.assertRaises(ValidationError):
+            self.portal.act("feedback", dict(payload, category="invalid"))
+        with self.assertRaises(ValidationError):
+            self.portal.act("feedback", dict(payload, comments="short"))
+        self.portal.act("feedback", payload)
+        receipt = self.portal.snapshot()["help_ui"]["feedback"]
+        self.assertEqual(receipt["category"], "Student services")
+        self.assertEqual(receipt["score"], 4)
+        self.assertEqual(receipt["comments"], payload["comments"])
+        self.assertFalse(self.env["campus.student.portal"].with_user(self.other_user).snapshot()["help_ui"]["feedback"])
+        with self.assertRaises(ValidationError):
+            self.portal.act("feedback", payload)
+        record = self.env["campus.feedback"].search([("respondent_id", "=", self.student_user.id), ("period", "=", period)])
+        self.assertEqual(record.student_category, "services")
+        record.active = False
+        self.assertTrue(self.portal.snapshot()["help_ui"]["feedback"])
+        with self.assertRaises(ValidationError):
+            self.portal.act("feedback", payload)
+        rendered = str(self.env["ir.ui.view"]._render_template("ideastone_erp.student_help_content", {
+            "d": self.portal.snapshot(), "student_url_for": lambda section: "/my/campus/student/" + section}))
+        self.assertIn("&lt;b&gt;Student suggestion&lt;/b&gt;", rendered)
+        self.env["campus.student.portal"].with_user(self.other_user).act("feedback", {"period": period, "score": 3})
+        self.assertEqual(self.env["campus.feedback"].search([("respondent_id", "=", self.other_user.id)]).student_category, "other")
 
     def test_attendance_matches_college_policy_and_cancellation(self):
         session = self.session()
@@ -268,3 +336,35 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
         for record in draft | foreign:
             with self.assertRaises(AccessError):
                 self.portal._download("resource", record.id)
+
+    def test_account_preferences_are_scoped_validated_and_rendered(self):
+        defaults = self.portal.snapshot()["account_ui"]
+        self.assertTrue(defaults["academic_reminders"])
+        self.assertFalse(defaults["compact_cards"])
+        for payload in ({}, {"compact_cards": "on"}, {"student_id": self.other.id}, {"password": "invalid"}):
+            with self.assertRaises(ValidationError):
+                self.portal.act("preferences", payload)
+        self.portal.act("preferences", {"notice_badge": False, "academic_reminders": False, "compact_cards": True})
+        data = self.portal.snapshot()
+        self.assertFalse(data["notice_badge"])
+        self.assertFalse(data["account_ui"]["academic_reminders"])
+        self.assertTrue(data["account_ui"]["compact_cards"])
+        other = self.env["campus.student.portal"].with_user(self.other_user).snapshot()
+        self.assertTrue(other["notice_badge"])
+        self.assertTrue(other["account_ui"]["academic_reminders"])
+        self.assertFalse(other["account_ui"]["compact_cards"])
+        self.portal.act("preferences", {"notice_badge": True})
+        self.assertTrue(self.portal.snapshot()["account_ui"]["compact_cards"])
+        self.assertFalse(self.portal.snapshot()["account_ui"]["academic_reminders"])
+        data["login"] = '<b style="color:red">student@example.test</b>'
+        rendered = str(self.env["ir.ui.view"].with_context(minimal_qcontext=True)._render_template("ideastone_erp.student_account_content", {
+            "d": data, "portal_data": data, "request": SimpleNamespace(csrf_token=lambda: "test-token"),
+            "student_url_for": lambda section: "/my/campus/student/" + section}))
+        self.assertIn("&lt;b style=", rendered)
+        self.assertIn('href="/my/security"', rendered)
+        self.assertNotIn("Today, 9:14 AM", rendered)
+        dashboard = str(self.env["ir.ui.view"]._render_template("ideastone_erp.student_dashboard", {
+            "d": data, "student_url_for": lambda section: "/my/campus/student/" + section, "money": str}))
+        self.assertNotIn("Your study assistant", dashboard)
+        self.assertNotIn("Upcoming examinations", dashboard)
+        self.assertIn("Today's classes", dashboard)
