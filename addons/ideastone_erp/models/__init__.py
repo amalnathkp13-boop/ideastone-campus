@@ -40,6 +40,7 @@ from . import student_education
 from . import mvp_audit
 from . import mvp_academics, mvp_admissions, mvp_attendance, mvp_fees, mvp_exams
 from . import mvp_dashboard, mvp_communication, mvp_import
+from . import admin_overview_ui
 from . import student_portal, student_service
 from . import student_account_ui
 

@@ -35,16 +35,32 @@ async function markup(page) {
         // Wait for the login POST to finish before navigating elsewhere; navigating early cancels it.
         await Promise.all([page.waitForURL(url=>!url.pathname.startsWith('/web/login')), page.locator('button[type=submit]').click()]);
         await page.goto(base+'/web#action=ideastone_erp.action_dashboard');
-        await page.getByRole('heading',{name:'Welcome back, College Owner'}).waitFor();
+        await page.getByRole('heading',{name:'Admin overview',exact:true}).waitFor();
         await page.locator('.campus_owner_stat').first().waitFor();
         const firstMetrics = await rpc(page,'campus.dashboard','get_owner_metrics');
         const studentCard = firstMetrics.stats.find(s=>s.kind==='active_students');
         if(studentCard.value!==3) throw Error('Owner demo does not reconcile with its saved students');
         await page.screenshot({path:path.join(out,'owner-dashboard-1440.png'),fullPage:true});
-        await page.locator('.campus_owner_charts').evaluate(element=>element.scrollIntoView({block:'start'}));
-        const collectionBars=await page.locator('.campus_owner_charts section').nth(1).locator('.campus_chart_track span').evaluateAll(nodes=>nodes.map(node=>parseFloat(node.style.width)));
+        await page.locator('.collection-panel').evaluate(element=>element.scrollIntoView({block:'start'}));
+        const collectionBars=await page.locator('.collection-panel .bar-fill').evaluateAll(nodes=>nodes.map(node=>parseFloat(node.style.width)));
         if(collectionBars.length!==2 || Math.abs(collectionBars[0]-100)>0.1 || Math.abs(collectionBars[1]-200/300*100)>0.1) throw Error('Collection and dues chart does not use a common amount scale');
         await page.screenshot({path:path.join(out,'owner-charts-1440.png')});
+        if(await page.locator('.admin_overview .kpi').count()!==8) throw Error('Admin overview does not show eight indicators');
+        if(await page.locator('.event-card').count()!==3) throw Error('Admin event cards do not reflect the four saved events');
+        if(await page.locator('.admin_overview .kpi-value').first().evaluate(el=>getComputedStyle(el).color)!=='rgb(12, 46, 76)') throw Error('Saved KPI text does not use the reference color');
+        if(await page.locator('.event-category').first().evaluate(el=>getComputedStyle(el).color)!=='rgb(101, 81, 198)') throw Error('Saved event category does not use the reference color');
+        for(const width of [320,390,768,1440]) {
+            await page.setViewportSize({width,height:1000});
+            if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)) throw Error(`Admin overview overflows at ${width}`);
+        }
+        await page.locator('.feature-open').click();
+        await page.locator('.o_form_view').waitFor();
+        await page.locator('.campus_sidebar').getByRole('button',{name:'Dashboard',exact:true}).click();
+        await page.locator('.admin_overview .kpi').first().waitFor();
+        await page.getByRole('button',{name:'Event calendar',exact:true}).click();
+        await page.locator('.o_calendar_view').waitFor();
+        await page.locator('.campus_sidebar').getByRole('button',{name:'Dashboard',exact:true}).click();
+        await page.locator('.admin_overview .kpi').first().waitFor();
         if(await page.locator('.campus_dashboard').innerText().then(text=>/Â·|â€”|â†/.test(text))) throw Error('Owner template contains incorrectly decoded UTF-8 punctuation');
         await page.locator('.campus_dashboard').evaluate(element=>element.scrollTop=0);
         const modules = await page.locator('.campus_sidebar nav .campus_nav_link').allTextContents();
@@ -129,6 +145,7 @@ async function markup(page) {
         await page.waitForURL(url=>url.hash.includes('model=ir.sequence'));
         await page.locator('.o_list_view').waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Dashboard',exact:true}).click();
+        await page.getByRole('button',{name:'Filters',exact:true}).click();
         await page.getByLabel('From',{exact:true}).fill('9999-12-01');
         await page.getByLabel('Through',{exact:true}).fill('9999-12-31');
         await page.getByRole('button',{name:'Apply filters',exact:true}).click();

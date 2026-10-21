@@ -2,6 +2,22 @@
 import { Component, onWillStart, onWillUnmount, useExternalListener, useRef, useState, markup } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
+import { Dialog } from "@web/core/dialog/dialog";
+
+class OwnerReportFilters extends Component {
+    static template = "ideastone_erp.OwnerReportFilters";
+    static components = { Dialog };
+    static props = ["filters", "years", "apply", "close"];
+    setup() { this.state = useState({...this.props.filters, busy: false, error: ""}); }
+    async apply() {
+        if (this.state.busy) return;
+        this.state.busy = true;
+        try {
+            this.state.error = await this.props.apply({date_from: this.state.date_from, date_to: this.state.date_to, year_id: this.state.year_id});
+            if (!this.state.error) this.props.close();
+        } finally { this.state.busy = false; }
+    }
+}
 
 function dashboardRoute(action = {}) {
     const params = {...action.params, ...action.context?.params, ...action.context};
@@ -14,13 +30,14 @@ class CampusBase extends Component {
         this.action = useService("action");
         this.router = useService("router");
         this.notification = useService("notification");
+        this.dialog = useService("dialog");
         this.toggleRef = useRef("navToggle");
         this.subnavRef = useRef("subnavStrip");
         const route = dashboardRoute(this.props.action);
         this.state = useState({ loading: true, error: "", navigation: [], stats: [], pages: [], queues: [], quick: [], appointments: [],
             company: "", user: "", filter: "", open: false, page: route.page,
             is_owner_workspace: false, is_demo: false, ownerMetrics: {stats: [], years: [], setup: [], funnel: [], programmes: [], collection: [], trend: [], recent: [], notices: [], upcoming: [], due_dates: []},
-            ownerFilters: {date_from: "", date_to: "", year_id: ""}, ownerError: "", ownerLoading: false,
+            ownerFilters: {date_from: "", date_to: "", year_id: ""}, ownerAppliedFilters: {}, ownerError: "", ownerLoading: false,
             faculty_modules: [], faculty_tasks: [], faculty_schedule: [], faculty_surveys: [], module: route.module, activeAction: 0, activeTool: "",
             busy: false, query: "", cardQuery: "", unit: "", card: "", loanPage: 0, desk: { units: [], cards: [], loans: [], next: false } });
         // Handle the drawer before Odoo's global Escape shortcut consumes the key.
@@ -61,7 +78,7 @@ class CampusBase extends Component {
     }
     get facultyModule() { return this.state.faculty_modules.find(item => item.key === this.state.module) || this.state.faculty_modules[0]; }
     get pageTitle() {
-        if (this.state.page === "owner-overview") return "College overview";
+        if (this.state.page === "owner-overview") return "Admin overview";
         if (this.state.page === "faculty-module") return this.facultyModule?.label || "Faculty workspace";
         if (this.state.page === "help") return "Faculty guide";
         if (this.state.page === "analytics") return "My teaching dashboard";
@@ -119,12 +136,29 @@ class CampusBase extends Component {
         await this.go({ key: "overview" });
     }
     closeNav() { this.state.open = false; this.toggleRef.el?.focus(); }
+    ownerOpenFilters() {
+        this.dialog.add(OwnerReportFilters, {
+            filters: {...this.state.ownerFilters}, years: this.state.ownerMetrics.years,
+            apply: async (filters) => {
+                const previous = {...this.state.ownerFilters};
+                Object.assign(this.state.ownerFilters, filters);
+                await this.loadOwnerMetrics();
+                const error = this.state.ownerError;
+                if (error) {
+                    Object.assign(this.state.ownerFilters, previous);
+                    this.state.ownerError = "";
+                }
+                return error;
+            },
+        });
+    }
     async loadOwnerMetrics() {
         if (this.state.ownerLoading) return;
         this.state.ownerLoading = true;
         this.state.ownerError = "";
         try {
             this.state.ownerMetrics = await this.orm.call("campus.dashboard", "get_owner_metrics", [this.state.ownerFilters]);
+            this.state.ownerAppliedFilters = {...this.state.ownerFilters};
             this.router.pushState({owner_from: this.state.ownerFilters.date_from, owner_to: this.state.ownerFilters.date_to, owner_year: this.state.ownerFilters.year_id});
         } catch (error) {
             this.state.ownerError = error.data?.message || "The college report could not be loaded. Check the period and retry.";
@@ -133,7 +167,9 @@ class CampusBase extends Component {
     async ownerSource(card) {
         if (!card.allowed) return;
         try {
-            const action = await this.orm.call("campus.dashboard", "get_owner_source_action", [card.kind, this.state.ownerFilters]);
+            if (["services", "attendance_pending", "overdue_services", "overdue_dues"].includes(card.kind)) return this.ownerOverviewAction(card.kind);
+            const action = await this.orm.call("campus.dashboard", "get_owner_source_action", [card.kind, this.state.ownerAppliedFilters]);
+            if (!action.views) action.views = (action.view_mode || "tree,form").split(",").map(mode => [false, mode]);
             if (action.help) action.help = markup(action.help);
             await this.action.doAction(action);
         } catch (error) { this.notification.add(error.data?.message || "The source register is unavailable.", {type: "danger"}); }
@@ -144,6 +180,59 @@ class CampusBase extends Component {
         return `${Math.abs(Number(value) || 0) / maximum * 100}%`;
     }
     number(value) { return new Intl.NumberFormat(undefined, {maximumFractionDigits: 2}).format(value); }
+    get ownerUI() { return this.state.ownerMetrics.overview_ui || {kpis: [], activity: [], departments: [], funnel: [], events: [], insights: [], watchlist: []}; }
+    get ownerYearLabel() { return this.state.ownerMetrics.years.find(year => String(year.id) === String(this.state.ownerAppliedFilters.year_id))?.name || "All academic years"; }
+    async ownerPeriod(period) {
+        const today = this.state.today;
+        const semester = this.ownerUI.semester;
+        if (period === "semester" && !semester) return;
+        Object.assign(this.state.ownerFilters, {date_from: period === "today" ? today : period === "semester" ? semester.start : `${today.slice(0, 8)}01`,
+            date_to: period === "semester" ? semester.end : today});
+        await this.loadOwnerMetrics();
+    }
+    ownerPeriodSelected(period) {
+        const f = this.state.ownerAppliedFilters, today = this.state.today;
+        if (period === "today") return f.date_from === today && f.date_to === today;
+        if (period === "month") return f.date_from === `${today.slice(0, 8)}01` && f.date_to === today && f.date_from !== today;
+        return this.ownerUI.semester && f.date_from === this.ownerUI.semester.start && f.date_to === this.ownerUI.semester.end;
+    }
+    async ownerOverviewAction(kind, eventId = null) {
+        try { await this.action.doAction(await this.orm.call("campus.dashboard", "get_owner_overview_action", [kind, this.state.ownerAppliedFilters, eventId])); }
+        catch (error) { this.notification.add(error.data?.message || "This overview register is unavailable.", {type: "danger"}); }
+    }
+    ownerOpenAction(xmlid) {
+        const item = this.state.navigation.find(row => row.action === xmlid);
+        if (item) return this.open(item);
+    }
+    ownerCanOpen(xmlid) { return this.state.navigation.some(row => row.action === xmlid); }
+    ownerPrint() { window.print(); }
+    ownerMoney(value) { return `${this.ownerUI.currency_symbol || ""} ${this.number(value)}`.trim(); }
+    ownerMonth(value) { return new Date(`${value.slice(0, 7)}-15T12:00:00Z`).toLocaleDateString(undefined, {month: "short", year: "2-digit", timeZone: "UTC"}); }
+    ownerDay(value) { return value.slice(8, 10); }
+    ownerMonthShort(value) { return new Date(`${value.slice(0, 10)}T12:00:00Z`).toLocaleDateString(undefined, {month: "short", timeZone: "UTC"}).toUpperCase(); }
+    get ownerFunnel() {
+        const total = this.ownerUI.funnel.reduce((sum, row) => sum + row.value, 0);
+        let offset = 0;
+        return this.ownerUI.funnel.map(row => { const ratio = total ? row.value / total : 0;
+            const item = {...row, percent: ratio * 100, dash: `${ratio * 351.86} 351.86`, offset: -offset}; offset += ratio * 351.86; return item; });
+    }
+    ownerActivityPoints(field) {
+        const rows = this.ownerUI.activity;
+        return rows.map((row, i) => row[field] === null ? null : `${rows.length === 1 ? 320 : 55 + i * 530 / (rows.length - 1)},${190 - row[field] * 1.6}`)
+            .reduce((parts, point) => { if (point === null) parts.push([]); else parts[parts.length - 1].push(point); return parts; }, [[]]).filter(part => part.length).map(part => part.join(" "));
+    }
+    get ownerQuickActions() {
+        return [{label: "Review admissions", detail: "Applications & decisions", icon: "envelope-o", action: "ideastone_erp.mvp_applications"},
+            {label: "Record a payment", detail: "Student fee accounts", icon: "inr", action: "ideastone_erp.mvp_fees"},
+            {label: "Track attendance", detail: "Completed class registers", icon: "check", action: "ideastone_erp.mvp_attendance"},
+            {label: "Manage timetable", detail: "Review schedules", icon: "calendar", action: "ideastone_erp.mvp_timetable"},
+            {label: "Plan examinations", detail: "Schedules & marks", icon: "file-text-o", action: "ideastone_erp.mvp_exams"},
+            {label: "Manage staff", detail: "Faculty directory", icon: "users", action: "ideastone_erp.mvp_faculty"},
+            {label: "Service desk", detail: "Open campus requests", icon: "flag-o", kind: "services", allowed: this.ownerUI.kpis.some(card => card.kind === "services" && card.allowed)},
+            {label: "Build a report", detail: "Reports & analytics", icon: "bar-chart", module: "reports"}]
+            .filter(item => item.action ? this.ownerCanOpen(item.action) : item.module ? this.state.faculty_modules.some(module => module.key === item.module) : item.allowed);
+    }
+    ownerQuick(item) { return item.action ? this.ownerOpenAction(item.action) : item.kind ? this.ownerOverviewAction(item.kind) : this.chooseModule({key: item.module}); }
     scrollSubmodules(direction) { this.subnavRef.el?.scrollBy({left: direction * 320, behavior: "smooth"}); }
     async loadDesk() {
         this.state.desk = await this.orm.call("campus.library.desk", "get_desk", [this.state.query, this.state.loanPage, this.state.cardQuery]);
