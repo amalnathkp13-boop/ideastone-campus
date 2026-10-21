@@ -4,11 +4,11 @@
   color: #111b38;
   --od-line: #dfebfb;
   --od-blue: #075aff;
-  h2, h3, p { margin-top: 0; }
+  h1, h3, p { margin-top: 0; }
   .student_panel { padding: 17px; border-radius: 8px; margin-bottom: 0; box-shadow: 0 3px 18px #0c39710a; }
   .od_page_intro { display: flex; align-items: center; gap: 14px; padding: 6px 0 17px;
     > div { flex: 1; min-width: 0; }
-    h2 { color: #111b38; font-size: 25px; font-weight: 750; margin: 0 0 2px; }
+    h1 { color: #111b38; font-size: 25px; font-weight: 750; margin: 0 0 2px; }
     p { color: #56668b; font-size: 12px; margin: 0; }
     small { align-self: flex-start; color: #61769d; font-size: 11px; white-space: nowrap; }
   }
