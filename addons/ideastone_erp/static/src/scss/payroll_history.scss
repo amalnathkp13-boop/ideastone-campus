@@ -22,7 +22,8 @@
     .payroll_hero p { color: #677c9b; font-size: 12px; margin-top: 4px; }
     .payroll_hero_note { margin-left: auto; align-self: flex-start; color: #577098; font-size: 12px; white-space: nowrap; }
     .payroll_hero_note i { margin-right: 5px; color: #1462d6; }
-    .payroll_filters { display: flex; align-items: center; gap: 20px; min-height: 67px; padding: 11px 15px; margin-bottom: 15px; }
+    .payroll_filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+        min-height: 67px; padding: 11px 15px; margin-bottom: 15px; }
     .payroll_filters label { display: flex; align-items: center; gap: 12px; color: #19325e; font-weight: 700; white-space: nowrap; }
     .payroll_filters select { min-width: 125px; height: 39px; padding: 0 12px; border: 1px solid #c9ddfb; border-radius: 6px;
         color: #14376f; background: #fff; font-weight: 600; }
@@ -63,6 +64,32 @@
     .payroll_featured small { font-size: 11px; color: #dae6ff; }
     .payroll_featured_amount { align-items: end; text-align: right; justify-content: center; }
     .payroll_featured_amount strong { font-size: 24px; white-space: nowrap; }
+    .payroll_late_summary { margin: 0 16px 14px; padding: 15px; border: 1px solid #cbdcfb;
+        border-radius: 8px; background: #f5f9ff; color: #173a7b; font-size: 12px; }
+    .payroll_late_header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .payroll_late_header h3 { margin-top: 3px; color: #0b317d; font-size: 15px; font-weight: 800; }
+    .payroll_late_rule { padding: 5px 8px; border-radius: 999px; background: #e4efff;
+        color: #0751c9; font-size: 11px; font-weight: 800; white-space: nowrap; }
+    .payroll_late_summary p { margin: 8px 0 13px; color: #526d99; font-size: 11px; }
+    .payroll_late_stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .payroll_late_stats div { display: flex; flex-direction: column; gap: 3px; padding: 9px;
+        border: 1px solid #e1eafb; border-radius: 6px; background: #fff; }
+    .payroll_late_stats span, .payroll_late_total span { color: #61789e; font-size: 10px; font-weight: 700; }
+    .payroll_late_stats strong { color: #0b317d; font-size: 18px; line-height: 1.15; }
+    .payroll_late_total { display: flex; justify-content: space-between; align-items: center; gap: 10px;
+        margin-top: 10px; padding-top: 9px; border-top: 1px solid #dbe8fa; }
+    .payroll_late_total strong { color: #083caa; font-size: 16px; }
+    .payroll_late_summary small { display: block; margin-top: 6px; color: #5c7193; overflow-wrap: anywhere; }
+    .payroll_entry_panel { padding: 15px 16px 17px; border-top: 1px solid #e3ecfa; }
+    .payroll_entry_panel h3 { font-size: 14px; font-weight: 800; color: #0b317d; }
+    .payroll_entry_panel p { margin: 3px 0 10px; color: #667da1; font-size: 11px; }
+    .payroll_entry_scroller { max-height: 260px; overflow: auto; border: 1px solid #dce9fa; border-radius: 6px; }
+    .payroll_entry_scroller table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
+    .payroll_entry_scroller th { position: sticky; top: 0; background: #f2f7ff; color: #29446f; text-align: left; }
+    .payroll_entry_scroller th, .payroll_entry_scroller td { padding: 8px 9px; border-bottom: 1px solid #e5eefb; }
+    .payroll_entry_status { display: inline-block; padding: 3px 7px; border-radius: 999px; background: #eef4fd; color: #40618c; }
+    .payroll_entry_paid { background: #eaf8ee; color: #087340; }
+    .payroll_entry_deducted { background: #fff0f1; color: #b42c3c; }
     .payroll_table_scroller { max-height: 390px; overflow-x: auto; overflow-y: auto; margin: 0 15px;
         border: 1px solid #dce9fa; border-radius: 6px; scrollbar-width: thin; scrollbar-color: #a6c3ed #f3f8ff; }
     .payroll_table_scroller:focus-visible { outline: 3px solid #a7c8ff; outline-offset: 2px; }

@@ -3,11 +3,12 @@
     <main class="campus_payroll_history">
       <section class="payroll_hero">
         <div class="payroll_hero_icon"><i class="fa fa-users"/></div>
-        <div><span class="payroll_eyebrow">STAFF · PAYROLL</span><h1>Payroll History</h1><p>A clear view of your salary, contributions and payslips.</p></div>
-        <span class="payroll_hero_note"><i class="fa fa-lock"/> Your payroll records</span>
+        <div><span class="payroll_eyebrow">STAFF · PAYROLL</span><h1>Payroll History</h1><p t-esc="state.isAdmin ? 'Review staff salary, late punches and deductions.' : 'A clear view of your salary, contributions and payslips.'"/></div>
+        <span class="payroll_hero_note"><i class="fa fa-lock"/> <t t-esc="state.isAdmin ? 'Campus admin payroll view' : 'Your payroll records'"/></span>
       </section>
 
       <section class="payroll_filters" aria-label="Payroll report options">
+        <label t-if="state.isAdmin">Staff member<select aria-label="Staff member" t-on-change="changeEmployee"><t t-foreach="state.staff" t-as="employee" t-key="employee.id"><option t-att-value="employee.id" t-att-selected="employee.id == state.employeeId" t-esc="employee.name"/></t></select></label>
         <label>Report Options<select aria-label="Report options" t-on-change="changeMode"><option value="history">Complete History</option><option value="selected">Selected Month Payslip</option></select></label>
         <label>Year<select aria-label="Year" t-on-change="changeYear"><option value="all" t-att-selected="state.year === 'all'">All</option><t t-foreach="years" t-as="year" t-key="year"><option t-att-value="year" t-att-selected="year == state.year" t-esc="year"/></t></select></label>
         <label>Month<select aria-label="Month" t-on-change="changeMonth"><option value="all" t-att-selected="state.month === 'all'">All</option><t t-foreach="months" t-as="month" t-key="month"><option t-att-value="month_index + 1" t-att-selected="month_index + 1 == state.month" t-esc="month"/></t></select></label>
@@ -26,18 +27,38 @@
 
         <div class="payroll_dashboard_grid">
           <section class="payroll_history_panel">
-            <div class="payroll_history_header"><div class="payroll_heading_icon"><i class="fa fa-file-text"/></div><div><span class="payroll_eyebrow">YOUR RECORDS</span><h2>Payroll History</h2><p>Monthly take-home pay and deductions, all in one place.</p></div><span class="payroll_record_count"><t t-esc="visibleRows.length"/> payslips</span></div>
+            <div class="payroll_history_header"><div class="payroll_heading_icon"><i class="fa fa-file-text"/></div><div><span class="payroll_eyebrow" t-esc="state.isAdmin ? 'SELECTED STAFF' : 'YOUR RECORDS'"/><h2 t-esc="state.isAdmin ? (state.employeeName || 'Payroll History') : 'Payroll History'"/><p>Monthly take-home pay and deductions, all in one place.</p></div><span class="payroll_record_count"><t t-esc="visibleRows.length"/> payslips</span></div>
             <div t-if="latest" class="payroll_featured"><div><span>LATEST PAYSLIP</span><strong t-esc="latestLabel"/><small>Approved payroll record</small></div><div class="payroll_featured_amount"><span>NET PAY</span><strong t-esc="formatMoney(latest.net)"/></div></div>
-            <div class="payroll_table_scroller" tabindex="0" aria-label="Scrollable payroll history"><table><thead><tr><th>#</th><th>Month</th><th>Year</th><th>Net Salary (₹)</th><th>P.F (₹)</th><th>T.D.S (₹)</th></tr></thead><tbody>
-              <t t-foreach="visibleRows" t-as="row" t-key="row.id"><tr t-att-class="latest &amp;&amp; row.id === latest.id ? 'payroll_latest_row' : ''"><td><span class="payroll_row_number" t-esc="row_index + 1"/></td><td class="payroll_month" t-esc="rowMonth(row)"/><td t-esc="rowYear(row)"/><td class="payroll_net" t-esc="formatMoney(row.net)"/><td t-esc="formatMoney(row.pf)"/><td t-esc="formatMoney(row.tds)"/></tr></t>
-              <tr t-if="!visibleRows.length"><td colspan="6" class="payroll_empty">No approved payslips match these filters.</td></tr>
+            <section t-if="state.isAdmin &amp;&amp; latest" class="payroll_late_summary" aria-label="Late punch payroll allowance">
+              <div class="payroll_late_header"><div><span class="payroll_eyebrow">ATTENDANCE · EXTRA FEATURE</span><h3>9:00 AM late punch policy</h3></div><span class="payroll_late_rule">2 paid days / month</span></div>
+              <p>The first two late working days are paid. Each later late day deducts one day of salary.</p>
+              <div class="payroll_late_stats">
+                <div><span>Late punch days</span><strong t-esc="latest.late_days"/></div>
+                <div><span>Paid permission used</span><strong><t t-esc="latest.late_grace_days"/> / 2</strong></div>
+                <div><span>Days deducted</span><strong t-esc="latest.late_deducted_days"/></div>
+              </div>
+              <div class="payroll_late_total"><span>Late punch deduction</span><strong t-esc="formatMoney(latest.late_deduction)"/></div>
+              <small t-if="latest.late_deduction_dates">Deducted dates: <t t-esc="latest.late_deduction_dates"/></small>
+            </section>
+            <div class="payroll_table_scroller" tabindex="0" aria-label="Scrollable payroll history"><table><thead><tr><th>#</th><th>Month</th><th>Year</th><th>Net Salary (<t t-esc="state.isAdmin ? state.currencyCode : '₹'"/>)</th><th t-if="state.isAdmin">Late Days</th><th t-if="state.isAdmin">Late Deduction (<t t-esc="state.currencyCode"/>)</th><th>P.F (<t t-esc="state.isAdmin ? state.currencyCode : '₹'"/>)</th><th>T.D.S (<t t-esc="state.isAdmin ? state.currencyCode : '₹'"/>)</th></tr></thead><tbody>
+              <t t-foreach="visibleRows" t-as="row" t-key="row.id"><tr t-att-class="latest &amp;&amp; row.id === latest.id ? 'payroll_latest_row' : ''"><td><span class="payroll_row_number" t-esc="row_index + 1"/></td><td class="payroll_month" t-esc="rowMonth(row)"/><td t-esc="rowYear(row)"/><td class="payroll_net" t-esc="formatMoney(row.net)"/><td t-if="state.isAdmin" t-esc="row.late_days"/><td t-if="state.isAdmin" t-esc="formatMoney(row.late_deduction)"/><td t-esc="formatMoney(row.pf)"/><td t-esc="formatMoney(row.tds)"/></tr></t>
+              <tr t-if="!visibleRows.length"><td t-att-colspan="state.isAdmin ? 8 : 6" class="payroll_empty">No approved payslips match these filters.</td></tr>
             </tbody></table></div>
+            <section t-if="state.isAdmin &amp;&amp; latest" class="payroll_entry_panel" aria-label="Staff punch entries">
+              <h3>Punch entries · <t t-esc="latestLabel"/></h3>
+              <p>Recorded check-in and checkout for <t t-esc="state.employeeName"/>. The first two late working days are paid permissions.</p>
+              <div t-if="state.entryError" class="payroll_message payroll_error" role="alert" t-esc="state.entryError"/>
+              <div class="payroll_entry_scroller" tabindex="0"><table><thead><tr><th>Date</th><th>Check-in</th><th>Checkout</th><th>Payroll treatment</th></tr></thead><tbody>
+                <t t-foreach="state.entries" t-as="entry" t-key="entry.id"><tr><td t-esc="entry.date"/><td t-esc="entry.check_in"/><td t-esc="entry.check_out"/><td><span class="payroll_entry_status" t-att-class="entry.treatment === 'Deduction due' ? 'payroll_entry_deducted' : entry.treatment === 'Paid permission' ? 'payroll_entry_paid' : ''" t-esc="entry.treatment"/></td></tr></t>
+                <tr t-if="!state.entries.length &amp;&amp; !state.entryError"><td colspan="4" class="payroll_empty">No punch entries recorded for this payroll period.</td></tr>
+              </tbody></table></div>
+            </section>
             <div class="payroll_table_footer"><span><i class="fa fa-shield"/> Values come from approved campus payslips.</span><span t-if="visibleRows.length > 9">Scroll for earlier months</span><span>Showing <t t-esc="visibleRows.length"/> of <t t-esc="state.records.length"/></span></div>
           </section>
 
           <div class="payroll_right_column">
             <section class="payroll_panel payroll_trend"><header><div class="payroll_panel_icon"><i class="fa fa-bar-chart"/></div><div><h2>Salary Trend</h2><p>Latest 12 payslips</p></div></header>
-              <div t-if="trend.length" class="payroll_chart" role="img" aria-label="Net salary over the latest 12 payslips"><div class="payroll_chart_axis"><span t-esc="formatMoney(chartMax)"/><span t-esc="formatMoney(chartMax * 2 / 3)"/><span t-esc="formatMoney(chartMax / 3)"/><span>₹ 0</span></div><div class="payroll_chart_body"><div class="payroll_chart_grid"><i/><i/><i/><i/></div><div class="payroll_chart_bars"><t t-foreach="trend" t-as="bar" t-key="bar.id"><div class="payroll_bar_group" t-att-title="bar.label + ' ' + bar.year + ': ' + formatMoney(bar.value)"><div class="payroll_bar_track"><div class="payroll_bar" t-att-style="'height: ' + bar.height + '%'"/></div><span t-esc="bar.label"/><small t-esc="bar.year"/></div></t></div></div></div>
+              <div t-if="trend.length" class="payroll_chart" role="img" aria-label="Net salary over the latest 12 payslips"><div class="payroll_chart_axis"><span t-esc="formatMoney(chartMax)"/><span t-esc="formatMoney(chartMax * 2 / 3)"/><span t-esc="formatMoney(chartMax / 3)"/><span t-esc="formatMoney(0)"/></div><div class="payroll_chart_body"><div class="payroll_chart_grid"><i/><i/><i/><i/></div><div class="payroll_chart_bars"><t t-foreach="trend" t-as="bar" t-key="bar.id"><div class="payroll_bar_group" t-att-title="bar.label + ' ' + bar.year + ': ' + formatMoney(bar.value)"><div class="payroll_bar_track"><div class="payroll_bar" t-att-style="'height: ' + bar.height + '%'"/></div><span t-esc="bar.label"/><small t-esc="bar.year"/></div></t></div></div></div>
               <div t-else="" class="payroll_empty">Salary trend will appear when payslips are available.</div>
             </section>
             <section class="payroll_panel payroll_insights"><header><div class="payroll_panel_icon sparkle"><i class="fa fa-magic"/></div><div><h2>Payroll Insights</h2><p>Highlights from your recorded salary and deductions.</p></div></header>

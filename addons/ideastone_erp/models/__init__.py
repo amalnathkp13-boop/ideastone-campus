@@ -22,6 +22,7 @@ from . import asset
 from . import purchase_request
 from . import stock_inspection
 from . import salary_agreement
+from . import late_punch
 from . import payslip
 from . import biometric_event
 from . import exam_review
