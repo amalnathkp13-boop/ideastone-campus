@@ -1,9 +1,9 @@
 <templates xml:space="preserve">
   <t t-name="ideastone_erp.PayrollHistoryPage">
-    <main class="campus_payroll_history">
+    <main t-att-class="state.isAdmin ? 'campus_payroll_history payroll_admin' : 'campus_payroll_history'">
       <section class="payroll_hero">
         <div class="payroll_hero_icon"><i class="fa fa-users"/></div>
-        <div><span class="payroll_eyebrow">STAFF · PAYROLL</span><h1>Payroll History</h1><p t-esc="state.isAdmin ? 'Review staff salary, late punches and deductions.' : 'A clear view of your salary, contributions and payslips.'"/></div>
+        <div><span class="payroll_eyebrow" t-esc="state.isAdmin ? 'Staff › Payroll History' : 'STAFF · PAYROLL'"/><h1>Payroll History</h1><p t-esc="state.isAdmin ? 'Review staff salary, late punches and deductions.' : 'A clear view of your salary, contributions and payslips.'"/></div>
         <span class="payroll_hero_note"><i class="fa fa-lock"/> <t t-esc="state.isAdmin ? 'Campus admin payroll view' : 'Your payroll records'"/></span>
       </section>
 
