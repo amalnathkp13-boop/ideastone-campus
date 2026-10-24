@@ -4,6 +4,8 @@
       <div t-if="state.error" class="mentor_error" role="alert"><span t-esc="state.error"/><button type="button" t-on-click="load">Retry</button></div>
       <div t-if="state.loading" class="mentor_loading" role="status">Loading assigned OD requests…</div>
       <t t-elif="state.data">
+        <t t-if="state.data.role === 'hod'"><t t-call="ideastone_erp.HodODManagement"/></t>
+        <t t-else="">
         <header class="mentor_hero">
           <div><small>YOUR CAMPUS, CONNECTED</small><h1>Welcome back, <t t-esc="state.data.mentor_name"/></h1><p>Review and manage student On Duty (OD) requests for your mentorship class.</p><span class="mentor_term"><t t-esc="state.data.company_name"/> · <t t-esc="state.data.semester || 'Current semester'"/></span></div>
           <i class="fa fa-university" aria-hidden="true"/>
@@ -43,6 +45,7 @@
             <section class="mentor_panel mentor_actions"><div class="mentor_panel_header"><h3><i class="fa fa-bell" aria-hidden="true"/> Pending Actions &amp; Dates</h3><a href="#mentor_requests_heading">View All</a></div><article t-foreach="state.data.actions" t-as="action" t-key="action.id"><span><i class="fa fa-file-text" aria-hidden="true"/></span><div><strong>Review Pending Request</strong><small><t t-esc="action.reference"/> · <t t-esc="action.student"/></small><p t-esc="action.name"/></div><em>Event on<br/><t t-esc="formatDate(action.date_from)"/></em></article><p t-if="!state.data.actions.length" class="mentor_empty">No requests are waiting for your review.</p></section>
           </div>
         </div>
+        </t>
       </t>
     </main>
   </t>
