@@ -1,9 +1,11 @@
-from datetime import datetime, time, timedelta
+from datetime import timedelta
 
 import pytz
 from odoo.exceptions import AccessError, ValidationError
 
 from odoo import _, api, fields, models
+
+from .late_punch import MONTHLY_GRACE_DAYS, late_punch_dates, local_bounds
 
 
 class Payslip(models.Model):
@@ -24,12 +26,84 @@ class Payslip(models.Model):
     pf = fields.Monetary(readonly=True)
     esi = fields.Monetary(readonly=True)
     deductions = fields.Monetary(readonly=True)
+    late_days = fields.Integer("Late punch days", readonly=True)
+    late_grace_days = fields.Integer("Paid late permission days", readonly=True)
+    late_deducted_days = fields.Integer("Late days deducted", readonly=True)
+    late_deduction = fields.Monetary("Late punch deduction", readonly=True)
+    late_punch_dates = fields.Char("Late punch dates", readonly=True)
+    late_deduction_dates = fields.Char("Deducted late dates", readonly=True)
     tds = fields.Monetary(readonly=True)
     net = fields.Monetary(readonly=True)
     computed_on = fields.Datetime(readonly=True)
     payment_reference = fields.Char()
 
     _sql_constraints = [("payslip_unique", "unique(employee_id, date_from, date_to)", "Payroll already exists for this employee and period.")]
+
+    _calculated_fields = {"worked_days", "gross", "pf", "esi", "tds", "deductions", "net", "computed_on",
+                          "late_days", "late_grace_days", "late_deducted_days", "late_deduction",
+                          "late_punch_dates", "late_deduction_dates"}
+
+    def _admin_history_employees(self):
+        if not self.env.user.has_group("ideastone_erp.group_manager"):
+            raise AccessError(_("Campus admin permission is required to review staff payroll."))
+        return self.env["hr.employee"].sudo().search(
+            [("company_id", "in", [False, self.env.company.id])], order="name, id")
+
+    @api.model
+    def get_history_data(self, employee_id=None):
+        """Return payroll details only to the campus admin for this company."""
+        employees = self._admin_history_employees()
+        selected = employees.filtered(lambda employee: employee.id == int(employee_id or 0))[:1]
+        if employee_id and not selected:
+            raise AccessError(_("This staff member is outside your permitted payroll scope."))
+        if not selected:
+            latest = self.search([("employee_id", "in", employees.ids),
+                                  ("state", "in", ["approved", "done"])], order="date_from desc, id desc", limit=1)
+            selected = latest.employee_id or employees[:1]
+        slips = self.search([("employee_id", "=", selected.id), ("state", "in", ["approved", "done"])],
+                            order="date_from desc, id desc") if selected else self.browse()
+        columns = ["name", "date_from", "date_to", "net", "pf", "tds", "state", "late_days",
+                   "late_grace_days", "late_deducted_days", "late_deduction", "late_punch_dates",
+                   "late_deduction_dates"]
+        currency = self.env.company.currency_id
+        return {"employee_id": selected.id or False,
+                "employee_name": selected.name or "", "staff": [
+                    {"id": employee.id, "name": employee.name} for employee in employees
+                ], "records": slips.read(columns),
+                "currency_symbol": currency.symbol, "currency_code": currency.name,
+                "currency_position": currency.position}
+
+    @api.model
+    def get_punch_entries(self, employee_id, date_from, date_to):
+        """Show a selected employee's check-in/out only to the campus admin."""
+        employees = self._admin_history_employees()
+        employee = employees.filtered(lambda record: record.id == int(employee_id or 0))[:1]
+        if not employee:
+            raise AccessError(_("This staff member is outside your permitted payroll scope."))
+        start_day = fields.Date.to_date(date_from)
+        end_day = fields.Date.to_date(date_to)
+        if not start_day or not end_day or end_day < start_day or start_day.year != end_day.year or start_day.month != end_day.month:
+            raise ValidationError(_("Choose a valid payroll month."))
+        timezone = pytz.timezone(employee.resource_calendar_id.tz or "UTC")
+        start = local_bounds(start_day, timezone)[0]
+        end = local_bounds(end_day + timedelta(days=1), timezone)[0]
+        attendance = self.env["hr.attendance"].sudo().search([
+            ("employee_id", "=", employee.id), ("check_in", ">=", start), ("check_in", "<", end),
+        ], order="check_in asc")
+        monthly_late = late_punch_dates(self.sudo().env, employee, start_day.replace(day=1))
+        paid_late = set(monthly_late[:MONTHLY_GRACE_DAYS])
+        late_days = set(monthly_late)
+        result = []
+        for entry in attendance:
+            check_in = pytz.UTC.localize(fields.Datetime.to_datetime(entry.check_in)).astimezone(timezone)
+            check_out = (pytz.UTC.localize(fields.Datetime.to_datetime(entry.check_out)).astimezone(timezone)
+                         if entry.check_out else None)
+            day = check_in.date()
+            result.append({"id": entry.id, "date": day.isoformat(), "check_in": check_in.strftime("%H:%M"),
+                           "check_out": check_out.strftime("%H:%M") if check_out else "Open",
+                           "treatment": "Paid permission" if day in paid_late else
+                           "Deduction due" if day in late_days else "On time"})
+        return result
 
     @api.constrains("date_from", "date_to", "working_days", "paid_leave_days", "advance_deduction")
     def _check_period(self):
@@ -45,7 +119,7 @@ class Payslip(models.Model):
                 raise AccessError(_("HR payroll permission is required to record payment evidence."))
             self._lock()
             return self._set_system_values(vals)
-        if set(vals) & {"worked_days", "gross", "pf", "esi", "tds", "deductions", "net", "computed_on"}:
+        if set(vals) & self._calculated_fields:
             raise AccessError(_("Payroll totals are calculated by Compute payroll."))
         result = super().write(vals)
         if set(vals) - {"state", "message_follower_ids", "activity_ids", "message_ids"}:
@@ -54,7 +128,7 @@ class Payslip(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        if any(set(v) & {"worked_days", "gross", "pf", "esi", "tds", "deductions", "net", "computed_on"} for v in vals_list):
+        if any(set(v) & self._calculated_fields for v in vals_list):
             raise AccessError(_("Payroll totals cannot be supplied when creating a payslip."))
         return super().create(vals_list)
 
@@ -69,13 +143,37 @@ class Payslip(models.Model):
             if rec.date_from < agreement.date_from or agreement.date_to and rec.date_to > agreement.date_to:
                 raise ValidationError(_("Payroll dates must lie within the salary agreement."))
             timezone = pytz.timezone(rec.employee_id.resource_calendar_id.tz or "UTC")
-            start = timezone.localize(datetime.combine(rec.date_from, time.min)).astimezone(pytz.utc).replace(tzinfo=None)
-            end = timezone.localize(datetime.combine(rec.date_to + timedelta(days=1), time.min)).astimezone(pytz.utc).replace(tzinfo=None)
+            start = local_bounds(rec.date_from, timezone)[0]
+            end = local_bounds(rec.date_to + timedelta(days=1), timezone)[0]
             attendance = self.env["hr.attendance"].search([
-                ("employee_id", "=", rec.employee_id.id), ("check_in", "<", end), ("check_out", ">", start),
+                ("employee_id", "=", rec.employee_id.id), ("check_in", "<", end),
+                "|", ("check_out", "=", False), ("check_out", ">", start),
             ])
-            hours = sum(att._get_worked_hours_in_range(max(att.check_in, start), min(att.check_out, end)) for att in attendance)
-            worked = min(hours / agreement.daily_hours, rec.working_days)
+            if any(not att.check_out for att in attendance):
+                raise ValidationError(_("Close all staff punches in the payroll period before computing salary."))
+            month_start = rec.date_from.replace(day=1)
+            monthly_late = late_punch_dates(self.env, rec.employee_id, month_start)
+            period_late = [day for day in monthly_late if rec.date_from <= day <= rec.date_to]
+            grace = set(monthly_late[:MONTHLY_GRACE_DAYS])
+            deducted_dates = [day for day in period_late if day not in grace]
+            worked = 0.0
+            day = rec.date_from
+            while day <= rec.date_to:
+                day_start, day_end = local_bounds(day, timezone)
+                hours = sum(att._get_worked_hours_in_range(max(att.check_in, day_start), min(att.check_out, day_end))
+                            for att in attendance if att.check_in < day_end and att.check_out > day_start)
+                if day in period_late:
+                    first = min(att.check_in for att in attendance if day_start <= att.check_in < day_end)
+                    local_first = pytz.UTC.localize(fields.Datetime.to_datetime(first)).astimezone(timezone)
+                    starts = [line.hour_from for line in rec.employee_id.resource_calendar_id.attendance_ids
+                              if line.dayofweek == str(day.weekday())]
+                    scheduled_start = min(starts) if starts else 9.0
+                    arrival_hour = local_first.hour + local_first.minute / 60 + local_first.second / 3600
+                    # Excuse the missed arrival time, never an unrelated early departure.
+                    hours += min(max(arrival_hour - scheduled_start, 0), agreement.daily_hours)
+                worked += min(hours / agreement.daily_hours, 1.0)
+                day += timedelta(days=1)
+            worked = min(worked, rec.working_days)
             leave = self.env["hr.leave"].search([
                 ("employee_id", "=", rec.employee_id.id), ("state", "=", "validate"),
                 ("date_from", ">=", start), ("date_to", "<", end),
@@ -87,10 +185,15 @@ class Payslip(models.Model):
             gross = currency.round((agreement.basic + agreement.allowance) * ratio)
             pf = currency.round(agreement.pf_base * agreement.pf_rate / 100 * ratio)
             esi = currency.round(agreement.esi_base * agreement.esi_rate / 100 * ratio)
-            deduction = currency.round(agreement.fixed_deduction + rec.advance_deduction + pf + esi + agreement.tds)
+            late_deduction = currency.round((agreement.basic + agreement.allowance) / rec.working_days * len(deducted_dates))
+            deduction = currency.round(agreement.fixed_deduction + rec.advance_deduction + pf + esi + agreement.tds + late_deduction)
             if deduction > gross:
                 raise ValidationError(_("Deductions exceed earned salary. Review the agreement and advances."))
             rec._set_system_values({"worked_days": worked, "gross": gross, "pf": pf, "esi": esi, "tds": agreement.tds,
+                                    "late_days": len(period_late), "late_grace_days": len(period_late) - len(deducted_dates),
+                                    "late_deducted_days": len(deducted_dates), "late_deduction": late_deduction,
+                                    "late_punch_dates": ", ".join(day.isoformat() for day in period_late),
+                                    "late_deduction_dates": ", ".join(day.isoformat() for day in deducted_dates),
                                     "deductions": deduction, "net": currency.round(gross - deduction), "computed_on": fields.Datetime.now()})
 
     def _validate_transition(self, target):

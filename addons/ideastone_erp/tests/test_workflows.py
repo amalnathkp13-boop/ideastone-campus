@@ -142,6 +142,91 @@ class TestCampusWorkflows(TransactionCase):
         slip.action_done()
         self.assertEqual(slip.state, "done")
 
+    def test_late_punches_have_two_paid_days_then_one_day_deduction(self):
+        agreement = self._approve(self.env["campus.salary.agreement"].create({
+            "name": "Late punch salary", "employee_id": self.employee.id,
+            "date_from": "2026-01-01", "date_to": "2026-01-31", "basic": 3000, "daily_hours": 8,
+        }))
+        attendance = self.env["hr.attendance"]
+        for day, hour, minute in [(1, 9, 1), (2, 9, 10), (3, 9, 15), (4, 9, 0), (5, 8, 0)]:
+            attendance.create({"employee_id": self.employee.id,
+                               "check_in": datetime(2026, 1, day, hour, minute),
+                               "check_out": datetime(2026, 1, day, 17 if day == 4 else 16)})
+        # A second punch on one day must not use a second monthly allowance.
+        attendance.create({"employee_id": self.employee.id,
+                           "check_in": datetime(2026, 1, 3, 17), "check_out": datetime(2026, 1, 3, 18)})
+        slip = self.env["campus.payslip"].with_user(self.manager).create({
+            "name": "January late punch payroll", "agreement_id": agreement.id,
+            "date_from": "2026-01-01", "date_to": "2026-01-31", "working_days": 5,
+        })
+        slip.action_compute()
+        self.assertEqual((slip.late_days, slip.late_grace_days, slip.late_deducted_days), (3, 2, 1))
+        self.assertEqual(slip.late_deduction_dates, "2026-01-03")
+        self.assertEqual(slip.late_deduction, 600)
+        self.assertEqual(slip.gross, 3000)
+        self.assertEqual(slip.net, 2400)
+        with self.assertRaises(AccessError):
+            slip.write({"late_deduction": 0})
+
+    def test_late_allowance_resets_each_month_and_uses_local_time(self):
+        self.employee.resource_calendar_id.tz = "Asia/Kolkata"
+        agreement = self._approve(self.env["campus.salary.agreement"].create({
+            "name": "Local-time salary", "employee_id": self.employee.id,
+            "date_from": "2026-01-01", "date_to": "2026-02-28", "basic": 3000, "daily_hours": 8,
+        }))
+        attendance = self.env["hr.attendance"]
+        # 03:31 UTC is 09:01 local; 03:30 UTC is exactly 09:00 local.
+        for day in (1, 2, 3):
+            attendance.create({"employee_id": self.employee.id,
+                               "check_in": datetime(2026, 1, day, 3, 31),
+                               "check_out": datetime(2026, 1, day, 11, 31)})
+        attendance.create({"employee_id": self.employee.id,
+                           "check_in": datetime(2026, 2, 1, 3, 31),
+                           "check_out": datetime(2026, 2, 1, 11, 31)})
+        attendance.create({"employee_id": self.employee.id,
+                           "check_in": datetime(2026, 2, 2, 3, 30),
+                           "check_out": datetime(2026, 2, 2, 11, 30)})
+        for month, expected in [(1, (3, 1, 600)), (2, (1, 0, 0))]:
+            last = 31 if month == 1 else 28
+            slip = self.env["campus.payslip"].with_user(self.manager).create({
+                "name": f"Month {month} salary", "agreement_id": agreement.id,
+                "date_from": f"2026-{month:02d}-01", "date_to": f"2026-{month:02d}-{last}",
+                "working_days": 5,
+            })
+            slip.action_compute()
+            self.assertEqual((slip.late_days, slip.late_deducted_days, slip.late_deduction), expected)
+
+    def test_paid_late_permission_does_not_excuse_early_checkout(self):
+        agreement = self._approve(self.env["campus.salary.agreement"].create({
+            "name": "Short shift salary", "employee_id": self.employee.id,
+            "date_from": "2026-01-01", "date_to": "2026-01-31", "basic": 1000,
+        }))
+        self.env["hr.attendance"].create({"employee_id": self.employee.id,
+                                           "check_in": datetime(2026, 1, 1, 9, 15),
+                                           "check_out": datetime(2026, 1, 1, 12)})
+        slip = self.env["campus.payslip"].with_user(self.manager).create({
+            "name": "Short shift payslip", "agreement_id": agreement.id,
+            "date_from": "2026-01-01", "date_to": "2026-01-31", "working_days": 1,
+        })
+        slip.action_compute()
+        self.assertEqual(slip.late_grace_days, 1)
+        self.assertEqual(slip.late_deduction, 0)
+        self.assertEqual(slip.gross, 500)
+
+    def test_open_punch_blocks_payroll_computation(self):
+        agreement = self._approve(self.env["campus.salary.agreement"].create({
+            "name": "Open punch salary", "employee_id": self.employee.id,
+            "date_from": "2026-01-01", "date_to": "2026-01-31", "basic": 3000,
+        }))
+        self.env["hr.attendance"].create({"employee_id": self.employee.id,
+                                           "check_in": datetime(2026, 1, 1, 9, 1)})
+        slip = self.env["campus.payslip"].with_user(self.manager).create({
+            "name": "Incomplete payroll", "agreement_id": agreement.id,
+            "date_from": "2026-01-01", "date_to": "2026-01-31", "working_days": 5,
+        })
+        with self.assertRaises(ValidationError):
+            slip.action_compute()
+
     def test_unapproved_purchase_cannot_generate_order(self):
         dept = self.env["op.department"].search([], limit=1)
         product = self.env["product.product"].create({"name": "Fixture equipment", "purchase_ok": True})

@@ -22,6 +22,7 @@ from . import asset
 from . import purchase_request
 from . import stock_inspection
 from . import salary_agreement
+from . import late_punch
 from . import payslip
 from . import biometric_event
 from . import exam_review
@@ -54,3 +55,5 @@ from . import student_library_ui
 from . import student_od
 from . import staff_od_ui
 from . import hod_od_ui
+from . import students_directory_ui
+from . import admissions_ui
