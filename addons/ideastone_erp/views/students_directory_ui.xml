@@ -1,0 +1,4 @@
+<odoo>
+  <record id="action_students_directory" model="ir.actions.client"><field name="name">Student directory</field><field name="tag">ideastone_erp.students_directory</field><field name="params">{'view': 'directory'}</field><field name="context">{'campus_module': 'students', 'campus_page': 'students-directory'}</field></record>
+  <record id="action_students_enrolments" model="ir.actions.client"><field name="name">Enrolments &amp; transfers</field><field name="tag">ideastone_erp.students_directory</field><field name="params">{'view': 'enrolments'}</field><field name="context">{'campus_module': 'students', 'campus_page': 'students-enrolments'}</field></record>
+</odoo>
