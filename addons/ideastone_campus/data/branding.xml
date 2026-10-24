@@ -20,7 +20,7 @@
     <!-- Browser window title -->
     <record id="web_window_title" model="ir.config_parameter">
       <field name="key">web.window_title</field>
-      <field name="value">Ideastone Campus</field>
+      <field name="value">erp.vcet</field>
     </record>
   </data>
 </odoo>

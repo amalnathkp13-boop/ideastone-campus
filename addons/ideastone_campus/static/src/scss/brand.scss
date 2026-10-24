@@ -45,7 +45,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
 .vcet_login { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); min-height: 100vh; background: #fff; color: #15263a; }
 .vcet_login_left { padding: clamp(24px,4vw,60px); display: flex; flex-direction: column; justify-content: space-between; }
-.vcet_login_logo { width: 250px; height: 95px; object-fit: contain; object-position: left center; }
+.vcet_login_logo { width: 95px; height: 95px; object-fit: contain; object-position: left center; }
 .vcet_login_main { width: 100%; max-width: 468px; margin: 26px auto; h1 { color: #082b4b; font-size: clamp(30px,3.3vw,46px); letter-spacing: -1.2px; line-height: 1.14; margin: 14px 0; } > p { color: #52677f; line-height: 1.65; font-size: 14px; } .oe_login_form { max-width: none; margin-top: 22px; input { min-height: 49px; } button[type=submit] { min-height: 49px; } } }
 .vcet_eyebrow { color: #47739c; font-size: 11px; font-weight: 750; letter-spacing: 2px; }
 .vcet_login_roles { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; margin-bottom: 23px; legend { font-size: 12px; color: #52677f; margin-bottom: 10px; } span { background: #f8fafd; border: 1px solid #dce5ef; border-radius: 12px; display: grid; gap: 7px; text-align: center; padding: 14px 5px; font-size: 12px; color: #254463; i { font-size: 23px; color: #1768e5; } } }
@@ -53,10 +53,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .vcet_login_foot { color: #52677f; font-size: 11px; margin: 10px 0; }
 .vcet_login_visual { background: linear-gradient(155deg,rgba(5,30,58,.8),rgba(8,47,81,.6)), url('/ideastone_campus/static/src/img/vcet-campus.jpg') center/cover; color: white; display: flex; flex-direction: column; justify-content: space-between; padding: clamp(28px,4vw,60px); gap: 60px; > div > p { font-size: 13px; line-height: 1.7; color: #e6ecf4; } h2 { color: #fff; font-size: clamp(32px,3.5vw,52px); line-height: 1.16; margin: 100px 0 24px; } }
 .vcet_login_features { background: #f4f8ff; color: #15263a; padding: 20px; border-radius: 15px; font-size: 13px; > div { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin-top: 15px; } span { border: 1px solid #dce5ef; padding: 12px 7px; background: white; border-radius: 8px; font-size: 11px; text-align: center; } }
-@media(max-width: 767px) { .vcet_login { grid-template-columns: 1fr; } .vcet_login_visual { min-height: 420px; h2 { margin-top: 20px; } } .vcet_login_logo { height: 75px; width: 210px; } .vcet_login_features > div { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width: 767px) { .vcet_login { grid-template-columns: 1fr; } .vcet_login_visual { min-height: 420px; h2 { margin-top: 20px; } } .vcet_login_logo { height: 75px; width: 75px; } .vcet_login_features > div { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 .vcet_login_roles legend { grid-column: 1 / -1; float: none; width: 100%; }
 .vcet_login_left { padding: clamp(24px,3vw,44px); }
-.vcet_login_logo { height: 75px; }
 .vcet_login_main { margin: 20px auto; }
 .vcet_login_body #wrapwrap { height: auto; overflow: visible; }
 body.vcet_login_body { overflow: auto; height: auto; }
