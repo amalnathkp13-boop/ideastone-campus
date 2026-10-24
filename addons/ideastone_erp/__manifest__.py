@@ -1,7 +1,7 @@
 {
     "name": "Ideastone Campus Operations",
     "summary": "Teaching, campus services, staff administration and institutional engagement",
-    "version": "17.0.1.0.13",
+    "version": "17.0.1.0.14",
     "category": "Education",
     "author": "Ideastone Technologies Pvt Ltd",
     "license": "OPL-1",
@@ -12,7 +12,7 @@
     ],
     "data": [
         "security/groups.xml", "security/directory.xml", "security/ir.model.access.csv", "security/rules.xml",
-        "views/operations.xml", "views/faculty.xml", "views/faculty_leave.xml", "views/faculty_attendance.xml", "views/student_attendance_workspace.xml", "views/subject_attendance_workspace.xml", "views/payroll_history.xml", "views/menus.xml", "views/portal.xml", "views/reports.xml",
+        "views/operations.xml", "views/faculty.xml", "views/faculty_leave.xml", "views/faculty_attendance.xml", "views/student_attendance_workspace.xml", "views/subject_attendance_workspace.xml", "views/payroll_history.xml", "views/menus.xml", "views/portal.xml", "views/website_icon.xml", "views/reports.xml",
         "security/workspace.xml", "views/workspace.xml", "views/faculty_workspace.xml",
         "security/faculty_tools.xml", "views/faculty_tools.xml", "views/student_leave.xml", "views/faculty_reports.xml",
         "security/mvp.xml", "data/mvp.xml", "views/mvp.xml", "views/mvp_search.xml", "views/mvp_reports.xml",
