@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <template id="vcet_website_touch_icon" inherit_id="website.layout" name="VCET website touch icon">
+    <xpath expr="//link[@rel='apple-touch-icon']" position="attributes">
+      <attribute name="t-att-href"/>
+      <attribute name="href">/ideastone_campus/static/src/img/icons/apple-touch-icon.png</attribute>
+      <attribute name="sizes">180x180</attribute>
+    </xpath>
+  </template>
+</odoo>
