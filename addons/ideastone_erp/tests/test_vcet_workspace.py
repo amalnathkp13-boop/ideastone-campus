@@ -404,6 +404,17 @@ class TestVcetWorkspace(TransactionCase):
         slip.with_user(payroll).action_compute()
         slip.with_user(payroll).action_submit()
         slip.with_user(payroll).action_approve()
+        admin_history = self.env["campus.payslip"].with_user(payroll).get_history_data(employee.id)
+        self.assertEqual(admin_history["employee_id"], employee.id)
+        self.assertEqual([row["id"] for row in admin_history["records"]], slip.ids)
+        self.assertEqual(admin_history["currency_code"], self.env.company.currency_id.name)
+        staff_admin = new_test_user(self.env, login="qa_staff_admin_history", groups="ideastone_erp.group_people")
+        for user in (staff_admin, self.teacher):
+            with self.assertRaises(AccessError):
+                self.env["campus.payslip"].with_user(user).get_history_data(employee.id)
+            with self.assertRaises(AccessError):
+                self.env["campus.payslip"].with_user(user).get_punch_entries(
+                    employee.id, "2035-01-01", "2035-01-31")
         self.assertEqual(slip.with_user(self.teacher).read(["name"])[0]["name"], slip.name)
         with self.assertRaises(AccessError):
             slip.with_user(self.other_teacher).read(["net"])
