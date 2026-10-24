@@ -17,6 +17,8 @@ CLIENT_ACTION_MODELS = {
     "action_admissions_applications": "op.admission",
     "action_admissions_documents": "campus.admission.document",
     "action_admissions_register": "op.admission.register",
+    "action_students_directory": "op.student",
+    "action_students_enrolments": "op.student.course",
     "action_staff_profile": "campus.faculty.detail",
     "action_faculty_appraisal_dashboard": "campus.faculty.achievement",
     "action_faculty_leave_page": "hr.leave",
