@@ -1,7 +1,8 @@
 import json
 
-from odoo import http
 from odoo.addons.web.controllers.webmanifest import WebManifest
+
+from odoo import http
 
 
 class VcetWebManifest(WebManifest):
