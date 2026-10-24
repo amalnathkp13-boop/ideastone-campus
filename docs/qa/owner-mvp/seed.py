@@ -13,8 +13,12 @@ company = env["res.company"].create({  # noqa: F821
 })
 env = env(context=dict(env.context, allowed_company_ids=[company.id], no_reset_password=True, mail_create_nosubscribe=True, mail_notrack=True))  # noqa: F821
 owner = new_test_user(env, login="owner.ui.qa", name="College Owner", password=os.environ["FACULTY_QA_PASSWORD"],
-                     company_id=company.id, company_ids=[(6, 0, company.ids)], groups="ideastone_erp.group_mvp_owner,event.group_event_manager")
-today = fields.Date.today()
+                     company_id=company.id, company_ids=[(6, 0, company.ids)], groups="ideastone_erp.group_mvp_owner,event.group_event_manager", tz="Asia/Kolkata")
+# The college works in India time and browser.cjs uses the same zone, so Odoo's
+# first-login "adopt the browser time zone" step leaves it unchanged. Dates come
+# from the owner's local day: near midnight UTC (the nightly CI run, ~23:20 UTC)
+# it differs from the server's UTC date.
+today = fields.Date.context_today(owner)
 year = env["op.academic.year"].create({"name": str(today.year) + " Academic Year", "code": "OWNERQA", "start_date": today.replace(month=1, day=1), "end_date": today.replace(month=12, day=31), "campus_current": True})
 department = env["op.department"].create({"name": "Computer Science", "code": "OWNERQA"})
 course = env["op.course"].create({"name": "B.E. Computer Science", "code": "OWNERQA", "department_id": department.id})
@@ -62,7 +66,7 @@ payment.action_pay()
 register = env["op.attendance.register"].create({"name": "CSE attendance", "code": "OWNERQA", "course_id": course.id, "batch_id": section.id})
 session = env["op.session"].create({"course_id": course.id, "batch_id": section.id, "subject_id": subject.id, "faculty_id": faculty.id,
     "start_datetime": datetime.combine(today, time(10, 0)), "end_datetime": datetime.combine(today, time(11, 0)), "state": "confirm"})
-sheet = env["op.attendance.sheet"].with_user(owner).create({"register_id": register.id, "session_id": session.id, "faculty_id": faculty.id, "campus_managed": True})
+sheet = env["op.attendance.sheet"].with_user(owner).create({"register_id": register.id, "session_id": session.id, "faculty_id": faculty.id, "attendance_date": today, "campus_managed": True})
 sheet.action_campus_roster()
 sheet.attendance_line[-1].write({"campus_status": "absent"})
 sheet.attendance_done()

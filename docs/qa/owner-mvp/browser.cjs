@@ -24,7 +24,7 @@ async function markup(page) {
 (async()=>{
     await fs.mkdir(out,{recursive:true});
     const browser = await chromium.launch({headless:true});
-    const page = await browser.newPage({viewport:{width:1440,height:1000}});
+    const page = await browser.newPage({viewport:{width:1440,height:1000},timezoneId:'Asia/Kolkata'});
     page.setDefaultTimeout(60000);
     const errors=[];
     page.on('pageerror',error=>errors.push(error.message));
