@@ -2,9 +2,8 @@ import mimetypes
 from collections import Counter
 from datetime import timedelta
 
-from odoo.exceptions import AccessError, ValidationError
-
 from odoo import _, api, fields, models
+from odoo.exceptions import AccessError, ValidationError
 
 
 class HodODUI(models.AbstractModel):
