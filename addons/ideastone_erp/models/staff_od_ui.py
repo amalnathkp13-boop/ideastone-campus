@@ -42,6 +42,8 @@ class StaffODUI(models.AbstractModel):
 
     @api.model
     def get_page_data(self, class_key=None):
+        if self.env.user.has_group("ideastone_erp.group_od_hod_approver"):
+            return self.env["campus.hod.od.ui"].get_page_data(class_key)
         routes = self._assigned_routes()
         classes = self._classes(routes)
         if class_key and class_key not in classes:

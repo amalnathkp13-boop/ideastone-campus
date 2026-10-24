@@ -15,6 +15,7 @@ export class StaffODManagement extends Component {
         this.state = useState({
             loading: true, saving: false, error: "", data: null, classKey: "",
             search: "", page: 1, period: "week", note: "", selectedId: null,
+            types: {}, approvedPage: 1, withheldPage: 1, approvedAll: false, withheldAll: false, hodDialog: null,
         });
         onWillStart(() => this.load());
     }
@@ -26,6 +27,9 @@ export class StaffODManagement extends Component {
             const data = await this.orm.call("campus.staff.od.ui", "get_page_data", [this.state.classKey || null]);
             this.state.data = data;
             this.state.classKey = data.class_key;
+            if (data.role === "hod") {
+                for (const row of data.rows) this.state.types[row.id] = row.category === "undetermined" ? "" : row.category;
+            }
             if (!data.rows.some((row) => row.id === this.state.selectedId)) {
                 this.state.selectedId = data.rows.find((row) => row.can_review)?.id || data.rows[0]?.id || null;
             }
@@ -65,6 +69,16 @@ export class StaffODManagement extends Component {
         return this.filteredRows.slice((this.state.page - 1) * PAGE_SIZE, this.state.page * PAGE_SIZE);
     }
 
+    get approvedRows() {
+        const rows = this.state.data?.approved_rows || [];
+        return this.state.approvedAll ? rows : rows.slice((this.state.approvedPage - 1) * PAGE_SIZE, this.state.approvedPage * PAGE_SIZE);
+    }
+
+    get withheldRows() {
+        const rows = this.state.data?.withheld_rows || [];
+        return this.state.withheldAll ? rows : rows.slice((this.state.withheldPage - 1) * PAGE_SIZE, this.state.withheldPage * PAGE_SIZE);
+    }
+
     get selectedRow() {
         return this.state.data?.rows.find((row) => row.id === this.state.selectedId) || null;
     }
@@ -99,6 +113,68 @@ export class StaffODManagement extends Component {
 
     setPage(page) {
         this.state.page = Math.max(1, Math.min(page, this.pageCount));
+    }
+
+    setListPage(kind, page) {
+        const key = kind === "approved" ? "approvedPage" : "withheldPage";
+        const count = this.state.data?.[`${kind}_rows`]?.length || 0;
+        this.state[key] = Math.max(1, Math.min(page, Math.max(1, Math.ceil(count / PAGE_SIZE))));
+    }
+
+    toggleListAll(kind) {
+        const key = kind === "approved" ? "approvedAll" : "withheldAll";
+        this.state[key] = !this.state[key];
+        this.setListPage(kind, 1);
+    }
+
+    setHodType(row, event) {
+        this.state.types[row.id] = event.target.value;
+    }
+
+    openHodDecision(row, decision) {
+        this.state.selectedId = row.id;
+        this.state.hodDialog = {
+            id: row.id, reference: row.reference, decision,
+            category: this.state.types[row.id] || (row.category === "undetermined" ? "" : row.category),
+            note: "", requirements: row.proof_requirements || "",
+            deadline: row.proof_deadline || "",
+        };
+    }
+
+    async downloadHodProof() {
+        const id = this.state.hodDialog?.id;
+        if (!id) return;
+        try {
+            const proof = await this.orm.call("campus.hod.od.ui", "get_proof", [id]);
+            const bytes = Uint8Array.from(atob(proof.content), (char) => char.charCodeAt(0));
+            const url = URL.createObjectURL(new Blob([bytes], {type: proof.mimetype}));
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = proof.filename;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (error) {
+            this.notification.add(error.data?.message || "The submitted proof could not be opened.", {type: "danger"});
+        }
+    }
+
+    async submitHodDecision() {
+        const dialog = this.state.hodDialog;
+        if (!dialog || this.state.saving) return;
+        this.state.saving = true;
+        try {
+            await this.orm.call("campus.hod.od.ui", "decide", [
+                dialog.id, dialog.decision, dialog.category, dialog.note,
+                dialog.requirements, dialog.deadline,
+            ]);
+            this.state.hodDialog = null;
+            await this.load();
+            this.notification.add("HOD decision saved.", {type: "success"});
+        } catch (error) {
+            this.notification.add(error.data?.message || "The HOD decision could not be saved.", {type: "danger"});
+        } finally {
+            this.state.saving = false;
+        }
     }
 
     async review(row, decision) {
@@ -137,7 +213,7 @@ export class StaffODManagement extends Component {
         const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
         const link = document.createElement("a");
         link.href = url;
-        link.download = `mentor-od-activity-${this.state.period}.csv`;
+        link.download = `${this.state.data?.role === "hod" ? "hod" : "mentor"}-od-activity-${this.state.period}.csv`;
         link.click();
         URL.revokeObjectURL(url);
     }

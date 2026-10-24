@@ -5,13 +5,13 @@
       <button t-if="state.open" class="campus_nav_backdrop" t-on-click="closeNav" aria-label="Close campus navigation"/>
       <aside id="campus_sidebar" class="campus_sidebar" t-att-class="{ 'is-open': state.open }" aria-label="Campus navigation">
         <button class="campus_brand" t-on-click="home" aria-label="Campus overview"><img src="/ideastone_campus/static/src/img/vcet-wordmark.png" alt="VCET"/><span>Campus Management ERP</span></button>
-        <div class="campus_nav_heading" t-esc="state.is_owner_workspace ? 'COLLEGE WORKSPACE' : state.faculty_modules.length ? 'FACULTY WORKSPACE' : 'WORKSPACES'"/>
+        <div class="campus_nav_heading" t-esc="state.is_owner_workspace ? 'COLLEGE WORKSPACE' : state.is_hod ? 'HOD WORKSPACE' : state.faculty_modules.length ? 'FACULTY WORKSPACE' : 'WORKSPACES'"/>
         <nav t-if="state.faculty_modules.length" aria-label="Faculty main modules"><t t-foreach="state.faculty_modules" t-as="module" t-key="module.key"><button class="campus_nav_link" t-att-class="{active: state.module === module.key}" t-att-aria-current="state.module === module.key ? 'page' : undefined" t-on-click="() => this.chooseModule(module)"><i t-att-class="'fa fa-' + module.icon" aria-hidden="true"/><span t-esc="module.label"/></button></t></nav>
         <nav t-else=""><t t-foreach="state.pages" t-as="item" t-key="item.key"><button class="campus_nav_link" t-att-class="{active: state.page === item.key}" t-on-click="() => this.go(item)"><i t-att-class="'fa fa-' + item.icon" aria-hidden="true"/><span t-esc="item.label"/></button></t></nav>
         <div t-if="state.error" role="alert"><p t-esc="state.error"/><button class="btn btn-light" t-on-click="load">Retry</button></div>
         <div class="campus_side_bottom"><strong t-esc="state.company"/><span t-esc="state.workspace_role"/><a href="/my/campus">My campus self-service <i class="fa fa-external-link"/></a></div>
       </aside>
-      <nav t-if="facultyModule" class="campus_faculty_subnav" aria-label="Faculty submodules">
+      <nav t-if="facultyModule &amp;&amp; state.module !== 'od'" class="campus_faculty_subnav" aria-label="Faculty submodules">
         <strong t-esc="facultyModule.label"/>
         <button class="campus_subnav_scroll" t-on-click="() => this.scrollSubmodules(-1)" aria-label="Previous submodules"><i class="fa fa-angle-left"/></button>
         <div t-ref="subnavStrip"><t t-foreach="facultyModule.items" t-as="item" t-key="item.label"><button t-att-class="{active: item.tool ? state.activeTool === item.tool : item.action_id ? state.activeAction === item.action_id : state.page === item.page}" t-on-click="() => this.facultyGo(item)" t-esc="item.label"/></t></div>
