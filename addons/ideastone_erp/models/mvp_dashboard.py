@@ -12,6 +12,11 @@ from odoo import _, api, fields, models
 ROLES = ("owner", "registrar", "admissions", "accountant", "exams", "readonly", "hod")
 # Client (OWL) actions have no res_model; access is checked against the model they edit.
 CLIENT_ACTION_MODELS = {
+    "action_admissions_overview": "op.admission",
+    "action_admissions_enquiries": "crm.lead",
+    "action_admissions_applications": "op.admission",
+    "action_admissions_documents": "campus.admission.document",
+    "action_admissions_register": "op.admission.register",
     "action_students_directory": "op.student",
     "action_students_enrolments": "op.student.course",
     "action_staff_profile": "campus.faculty.detail",

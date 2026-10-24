@@ -24,7 +24,7 @@ async function markup(page) {
 (async()=>{
     await fs.mkdir(out,{recursive:true});
     const browser = await chromium.launch({headless:true});
-    const page = await browser.newPage({viewport:{width:1440,height:1000}});
+    const page = await browser.newPage({viewport:{width:1440,height:1000},timezoneId:'Asia/Kolkata'});
     page.setDefaultTimeout(60000);
     const errors=[];
     page.on('pageerror',error=>errors.push(error.message));
@@ -81,6 +81,17 @@ async function markup(page) {
         }
         for (const module of overview.faculty_modules.filter(module=>module.key!=='home')) {
             await page.locator('.campus_sidebar').getByRole('button',{name:module.label,exact:true}).click();
+            await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory'})[module.key]||module.label,exact:true,level:1}).waitFor();
+        }
+        await page.locator('.campus_sidebar').getByRole('button',{name:'Admissions',exact:true}).click();
+        await page.getByRole('heading',{name:'Admissions',exact:true}).waitFor();
+        if(await page.locator('.campus_admissions_workspace .stat').count()!==4) throw Error('Admissions overview does not show four live indicators');
+        if(await page.locator('.campus_admissions_workspace h1').evaluate(el=>getComputedStyle(el).fontSize)!=='27px') throw Error('Admissions heading differs from the established admin typography');
+        for(const [label,title] of [['Enquiries','Enquiry studio'],['Applications & review','Applications & review'],['Documents','Document verification desk'],['Admission register','Admission register']]) {
+            await page.locator('.campus_faculty_subnav').getByRole('button',{name:label,exact:true}).click();
+            await page.getByRole('heading',{name:title,exact:true,level:1}).waitFor();
+            await page.locator('.campus_admissions_workspace .loading-note').waitFor({state:'hidden'});
+            if(await page.locator('.campus_admissions_workspace .alert-danger').count()) throw Error(`Admissions workspace ${label} failed to load`);
             await page.getByRole('heading',{name:module.key==='students'?'Student directory':module.label,exact:true,level:1}).waitFor();
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Students',exact:true}).click();
