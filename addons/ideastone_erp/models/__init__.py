@@ -51,5 +51,6 @@ from . import student_requests_ui
 from . import student_fees_ui
 from . import student_help_ui
 from . import student_library_ui
+from . import student_od
 from . import students_directory_ui
 from . import admissions_ui
