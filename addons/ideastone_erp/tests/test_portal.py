@@ -46,7 +46,7 @@ class TestCampusPortal(HttpCase):
         self.authenticate("qa_http_parent", "qa-http-fixture")
         response = self.url_open("/my/campus")
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Parent workspace", response.text)
+        self.assertIn('aria-label="Parent navigation"', response.text)
         self.assertIn("QA-LINKED-STUDENT", response.text)
         response = self.url_open(f"/my/campus?student={self.unrelated_student.id}")
         self.assertEqual(response.status_code, 403)
