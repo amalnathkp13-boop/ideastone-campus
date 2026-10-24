@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+  <template id="vcet_browser_tab" inherit_id="web.layout" name="VCET browser tab branding">
+    <xpath expr="//head/title" position="replace"><title>erp.vcet</title></xpath>
+    <xpath expr="//head/link[@rel='shortcut icon']" position="replace">
+      <link rel="icon" type="image/png" href="/ideastone_campus/static/src/img/vcet-tab-icon.png"/>
+    </xpath>
+  </template>
   <template id="campus_login_layout" name="VCET campus login layout">
     <t t-call="web.frontend_layout">
       <t t-set="body_classname" t-value="'vcet_login_body'"/><t t-set="no_header" t-value="True"/><t t-set="no_footer" t-value="True"/>
