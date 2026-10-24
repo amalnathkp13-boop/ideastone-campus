@@ -88,6 +88,10 @@ class CampusBase extends Component {
         return this.state.page === "library" ? "Library circulation desk" : "Reports & exports";
     }
     async chooseModule(module) {
+        if (this.state.is_owner_workspace && module.key === "admissions" && module.items?.[0]?.action) {
+            this.state.module = module.key;
+            return this.open(module.items[0]);
+        }
         await this.action.doAction("ideastone_erp.action_dashboard", {
             additionalContext: { campus_page: module.key === "home" ? (this.state.is_owner_workspace ? "owner-overview" : "overview") : "faculty-module", campus_module: module.key },
         });
