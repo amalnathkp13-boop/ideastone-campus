@@ -10,7 +10,8 @@ registry.category("services").add("title", {
         const setParts = service.setParts;
         service.setParts = (parts) => {
             setParts(parts);
-            document.title = "erp.vcet";
+            const page = service.getParts().action;
+            document.title = page ? `${page} · erp.vcet` : "erp.vcet";
         };
         return service;
     },
