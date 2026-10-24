@@ -108,7 +108,7 @@ class CampusBase extends Component {
             if (["ideastone_erp.action_students_directory", "ideastone_erp.action_students_enrolments"].includes(item.action)) {
                 this.router.pushState({students_screen: item.action.endsWith("enrolments") ? "enrolments" : "directory", students_department_id: "", students_batch_id: ""});
             }
-            if (["ideastone_erp.action_faculty_appraisal_dashboard", "ideastone_erp.action_staff_profile"].includes(item.action) && item.action_id) {
+            if (["ideastone_erp.action_faculty_appraisal_dashboard", "ideastone_erp.action_staff_profile", "ideastone_erp.action_staff_od_management"].includes(item.action) && item.action_id) {
                 window.location.assign(`/web#action=${item.action_id}`);
                 return;
             }
@@ -120,7 +120,7 @@ class CampusBase extends Component {
                 await this.action.doAction({ type: "ir.actions.act_window", res_model: "op.faculty", res_id: item.profile_id, views: [[false, "form"]], target: "current" });
             } else {
                 const action = this.state.is_owner_workspace && ![
-                    "ideastone_erp.action_faculty_leave_page", "ideastone_erp.action_faculty_appraisal_dashboard", "ideastone_erp.action_staff_profile", "ideastone_erp.action_faculty_attendance_page", "ideastone_erp.action_student_attendance_workspace",
+                    "ideastone_erp.action_faculty_leave_page", "ideastone_erp.action_faculty_appraisal_dashboard", "ideastone_erp.action_staff_profile", "ideastone_erp.action_staff_od_management", "ideastone_erp.action_faculty_attendance_page", "ideastone_erp.action_student_attendance_workspace",
                 ].includes(item.action) ?
                     await this.orm.call("campus.dashboard", "get_owner_action", [item.action]) : item.action;
                 if (this.state.is_owner_workspace && action.context) action.context.campus_module = this.state.module;

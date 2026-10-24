@@ -63,6 +63,7 @@
                 proof_review: { done: 3, current: 4 },
                 completed: { done: 5, current: 0 },
                 rejected: { done: 1, stopped: 2 },
+                returned: { done: 1, stopped: 2 },
                 invalid: { done: 3, stopped: 4 },
                 cancelled: { done: 1, stopped: 2 },
             }[state] || { done: 0, current: 0 };
