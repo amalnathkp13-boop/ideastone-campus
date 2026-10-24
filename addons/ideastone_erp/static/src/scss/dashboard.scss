@@ -4,7 +4,7 @@
     display: flex; flex-direction: column; padding: 24px 15px; gap: 14px;
     nav { flex: 1; overflow-y: auto; min-height: 0; }
 }
-.campus_brand { border: 0; background: transparent; color: #c1d5e5; text-align: left; padding: 0 10px 22px; border-bottom: 1px solid #315672; font-size: 11px; img { display: block; object-fit: contain; background: white; width: 180px; height: 64px; padding: 5px; border-radius: 8px; margin-bottom: 12px; } }
+.campus_brand { border: 0; background: transparent; color: #c1d5e5; text-align: left; padding: 0 10px 22px; border-bottom: 1px solid #315672; font-size: 11px; img { display: block; object-fit: contain; width: 70px; height: 70px; margin-bottom: 12px; } }
 .campus_nav_heading { color: #b3ccdf; font-size: 10px; letter-spacing: 1.4px; padding: 10px; font-weight: 750; }
 .campus_nav_link { width: 100%; border: 0; background: transparent; color: #e2edf7; text-align: left; padding: 13px 12px; border-radius: 8px; font-size: 13px; min-height: 46px; display: flex; gap: 12px; align-items: center; margin-bottom: 4px; i { width: 20px; text-align: center; font-size: 17px; } &:hover, &:focus-visible { background: #17445f; } }
 .campus_side_bottom { display: grid; gap: 8px; border-top: 1px solid #315672; padding: 18px 10px 0; font-size: 11px; color: #c1d5e5; a { color: #eff7ff; padding: 9px 0; } }

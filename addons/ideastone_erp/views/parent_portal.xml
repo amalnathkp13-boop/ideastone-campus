@@ -10,7 +10,7 @@
       <div id="campus_student_workspace" class="student_workspace parent_workspace" data-portal-prefix="/my/campus/parent/">
         <a class="student_skip" href="#student_main">Skip to content</a>
         <aside id="student_sidebar" class="student_sidebar" aria-label="Parent navigation">
-          <a class="student_brand" href="/my/campus"><img src="/ideastone_campus/static/src/img/vcet-wordmark.png" alt="Campus ERP"/><span>Campus Management ERP</span></a>
+          <a class="student_brand" href="/my/campus"><img src="/ideastone_campus/static/src/img/vcet-tab-icon.png" alt="VCET shield"/><span>Campus Management ERP</span></a>
           <span class="student_nav_heading">PARENT WORKSPACE</span>
           <nav t-if="d"><a t-foreach="d['navigation']" t-as="item" t-att-href="student_url_for(item[0])" t-att-class="'student_nav_link active' if section == item[0] else 'student_nav_link'" t-att-aria-current="'page' if section == item[0] else None"><i t-att-class="'fa fa-' + item[2]" aria-hidden="true"/><span t-esc="item[1]"/></a></nav>
           <div class="student_sidebar_bottom"><strong t-if="d" t-esc="d['company']"/><span>Parent monitoring &amp; contact</span><a href="/web/session/logout?redirect=/web/login">Sign out</a></div>

@@ -12,7 +12,7 @@
   <template id="portal_campus" name="My campus">
     <t t-call="portal.portal_layout">
       <main class="container campus_portal">
-        <img src="/ideastone_campus/static/src/img/vcet-logo.png" class="img-fluid mb-4" style="max-height:65px" alt="Velalar College of Engineering and Technology"/>
+        <img src="/ideastone_campus/static/src/img/vcet-tab-icon.png" class="img-fluid mb-4" style="max-height:65px" alt="VCET shield"/>
         <header class="campus_portal_heading"><div><span class="vcet_eyebrow">YOUR CONNECTED CAMPUS</span><h1><t t-esc="workspace_role"/> workspace</h1><p>Academic progress, notices and service requests for your linked records.</p></div><a href="/my/campus/library" class="btn btn-outline-primary mb-3">Library catalogue and digital resources</a></header>
         <nav t-if="selected" class="campus_portal_nav" aria-label="My campus sections"><a href="#campus_timetable">Timetable</a><a href="#campus_attendance">Attendance</a><a href="#campus_results">Published results</a><a href="#campus_fees">Fees</a><a href="#campus_notices">Notices</a></nav>
         <div t-if="success" class="alert alert-success" role="status">Your submission was saved.</div>
