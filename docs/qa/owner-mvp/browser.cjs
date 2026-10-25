@@ -43,7 +43,12 @@ async function markup(page) {
         await page.screenshot({path:path.join(out,'owner-dashboard-1440.png'),fullPage:true});
         await page.locator('.collection-panel').evaluate(element=>element.scrollIntoView({block:'start'}));
         const collectionBars=await page.locator('.collection-panel .bar-fill').evaluateAll(nodes=>nodes.map(node=>parseFloat(node.style.width)));
-        if(collectionBars.length!==2 || Math.abs(collectionBars[0]-100)>0.1 || Math.abs(collectionBars[1]-200/300*100)>0.1) throw Error('Collection and dues chart does not use a common amount scale');
+        // The seeded fee is due a week ahead, so in a month's last week receipts and dues fall in
+        // different months. Check every bar against one shared scale instead of assuming one month.
+        const amounts=firstMetrics.collection.flatMap(row=>[row.collected,row.dues]);
+        const scale=Math.max(...amounts);
+        if(scale!==300 || amounts.reduce((a,b)=>a+b,0)!==500 || collectionBars.length!==amounts.length
+            || collectionBars.some((width,index)=>Math.abs(width-amounts[index]/scale*100)>0.1)) throw Error('Collection and dues chart does not use a common amount scale');
         await page.screenshot({path:path.join(out,'owner-charts-1440.png')});
         if(await page.locator('.admin_overview .kpi').count()!==8) throw Error('Admin overview does not show eight indicators');
         if(await page.locator('.event-card').count()!==3) throw Error('Admin event cards do not reflect the four saved events');
