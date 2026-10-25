@@ -2,9 +2,10 @@ import base64
 import uuid
 from datetime import timedelta
 
-from odoo import fields
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import TransactionCase, new_test_user, tagged
+
+from odoo import fields
 
 from .test_owner_mvp import OwnerMVPFixture
 
