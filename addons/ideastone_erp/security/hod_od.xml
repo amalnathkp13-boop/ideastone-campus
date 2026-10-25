@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="group_od_hod_approver" model="res.groups">
+    <field name="name">Student OD HOD approver</field>
+    <field name="category_id" ref="ideastone_erp.category_campus"/>
+    <field name="implied_ids" eval="[(4, ref('ideastone_erp.group_mvp_hod')), (4, ref('openeducat_core.group_op_faculty'))]"/>
+  </record>
+</odoo>

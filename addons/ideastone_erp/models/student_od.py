@@ -79,6 +79,9 @@ class StudentOD(models.Model):
     mentor_note = fields.Text(readonly=True)
     mentor_reviewed_by_id = fields.Many2one("res.users", readonly=True)
     mentor_reviewed_at = fields.Datetime(readonly=True)
+    hod_note = fields.Text(readonly=True)
+    hod_reviewed_by_id = fields.Many2one("res.users", readonly=True)
+    hod_reviewed_at = fields.Datetime(readonly=True)
     support_file = fields.Binary(attachment=True, readonly=True)
     support_filename = fields.Char(readonly=True)
     event_ids = fields.One2many("campus.student.od.event", "od_id", readonly=True)
@@ -104,6 +107,10 @@ class StudentOD(models.Model):
     def write(self, vals):
         allowed = ({"state", "mentor_note", "mentor_reviewed_by_id", "mentor_reviewed_at"}
                    if self.env.context.get("campus_od_mentor_review") else
+                   {"state", "category", "proof_requirements", "proof_deadline", "hod_note",
+                    "hod_reviewed_by_id", "hod_reviewed_at"}
+                   if self.env.context.get("campus_od_hod_review") else
+                   {"state"} if self.env.context.get("campus_od_proof_expiry") else
                    {"state"} if self.env.context.get("campus_od_student_cancel")
                    or self.env.context.get("campus_od_student_activate") else
                    {"proof_file", "proof_filename", "state"} if self.env.context.get("campus_od_student_proof") else set())
@@ -118,6 +125,34 @@ class StudentOD(models.Model):
                 or not self.env.user.has_group("openeducat_core.group_op_faculty")
             ):
                 raise AccessError(_("Only the assigned mentor may decide a pending OD request."))
+            if self.env.context.get("campus_od_hod_review"):
+                if (not self.env.user.has_group("ideastone_erp.group_od_hod_approver")
+                        or rec.hod_id != self.env.user or rec.routing_id.hod_id != self.env.user
+                        or not rec.routing_id.active or rec.company_id != self.env.company
+                        or vals.get("hod_reviewed_by_id") != self.env.uid or not vals.get("hod_reviewed_at")):
+                    raise AccessError(_("Only the assigned HOD may decide this OD request."))
+                next_state = vals.get("state")
+                if rec.state == "pending_hod":
+                    if next_state not in {"completed", "withheld", "rejected"}:
+                        raise AccessError(_("This OD is not awaiting a valid HOD decision."))
+                    if next_state == "completed" and vals.get("category") != "general":
+                        raise AccessError(_("General OD must be confirmed without proof."))
+                    if next_state == "withheld" and (vals.get("category") != "special"
+                            or not vals.get("proof_requirements") or not vals.get("proof_deadline")):
+                        raise AccessError(_("Special OD requires proof instructions and a separate deadline."))
+                elif rec.state == "withheld":
+                    if next_state != "withheld" or not vals.get("proof_requirements") or not vals.get("proof_deadline"):
+                        raise AccessError(_("Only proof instructions may be updated while evidence is pending."))
+                elif rec.state == "proof_review":
+                    if next_state not in {"completed", "withheld", "invalid"} or not rec.proof_file:
+                        raise AccessError(_("Only submitted proof may be reviewed."))
+                else:
+                    raise AccessError(_("This request is not awaiting HOD action."))
+            if self.env.context.get("campus_od_proof_expiry") and (
+                rec.state != "withheld" or vals != {"state": "invalid"}
+                or not rec.proof_deadline or rec.proof_deadline >= fields.Date.context_today(rec)
+            ):
+                raise AccessError(_("Only overdue proof requests may expire."))
             if self.env.context.get("campus_od_student_cancel") and (rec.state != "pending_mentor" or vals != {"state": "cancelled"}):
                 raise AccessError(_("Only a request awaiting mentor review may be cancelled by the student."))
             if self.env.context.get("campus_od_student_activate") and (rec.state not in {"draft", "returned"} or vals != {"state": "pending_mentor"}):
@@ -126,10 +161,22 @@ class StudentOD(models.Model):
                     or not vals.get("proof_file") or not rec.proof_deadline or fields.Date.context_today(rec) > rec.proof_deadline):
                 raise AccessError(_("Proof can be submitted only while an approved Special OD is awaiting evidence."))
         result = super().write(vals)
-        if "state" in vals and not self.env.context.get("campus_od_mentor_review"):
+        if "state" in vals and not (self.env.context.get("campus_od_mentor_review")
+                                     or self.env.context.get("campus_od_hod_review")
+                                     or self.env.context.get("campus_od_proof_expiry")):
             self._record_event({"cancelled": "Cancelled by student", "pending_mentor": "Submitted for mentor review",
                                 "proof_review": "Proof submitted for HOD review"}[vals["state"]])
         return result
+
+    @api.model
+    def _cron_expire_proof(self):
+        today = fields.Date.context_today(self)
+        records = self.sudo().search([("state", "=", "withheld"), ("proof_deadline", "<", today)])
+        for record in records:
+            record._lock()
+            if record.state == "withheld" and record.proof_deadline < today:
+                record.with_context(campus_od_proof_expiry=True).write({"state": "invalid"})
+                record._record_event("Proof deadline passed; OD invalidated")
 
     def unlink(self):
         raise AccessError(_("Retain OD requests and decisions for audit."))
@@ -217,7 +264,7 @@ class StudentODPortal(models.AbstractModel):
         ][:4]
         data["od"]["proof_ready"] = any(row["can_upload"] for row in data["od"]["rows"])
         index = next((index for index, item in enumerate(data["navigation"]) if item[0] == "requests"), len(data["navigation"]))
-        data["navigation"].insert(index, ("on-duty", "On Duty Management", "briefcase"))
+        data["navigation"].insert(index, ("on-duty", "OD Management", "briefcase"))
         return data
 
     @api.model
