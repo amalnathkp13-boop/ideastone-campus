@@ -9,6 +9,7 @@ body.campus_faculty_workspace {
     .campus_nav_heading { font-size: 10px; }
     &.o_web_client > .o_navbar, &.o_web_client > .o_main_navbar { margin-left: 250px; }
     &.o_web_client > .o_action_manager { margin-left: 250px; margin-top: 56px; min-height: 0; }
+    &:not(:has(.campus_faculty_subnav)).o_web_client > .o_action_manager { margin-top: 0; }
     .campus_faculty_subnav { position: fixed; top: 46px; left: 250px; right: 0; height: 56px; z-index: 90;
         display: flex; align-items: center; padding: 0 20px; gap: 20px; background: #fff; border-bottom: 1px solid #e0e8f2;
         > strong { white-space: nowrap; color: #082b46; font-size: 13px; }

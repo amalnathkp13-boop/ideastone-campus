@@ -1,7 +1,7 @@
 <odoo>
   <template id="student_od_workspace" inherit_id="ideastone_erp.student_workspace" name="Student On Duty Management">
-    <xpath expr="//nav[hasclass('student_subnav')]/t[@t-elif=&quot;section == 'requests'&quot;]" position="before">
-      <t t-elif="section == 'on-duty'"><a href="#student_od_apply">New request</a><a href="#student_od_workflow">Approval workflow</a><a href="#student_od_history">My requests</a></t>
+    <xpath expr="//nav[hasclass('student_subnav')]" position="attributes">
+      <attribute name="t-if">d and section != 'on-duty'</attribute>
     </xpath>
     <xpath expr="//t[@t-elif=&quot;section == 'requests'&quot;][@t-call]" position="before">
       <t t-elif="section == 'on-duty'" t-call="ideastone_erp.student_od_content"/>

@@ -54,7 +54,7 @@ class OwnerDashboard(models.AbstractModel):
 
     @api.model
     def get_overview(self):
-        if not self._is_mvp_user():
+        if self.env.user.has_group("ideastone_erp.group_od_hod_approver") or not self._is_mvp_user():
             return super().get_overview()
         modules = []
         navigation = []

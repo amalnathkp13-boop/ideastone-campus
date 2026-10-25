@@ -11,7 +11,7 @@ registry.category("services").add("title", {
         service.setParts = (parts) => {
             setParts(parts);
             const page = service.getParts().action;
-            document.title = page ? `${page} · erp.vcet` : "erp.vcet";
+            document.title = page ? `${page} · VCET Campus ERP` : "VCET Campus ERP";
         };
         return service;
     },

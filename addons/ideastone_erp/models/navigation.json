@@ -32,7 +32,7 @@
   {
     "model": "op.faculty",
     "label": "OD Management",
-    "group": "Staff",
+    "group": "OD Management",
     "action": "ideastone_erp.action_staff_od_management"
   },
   {
