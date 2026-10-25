@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+  <template id="vcet_browser_icon" inherit_id="web.layout" priority="90" name="VCET browser icon">
+    <xpath expr="//head/link[@rel='shortcut icon']" position="replace">
+      <link rel="icon" type="image/x-icon" href="/ideastone_campus/static/src/img/icons/favicon.ico"/>
+      <link rel="icon" type="image/png" sizes="32x32" href="/ideastone_campus/static/src/img/icons/favicon-32x32.png"/>
+      <link rel="icon" type="image/png" sizes="16x16" href="/ideastone_campus/static/src/img/icons/favicon-16x16.png"/>
+    </xpath>
+  </template>
+  <template id="vcet_backend_touch_icon" inherit_id="web.webclient_bootstrap" name="VCET backend touch icon">
+    <xpath expr="//link[@rel='apple-touch-icon']" position="attributes">
+      <attribute name="href">/ideastone_campus/static/src/img/icons/apple-touch-icon.png</attribute>
+      <attribute name="sizes">180x180</attribute>
+    </xpath>
+  </template>
   <template id="campus_login_layout" name="VCET campus login layout">
     <t t-call="web.frontend_layout">
       <t t-set="body_classname" t-value="'vcet_login_body'"/><t t-set="no_header" t-value="True"/><t t-set="no_footer" t-value="True"/>
