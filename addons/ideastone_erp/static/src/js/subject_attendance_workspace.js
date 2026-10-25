@@ -10,9 +10,12 @@ export class SubjectAttendanceWorkspace extends Component {
     setup() {
         this.orm = useService("orm");
         this.notification = useService("notification");
+        this.action = useService("action");
         this.state = useState({loading: true, saving: false, error: "", data: null,
             termId: "", facultyId: "", date: "", subjectKey: "", sessionId: "",
-            page: 1, notes: "", holdDate: false});
+            page: 1, subjectPage: 1, allocationPage: 1, notes: "",
+            subjectSearch: "", studentSearch: "", studentStatus: "all", showRoll: true,
+            selectedStudents: []});
         onWillStart(() => this.load());
     }
 
@@ -32,6 +35,8 @@ export class SubjectAttendanceWorkspace extends Component {
             this.state.sessionId = String(data.session_id || "");
             this.state.notes = data.notes || "";
             this.state.page = Math.min(this.state.page, this.pageCount);
+            this.state.subjectPage = Math.min(this.state.subjectPage, this.subjectPageCount);
+            this.state.allocationPage = Math.min(this.state.allocationPage, this.allocationPageCount);
         } catch (error) {
             this.state.error = error.data?.message || "Subject attendance could not be loaded. Please retry.";
         } finally {
@@ -43,13 +48,40 @@ export class SubjectAttendanceWorkspace extends Component {
         return this.state.data?.subjects.find((item) => item.key === this.state.subjectKey);
     }
 
+    get filteredSubjects() {
+        const query = this.state.subjectSearch.trim().toLowerCase();
+        return (this.state.data?.subjects || []).filter(
+            (item) => !query || [item.code, item.name, item.class].some(
+                (value) => String(value || "").toLowerCase().includes(query)
+            )
+        );
+    }
+
+    get subjectPageCount() {
+        return Math.max(1, Math.ceil(this.filteredSubjects.length / 6));
+    }
+
+    get visibleSubjects() {
+        return this.filteredSubjects.slice((this.state.subjectPage - 1) * 6, this.state.subjectPage * 6);
+    }
+
+    get filteredStudents() {
+        const query = this.state.studentSearch.trim().toLowerCase();
+        return (this.state.data?.students || []).filter((item) =>
+            (this.state.studentStatus === "all" || item.status === this.state.studentStatus) &&
+            (!query || [item.roll, item.name, item.class].some(
+                (value) => String(value || "").toLowerCase().includes(query)
+            ))
+        );
+    }
+
     get visibleStudents() {
         const offset = (this.state.page - 1) * 8;
-        return (this.state.data?.students || []).slice(offset, offset + 8);
+        return this.filteredStudents.slice(offset, offset + 8);
     }
 
     get pageCount() {
-        return Math.max(1, Math.ceil((this.state.data?.students.length || 0) / 8));
+        return Math.max(1, Math.ceil(this.filteredStudents.length / 8));
     }
 
     get pageNumbers() {
@@ -61,15 +93,38 @@ export class SubjectAttendanceWorkspace extends Component {
     }
 
     get studentRange() {
-        const count = this.state.data?.students.length || 0;
+        const count = this.filteredStudents.length;
         return count ? `Showing ${(this.state.page - 1) * 8 + 1} to ${Math.min(this.state.page * 8, count)} of ${count} students` : "No students in this class";
     }
+
+    get allocationPageCount() {
+        return Math.max(1, Math.ceil((this.state.data?.allocations.length || 0) / 5));
+    }
+
+    get visibleAllocations() {
+        const start = (this.state.allocationPage - 1) * 5;
+        return (this.state.data?.allocations || []).slice(start, start + 5);
+    }
+
+    get trendMax() {
+        return Math.max(1, ...(this.state.data?.trend || []).flatMap(
+            (item) => [item.present, item.absent, item.excused]
+        ));
+    }
+
+    chartHeight(value) {
+        return value ? `${Math.max(5, Math.round(value * 100 / this.trendMax))}%` : "0%";
+    }
+
+    displayDate(value) { return value ? value.split("-").reverse().join("/") : ""; }
 
     async changeTerm(event) {
         this.state.termId = event.target.value;
         this.state.subjectKey = "";
         this.state.sessionId = "";
         this.state.page = 1;
+        this.state.subjectPage = 1;
+        this.state.selectedStudents = [];
         await this.load();
     }
 
@@ -78,6 +133,8 @@ export class SubjectAttendanceWorkspace extends Component {
         this.state.subjectKey = "";
         this.state.sessionId = "";
         this.state.page = 1;
+        this.state.subjectPage = 1;
+        this.state.selectedStudents = [];
         await this.load();
     }
 
@@ -91,11 +148,18 @@ export class SubjectAttendanceWorkspace extends Component {
         this.state.subjectKey = key;
         this.state.sessionId = "";
         this.state.page = 1;
+        this.state.selectedStudents = [];
         await this.load();
     }
 
     async chooseHour(event) {
         this.state.sessionId = event.target.value;
+        await this.load();
+    }
+
+    async chooseAllocation(allocation) {
+        this.state.date = allocation.date;
+        this.state.sessionId = String(allocation.id);
         await this.load();
     }
 
@@ -105,8 +169,24 @@ export class SubjectAttendanceWorkspace extends Component {
     }
 
     changeNotes(event) { this.state.notes = event.target.value; }
-    changeHoldDate(event) { this.state.holdDate = event.target.checked; }
     setPage(page) { this.state.page = Math.max(1, Math.min(page, this.pageCount)); }
+    setSubjectPage(page) { this.state.subjectPage = Math.max(1, Math.min(page, this.subjectPageCount)); }
+    setAllocationPage(page) { this.state.allocationPage = Math.max(1, Math.min(page, this.allocationPageCount)); }
+    searchSubjects(event) { this.state.subjectSearch = event.target.value; this.state.subjectPage = 1; }
+    searchStudents(event) { this.state.studentSearch = event.target.value; this.state.page = 1; }
+    filterStudents(event) { this.state.studentStatus = event.target.value; this.state.page = 1; }
+    toggleRoll(event) { this.state.showRoll = event.target.checked; }
+    toggleStudent(id, event) {
+        this.state.selectedStudents = event.target.checked
+            ? [...this.state.selectedStudents, id]
+            : this.state.selectedStudents.filter((item) => item !== id);
+    }
+    toggleVisibleStudents(event) {
+        const visible = this.visibleStudents.map((item) => item.id);
+        this.state.selectedStudents = event.target.checked
+            ? [...new Set([...this.state.selectedStudents, ...visible])]
+            : this.state.selectedStudents.filter((id) => !visible.includes(id));
+    }
 
     async save() {
         if (!this.state.data?.can_save || !this.state.sessionId || this.state.saving) return;
@@ -127,14 +207,49 @@ export class SubjectAttendanceWorkspace extends Component {
 
     exportSubjects() {
         const rows = [["Code", "Subject", "Class", "Students"],
-            ...(this.state.data?.subjects || []).map((item) => [item.code, item.name, item.class, item.students])];
-        const csv = "\ufeff" + rows.map((row) => row.map((value) => `"${String(value ?? "").replaceAll('"', '""')}"`).join(",")).join("\r\n");
+            ...this.filteredSubjects.map((item) => [item.code, item.name, item.class, item.students])];
+        const csv = "\ufeff" + rows.map((row) => row.map((value) => {
+            const safe = String(value ?? "");
+            return `"${( /^[=+\-@\t\r]/.test(safe) ? "'" + safe : safe).replaceAll('"', '""')}"`;
+        }).join(",")).join("\r\n");
         const url = URL.createObjectURL(new Blob([csv], {type: "text/csv;charset=utf-8"}));
         const link = document.createElement("a");
         link.href = url;
         link.download = "subject-attendance-subjects.csv";
         link.click();
         URL.revokeObjectURL(url);
+    }
+
+    printSubjects() { window.print(); }
+
+    openRecord(model, id, title) {
+        this.action.doAction({type: "ir.actions.act_window", name: title, res_model: model,
+            res_id: id, views: [[false, "form"]], target: "current"});
+    }
+
+    openAllocations() {
+        if (!this.state.data?.can_manage_allocations) return;
+        this.action.doAction({type: "ir.actions.act_window", name: "Teaching hours",
+            res_model: "op.session", views: [[false, "tree"], [false, "form"]],
+            domain: [["faculty_id", "=", Number(this.state.facultyId)]],
+            context: {default_faculty_id: Number(this.state.facultyId),
+                default_subject_id: this.selectedSubject?.subject_id,
+                default_batch_id: this.selectedSubject?.batch_id}, target: "current"});
+    }
+
+    openClasses() {
+        if (!this.state.data?.can_manage_allocations) return;
+        this.action.doAction({type: "ir.actions.act_window", name: "Allocated classes",
+            res_model: "op.batch", views: [[false, "tree"], [false, "form"]],
+            domain: [["id", "in", this.state.data.classes.map((item) => item.id)]],
+            target: "current"});
+    }
+
+    openHistory() {
+        this.action.doAction({type: "ir.actions.act_window", name: "Attendance history",
+            res_model: "op.attendance.sheet", views: [[false, "tree"], [false, "form"]],
+            domain: [["session_id", "in", this.state.data.allocations.map((item) => item.id)]],
+            target: "current"});
     }
 }
 
