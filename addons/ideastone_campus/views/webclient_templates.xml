@@ -13,11 +13,15 @@
       <attribute name="sizes">180x180</attribute>
     </xpath>
   </template>
+  <template id="vcet_browser_tab" inherit_id="web.layout" name="VCET browser tab branding">
+    <xpath expr="//head/title" position="replace"><title t-esc="('%s · VCET Campus ERP' % title) if title else 'VCET Campus ERP'"/></xpath>
+  </template>
   <template id="campus_login_layout" name="VCET campus login layout">
     <t t-call="web.frontend_layout">
+      <t t-set="title">Sign in</t>
       <t t-set="body_classname" t-value="'vcet_login_body'"/><t t-set="no_header" t-value="True"/><t t-set="no_footer" t-value="True"/>
       <div class="vcet_login"><section class="vcet_login_left">
-        <img class="vcet_login_logo" src="/ideastone_campus/static/src/img/vcet-wordmark.png" alt="Velalar College of Engineering and Technology"/>
+        <img class="vcet_login_logo" src="/ideastone_campus/static/src/img/vcet-tab-icon.png" alt="VCET shield"/>
         <div class="vcet_login_main"><span class="vcet_eyebrow">A CONNECTED CAMPUS</span><h1>Welcome to<br/>VCET Campus ERP</h1><p>One secure workspace for admissions, academics, attendance, examinations, fees and learning.</p><t t-out="0"/>
         <p class="vcet_login_notice">Use your college account. Your assigned permissions determine the workspace and records available after sign-in.</p></div>
         <p class="vcet_login_foot">Velalar College of Engineering and Technology · Powered by Ideastone</p>

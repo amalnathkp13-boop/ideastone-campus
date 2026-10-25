@@ -42,6 +42,7 @@ timetable, attendance, exams, library, parents portal) and layers on:
     ],
     "assets": {
         "web.assets_backend": [
+            "ideastone_campus/static/src/js/tab_branding.js",
             "ideastone_campus/static/src/scss/brand.scss",
         ],
         "web.assets_frontend": [
