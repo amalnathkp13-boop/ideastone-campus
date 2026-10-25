@@ -1,5 +1,6 @@
 """Subject-wise attendance workspace backed by assigned timetable sessions."""
 
+from calendar import monthrange
 from datetime import datetime, time, timedelta
 
 from odoo.exceptions import AccessError, UserError, ValidationError
@@ -82,6 +83,7 @@ class SubjectAttendanceUI(models.AbstractModel):
                 "key": key, "code": item.subject_id.code or "", "name": item.subject_id.name,
                 "kind": (item.subject_id.subject_type or "core").title(),
                 "class": item.batch_id.name, "students": len(set(roster.student_id.ids)),
+                "subject_id": item.subject_id.id, "batch_id": item.batch_id.id,
             })
         start = datetime.combine(day - timedelta(days=1), time.min)
         end = datetime.combine(day + timedelta(days=2), time.min)
@@ -122,6 +124,65 @@ class SubjectAttendanceUI(models.AbstractModel):
                 "absent": len(session_sheet.attendance_line.filtered(lambda line: line.campus_status == "absent")) if session_sheet else 0,
                 "state": session_sheet.state or "unrecorded",
             })
+        allocations = []
+        selected_sessions = sessions.filtered(
+            lambda item: selected and item.subject_id == selected.subject_id and item.batch_id == selected_batch
+        )
+        for session in selected_sessions:
+            local_start = fields.Datetime.context_timestamp(self, session.start_datetime)
+            local_end = fields.Datetime.context_timestamp(self, session.end_datetime)
+            allocations.append({
+                "id": session.id, "date": str(local_start.date()), "hour": local_start.strftime("%H:%M"),
+                "from": local_start.strftime("%H:%M"), "to": local_end.strftime("%H:%M"),
+                "subject": session.subject_id.code or session.subject_id.name,
+            })
+        classes = []
+        for batch in sessions.mapped("batch_id"):
+            class_roster = enrolments.filtered(
+                lambda item, current_batch=batch: item.batch_id == current_batch and item.student_id.active
+            )
+            classes.append({
+                "id": batch.id, "name": batch.name, "semester": batch.campus_term_id.name or "",
+                "total": len(set(class_roster.student_id.ids)),
+            })
+        sheets = self.env["op.attendance.sheet"].search([
+            ("session_id", "in", sessions.ids), ("state", "=", "done"),
+        ]) if sessions else self.env["op.attendance.sheet"]
+        policy = self.env.company.campus_excused_policy
+        eligible = attended = 0
+        subject_counts = {key: [0, 0] for key in allocated}
+        weeks = [{"label": "Week %s" % (index + 1), "present": 0, "absent": 0, "excused": 0}
+                 for index in range((monthrange(day.year, day.month)[1] + 6) // 7)]
+        for recorded in sheets:
+            session_key = "%s:%s" % (recorded.session_id.subject_id.id, recorded.session_id.batch_id.id)
+            if session_key not in subject_counts:
+                continue
+            local_date = recorded.attendance_date
+            for line in recorded.attendance_line:
+                status = line.campus_status
+                if status != "excused" or policy != "exclude":
+                    eligible += 1
+                    subject_counts[session_key][1] += 1
+                    if status in ("present", "late") or status == "excused" and policy == "present":
+                        attended += 1
+                        subject_counts[session_key][0] += 1
+                if local_date and local_date.year == day.year and local_date.month == day.month:
+                    bucket = weeks[(local_date.day - 1) // 7]
+                    bucket["present" if status in ("present", "late") else
+                           "excused" if status == "excused" else "absent"] += 1
+        ranked = sorted(((round(present * 100 / total, 1), key) for key, (present, total) in
+                         subject_counts.items() if total))
+        weakest = ranked[0] if ranked else None
+        strongest = ranked[-1] if ranked else None
+        names = {row["key"]: row["name"] for row in subject_rows}
+        threshold = self.env.company.campus_attendance_threshold
+        insights = {
+            "low": {"name": names[weakest[1]], "rate": weakest[0]} if weakest else None,
+            "high": {"name": names[strongest[1]], "rate": strongest[0]} if strongest else None,
+            "suggestion": (_("Consider extra remedial classes") if weakest and weakest[0] < threshold
+                           else _("Attendance is meeting the campus threshold") if weakest
+                           else _("Insights will appear after attendance is submitted.")),
+        }
         can_save = bool(chosen_session and (self._can_manage_all() or chosen_session.faculty_id.user_id == self.env.user)
                         and self.env["op.attendance.sheet"].check_access_rights("create", raise_exception=False)
                         and self.env["op.attendance.line"].check_access_rights("write", raise_exception=False)
@@ -135,6 +196,11 @@ class SubjectAttendanceUI(models.AbstractModel):
             "faculty_id": chosen_faculty.id or False,
             "subjects": subject_rows, "subject_key": chosen_key,
             "students": students, "hours": hours, "session_id": chosen_session.id or False,
+            "allocations": allocations, "classes": classes, "trend": weeks,
+            "trend_month": day.strftime("%b %Y"),
+            "summary": {"subjects": len(subject_rows), "students": len(set(enrolments.student_id.ids)),
+                        "classes": len(classes), "rate": round(attended * 100 / eligible, 1) if eligible else None},
+            "insights": insights, "can_manage_allocations": self._can_manage_all(),
             "allocated_class": {"name": selected_batch.name, "semester": term.name, "total": len(students)} if selected else None,
             "notes": sheet.campus_subject_lesson_notes or "", "sheet_state": sheet.state or "unrecorded",
             "can_save": can_save,
