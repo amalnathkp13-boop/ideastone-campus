@@ -1,0 +1,8 @@
+<odoo>
+  <record id="action_examinations_overview" model="ir.actions.client"><field name="name">Examinations</field><field name="tag">ideastone_erp.examinations</field><field name="params">{'view': 'overview'}</field><field name="context">{'campus_module': 'exams'}</field></record>
+  <record id="action_examinations_sessions" model="ir.actions.client"><field name="name">Exam sessions</field><field name="tag">ideastone_erp.examinations</field><field name="params">{'view': 'sessions'}</field><field name="context">{'campus_module': 'exams'}</field></record>
+  <record id="action_examinations_marks" model="ir.actions.client"><field name="name">Schedule &amp; marks entry</field><field name="tag">ideastone_erp.examinations</field><field name="params">{'view': 'marks'}</field><field name="context">{'campus_module': 'exams'}</field></record>
+  <record id="action_examinations_grades" model="ir.actions.client"><field name="name">Grade rules</field><field name="tag">ideastone_erp.examinations</field><field name="params">{'view': 'grades'}</field><field name="context">{'campus_module': 'exams'}</field></record>
+  <record id="action_examinations_results" model="ir.actions.client"><field name="name">Results &amp; missing entries</field><field name="tag">ideastone_erp.examinations</field><field name="params">{'view': 'results'}</field><field name="context">{'campus_module': 'exams'}</field></record>
+  <record id="action_examinations_papers" model="ir.actions.client"><field name="name">Question papers</field><field name="tag">ideastone_erp.examinations</field><field name="params">{'view': 'papers'}</field><field name="context">{'campus_module': 'exams'}</field></record>
+</odoo>

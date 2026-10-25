@@ -57,3 +57,4 @@ from . import staff_od_ui
 from . import hod_od_ui
 from . import students_directory_ui
 from . import admissions_ui
+from . import examinations_ui

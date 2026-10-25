@@ -5,6 +5,7 @@ from . import test_owner_mvp
 from . import test_admin_overview_ui
 from . import test_admissions_ui
 from . import test_students_directory_ui
+from . import test_examinations_ui
 from . import test_student_portal
 
 from . import test_parent_portal
