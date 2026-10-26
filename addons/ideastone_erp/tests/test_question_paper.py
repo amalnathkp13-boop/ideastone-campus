@@ -27,7 +27,7 @@ class TestQuestionPapers(TransactionCase):
                 'main_department_id': cls.dept.id, 'faculty_subject_ids': [(6, 0, cls.subject.ids)]})
         cls.env['campus.question.paper.routing'].create({'department_id': cls.dept.id, 'hod_id': cls.hod.id, 'coe_id': cls.coe.id})
         cls.values = {'subject_id': cls.subject.id, 'department_id': cls.dept.id, 'exam_type': 'CAT II',
-            'exam_date': str(fields.Date.today() + timedelta(days=10)), 'paper_code': 'QPQA', 'duration': '3 hours', 'notes': 'QA'}
+            'exam_date': str(fields.Date.today() + timedelta(days=10)), 'paper_code': 'QPQA', 'duration': '3 hours', 'notes': 'QA', 'study_year': '3', 'semester': 'V'}
         writer = PdfFileWriter()
         writer.addBlankPage(width=595, height=842)
         out = io.BytesIO()
