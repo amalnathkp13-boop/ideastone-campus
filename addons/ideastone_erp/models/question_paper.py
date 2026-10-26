@@ -79,7 +79,8 @@ class QuestionPaper(models.Model):
         if not self.env.user.has_group('openeducat_core.group_op_faculty'):
             raise AccessError(_('A linked faculty account is required.'))
         faculty = self.env['op.faculty'].sudo().search([
-            ('user_id', '=', self.env.uid), ('active', '=', True), ('company_id', '=', self.env.company.id)], limit=1)
+            ('user_id', '=', self.env.uid), ('active', '=', True),
+            ('company_id', 'in', [False, self.env.company.id])], limit=1)
         if not faculty:
             raise AccessError(_('Link this login to a faculty record in the active college.'))
         return faculty
