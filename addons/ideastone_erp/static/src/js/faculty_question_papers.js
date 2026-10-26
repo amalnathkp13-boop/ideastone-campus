@@ -92,6 +92,8 @@ export class FacultyQuestionPapers extends Component {
     }
     edit(row) {
         this.state.form=Object.fromEntries(Object.keys(emptyForm()).map(k=>[k,row[k] ?? ""]));
+        this.state.form.department_id=String(row.department_id);
+        this.state.form.subject_id=String(row.subject_id);
         this.state.id=row.id; this.state.files={}; this.state.modal=null;
         for(const l of this.levels) this.state.levels[l.key]=row.sets.some(s=>s.level===l.key);
         if(!row.sets.length) this.state.levels.balanced=true;
