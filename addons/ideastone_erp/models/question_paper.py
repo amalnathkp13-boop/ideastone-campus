@@ -79,7 +79,7 @@ class QuestionPaper(models.Model):
         if not self.env.user.has_group('openeducat_core.group_op_faculty'):
             raise AccessError(_('A linked faculty account is required.'))
         faculty = self.env['op.faculty'].sudo().search([
-            ('user_id', '=', self.env.uid), ('company_id', '=', self.env.company.id)], limit=1)
+            ('user_id', '=', self.env.uid), ('active', '=', True), ('company_id', '=', self.env.company.id)], limit=1)
         if not faculty:
             raise AccessError(_('Link this login to a faculty record in the active college.'))
         return faculty
@@ -201,7 +201,9 @@ class QuestionPaper(models.Model):
         if decision not in ('approve', 'return', 'forward') or not isinstance(note, str) or len(note) > 4000:
             raise ValidationError(_('Choose a valid review action and a concise note.'))
         if decision == 'forward':
-            if rec.state != 'approved' or not rec.selected_set_id or not rec.coe_id.active or not rec.coe_id.has_group('ideastone_erp.group_exam_paper_coe'):
+            if (rec.state != 'approved' or not rec.selected_set_id or not rec.coe_id.active
+                    or rec.company_id not in rec.coe_id.company_ids
+                    or not rec.coe_id.has_group('ideastone_erp.group_exam_paper_coe')):
                 raise ValidationError(_('Forward one approved paper to an active exam-control recipient.'))
             rec.sudo().write({'state': 'forwarded', 'forwarded_at': fields.Datetime.now()})
             rec._event('Forwarded to COE', note)
@@ -214,7 +216,7 @@ class QuestionPaper(models.Model):
                 rec.sudo().write({'state': 'returned', 'review_note': note.strip()})
                 rec._event('Returned for revision', note.strip())
             else:
-                selected = rec.set_ids.filtered(lambda s: s.id == set_id)
+                selected = rec.set_ids.filtered(lambda s: s.active and s.id == set_id)
                 if len(selected) != 1:
                     raise ValidationError(_('Select one current PDF set belonging to this submission.'))
                 rec.sudo().write({'state': 'approved', 'selected_set_id': selected.id, 'review_note': note.strip(), 'approved_at': fields.Datetime.now()})

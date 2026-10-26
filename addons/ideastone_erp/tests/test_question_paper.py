@@ -127,6 +127,20 @@ class TestQuestionPapers(TransactionCase):
             self.api.with_user(self.coe).download_set(sets[1]['id'])
         self.assertEqual(self.env['campus.question.paper.set'].with_user(self.coe).search_count([]), 1)
 
+    def test_archived_sets_and_revoked_recipient_cannot_be_forwarded(self):
+        record_id=self.api.save_submission(self.values,[self.file])
+        old_id=self.api.get_workspace()['rows'][0]['sets'][0]['id']
+        self.api.save_submission(self.values,[self.file],record_id,True)
+        reviewer=self.api.with_user(self.hod).with_context(active_test=False)
+        with self.assertRaises(ValidationError):
+            reviewer.decide(record_id,'approve',old_id)
+        current=self.api.get_workspace()['rows'][0]['sets'][0]['id']
+        reviewer.decide(record_id,'approve',current)
+        foreign=self.env['res.company'].create({'name':'New COE college'})
+        self.coe.write({'company_id':foreign.id,'company_ids':[(6,0,foreign.ids)]})
+        with self.assertRaises(ValidationError):
+            reviewer.decide(record_id,'forward')
+
     def test_selected_difficulty_sets_persist_after_draft_edit(self):
         record_id = self.api.save_submission(self.values, [self.file, dict(self.file, level='advanced')])
         self.api.save_submission(self.values, [], record_id, True, ['advanced'])
