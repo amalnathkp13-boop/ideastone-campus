@@ -1,11 +1,10 @@
 import base64
 import io
 
+from odoo.exceptions import AccessError, ValidationError
 from PyPDF2 import PdfFileReader
 
 from odoo import _, api, fields, models
-from odoo.exceptions import AccessError, ValidationError
-
 
 LEVELS = [('balanced', 'Balanced'), ('moderate', 'Moderate'), ('advanced', 'Advanced')]
 STUDY_YEARS = [('1', '1st Year'), ('2', '2nd Year'), ('3', '3rd Year'), ('4', '4th Year')]
@@ -202,7 +201,7 @@ class QuestionPaper(models.Model):
             rec = self.sudo().create(dict(vals, company_id=self.env.company.id, faculty_id=faculty.id)).with_user(self.env.user)
         rec.set_ids.filtered(lambda item: item.level not in levels).sudo().write({'active': False})
         for item in prepared:
-            previous = rec.set_ids.filtered(lambda s: s.level == item['level'])
+            previous = rec.set_ids.filtered(lambda s, level=item['level']: s.level == level)
             previous.sudo().write({'active': False})
             self.env['campus.question.paper.set'].sudo().create(dict(item, paper_id=rec.id, revision=rec.revision))
         rec._event('Draft saved')
