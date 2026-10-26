@@ -1,0 +1,158 @@
+{
+  "verified_on": "2026-10-26",
+  "academic_year_id": 8,
+  "pages": [
+    {
+      "module": "COE overview",
+      "page": "Overview",
+      "heading": "Overview",
+      "availableCards": 13,
+      "error": ""
+    },
+    {
+      "module": "COE overview",
+      "page": "Action queue",
+      "heading": "Action queue",
+      "availableCards": 12,
+      "error": ""
+    },
+    {
+      "module": "Examination records",
+      "page": "All examinations",
+      "heading": "All examinations",
+      "availableCards": 13,
+      "error": ""
+    },
+    {
+      "module": "Examination records",
+      "page": "Upcoming",
+      "heading": "Upcoming",
+      "availableCards": 12,
+      "error": ""
+    },
+    {
+      "module": "Examination records",
+      "page": "Recent",
+      "heading": "Recent",
+      "availableCards": 12,
+      "error": ""
+    },
+    {
+      "module": "Examination records",
+      "page": "Past records",
+      "heading": "Past records",
+      "availableCards": 12,
+      "error": ""
+    },
+    {
+      "module": "Examination records",
+      "page": "Timetable",
+      "heading": "Timetable",
+      "availableCards": 12,
+      "error": ""
+    },
+    {
+      "module": "Question papers",
+      "page": "Question papers & HOD status",
+      "heading": "Question papers & HOD status",
+      "availableCards": 13,
+      "error": ""
+    },
+    {
+      "module": "Question papers",
+      "page": "Received papers",
+      "heading": "Received papers",
+      "availableCards": 12,
+      "error": ""
+    },
+    {
+      "module": "Question papers",
+      "page": "Dispatch register",
+      "heading": "Dispatch register",
+      "availableCards": 12,
+      "error": ""
+    },
+    {
+      "module": "Exam operations",
+      "page": "Hall allocations",
+      "heading": "Hall allocations",
+      "availableCards": 12,
+      "error": ""
+    },
+    {
+      "module": "Exam operations",
+      "page": "Invigilation",
+      "heading": "Invigilation",
+      "availableCards": 12,
+      "error": ""
+    },
+    {
+      "module": "Exam operations",
+      "page": "Attendance & incidents",
+      "heading": "Attendance & incidents",
+      "availableCards": 12,
+      "error": ""
+    },
+    {
+      "module": "Evaluation & results",
+      "page": "Evaluation tracker",
+      "heading": "Evaluation tracker",
+      "availableCards": 13,
+      "error": ""
+    },
+    {
+      "module": "Evaluation & results",
+      "page": "Results register",
+      "heading": "Results register",
+      "availableCards": 13,
+      "error": ""
+    },
+    {
+      "module": "Evaluation & results",
+      "page": "Revaluation & corrections",
+      "heading": "Revaluation & corrections",
+      "availableCards": 13,
+      "error": ""
+    },
+    {
+      "module": "Reports & audit",
+      "page": "Department summary",
+      "heading": "Department summary",
+      "availableCards": 13,
+      "error": ""
+    },
+    {
+      "module": "Reports & audit",
+      "page": "Years I–IV",
+      "heading": "Years I–IV",
+      "availableCards": 13,
+      "error": ""
+    },
+    {
+      "module": "Reports & audit",
+      "page": "Workflow audit",
+      "heading": "Workflow audit",
+      "availableCards": 13,
+      "error": ""
+    },
+    {
+      "module": "Academic setup",
+      "page": "Academic years",
+      "heading": "Academic years",
+      "availableCards": 8,
+      "error": ""
+    },
+    {
+      "module": "Academic setup",
+      "page": "Departments & HOD routes",
+      "heading": "Departments & HOD routes",
+      "availableCards": 13,
+      "error": ""
+    }
+  ],
+  "detailed_checks": [
+    "CSE Year I: marks entry 2/3 and published results 3/3",
+    "CSE Year I: received and dispatched official papers",
+    "All 24 department/year groups: recent, past, upcoming, published roster, received paper, dispatched paper, case and audit entry"
+  ]
+}

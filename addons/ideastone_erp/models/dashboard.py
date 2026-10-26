@@ -24,7 +24,7 @@ class Dashboard(models.AbstractModel):
             ("Timetable", "op.session", "openeducat_timetable.act_open_op_session_view", "Academics"),
             ("Student Attendance", "op.attendance.sheet", "ideastone_erp.action_student_attendance_workspace", "Academics"),
             ("Subject-wise Attendance", "op.attendance.sheet", "ideastone_erp.action_subject_attendance_workspace", "Academics"),
-            ("Examinations", "op.exam", "openeducat_exam.act_open_op_exam_view", "Academics"),
+            ("Examinations", "campus.question.paper", "ideastone_erp.action_faculty_question_papers", "Academics"),
             ("Results", "op.result.line", "ideastone_erp.action_results", "Academics"),
             ("Assignments", "op.assignment", "openeducat_assignment.act_open_op_assignment_view", "Academics"),
             ("Review submissions", "op.assignment.sub.line", "ideastone_erp.mvp_learning_submissions", "Academics"),
@@ -239,7 +239,6 @@ class Dashboard(models.AbstractModel):
                          ("sdp", "SDP functions & attendance", "campus.faculty.activity"),
                          ("vac", "VAC & placement training", "campus.faculty.activity"),
                          ("certificates", "Exam certificates", "campus.faculty.document"),
-                         ("question_papers", "Question papers", "campus.faculty.document"),
                          ("answer_keys", "Answer keys", "campus.faculty.document"),
                          ("internal", "Internal mark generation", "campus.faculty.assessment"),
                          ("additional", "Additional internal marks", "campus.faculty.assessment"),
@@ -254,6 +253,9 @@ class Dashboard(models.AbstractModel):
 
     @api.model
     def get_faculty_action(self, tool):
+        if tool == "question_papers":
+            self.env['campus.question.paper']._faculty()
+            return self.env['ir.actions.actions']._for_xml_id('ideastone_erp.action_faculty_question_papers')
         faculty = self.env["op.faculty"].search([("user_id", "=", self.env.uid), "|", ("company_id", "=", False), ("company_id", "=", self.env.company.id)], limit=1)
         if not faculty or not self.env.user.has_group("openeducat_core.group_op_faculty"):
             raise AccessError(_("A linked faculty account is required."))

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VCET Campus ERP — HOD Examinations</title>
+<style>
+:root{--navy:#0b2d47;--blue:#0866e8;--blue2:#2b7bf0;--soft:#eaf3ff;--page:#f3f7fc;--line:#dce6f2;--text:#17334f;--muted:#67809d;--green:#0e8a68;--greenbg:#e4f7f0;--amber:#a76505;--amberbg:#fff3dc;--red:#b54747;--redbg:#fff0f0;--purple:#7054b8;--purplebg:#f0ebff}
+*{box-sizing:border-box}body{margin:0;background:var(--page);color:var(--text);font:14px/1.45 Inter,"Segoe UI",Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:flex;min-height:100vh}.sidebar{width:286px;flex:0 0 286px;background:var(--navy);color:#eef6ff;display:flex;flex-direction:column}.brand{padding:22px 27px 18px;border-bottom:1px solid #ffffff26;margin:0 16px}.logo{height:68px;background:#fff;border-radius:9px;display:grid;place-items:center;color:#1a4c88;font-size:28px;font-weight:800;letter-spacing:-1px}.logo small{display:block;font-size:9px;letter-spacing:0;color:#53708c;margin-top:-5px}.brand-sub{font-size:12px;margin-top:13px;color:#d3e2f2}.side-label{padding:23px 28px 12px;font-size:11px;font-weight:800;letter-spacing:1px;color:#c6d9ec}.nav{padding:0 16px;display:grid;gap:5px}.nav a{display:flex;align-items:center;gap:13px;padding:13px 14px;border-radius:10px;color:#e8f2fb;text-decoration:none;font-weight:650}.nav a .ico{width:22px;text-align:center;font-size:18px}.nav a.active{background:#1769df;color:#fff}.nav a:hover:not(.active){background:#ffffff12}.side-bottom{margin:auto 16px 0;border-top:1px solid #ffffff26;padding:18px 12px 22px;font-size:12px;color:#d3e2f2}.side-bottom strong{display:block;color:#fff;margin-bottom:8px}.main{flex:1;min-width:0}.topbar{height:52px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 22px}.app-grid{font-size:21px;color:var(--navy);font-weight:800}.top-right{display:flex;align-items:center;gap:17px;color:#183d62;white-space:nowrap}.avatar{width:29px;height:29px;border-radius:6px;background:#e5edf7;display:grid;place-items:center;font-size:18px}.modulebar{height:64px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:stretch;padding:0 22px;gap:10px;overflow-x:auto;white-space:nowrap}.module-name{display:flex;align-items:center;font-weight:800}.back{align-self:center;width:36px;height:36px;border:1px solid var(--line);background:white;color:var(--blue);border-radius:9px}.tab{padding:0 16px;display:flex;align-items:center;color:#405d7b;text-decoration:none;border-bottom:3px solid transparent}.tab.active{color:var(--blue);border-bottom-color:var(--blue);background:#f3f8ff;font-weight:700}.content{padding:25px 28px 36px;max-width:1800px;margin:auto}.crumb{font-size:12px;color:var(--muted);margin-bottom:13px}.crumb b{color:var(--blue)}.heading{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:20px}h1{font-size:27px;letter-spacing:-.5px;margin:0 0 4px;color:#102f4c;font-weight:750}.subtitle{color:var(--muted)}.actions{display:flex;gap:9px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:10px 14px;color:#31506f;font-weight:650}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.green{background:var(--green);border-color:var(--green);color:#fff}.btn.danger{color:var(--red);border-color:#f0caca}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:19px}.stat{background:#fff;border:1px solid var(--line);border-radius:13px;padding:17px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px #1635570b}.sicon{width:42px;height:42px;border-radius:11px;background:var(--soft);color:var(--blue);display:grid;place-items:center;font-size:20px;flex:0 0 auto}.sicon.amber{background:var(--amberbg);color:var(--amber)}.sicon.green{background:var(--greenbg);color:var(--green)}.sicon.purple{background:var(--purplebg);color:var(--purple)}.num{font-size:25px;line-height:1.1;font-weight:800;color:#123453}.label{font-size:12px;color:var(--muted);margin-top:4px}.foot{font-size:11px;color:#54708e;margin-top:3px}.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,.85fr);gap:18px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 24px #1635570b;overflow:hidden}.panelhead{padding:18px 21px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center}.panelhead h2{font-size:18px;margin:0 0 3px;color:#173754}.panelhead p{margin:0;color:var(--muted);font-size:12px}.panelbody{padding:19px 21px}.pill{display:inline-flex;border-radius:99px;padding:5px 9px;font-size:10px;font-weight:750;white-space:nowrap}.pill.review{background:var(--amberbg);color:#9b630c}.pill.approved{background:var(--greenbg);color:#087b5e}.pill.draft{background:#edf2f8;color:#5b7189}.pill.returned{background:var(--redbg);color:#b34242}.pill.forwarded{background:var(--purplebg);color:var(--purple)}.filterrow{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}.filterrow select,.filterrow input{width:auto;min-width:140px;max-width:100%;padding:9px 10px;border:1px solid #d4e0ef;border-radius:8px;background:#fff;color:#274663}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:690px}th{background:#edf4fc;color:#385777;font-size:11px;text-align:left;font-weight:750;padding:12px 13px;white-space:nowrap}td{padding:13px;border-top:1px solid #e5edf6;font-size:12px;color:#35516e;vertical-align:middle}tbody tr:hover{background:#f9fbfe}.strong{font-weight:750;color:#1d3e5e}.sub{font-size:11px;color:#8295aa;margin-top:3px}.actions-cell{display:flex;gap:6px;flex-wrap:wrap}.smallbtn{padding:6px 9px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--blue);font-weight:700;font-size:11px}.smallbtn.approve{background:#e4f7f0;border-color:#c4eadd;color:#087b5e}.smallbtn.return{background:#fff7e8;border-color:#f3dfb6;color:#98610c}.steps{display:grid;gap:15px}.step{display:flex;gap:11px;align-items:flex-start}.stepnum{width:28px;height:28px;flex:0 0 auto;border-radius:8px;background:var(--soft);color:var(--blue);display:grid;place-items:center;font-weight:800}.step strong{display:block;font-size:12px;color:#2b4968}.step p{margin:3px 0 0;color:var(--muted);font-size:11px}.notice{display:flex;gap:10px;background:#f2f7ff;border:1px solid #d9e8ff;border-radius:9px;padding:12px;font-size:11px;color:#496b91;margin-top:15px}.notice b{color:#225b9a}.activity{display:grid;gap:13px}.event{display:flex;gap:10px}.dot{width:9px;height:9px;border-radius:50%;background:#2c7be5;margin-top:5px;flex:0 0 auto;box-shadow:0 0 0 4px #e9f2ff}.event strong{display:block;font-size:12px}.event p{margin:3px 0 0;color:var(--muted);font-size:11px}.deptcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.dept{border:1px solid var(--line);border-radius:11px;padding:14px;background:#fff}.depthead{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.dept h3{font-size:13px;margin:0;color:#244563}.dept p{font-size:11px;color:var(--muted);margin:5px 0 12px}.deptfoot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #edf2f8;padding-top:10px;font-size:11px;color:#5c7692}.progress{height:6px;border-radius:99px;background:#edf2f8;margin:9px 0 4px;overflow:hidden}.progress span{display:block;height:100%;background:var(--blue);border-radius:99px}.queuefoot{padding:12px 16px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:10px}.hidden{display:none!important}.toast{position:fixed;right:22px;bottom:22px;background:#123a59;color:white;border-radius:10px;padding:13px 17px;box-shadow:0 10px 35px #183a5c33;display:none;max-width:380px;z-index:10;font-size:13px}.modalback{position:fixed;inset:0;background:#102d4a77;display:none;align-items:center;justify-content:center;padding:18px;z-index:20}.modal{width:min(560px,100%);background:white;border-radius:14px;box-shadow:0 20px 60px #09213c40;overflow:hidden}.modalhead{padding:18px 21px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}.modalhead h3{margin:0;font-size:17px}.modalbody{padding:20px}.modalbody label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}.modalbody textarea{width:100%;min-height:95px;border:1px solid #d4e0ef;border-radius:8px;padding:10px}.modalfoot{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+@media(max-width:1100px){.sidebar{width:235px;flex-basis:235px}.content{padding:22px 18px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:minmax(0,1.2fr) minmax(270px,.8fr)}.deptcards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:800px){.sidebar{width:72px;flex-basis:72px}.brand{padding:15px 7px;margin:0 8px}.logo{height:45px;font-size:18px}.logo small,.brand-sub,.side-label,.nav .txt,.side-bottom{display:none}.nav{padding:12px 8px}.nav a{justify-content:center;padding:13px 8px}.modulebar{padding:0 12px}.content{padding:18px 13px}.grid{grid-template-columns:1fr}.topbar{padding:0 14px}.college{display:none}}
+@media(max-width:560px){.sidebar{display:none}.topbar{height:48px}.modulebar{height:54px;padding:0 10px}.tab{padding:0 11px;font-size:12px}.content{padding:15px 10px}.heading{flex-direction:column}.stats{gap:8px}.stat{padding:12px;gap:9px}.sicon{width:34px;height:34px;font-size:16px}.num{font-size:21px}.label{font-size:11px}.panelhead,.panelbody{padding:14px}.panelhead{align-items:flex-start;flex-direction:column}.deptcards{grid-template-columns:1fr}.queuefoot{flex-direction:column}.actions{width:100%}.actions .btn{flex:1}}
+
+/* Subtle, slim scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f6f8fb;
+}
+*::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+*::-webkit-scrollbar-track {
+  background: #f6f8fb;
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+  border: 1px solid #f6f8fb;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #b3c0d0;
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+ <div class="brand"><div class="logo"><span>VCET<small>Empowering the Next Generation</small></span></div><div class="brand-sub">Campus Management ERP</div></div>
+ <div class="side-label">FACULTY WORKSPACE</div>
+ <nav class="nav">
+  <a href="#"><span class="ico">⌂</span><span class="txt">Home</span></a>
+  <a class="active" href="#"><span class="ico">🎓</span><span class="txt">My task list</span></a>
+  <a href="#"><span class="ico">⌕</span><span class="txt">Search</span></a>
+  <a href="#"><span class="ico">♟</span><span class="txt">My profile & payroll</span></a>
+  <a href="#"><span class="ico">▣</span><span class="txt">OD Management</span></a>
+  <a href="#"><span class="ico">▤</span><span class="txt">Library & learning</span></a>
+  <a href="#"><span class="ico">☏</span><span class="txt">Grievances & others</span></a>
+  <a href="#"><span class="ico">▦</span><span class="txt">Campus services</span></a>
+ </nav>
+ <div class="side-bottom"><strong>Ideastone Demo Engineering College</strong>Faculty · Department HOD<br><br>My campus self-service ↗</div>
+</aside>
+<main class="main">
+<header class="topbar"><div class="app-grid">▦</div><div class="top-right"><span>●</span><span>☏ <b style="color:#0e8a68">3</b></span><span>◷</span><span class="college">Ideastone Demo Engineering College</span><div class="avatar">👩🏻‍🏫</div></div></header>
+<nav class="modulebar"><div class="module-name">My task list</div><button class="back">‹</button><a class="tab" href="#">Exams & revaluation</a><a class="tab" href="#">Subjects</a><a class="tab" href="#">Timetable</a><a class="tab" href="#">Student Attendance</a><a class="tab" href="#">Subject-wise Attendance</a><a class="tab active" href="#">Examinations</a><a class="tab" href="#">Results</a><a class="tab" href="#">Assignments</a><a class="tab" href="#">Review submissions</a><button class="back">›</button></nav>
+<section class="content">
+<div class="crumb">Campus home&nbsp; / &nbsp;<b>My task list</b>&nbsp; / &nbsp;<b>Examinations</b>&nbsp; / &nbsp;HOD review workspace</div>
+<div class="heading"><div><h1>Examinations</h1><div class="subtitle">Department HOD workspace · review, approve and forward question papers.</div></div><div class="actions"><button class="btn" id="historyBtn">◷ Approval history</button><button class="btn primary" id="refreshBtn">↻ Refresh queue</button></div></div>
+<div class="stats">
+ <div class="stat"><div class="sicon amber">◷</div><div><div class="num" id="pendingCount">04</div><div class="label">Papers awaiting review</div><div class="foot">Across your department</div></div></div>
+ <div class="stat"><div class="sicon">▤</div><div><div class="num">12</div><div class="label">Sets received this cycle</div><div class="foot">Across assigned subjects</div></div></div>
+ <div class="stat"><div class="sicon green">✓</div><div><div class="num" id="approvedCount">06</div><div class="label">Approved by HOD</div><div class="foot">Ready to forward or forwarded</div></div></div>
+ <div class="stat"><div class="sicon purple">➜</div><div><div class="num" id="forwardedCount">03</div><div class="label">Forwarded to COE</div><div class="foot">Awaiting exam-control action</div></div></div>
+</div>
+<div class="grid">
+ <section class="panel">
+  <div class="panelhead"><div><h2>Question papers requiring review</h2><p>Compare the submitted difficulty sets and select one paper for approval.</p></div><span class="pill review">HOD ACTION REQUIRED</span></div>
+  <div class="panelbody">
+   <div class="filterrow"><select id="deptFilter"><option value="">All assigned departments</option><option value="ECE">Electronics & Communication</option><option value="CSE">Computer Science</option><option value="EEE">Electrical & Electronics</option><option value="MECH">Mechanical</option></select><select id="examFilter"><option value="">All exam types</option><option>CAT I</option><option>CAT II</option><option>Semester Examination</option><option>Model Examination</option></select><input id="paperSearch" placeholder="Search subject or staff…" /></div>
+   <div class="tablewrap"><table><thead><tr><th>SUBJECT / STAFF</th><th>EXAM DATE</th><th>SETS RECEIVED</th><th>LAST UPDATED</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody id="reviewRows">
+    <tr data-dept="ECE" data-exam="CAT II" data-search="digital electronics dr julie wilson"><td><div class="strong">Digital Electronics</div><div class="sub">EC3402 · Dr. Julie Wilson</div></td><td>12 Nov 2026</td><td>3 PDFs <div class="sub">Balanced · Moderate · Advanced</div></td><td>25 Oct · 10:42 AM</td><td><span class="pill review status">Awaiting review</span></td><td><button class="smallbtn" data-review="Digital Electronics">Review sets</button></td></tr>
+    <tr data-dept="ECE" data-exam="CAT I" data-search="communication systems maria c daniel"><td><div class="strong">Communication Systems</div><div class="sub">EC3501 · Maria C Daniel</div></td><td>18 Nov 2026</td><td>2 PDFs <div class="sub">Balanced · Advanced</div></td><td>25 Oct · 09:18 AM</td><td><span class="pill review status">Awaiting review</span></td><td><button class="smallbtn" data-review="Communication Systems">Review sets</button></td></tr>
+    <tr data-dept="CSE" data-exam="CAT I" data-search="data structures ana m thomas"><td><div class="strong">Data Structures</div><div class="sub">CS3401 · Ana M Thomas</div></td><td>09 Nov 2026</td><td>3 PDFs <div class="sub">Balanced · Moderate · Advanced</div></td><td>24 Oct · 04:30 PM</td><td><span class="pill review status">Awaiting review</span></td><td><button class="smallbtn" data-review="Data Structures">Review sets</button></td></tr>
+    <tr data-dept="ECE" data-exam="Semester Examination" data-search="microprocessors harvey j moore"><td><div class="strong">Microprocessors</div><div class="sub">EC3601 · Harvey J Moore</div></td><td>02 Dec 2026</td><td>2 PDFs <div class="sub">Balanced · Moderate</div></td><td>24 Oct · 02:12 PM</td><td><span class="pill review status">Awaiting review</span></td><td><button class="smallbtn" data-review="Microprocessors">Review sets</button></td></tr>
+   </tbody></table></div>
+  </div>
+  <div class="queuefoot"><span id="visibleCount">Showing 4 sample submissions</span><span>Demo data · not live college records</span></div>
+ </section>
+ <aside>
+  <section class="panel">
+   <div class="panelhead"><div><h2>HOD review checklist</h2><p>Before approving a set</p></div></div>
+   <div class="panelbody">
+    <div class="steps">
+     <div class="step"><div class="stepnum">1</div><div><strong>Confirm syllabus and blueprint</strong><p>Verify unit coverage, learning outcomes, marks distribution and exam duration.</p></div></div>
+     <div class="step"><div class="stepnum">2</div><div><strong>Compare the submitted sets</strong><p>Review Balanced, Moderate and Advanced versions; check fairness and academic standard.</p></div></div>
+     <div class="step"><div class="stepnum">3</div><div><strong>Approve one official paper</strong><p>Select a single version. Return the others or retain them as restricted alternatives per policy.</p></div></div>
+     <div class="step"><div class="stepnum">4</div><div><strong>Forward to COE / Exam Control</strong><p>Record approval and transmit the selected PDF with the approval timestamp.</p></div></div>
+    </div>
+    <div class="notice"><span>ⓘ</span><span><b>Confidentiality:</b> Approval actions must be auditable. Keep every version restricted and record who approved the final paper.</span></div>
+   </div>
+  </section>
+  <section class="panel" style="margin-top:16px">
+   <div class="panelhead"><div><h2>Recent activity</h2><p>Department question-paper workflow</p></div></div>
+   <div class="panelbody"><div class="activity">
+    <div class="event"><span class="dot"></span><div><strong>3 sets submitted · Digital Electronics</strong><p>Dr. Julie Wilson · 25 Oct 2026, 10:42 AM</p></div></div>
+    <div class="event"><span class="dot" style="background:#d99419;box-shadow:0 0 0 4px #fff2d8"></span><div><strong>Revision requested · Data Structures</strong><p>Marks blueprint clarification requested · 24 Oct, 04:30 PM</p></div></div>
+    <div class="event"><span class="dot" style="background:#15956f;box-shadow:0 0 0 4px #e4f7f0"></span><div><strong>Approved set forwarded to COE</strong><p>Engineering Mathematics · 24 Oct 2026, 12:05 PM</p></div></div>
+   </div></div>
+  </section>
+ </aside>
+</div>
+<section class="panel" style="margin-top:18px">
+ <div class="panelhead"><div><h2>Department question-paper status</h2><p>Quick overview of submissions, reviews and approval readiness.</p></div><button class="btn" id="exportBtn">Export status CSV</button></div>
+ <div class="panelbody"><div class="deptcards">
+  <article class="dept"><div class="depthead"><h3>Electronics & Communication</h3><span class="pill review">2 pending</span></div><p>ECE · 8 subjects in this cycle</p><div class="progress"><span style="width:72%"></span></div><div class="deptfoot"><span>6 / 8 reviewed</span><a href="#" class="rowlink" data-deptjump="ECE">View queue →</a></div></article>
+  <article class="dept"><div class="depthead"><h3>Computer Science</h3><span class="pill review">1 pending</span></div><p>CSE · 7 subjects in this cycle</p><div class="progress"><span style="width:80%"></span></div><div class="deptfoot"><span>6 / 7 reviewed</span><a href="#" class="rowlink" data-deptjump="CSE">View queue →</a></div></article>
+  <article class="dept"><div class="depthead"><h3>Electrical & Electronics</h3><span class="pill approved">Up to date</span></div><p>EEE · 5 subjects in this cycle</p><div class="progress"><span style="width:100%"></span></div><div class="deptfoot"><span>5 / 5 reviewed</span><a href="#" class="rowlink" data-deptjump="EEE">View queue →</a></div></article>
+ </div></div>
+</section>
+</section>
+</main>
+</div>
+<div class="modalback" id="reviewModal"><div class="modal">
+ <div class="modalhead"><div><h3 id="modalTitle">Review question-paper sets</h3><div class="subtitle" style="font-size:12px">Compare PDF versions and select one official set.</div></div><button class="btn" id="closeModal">✕</button></div>
+ <div class="modalbody">
+  <div class="notice" style="margin-top:0;margin-bottom:15px"><span>✦</span><span><b>AI review summary (illustrative):</b> Compare syllabus coverage, marks total, difficulty balance and possible duplicate questions. This sample panel does not inspect actual PDF content.</span></div>
+  <div id="setChoices" style="display:grid;gap:9px">
+   <label style="display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);padding:12px;border-radius:9px"><input type="radio" name="chosenSet" value="Balanced" checked style="margin-top:3px;width:auto"><span><b>Set A · Balanced</b><div class="sub">Mixed difficulty · Sample PDF metadata · 100 marks</div><a href="#" class="rowlink fakepdf">Preview PDF ↗</a></span></label>
+   <label style="display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);padding:12px;border-radius:9px"><input type="radio" name="chosenSet" value="Moderate" style="margin-top:3px;width:auto"><span><b>Set B · Moderate</b><div class="sub">Core concepts · Sample PDF metadata · 100 marks</div><a href="#" class="rowlink fakepdf">Preview PDF ↗</a></span></label>
+   <label style="display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);padding:12px;border-radius:9px"><input type="radio" name="chosenSet" value="Advanced" style="margin-top:3px;width:auto"><span><b>Set C · Advanced</b><div class="sub">Higher-order problems · Sample PDF metadata · 100 marks</div><a href="#" class="rowlink fakepdf">Preview PDF ↗</a></span></label>
+  </div>
+  <div style="margin-top:16px"><label for="hodComment">Review notes / return reason</label><textarea id="hodComment" placeholder="Optional approval note or required corrections…"></textarea></div>
+ </div>
+ <div class="modalfoot"><button class="btn danger" id="returnBtn">Return for revision</button><button class="btn green" id="approveBtn">Approve selected set</button></div>
+</div></div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+let activeRow=null;let toastTimer;
+function toast(msg){$('#toast').textContent=msg;$('#toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').style.display='none',3500)}
+function applyFilters(){let dept=$('#deptFilter').value,exam=$('#examFilter').value,q=$('#paperSearch').value.toLowerCase(),n=0;$$('#reviewRows tr').forEach(r=>{let show=(!dept||r.dataset.dept===dept)&&(!exam||r.dataset.exam===exam)&&(!q||r.dataset.search.includes(q));r.classList.toggle('hidden',!show);if(show)n++});$('#visibleCount').textContent='Showing '+n+' matching sample submission'+(n===1?'':'s')}
+$('#deptFilter').addEventListener('change',applyFilters);$('#examFilter').addEventListener('change',applyFilters);$('#paperSearch').addEventListener('input',applyFilters);
+$$('[data-review]').forEach(b=>b.addEventListener('click',()=>{activeRow=b.closest('tr');$('#modalTitle').textContent='Review sets · '+b.dataset.review;$('#hodComment').value='';$('#reviewModal').style.display='flex'}));
+$('#closeModal').addEventListener('click',()=>$('#reviewModal').style.display='none');
+$('#reviewModal').addEventListener('click',e=>{if(e.target.id==='reviewModal')$('#reviewModal').style.display='none'});
+$$('.fakepdf').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();toast('PDF preview is a placeholder; connect the secure document store to preview real files.')}));
+function updateCounts(){let pending=0,approved=6,forwarded=3;$$('#reviewRows tr').forEach(r=>{let s=r.querySelector('.status').textContent;if(s.includes('Awaiting'))pending++;if(s.includes('Approved'))approved++;if(s.includes('Forwarded'))forwarded++});$('#pendingCount').textContent=String(pending).padStart(2,'0');$('#approvedCount').textContent=String(approved).padStart(2,'0');$('#forwardedCount').textContent=String(forwarded).padStart(2,'0')}
+$('#approveBtn').addEventListener('click',()=>{if(!activeRow)return;let chosen=$('input[name="chosenSet"]:checked').value;activeRow.querySelector('.status').className='pill approved status';activeRow.querySelector('.status').textContent='Approved · '+chosen;activeRow.querySelector('td:last-child').innerHTML='<span class="pill forwarded">Ready to forward</span> <button class="smallbtn" data-forward>Forward to COE</button>';$('#reviewModal').style.display='none';toast(chosen+' set approved. Use “Forward to COE” to send it onward in this prototype.');bindForward();updateCounts()});
+$('#returnBtn').addEventListener('click',()=>{if(!activeRow)return;let comment=$('#hodComment').value.trim();if(!comment){toast('Add a short reason before returning the paper for revision.');return}activeRow.querySelector('.status').className='pill returned status';activeRow.querySelector('.status').textContent='Revision required';activeRow.querySelector('td:last-child').innerHTML='<span class="sub">Returned with comments</span>';$('#reviewModal').style.display='none';toast('Paper returned to staff with revision notes in this prototype.');updateCounts()});
+function bindForward(){$$('[data-forward]').forEach(b=>{if(b.dataset.bound)return;b.dataset.bound='1';b.addEventListener('click',()=>{let row=b.closest('tr');row.querySelector('.status').className='pill forwarded status';row.querySelector('.status').textContent='Forwarded to COE';b.outerHTML='<span class="pill forwarded">Forwarded</span>';toast('Approved paper marked as forwarded to COE / Exam Control in this prototype.');updateCounts()})})}
+$('#refreshBtn').addEventListener('click',()=>{applyFilters();toast('Queue refreshed. This prototype uses sample records; live refresh needs backend integration.')});
+$('#historyBtn').addEventListener('click',()=>toast('Approval history would show reviewer, selected set, timestamp, comments and COE forwarding receipt.'));
+$$('[data-deptjump]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();$('#deptFilter').value=a.dataset.deptjump;applyFilters();$('.grid').scrollIntoView({behavior:'smooth',block:'start'})}));
+$('#exportBtn').addEventListener('click',()=>{let rows=[['Subject','Staff','Exam date','Department','Status']];$$('#reviewRows tr').forEach(r=>{let c=r.querySelectorAll('td');rows.push([c[0].querySelector('.strong').textContent,c[0].querySelector('.sub').textContent,c[1].textContent,r.dataset.dept,c[4].textContent])});let csv=rows.map(r=>r.map(x=>'"'+String(x).replaceAll('"','""')+'"').join(',')).join('\\n');let blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='hod-question-paper-status.csv';a.click();URL.revokeObjectURL(url);toast('Status CSV exported.')});
+</script>
+</body></html>

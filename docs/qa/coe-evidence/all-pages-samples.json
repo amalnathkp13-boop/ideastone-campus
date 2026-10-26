@@ -1,0 +1,39 @@
+{
+  "verified_on": "2026-10-26",
+  "database": "question_papers_preview",
+  "academic_year": "2026–27 · COE sample",
+  "academic_year_id": 8,
+  "sample_departments": ["CSE", "QP-ECE", "EEE", "MECH", "CIVIL", "IT"],
+  "department_year_groups": 24,
+  "created": {
+    "examinations": 144,
+    "question_paper_submissions": 96,
+    "cases": 24,
+    "fictional_students": 72,
+    "fictional_enrolments": 72,
+    "grade_bands": 5,
+    "department_review_routes": 5
+  },
+  "current_year_totals": {
+    "examination_records": 181,
+    "upcoming_examinations": 121,
+    "official_question_papers": 86,
+    "received_papers_including_dispatched": 49,
+    "dispatched_papers": 25,
+    "cases": 27,
+    "open_or_in_review_cases": 19,
+    "result_workflow": {"draft": 133, "entry": 6, "submitted": 6, "locked": 6, "published": 30}
+  },
+  "idempotency_check": {"records_created_on_second_run": 0},
+  "checks": {
+    "all_21_coe_pages_opened": true,
+    "every_sample_department_and_year_has_past_recent_upcoming_exams": true,
+    "every_sample_department_and_year_has_received_and_dispatched_papers": true,
+    "every_sample_department_and_year_has_published_fictional_roster": true,
+    "every_sample_department_and_year_has_case_and_recent_audit_entry": true,
+    "partial_marks_and_published_results_checked_in_browser": true,
+    "received_and_dispatched_pdfs_checked_in_browser": true,
+    "reset_before_navigation_retains_all_departments": true
+  },
+  "data_scope": "Only the isolated preview database. Published marks belong to explicitly fictional students without login accounts. Existing submissions and academic history are preserved."
+}

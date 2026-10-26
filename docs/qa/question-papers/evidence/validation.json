@@ -1,0 +1,84 @@
+{
+  "verified_on": "2026-10-26",
+  "backend_tests": 11,
+  "backend_failures": 0,
+  "browser_workflow": [
+    "upload PDF",
+    "save draft",
+    "submit to HOD",
+    "download PDF",
+    "return with notes",
+    "edit and resubmit",
+    "approve one set",
+    "forward to COE",
+    "faculty status refresh"
+  ],
+  "coe_receipt": {
+    "submission_id": 45,
+    "revision": 2,
+    "official_pdf_count": 1,
+    "history_entries": 8
+  },
+  "hod_typography_matches_reference": true,
+  "hod_typography": [
+    {
+      "color": "rgb(16, 47, 76)",
+      "font": "Inter, \"Segoe UI\", Arial, sans-serif",
+      "line": "39.15px",
+      "selector": "h1",
+      "size": "27px",
+      "weight": "750"
+    },
+    {
+      "color": "rgb(23, 55, 84)",
+      "font": "Inter, \"Segoe UI\", Arial, sans-serif",
+      "line": "26.1px",
+      "selector": ".panelhead h2",
+      "size": "18px",
+      "weight": "700"
+    },
+    {
+      "color": "rgb(39, 70, 99)",
+      "font": "Inter, \"Segoe UI\", Arial, sans-serif",
+      "line": "normal",
+      "selector": ".filterrow select",
+      "size": "14px",
+      "weight": "400"
+    },
+    {
+      "color": "rgb(8, 102, 232)",
+      "font": "Inter, \"Segoe UI\", Arial, sans-serif",
+      "line": "15.95px",
+      "selector": ".smallbtn",
+      "size": "11px",
+      "weight": "700"
+    },
+    {
+      "color": "rgb(18, 52, 83)",
+      "font": "Inter, \"Segoe UI\", Arial, sans-serif",
+      "line": "27.5px",
+      "selector": ".num",
+      "size": "25px",
+      "weight": "800"
+    }
+  ],
+  "faculty_typography": {
+    "font": "Inter, \"Segoe UI\", Arial, sans-serif",
+    "heading_size": "27px",
+    "heading_color": "#102f4c",
+    "heading_weight": "750",
+    "heading_line_height": "39.15px",
+    "label_size": "12px",
+    "label_color": "#3b5876",
+    "input_size": "14px",
+    "input_color": "#274663"
+  },
+  "previews": {
+    "faculty": "http://faculty.localhost:18072/web#action=850",
+    "hod": "http://hod.localhost:18073/web#action=852"
+  },
+  "limitations": [
+    "Academic AI analysis is not configured.",
+    "PDFs download for local review because the in-app browser blocks new PDF tabs."
+  ]
+}

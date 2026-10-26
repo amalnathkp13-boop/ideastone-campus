@@ -1,0 +1,19 @@
+{
+  "verified_on": "2026-10-26",
+  "database": "question_papers_preview",
+  "backend_tests": 20,
+  "failures": 0,
+  "errors": 0,
+  "browser_checks": {
+    "reload_ignores_previous_department_year_and_url_scope": true,
+    "refresh_button_returns_default_academic_year_all_departments_all_study_years": true,
+    "normal_navigation_retains_current_scope": true,
+    "semester_options_use_roman_numerals_and_match_study_year": true,
+    "changing_year_clears_incompatible_semester": true,
+    "staff_hod_coe_show_identical_year_and_semester": true,
+    "staff_submit_hod_approve_hod_forward_coe_receipt_pending": true,
+    "coe_csv_contains_year_and_semester": true
+  },
+  "sample": {"paper_code": "FLOW-EC3601-Y3-VI", "record_id": 265, "study_year": "3", "semester": "VI", "final_state": "forwarded"},
+  "legacy_records": "Missing year/semester remains explicitly unrecorded; no guessed values or historical approval changes."
+}
