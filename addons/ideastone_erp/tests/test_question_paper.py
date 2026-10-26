@@ -94,6 +94,11 @@ class TestQuestionPapers(TransactionCase):
             reviewer.decide(second, 'forward')
 
     def test_pdf_validation_and_required_upload(self):
+        for invalid in ([], {}, True, 'unknown'):
+            with self.assertRaises(ValidationError):
+                self.api.save_submission(self.values,[dict(self.file,level=invalid)],submit=True)
+            with self.assertRaises(ValidationError):
+                self.api.save_submission(self.values,[self.file],submit=True,levels=[invalid])
         for bad in ('not base64', base64.b64encode(b'%PDF-1.4 invalid').decode(), base64.b64encode(b'not PDF').decode()):
             with self.assertRaises(ValidationError):
                 self.api.save_submission(self.values, [dict(self.file, content=bad)], submit=True)

@@ -152,7 +152,8 @@ class QuestionPaper(models.Model):
             raise ValidationError(_('Upload at most one PDF for each difficulty set.'))
         seen = set()
         for item in files:
-            if not isinstance(item, dict) or set(item) != {'level', 'filename', 'content'} or item['level'] not in dict(LEVELS) or item['level'] in seen:
+            if (not isinstance(item, dict) or set(item) != {'level', 'filename', 'content'}
+                    or not isinstance(item['level'], str) or item['level'] not in dict(LEVELS) or item['level'] in seen):
                 raise ValidationError(_('Choose a unique difficulty label for each PDF.'))
             seen.add(item['level'])
             filename, content = item['filename'], item['content']
@@ -170,7 +171,7 @@ class QuestionPaper(models.Model):
                 raise ValidationError(_('Upload a readable, unencrypted PDF with at least one page.')) from exc
             prepared.append({'level': item['level'], 'filename': filename, 'content': content, 'page_count': pages})
         levels = levels if levels is not None else list({p['level'] for p in prepared} | set(rec.set_ids.mapped('level') if rec else []))
-        if not isinstance(levels, list) or any(level not in dict(LEVELS) for level in levels) or len(set(levels)) != len(levels):
+        if not isinstance(levels, list) or any(not isinstance(level, str) or level not in dict(LEVELS) for level in levels) or len(set(levels)) != len(levels):
             raise ValidationError(_('Choose valid difficulty sets.'))
         available = {p['level'] for p in prepared} | set(rec.set_ids.mapped('level') if rec else [])
         if any(p['level'] not in levels for p in prepared) or (submit and (not levels or set(levels) - available)):
