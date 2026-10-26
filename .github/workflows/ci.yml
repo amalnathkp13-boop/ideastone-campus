@@ -72,7 +72,7 @@ jobs:
             odoo:17.0 \
             --db_host=127.0.0.1 --db_user=odoo --db_password=odoo -d ci \
                  --addons-path=/mnt/ideastone-addons,/mnt/openeducat,/usr/lib/python3/dist-packages/odoo/addons \
-                 -i ideastone_campus,ideastone_lms,ideastone_erp --test-enable --test-tags=/ideastone_erp \
+                 -i ideastone_campus,ideastone_lms,ideastone_erp,ideastone_ai --test-enable --test-tags=/ideastone_erp,/ideastone_ai \
                  --stop-after-init --workers=0 --max-cron-threads=0 --log-level=test 2>&1 | tee install.log
           ! grep -E "^[0-9-]+ [0-9:,]+ [0-9]+ (ERROR|CRITICAL)" install.log
       - name: Test summary
@@ -194,7 +194,7 @@ jobs:
             -v "$PWD/vendor/openeducat_erp:/mnt/openeducat:ro" \
             odoo:17.0 --db_host=127.0.0.1 --db_user=odoo --db_password=odoo -d ci \
             --addons-path=/mnt/ideastone-addons,/mnt/openeducat,/usr/lib/python3/dist-packages/odoo/addons \
-            -u ideastone_campus,ideastone_lms,ideastone_erp --stop-after-init --workers=0 --max-cron-threads=0 2>&1 | tee upgrade.log
+            -u ideastone_campus,ideastone_lms,ideastone_erp,ideastone_ai --stop-after-init --workers=0 --max-cron-threads=0 2>&1 | tee upgrade.log
           ! grep -E "^[0-9-]+ [0-9:,]+ [0-9]+ (ERROR|CRITICAL)" upgrade.log
       - name: Faculty UI diagnostics and teardown
         if: always()

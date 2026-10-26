@@ -52,6 +52,7 @@ class Dashboard(models.AbstractModel):
             "Campus services": "Campus services", "Engagement": "Communication & student portal",
         }
         admin = self.env.user.has_group("ideastone_erp.group_college_admin") or self.env.user.has_group("ideastone_erp.group_manager")
+        navigation += self._navigation_extensions()
         navigation += [
             {"label": "Departments", "model": "op.department", "action": "openeducat_core.act_open_op_department_view", "group": "Admissions"},
             {"label": "Programmes", "model": "op.course", "action": "openeducat_core.act_open_op_course_view", "group": "Admissions"},
@@ -152,9 +153,13 @@ class Dashboard(models.AbstractModel):
                 "appointments": [{"id": r.id, "faculty": r.faculty_id.name, "role": "Library In-charge", "scope": ", ".join(r.media_type_ids.mapped("name")),
                                   "state": r.state, "effective": r.effective, "until": str(r.date_to)} for r in appointments]}
 
-    def _faculty_modules(self, visible, faculty, pages):
-        """Navigation is discovery only. Every action keeps its model ACLs and record rules."""
-        definitions = [
+    def _navigation_extensions(self):
+        """Extra staff navigation entries (label, model, action, group). Add-on modules extend this."""
+        return []
+
+    def _faculty_module_definitions(self):
+        """Staff sidebar modules (key, label, icon, navigation groups). Add-on modules extend this."""
+        return [
             ("home", "Home", "home", []),
             ("teaching", "My task list", "graduation-cap", ["Academic management", "Examination & results", "Mentorship & student support"]),
             ("search", "Search", "search", []),
@@ -169,6 +174,10 @@ class Dashboard(models.AbstractModel):
             ("analytics", "Dashboard", "dashboard", []),
             ("help", "Help", "question-circle", []),
         ]
+
+    def _faculty_modules(self, visible, faculty, pages):
+        """Navigation is discovery only. Every action keeps its model ACLs and record rules."""
+        definitions = self._faculty_module_definitions()
         result = []
         for key, label, icon, groups in definitions:
             items = [dict(item, action_id=self.env.ref(item["action"]).id) for item in visible

@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ai_log_owner,campus.ai.log owner,model_campus_ai_log,ideastone_erp.group_mvp_owner,1,0,0,0
+access_ai_log_registrar,campus.ai.log registrar,model_campus_ai_log,ideastone_erp.group_mvp_registrar,1,0,0,0
+access_ai_log_manager,campus.ai.log manager,model_campus_ai_log,ideastone_erp.group_manager,1,0,0,0
