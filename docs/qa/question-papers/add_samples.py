@@ -68,6 +68,7 @@ for login in ('faculty@openeducat.com', 'exam.faculty.preview'):
         if existing:
             continue
         values = {'department_id': route.department_id.id, 'subject_id': subject.id,
+                  'study_year': str(index % 4 + 1), 'semester': ('I', 'III', 'V', 'VII')[index % 4],
                   'exam_type': 'Model Examination' if index % 2 else 'Internal Assessment — CAT II',
                   'exam_date': str(fields.Date.context_today(api) + timedelta(days=10 + index * 2)),
                   'paper_code': code, 'duration': '3 hours',

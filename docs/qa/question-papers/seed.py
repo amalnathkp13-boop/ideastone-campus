@@ -57,6 +57,7 @@ for n, target in enumerate(['submitted','submitted','returned','approved','forwa
     account = faculty if n < 6 else other
     subject = subjects[n % len(subjects)]
     values = {'department_id': dept.id, 'subject_id': subject.id, 'exam_type': ['Internal Assessment — CAT II','Model Examination','Internal Assessment — CAT I'][n%3],
+        'study_year': str(n % 4 + 1), 'semester': ('I', 'III', 'V', 'VII')[n % 4],
         'exam_date': str(fields.Date.today()+timedelta(days=17+n)), 'paper_code': subject.code.replace('QP-',''), 'duration': '3 hours',
         'notes': 'Syllabus units I–V. Review the 100-mark blueprint. Synthetic preview data.'}
     api = env['campus.question.paper'].with_user(account)
