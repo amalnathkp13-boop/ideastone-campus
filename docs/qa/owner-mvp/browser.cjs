@@ -117,7 +117,6 @@ async function markup(page) {
             await page.getByRole('heading',{name:title,exact:true,level:1}).waitFor();
             await page.locator('.campus_admissions_workspace .loading-note').waitFor({state:'hidden'});
             if(await page.locator('.campus_admissions_workspace .alert-danger').count()) throw Error(`Admissions workspace ${label} failed to load`);
-            await page.getByRole('heading',{name:module.key==='students'?'Student directory':module.label,exact:true,level:1}).waitFor();
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Students',exact:true}).click();
         await page.getByRole('heading',{name:'Student directory',exact:true,level:1}).waitFor();

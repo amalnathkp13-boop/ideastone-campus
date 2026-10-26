@@ -136,11 +136,35 @@ async function save(page, control) {
         assert.equal(await page.locator('.attendance_register_row').count(),initial.attendance.rows.length);
         assert.equal(await page.locator('.attendance_status.present').first().evaluate(element=>getComputedStyle(element).color),'rgb(22, 118, 74)');
         assert.equal(await page.locator('.attendance_tabs').count(),0);
-        assert.equal(await page.locator('.student_subnav a').count(),4);
+        assert.equal(await page.locator('.student_subnav a').count(),5);
         await page.locator('.student_subnav').getByRole('link',{name:'Summary',exact:true}).click();
         assert(await page.locator('#student_attendance_summary').isVisible());
         await page.locator('.student_subnav').getByRole('link',{name:'Session register',exact:true}).click();
         assert.equal(await page.locator('.attendance_register_row:visible').count(),initial.attendance.rows.length);
+        await page.locator('.student_subnav').getByRole('link',{name:'Hourly attendance',exact:true}).click();
+        const hourly=page.locator('#student_attendance_hourly');
+        await hourly.getByRole('heading',{name:'Hourly Attendance',exact:true}).waitFor();
+        assert.equal(await hourly.locator('.attendance_hourly_row:visible').count(),initial.attendance.rows.length);
+        assert.equal(await hourly.locator('[data-attendance-hourly-count=recorded]').innerText(),String(initial.attendance.rows.length));
+        assert.equal(await hourly.getByLabel('Student',{exact:true}).getAttribute('readonly'),'readonly');
+        assert.equal(await hourly.locator('h1').evaluate(el=>getComputedStyle(el).fontSize),'30px');
+        assert.equal(await hourly.locator('h1').evaluate(el=>getComputedStyle(el).fontWeight),'600');
+        assert.equal(await hourly.locator('.attendance_kpi strong').first().evaluate(el=>getComputedStyle(el).fontWeight),'650');
+        const slotCounts=await hourly.locator('[data-attendance-hourly-slots] tr').evaluateAll(rows=>rows.map(row=>Number(row.cells[1]?.textContent || 0)));
+        assert.equal(slotCounts.reduce((sum,value)=>sum+value,0),initial.attendance.rows.length);
+        await hourly.getByLabel('Attendance status',{exact:true}).selectOption('absent');
+        assert.equal(await hourly.locator('.attendance_hourly_row:visible').count(),initial.attendance.rows.filter(row=>row.status==='absent').length);
+        await hourly.getByRole('button',{name:'Reset',exact:true}).click();
+        await hourly.getByRole('searchbox',{name:'Search hourly attendance',exact:true}).fill('NO MATCH HOURLY QA');
+        assert.equal(await hourly.locator('[data-attendance-hourly-count=recorded]').innerText(),'0');
+        assert(await hourly.locator('.attendance_hourly_no_matches').isVisible());
+        await hourly.getByRole('button',{name:'Reset',exact:true}).click();
+        assert.equal(await hourly.locator('.attendance_hourly_row:visible').count(),initial.attendance.rows.length);
+        for(const width of [320,390,768,1440]) {
+            await page.setViewportSize({width,height:1000});
+            assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Hourly attendance overflows at ${width}`);
+        }
+        await page.screenshot({path:path.join(out,'student-hourly-attendance-1440.png'),fullPage:true});
         await page.locator('.student_subnav').getByRole('link',{name:'Attendance calendar',exact:true}).click();
         assert(await page.locator('.attendance_month_grid .attendance_day').count() >= 35);
         await page.setViewportSize({width:390,height:844});
