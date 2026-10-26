@@ -34,7 +34,7 @@ This initial workspace stores allocation details and candidate totals, rather th
 
 ## Sample data and validation
 
-Run `question-papers/seed_coe.py` through Odoo shell in the preview database only. It reuses the existing COE account and engineering departments, adds sample examinations across two academic years, and preserves earlier question-paper history. Empty department rows mean no matching examinations are recorded; no synthetic results have been published.
+Run `question-papers/seed_coe.py` through Odoo shell in the preview database only. It reuses the existing COE account and engineering departments, adds sample examinations across two academic years, and preserves earlier question-paper history. This initial seed does not publish marks. Empty department rows mean no matching examinations are recorded.
 
 Verified on 2026-10-26:
 
@@ -55,3 +55,13 @@ The four dashboard summary cards appear only on Overview. Filters use explicit c
 HOD progress is a limited projection of submitted, returned, approved and forwarded papers routed to the authenticated COE in the active college. Drafts, unselected PDFs and confidential HOD notes are excluded. Year grouping uses an explicit examination link first, then matching scheduled dates, then an unambiguous subject/year allocation in the selected academic year. Ambiguous or unscheduled subjects remain under Needs year assignment. PDF permissions and the approval/receipt/dispatch workflow remain enforced by the existing methods.
 
 Validation: 18 backend tests passed. All 21 COE subpages were opened and refreshed in the browser; summary cards were present only on Overview. Rapid year changes, academic-year switching, reset, department → year → subject navigation, scoped refresh and department-summary CSV export were checked. See `coe-evidence/organization-checks.json` and the department/year/subject screenshots.
+
+## Samples for every COE page
+
+Run `question-papers/seed_coe_all_pages.py` after the initial seed. It is guarded to the preview database and adds records under dedicated `CS26…` examination codes and `COES-…` fictional student identifiers. It creates department HOD routes where missing, sample faculty, three fictional students per year group, and normal enrolments. No new account passwords or password changes are needed by this script.
+
+For all six sample departments and Years I–IV, it creates upcoming examination papers awaiting HOD review or revision, approved papers, received official PDFs and dispatched official PDFs. Recent and past examination rosters demonstrate partial entry, submission, approval/locking and publication through the existing marks workflow. Publication is restricted to the new fictional students. Revaluation, correction and incident examples cover open, review and resolved states. Recent operations audit entries ensure every group appears in the bounded audit register.
+
+The first run created 144 examinations, 96 question-paper submissions, 72 fictional students and 24 cases. Existing records were retained. The second run created no duplicates. The current COE sample academic year contains 181 examinations, 86 official papers and 27 cases, including 30 published fictional-roster examinations. All 21 COE pages were opened, and CSE Year I partial/published marks and received/dispatched paper registers were checked in the browser. See `coe-evidence/all-pages-samples.json`, `sample-page-checks.json` and the sample screenshots.
+
+Filter intent is now persisted before refresh requests start, so navigating immediately after Reset cannot restore a stale department/year preference.

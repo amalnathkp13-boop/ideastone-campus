@@ -54,7 +54,7 @@
     "seating": "Stored hall and invigilator allocations; automated seat plans are not implemented.",
     "attendance": "COE candidate totals; biometric attendance import is not implemented.",
     "cases": "Cases record workflow and notes; resolving a case does not change student marks.",
-    "results": "Uses the existing marks, approval and publication workflow. No sample results were published.",
-    "paper_routing": "Existing ECE preview route is connected; missing department routes are shown as Not configured."
+    "results": "Uses the existing marks, approval and publication workflow. The all-pages seed publishes only fictional preview students' results.",
+    "paper_routing": "Six sample department routes are connected; other unconfigured departments remain explicitly labelled."
   }
 }
