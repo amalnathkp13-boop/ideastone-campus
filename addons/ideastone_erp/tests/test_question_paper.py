@@ -2,11 +2,11 @@ import base64
 import io
 from datetime import datetime, time, timedelta
 
+from odoo.exceptions import AccessError, ValidationError
+from odoo.tests import TransactionCase, new_test_user, tagged
 from PyPDF2 import PdfFileWriter
 
 from odoo import fields
-from odoo.exceptions import AccessError, ValidationError
-from odoo.tests import TransactionCase, new_test_user, tagged
 
 
 @tagged('post_install', '-at_install')
