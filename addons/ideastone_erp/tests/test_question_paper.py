@@ -38,6 +38,28 @@ class TestQuestionPapers(TransactionCase):
     def submit(self):
         return self.api.save_submission(self.values, [self.file], submit=True)
 
+    def test_shared_faculty_can_open_workspace_and_submit(self):
+        faculty = self.env['op.faculty'].search([('user_id', '=', self.teacher.id)])
+        faculty.company_id = False
+        self.assertEqual(self.api.get_workspace()['rows'], [])
+        record_id = self.submit()
+        paper = self.env['campus.question.paper'].browse(record_id)
+        self.assertEqual(paper.faculty_id, faculty)
+        self.assertEqual(paper.company_id, self.env.company)
+        self.assertEqual(self.api.get_workspace()['rows'][0]['id'], record_id)
+
+    def test_foreign_college_and_inactive_faculty_cannot_open_workspace(self):
+        faculty = self.env['op.faculty'].search([('user_id', '=', self.teacher.id)])
+        foreign = self.env['res.company'].create({'name': 'Other faculty college'})
+        faculty.company_id = foreign
+        with self.assertRaises(AccessError):
+            self.api.get_workspace()
+        with self.assertRaises(AccessError):
+            self.submit()
+        faculty.write({'company_id': False, 'active': False})
+        with self.assertRaises(AccessError):
+            self.api.get_workspace()
+
     def test_connected_approval_forwarding_and_receipt(self):
         record_id = self.submit()
         reviewer = self.api.with_user(self.hod)
