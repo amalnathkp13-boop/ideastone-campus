@@ -23,6 +23,7 @@
         "views/student_help.xml", "views/student_od.xml", "views/student_od_policy.xml",
         "data/student_library.xml", "views/student_library.xml",
         "views/student_requests.xml", "security/question_paper.xml", "views/question_paper.xml", "views/hod_question_paper.xml",
+        "security/coe_workspace.xml", "views/coe_workspace.xml",
     ],
     "assets": {
         "web.assets_frontend": [
@@ -94,6 +95,9 @@
             "ideastone_erp/static/src/js/hod_question_papers.js",
             "ideastone_erp/static/src/xml/hod_question_papers.xml",
             "ideastone_erp/static/src/scss/hod_question_papers.scss",
+            "ideastone_erp/static/src/js/coe_workspace.js",
+            "ideastone_erp/static/src/xml/coe_workspace.xml",
+            "ideastone_erp/static/src/scss/coe_workspace.scss",
         ],
     },
     "application": True,

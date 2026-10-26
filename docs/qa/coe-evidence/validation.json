@@ -1,0 +1,40 @@
+{
+  "verified_on": "2026-10-26",
+  "branch": "codex/coe-examinations-workspace",
+  "preview": "http://coe.localhost:18074/web#action=854&cids=1",
+  "backend_tests": 16,
+  "backend_failures": 0,
+  "backend_errors": 0,
+  "browser_checks": [
+    "COE login and automatic overview",
+    "seven main modules and related submodules",
+    "selected official PDF download",
+    "receipt acknowledgement",
+    "dispatch to a matching scheduled examination",
+    "examination operations save",
+    "academic year, department and study-year filters",
+    "filters retained between records and reports",
+    "department CSV download",
+    "existing examination-officer marks form"
+  ],
+  "sample_dispatch_exam": "COE-PACKET-01",
+  "sample_dispatch_exam_id": 76,
+  "sample_academic_year_id": 8,
+  "current_year_examinations": 37,
+  "previous_year_examinations": 12,
+  "study_years": [1, 2, 3, 4],
+  "sample_departments": ["CSE", "QP-ECE", "EEE", "MECH", "CIVIL", "IT"],
+  "heading_typography": {
+    "font": "Inter, Segoe UI, Arial, sans-serif",
+    "size": "27px",
+    "weight": "750",
+    "color": "rgb(16, 47, 76)"
+  },
+  "initial_scope": {
+    "seating": "Stored hall and invigilator allocations; automated seat plans are not implemented.",
+    "attendance": "COE candidate totals; biometric attendance import is not implemented.",
+    "cases": "Cases record workflow and notes; resolving a case does not change student marks.",
+    "results": "Uses the existing marks, approval and publication workflow. No sample results were published.",
+    "paper_routing": "Existing ECE preview route is connected; missing department routes are shown as Not configured."
+  }
+}
