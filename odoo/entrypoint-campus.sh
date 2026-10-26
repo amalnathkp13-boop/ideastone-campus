@@ -7,7 +7,7 @@
 set -e
 
 : "${HOST:=db}" "${USER:=odoo}" "${PASSWORD:=odoo}" "${ODOO_DB:=campus}" "${ODOO_DEMO:=true}"
-: "${CAMPUS_MODULES:=ideastone_campus,ideastone_lms,ideastone_erp}"
+: "${CAMPUS_MODULES:=ideastone_campus,ideastone_lms,ideastone_erp,ideastone_ai}"
 : "${CAMPUS_AUTO_UPGRADE:=true}"
 STAMP=/var/lib/odoo/.campus-code-hash
 DB_ARGS=(--db_host="$HOST" --db_user="$USER" --db_password="$PASSWORD")

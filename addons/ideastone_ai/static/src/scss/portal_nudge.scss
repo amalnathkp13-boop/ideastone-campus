@@ -1,0 +1,11 @@
+.success_nudge {
+  border-radius: 14px; padding: 14px 16px; margin: 0 0 16px; border: 1px solid #dfe8f2; background: #fff;
+  &.success_low { border-color: #bfe8d4; background: #f3fbf7; } &.success_watch { border-color: #f1dca4; background: #fffaf0; } &.success_high { border-color: #f1b9bd; background: #fff5f5; }
+  .success_nudge_head { display: flex; gap: 12px; align-items: flex-start; strong { display: block; color: #0e3151; font-size: 15px; } }
+  .success_nudge_icon { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; flex-shrink: 0; background: #e6efff; color: #1668df; font-size: 18px; }
+  &.success_high .success_nudge_icon { background: #fdecec; color: #b7353d; } &.success_watch .success_nudge_icon { background: #fff2d6; color: #9a6200; } &.success_low .success_nudge_icon { background: #eaf8f1; color: #16835d; }
+  .success_nudge_message { margin: 2px 0 0; color: #35506b; font-size: 13.5px; line-height: 1.5; }
+  .success_nudge_factors { margin: 10px 0 0 50px; padding: 0 0 0 16px; font-size: 13px; color: #35506b; line-height: 1.55; }
+  .success_nudge_action { margin: 10px 0 0 50px; font-size: 13px; font-weight: 600; color: #0e3151; }
+  @media (max-width: 460px) { .success_nudge_factors, .success_nudge_action { margin-left: 0; } }
+}

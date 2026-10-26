@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="rule_ai_log_company" model="ir.rule">
+    <field name="name">Campus Assistant log: college boundary</field>
+    <field name="model_id" ref="model_campus_ai_log"/>
+    <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    <field name="global" eval="True"/>
+  </record>
+</odoo>

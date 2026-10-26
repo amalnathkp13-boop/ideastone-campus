@@ -58,13 +58,22 @@ class OwnerDashboard(models.AbstractModel):
     def _is_mvp_user(self):
         return any(self.env.user.has_group("ideastone_erp.group_mvp_" + role) for role in ROLES)
 
+    def _owner_modules(self):
+        """Owner workspace modules. Add-on modules extend this list."""
+        return list(MODULES)
+
+    def _client_action_models(self):
+        """Access-check model for each client (OWL) action. Add-on modules extend this map."""
+        return dict(CLIENT_ACTION_MODELS)
+
     @api.model
     def get_overview(self):
         if self.env.user.has_group("ideastone_erp.group_od_hod_approver") or not self._is_mvp_user():
             return super().get_overview()
         modules = []
         navigation = []
-        for key, label, icon, entries in MODULES:
+        client_models = self._client_action_models()
+        for key, label, icon, entries in self._owner_modules():
             items = []
             for title, action in entries:
                 if action == "owner-overview":
@@ -83,7 +92,7 @@ class OwnerDashboard(models.AbstractModel):
                 report_model = {"mvp_report_admissions": "op.admission", "mvp_report_students": "op.student", "mvp_report_attendance": "op.attendance.line", "mvp_report_collection": "account.payment", "mvp_report_dues": "account.move", "mvp_report_results": "op.result.line", "mvp_report_faculty": "op.faculty"}.get(action)
                 if report_model and not self.env[report_model].check_access_rights("read", raise_exception=False):
                     continue
-                target_model = CLIENT_ACTION_MODELS.get(action) or ref.res_model
+                target_model = client_models.get(action) or ref.res_model
                 if not self.env[target_model].check_access_rights("read", raise_exception=False):
                     continue
                 item = {"label": title, "action": ref.get_external_id()[ref.id], "action_id": ref.id, "model": target_model, "group": label, "allowed": True}
@@ -317,7 +326,7 @@ class OwnerDashboard(models.AbstractModel):
         if xmlid not in allowed:
             raise AccessError(_("This action is outside your permitted college workspace."))
         action = self.env["ir.actions.actions"]._for_xml_id(xmlid)
-        target_model = CLIENT_ACTION_MODELS.get(xmlid.removeprefix("ideastone_erp.")) or action["res_model"]
+        target_model = self._client_action_models().get(xmlid.removeprefix("ideastone_erp.")) or action["res_model"]
         model = self.env[target_model]
         model.check_access_rights("read")
         if xmlid == "ideastone_erp.mvp_college":
@@ -332,7 +341,7 @@ class OwnerDashboard(models.AbstractModel):
         return action
 
     def _mvp_module_for(self, xmlid):
-        return next((key for key, _label, _icon, items in MODULES if any((action if "." in action else "ideastone_erp." + action) == xmlid for _title, action in items)), "home")
+        return next((key for key, _label, _icon, items in self._owner_modules() if any((action if "." in action else "ideastone_erp." + action) == xmlid for _title, action in items)), "home")
 
     def _mvp_report_rows(self, kind, f, records=None):
         if records is None:

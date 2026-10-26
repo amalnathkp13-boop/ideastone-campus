@@ -7,6 +7,9 @@ from odoo.tests import new_test_user
 from odoo import fields
 
 assert env.cr.dbname == "ci", "Disposable CI database required"  # noqa: F821
+# Odoo demo data declares a mandatory working day next month; the browser check requests
+# leave on the next Monday a week out, which collides with it one week a month.
+env["hr.leave.mandatory.day"].sudo().search([]).unlink()  # noqa: F821
 user = new_test_user(env, login="faculty.ui.qa", name="QA Faculty",  # noqa: F821
                      password=os.environ["FACULTY_QA_PASSWORD"],
                      groups="openeducat_core.group_op_faculty,openeducat_attendance.group_op_attendance_user,openeducat_exam.group_op_exam_user")

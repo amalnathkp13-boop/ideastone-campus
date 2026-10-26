@@ -69,7 +69,9 @@ async function markup(page) {
         if(await page.locator('.campus_dashboard').innerText().then(text=>/Â·|â€”|â†/.test(text))) throw Error('Owner template contains incorrectly decoded UTF-8 punctuation');
         await page.locator('.campus_dashboard').evaluate(element=>element.scrollTop=0);
         const modules = await page.locator('.campus_sidebar nav .campus_nav_link').allTextContents();
-        if(modules.length!==13) throw Error('Owner sidebar does not contain the 13 functional MVP modules');
+        // 13 base modules; the optional AI Pack (ideastone_ai) adds one more.
+        const aiPack=modules.some(label=>label.trim()==='AI insights');
+        if(modules.length!==13+(aiPack?1:0)) throw Error('Owner sidebar does not contain the 13 functional MVP modules');
         const overview=await rpc(page,'campus.dashboard','get_overview');
         let checkedViews=0;
         for(const module of overview.faculty_modules) {
@@ -83,6 +85,24 @@ async function markup(page) {
                 await rpc(page,action.res_model,'get_views',[views],{options:{toolbar:false,load_filters:false},context:action.context || {}});
                 checkedViews++;
             }
+        }
+        if(aiPack) {
+            await page.locator('.campus_sidebar').getByRole('button',{name:'AI insights',exact:true}).click();
+            await page.getByRole('button',{name:'Student Success Radar',exact:true}).click();
+            await page.getByRole('heading',{name:'Student Success Radar',exact:true,level:1}).waitFor();
+            await page.locator('.radar_table tbody tr.radar_row').first().waitFor();
+            const radar=await rpc(page,'campus.success.radar','get_workspace',[{}]);
+            if(radar.summary.students<1 || radar.rows.some(row=>row.score<0 || row.score>100)) throw Error('Student Success Radar returned no scored students or an out-of-range score');
+            if(await page.locator('.radar_row').count()!==radar.rows.length) throw Error('Radar table does not list every scored student');
+            await page.screenshot({path:path.join(out,'owner-success-radar-1440.png'),fullPage:true});
+            await page.locator('.campus_sidebar').getByRole('button',{name:'AI insights',exact:true}).click();
+            await page.getByRole('button',{name:'Campus Assistant',exact:true}).click();
+            await page.getByRole('heading',{name:'Campus Assistant',exact:true,level:1}).waitFor();
+            await page.getByText('Not configured',{exact:true}).waitFor();
+            if(await page.locator('#ai_question').isEnabled()) throw Error('Assistant accepts questions before a provider is configured');
+            await page.screenshot({path:path.join(out,'owner-assistant-1440.png'),fullPage:true});
+            await page.locator('.campus_sidebar').getByRole('button',{name:'Dashboard',exact:true}).click();
+            await page.locator('.admin_overview .kpi').first().waitFor();
         }
         for (const module of overview.faculty_modules.filter(module=>module.key!=='home')) {
             await page.locator('.campus_sidebar').getByRole('button',{name:module.label,exact:true}).click();
