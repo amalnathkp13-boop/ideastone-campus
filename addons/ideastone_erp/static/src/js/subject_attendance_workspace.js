@@ -13,7 +13,7 @@ export class SubjectAttendanceWorkspace extends Component {
         this.action = useService("action");
         this.state = useState({loading: true, saving: false, error: "", data: null,
             termId: "", facultyId: "", date: "", subjectKey: "", sessionId: "",
-            page: 1, subjectPage: 1, allocationPage: 1, notes: "",
+            page: 1, subjectPage: 1, subjectPageSize: 10, allocationPage: 1, classPage: 1, notes: "",
             subjectSearch: "", studentSearch: "", studentStatus: "all", showRoll: true,
             selectedStudents: []});
         onWillStart(() => this.load());
@@ -37,6 +37,7 @@ export class SubjectAttendanceWorkspace extends Component {
             this.state.page = Math.min(this.state.page, this.pageCount);
             this.state.subjectPage = Math.min(this.state.subjectPage, this.subjectPageCount);
             this.state.allocationPage = Math.min(this.state.allocationPage, this.allocationPageCount);
+            this.state.classPage = Math.min(this.state.classPage, this.classPageCount);
         } catch (error) {
             this.state.error = error.data?.message || "Subject attendance could not be loaded. Please retry.";
         } finally {
@@ -58,11 +59,12 @@ export class SubjectAttendanceWorkspace extends Component {
     }
 
     get subjectPageCount() {
-        return Math.max(1, Math.ceil(this.filteredSubjects.length / 6));
+        return Math.max(1, Math.ceil(this.filteredSubjects.length / this.state.subjectPageSize));
     }
 
     get visibleSubjects() {
-        return this.filteredSubjects.slice((this.state.subjectPage - 1) * 6, this.state.subjectPage * 6);
+        const start = (this.state.subjectPage - 1) * this.state.subjectPageSize;
+        return this.filteredSubjects.slice(start, start + this.state.subjectPageSize);
     }
 
     get filteredStudents() {
@@ -106,14 +108,39 @@ export class SubjectAttendanceWorkspace extends Component {
         return (this.state.data?.allocations || []).slice(start, start + 5);
     }
 
+    get classPageCount() {
+        return Math.max(1, Math.ceil((this.state.data?.classes.length || 0) / 4));
+    }
+
+    get visibleClasses() {
+        const start = (this.state.classPage - 1) * 4;
+        return (this.state.data?.classes || []).slice(start, start + 4);
+    }
+
     get trendMax() {
         return Math.max(1, ...(this.state.data?.trend || []).flatMap(
             (item) => [item.present, item.absent, item.excused]
         ));
     }
 
+    get trendScale() {
+        return Math.max(20, Math.ceil(this.trendMax / 20) * 20);
+    }
+
+    get trendTicks() {
+        return [4, 3, 2, 1, 0].map((step) => step * this.trendScale / 4);
+    }
+
+    get trendMonths() {
+        const date = new Date(`${(this.state.data?.date || this.state.date).slice(0, 7)}-15T12:00:00Z`);
+        return Array.from({length: 12}, (_, index) => {
+            const month = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() - index, 15));
+            return {value: month.toISOString().slice(0, 7), label: month.toLocaleDateString(undefined, {month: "short", year: "numeric", timeZone: "UTC"})};
+        });
+    }
+
     chartHeight(value) {
-        return value ? `${Math.max(5, Math.round(value * 100 / this.trendMax))}%` : "0%";
+        return value ? `${Math.max(4, Math.round(value * 100 / this.trendScale))}%` : "0%";
     }
 
     displayDate(value) { return value ? value.split("-").reverse().join("/") : ""; }
@@ -140,6 +167,12 @@ export class SubjectAttendanceWorkspace extends Component {
 
     async changeDate(event) {
         this.state.date = event.target.value;
+        this.state.sessionId = "";
+        await this.load();
+    }
+
+    async changeTrendMonth(event) {
+        this.state.date = `${event.target.value}-01`;
         this.state.sessionId = "";
         await this.load();
     }
@@ -172,6 +205,8 @@ export class SubjectAttendanceWorkspace extends Component {
     setPage(page) { this.state.page = Math.max(1, Math.min(page, this.pageCount)); }
     setSubjectPage(page) { this.state.subjectPage = Math.max(1, Math.min(page, this.subjectPageCount)); }
     setAllocationPage(page) { this.state.allocationPage = Math.max(1, Math.min(page, this.allocationPageCount)); }
+    setClassPage(page) { this.state.classPage = Math.max(1, Math.min(page, this.classPageCount)); }
+    changeSubjectPageSize(event) { this.state.subjectPageSize = Number(event.target.value); this.state.subjectPage = 1; }
     searchSubjects(event) { this.state.subjectSearch = event.target.value; this.state.subjectPage = 1; }
     searchStudents(event) { this.state.studentSearch = event.target.value; this.state.page = 1; }
     filterStudents(event) { this.state.studentStatus = event.target.value; this.state.page = 1; }
@@ -250,6 +285,15 @@ export class SubjectAttendanceWorkspace extends Component {
             res_model: "op.attendance.sheet", views: [[false, "tree"], [false, "form"]],
             domain: [["session_id", "in", this.state.data.allocations.map((item) => item.id)]],
             target: "current"});
+    }
+
+    openLessonPlanner() {
+        this.action.doAction({type: "ir.actions.act_window", name: "Lesson plans",
+            res_model: "campus.teaching.plan", views: [[false, "tree"], [false, "form"]],
+            domain: [["faculty_id", "=", Number(this.state.facultyId)]],
+            context: {default_faculty_id: Number(this.state.facultyId),
+                default_subject_id: this.selectedSubject?.subject_id,
+                default_batch_id: this.selectedSubject?.batch_id}, target: "current"});
     }
 }
 

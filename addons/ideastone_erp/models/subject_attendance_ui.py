@@ -13,8 +13,8 @@ class SubjectAttendanceUI(models.AbstractModel):
     _description = "Subject-wise attendance workspace"
 
     def _require_staff(self):
-        if not self.env.user.has_group("base.group_user"):
-            raise AccessError(_("An internal campus account is required."))
+        if not self.env.user.has_group("openeducat_core.group_op_faculty"):
+            raise AccessError(_("A staff account is required for subject attendance."))
         self.env["op.attendance.sheet"].check_access_rights("read")
 
     def _can_manage_all(self):
@@ -81,7 +81,8 @@ class SubjectAttendanceUI(models.AbstractModel):
             roster = enrolments.filtered(lambda entry, batch=item.batch_id: entry.batch_id == batch and entry.student_id.active)
             subject_rows.append({
                 "key": key, "code": item.subject_id.code or "", "name": item.subject_id.name,
-                "kind": (item.subject_id.subject_type or "core").title(),
+                "kind": "Core" if item.subject_id.subject_type == "compulsory" else
+                        (item.subject_id.subject_type or "core").title(),
                 "class": item.batch_id.name, "students": len(set(roster.student_id.ids)),
                 "subject_id": item.subject_id.id, "batch_id": item.batch_id.id,
             })
@@ -128,11 +129,14 @@ class SubjectAttendanceUI(models.AbstractModel):
         selected_sessions = sessions.filtered(
             lambda item: selected and item.subject_id == selected.subject_id and item.batch_id == selected_batch
         )
+        daily_hours = {}
         for session in selected_sessions:
             local_start = fields.Datetime.context_timestamp(self, session.start_datetime)
             local_end = fields.Datetime.context_timestamp(self, session.end_datetime)
+            session_day = str(local_start.date())
+            daily_hours[session_day] = daily_hours.get(session_day, 0) + 1
             allocations.append({
-                "id": session.id, "date": str(local_start.date()), "hour": local_start.strftime("%H:%M"),
+                "id": session.id, "date": session_day, "hour": daily_hours[session_day],
                 "from": local_start.strftime("%H:%M"), "to": local_end.strftime("%H:%M"),
                 "subject": session.subject_id.code or session.subject_id.name,
             })
@@ -151,8 +155,11 @@ class SubjectAttendanceUI(models.AbstractModel):
         policy = self.env.company.campus_excused_policy
         eligible = attended = 0
         subject_counts = {key: [0, 0] for key in allocated}
-        weeks = [{"label": "Week %s" % (index + 1), "present": 0, "absent": 0, "excused": 0}
-                 for index in range((monthrange(day.year, day.month)[1] + 6) // 7)]
+        month_days = monthrange(day.year, day.month)[1]
+        weeks = [{"label": "Week %s" % (index + 1),
+                  "range": "%s - %s %s" % (index * 7 + 1, min((index + 1) * 7, month_days), day.strftime("%b")),
+                  "present": 0, "absent": 0, "excused": 0}
+                 for index in range((month_days + 6) // 7)]
         for recorded in sheets:
             session_key = "%s:%s" % (recorded.session_id.subject_id.id, recorded.session_id.batch_id.id)
             if session_key not in subject_counts:
