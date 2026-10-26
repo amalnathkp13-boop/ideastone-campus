@@ -5,6 +5,16 @@
   "backend_tests": 16,
   "backend_failures": 0,
   "backend_errors": 0,
+  "scroll_regression": {
+    "verified_on": "2026-10-26",
+    "overview_container_height": 604,
+    "overview_content_height": 2346,
+    "overview_scrolled_down": 1440,
+    "overview_scrolled_back_to_top": 0,
+    "question_papers_scrolled_down": 1440,
+    "question_papers_scrolled_back_to_top": 0,
+    "parent_scroll_top": 0
+  },
   "browser_checks": [
     "COE login and automatic overview",
     "seven main modules and related submodules",
