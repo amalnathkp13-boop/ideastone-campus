@@ -1,4 +1,14 @@
 .coe-workspace {
+ .coe-browser-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding:22px}.coe-year-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .coe-filters.coe-route-filters{grid-template-columns:minmax(0,1fr) auto}
+ .coe-browse-card,.coe-subject-card{text-align:left;border:1px solid #dce6f2;border-radius:12px;background:#fff;padding:21px;color:#17334f;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:12px;box-shadow:0 5px 18px #16355705}
+ .coe-browse-card:hover:enabled{border-color:#8ab7f6;background:#f8fbff;box-shadow:0 8px 22px #1635570b}.coe-browse-card h3,.coe-subject-card h3{font-size:16px;font-weight:750;margin:0;line-height:1.5}.coe-browse-card>i{color:#0866e8;font-size:22px}.coe-browse-card p,.coe-subject-card p{font-size:12px}
+ .coe-department-icon{display:flex;align-items:center;gap:10px;width:100%;color:#3978b9}.coe-department-icon>i{font-size:22px;padding:12px;background:#edf5ff;border-radius:9px}.coe-department-icon>span{font-size:10px;font-weight:750;letter-spacing:.8px}
+ .coe-card-counts{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:11px;color:#67809d}.coe-card-counts b{color:#254c70}.coe-card-link{font-size:12px;color:#0866e8;font-weight:700;margin-top:auto;padding-top:5px}
+ .coe-browser-path{display:flex;align-items:center;flex-wrap:wrap;gap:9px;font-size:12px;margin-bottom:9px;color:#67809d}.coe-browser-path .coe-link{white-space:normal;text-align:left}.coe-browser-path>b{color:#244866;font-size:12px}.coe-empty-departments{border-top:1px solid #e5edf7}.coe-empty-departments>summary{padding:17px 22px;font-size:12px;color:#547699;cursor:pointer;background:#f9fbfe}
+ .coe-subject-top{display:flex;flex-wrap:wrap;gap:7px}.coe-subject-top .coe-badge{white-space:normal}.coe-subject-hod{color:#496886!important}.coe-paper-progress{background:#f5f8fd;border-radius:8px;padding:12px;width:100%;font-size:12px}.coe-paper-progress>p{color:#274f75;margin:6px 0}.coe-paper-progress small{font-size:10px}.coe-subject-card>.coe-link{margin-top:auto}.coe-loading{padding:0 3px 15px;font-size:12px;color:#547699}
+ @media(max-width:1200px){.coe-browser-grid,.coe-year-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+ @media(max-width:600px){.coe-browser-grid{grid-template-columns:1fr;padding:15px}.coe-year-grid{grid-template-columns:1fr}.coe-browser-path{gap:6px}}
  --coe-ink:#17334f;--coe-muted:#67809d;--coe-blue:#0866e8;--coe-line:#dce6f2;
  background:#f3f7fc;color:var(--coe-ink);padding:28px;font:14px/1.45 Inter,"Segoe UI",Arial,sans-serif;width:100%;height:100%;min-height:0;overflow-x:hidden;overflow-y:auto;
  &, *{box-sizing:border-box} button,input,select,textarea{font:inherit} button{cursor:pointer} button:disabled{opacity:.55;cursor:default}

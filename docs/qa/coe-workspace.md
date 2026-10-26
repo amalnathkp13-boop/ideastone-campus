@@ -24,7 +24,7 @@ Faculty and HOD previews share this database so handoffs remain connected.
 | --- | --- |
 | COE overview | Overview, action queue |
 | Examination records | All examinations, upcoming, recent (last 30 days), past records, timetable |
-| Question papers | Approved paper inbox, received papers, dispatch register |
+| Question papers | Question papers and HOD status, received papers, dispatch register |
 | Exam operations | Hall allocations, invigilation, attendance and incidents |
 | Evaluation and results | Evaluation tracker, results register, revaluation and corrections |
 | Reports and audit | Department summary, Years I–IV, workflow audit |
@@ -45,3 +45,13 @@ Verified on 2026-10-26:
 - Department CSV downloaded; existing examination-officer marks form loaded without additional faculty permissions.
 
 Release screenshots and structured evidence are in `coe-evidence/`.
+
+## Department-first organization update
+
+COE registers now open with department cards. Choosing a department shows Years I–IV; choosing a year shows current examination subjects and the HOD's question-paper progress. Subject records retain the existing examination, case, official-PDF and dispatch actions. Departments without matching records are grouped under a collapsed directory. Academic years use year cards; HOD routing uses department cards because routes are independent of a study year.
+
+The four dashboard summary cards appear only on Overview. Filters use explicit change handlers, a latest-request guard and a consistent stored scope, so an older response cannot replace a later choice or update a page after navigating away. Refresh reloads the current scope. Reset returns to the default current academic year and all departments/years, clearing the subject and search. Setup pages omit filters that do not apply to that register.
+
+HOD progress is a limited projection of submitted, returned, approved and forwarded papers routed to the authenticated COE in the active college. Drafts, unselected PDFs and confidential HOD notes are excluded. Year grouping uses an explicit examination link first, then matching scheduled dates, then an unambiguous subject/year allocation in the selected academic year. Ambiguous or unscheduled subjects remain under Needs year assignment. PDF permissions and the approval/receipt/dispatch workflow remain enforced by the existing methods.
+
+Validation: 18 backend tests passed. All 21 COE subpages were opened and refreshed in the browser; summary cards were present only on Overview. Rapid year changes, academic-year switching, reset, department → year → subject navigation, scoped refresh and department-summary CSV export were checked. See `coe-evidence/organization-checks.json` and the department/year/subject screenshots.

@@ -2,9 +2,19 @@
   "verified_on": "2026-10-26",
   "branch": "codex/coe-examinations-workspace",
   "preview": "http://coe.localhost:18074/web#action=854&cids=1",
-  "backend_tests": 16,
+  "backend_tests": 18,
   "backend_failures": 0,
   "backend_errors": 0,
+  "organization_update": {
+    "browser_subpages_checked": 21,
+    "summary_cards_only_on_overview": true,
+    "department_year_subject_drilldown": true,
+    "refresh_and_reset_checked": true,
+    "rapid_year_changes_checked": true,
+    "confidential_hod_notes_excluded_from_progress": true,
+    "ambiguous_subject_year_kept_unassigned": true,
+    "department_summary_export_checked": true
+  },
   "scroll_regression": {
     "verified_on": "2026-10-26",
     "overview_container_height": 604,

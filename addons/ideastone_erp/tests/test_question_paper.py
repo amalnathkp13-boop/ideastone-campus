@@ -96,6 +96,55 @@ class TestQuestionPapers(TransactionCase):
         self.assertEqual(self.env['campus.coe.case'].browse(case_id).state, 'resolved')
         self.assertTrue(self.env['campus.mvp.audit'].search_count([('model_name', '=', 'campus.coe.case'), ('record_id', '=', case_id)]))
 
+    def test_coe_subject_progress_reports_hod_status_without_confidential_content(self):
+        exam = self.coe_exam()
+        record_id = self.submit()
+        api = self.env['campus.coe.workspace'].with_user(self.coe)
+        scope = {'year_id': exam.campus_year_id.id, 'department_id': self.dept.id, 'study_year': '3'}
+        data = api.get_workspace('papers', scope)
+        subject = data['subject_progress'][0]
+        self.assertEqual(subject['subject_id'], self.subject.id)
+        self.assertEqual(subject['study_year'], '3')
+        self.assertEqual(subject['updates'][0]['state'], 'submitted')
+        self.assertEqual(data['papers'], [])
+        with self.assertRaises(AccessError):
+            self.api.with_user(self.coe).download_set(self.api.get_workspace()['rows'][0]['sets'][0]['id'])
+        reviewer = self.api.with_user(self.hod)
+        reviewer.decide(record_id, 'return', note='Confidential HOD revision detail')
+        updates = api.get_workspace('papers', scope)['subject_progress'][0]['updates']
+        self.assertEqual(updates[0]['state'], 'returned')
+        self.assertNotIn('Confidential HOD revision detail', str(updates))
+        self.assertEqual(set(updates[0]), {'state', 'status', 'hod', 'updated', 'exam_date', 'department_id', 'subject_id', 'study_year'})
+        self.api.save_submission(self.values, [self.file], record_id, True)
+        row = self.api.get_workspace()['rows'][0]
+        reviewer.decide(record_id, 'approve', row['sets'][0]['id'])
+        data = api.get_workspace('papers', scope)
+        self.assertEqual(data['subject_progress'][0]['updates'][0]['state'], 'approved')
+        self.assertEqual(data['papers'][0]['study_year'], '3')
+        self.assertEqual(len(data['papers'][0]['sets']), 1)
+        self.other.groups_id |= self.env.ref('ideastone_erp.group_exam_paper_coe')
+        route = self.env['campus.question.paper.routing'].search([('department_id', '=', self.dept.id)])
+        route.coe_id = self.other
+        self.submit()
+        self.assertEqual(len(api.get_workspace('papers', scope)['subject_progress'][0]['updates']), 1)
+
+    def test_coe_ambiguous_subject_year_stays_in_unassigned_group(self):
+        exam = self.coe_exam()
+        exam.copy({'exam_code': 'COEQA-SECOND', 'coe_study_year': '4',
+                   'start_time': exam.start_time + timedelta(hours=4), 'end_time': exam.end_time + timedelta(hours=4)})
+        self.submit()
+        api = self.env['campus.coe.workspace'].with_user(self.coe)
+        scope = {'year_id': exam.campus_year_id.id, 'department_id': self.dept.id}
+        data = api.get_workspace('papers', scope)
+        unassigned = next(s for s in data['subject_progress'] if s['study_year'] == '')
+        self.assertEqual(unassigned['updates'][0]['state'], 'submitted')
+        assigned = api.get_workspace('papers', dict(scope, study_year='3'))
+        self.assertFalse(assigned['subject_progress'][0]['updates'])
+        data = api.get_workspace('papers', dict(scope, study_year='unassigned'))
+        self.assertEqual(data['exams'], [])
+        self.assertEqual(len(data['subject_progress']), 1)
+        self.assertEqual(len(data['subject_progress'][0]['updates']), 1)
+
     def test_coe_approved_selected_pdf_receipt_and_dispatch(self):
         exam = self.coe_exam()
         record_id = self.api.save_submission(self.values, [self.file, dict(self.file, level='advanced')], submit=True)

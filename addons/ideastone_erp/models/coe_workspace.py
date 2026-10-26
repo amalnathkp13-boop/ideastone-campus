@@ -7,7 +7,7 @@ from odoo.exceptions import AccessError, ValidationError
 COE_MODULES = [
     ('coe-home', 'COE overview', 'home', [('overview', 'Overview'), ('attention', 'Action queue')]),
     ('coe-exams', 'Examination records', 'calendar', [('records', 'All examinations'), ('upcoming', 'Upcoming'), ('recent', 'Recent'), ('past', 'Past records'), ('timetable', 'Timetable')]),
-    ('coe-papers', 'Question papers', 'file-text-o', [('papers', 'Approved paper inbox'), ('received', 'Received papers'), ('dispatch', 'Dispatch register')]),
+    ('coe-papers', 'Question papers', 'file-text-o', [('papers', 'Question papers & HOD status'), ('received', 'Received papers'), ('dispatch', 'Dispatch register')]),
     ('coe-operations', 'Exam operations', 'building-o', [('halls', 'Hall allocations'), ('invigilation', 'Invigilation'), ('attendance', 'Attendance & incidents')]),
     ('coe-results', 'Evaluation & results', 'graduation-cap', [('evaluation', 'Evaluation tracker'), ('results', 'Results register'), ('cases', 'Revaluation & corrections')]),
     ('coe-reports', 'Reports & audit', 'bar-chart', [('departments', 'Department summary'), ('year-summary', 'Years I–IV'), ('audit', 'Workflow audit')]),
@@ -124,14 +124,43 @@ class COEWorkspace(models.AbstractModel):
         if department_id and department_id not in departments.ids:
             raise AccessError(_('Choose a department in the active college.'))
         study = filters.get('study_year', '')
-        if not isinstance(study, str) or study not in ('', '1', '2', '3', '4'):
+        if not isinstance(study, str) or study not in ('', '1', '2', '3', '4', 'unassigned'):
             raise ValidationError(_('Choose Year I, II, III or IV.'))
         domain = company + [('campus_year_id', '=', year.id)]
         if department_id:
             domain += [('course_id.department_id', '=', department_id)]
-        if study:
-            domain += [('coe_study_year', '=', study)]
-        exams = self.env['op.exam'].search(domain, order='start_time desc, id desc')
+        all_exams = self.env['op.exam'].search(domain, order='start_time desc, id desc')
+        exams = all_exams.filtered(lambda e: not study or (e.coe_study_year or 'unassigned') == study)
+        # COE may see progress for its routed submissions, without reading draft
+        # content, HOD notes or unselected PDFs through the confidential-paper ACL.
+        update_domain = company + [('coe_id', '=', self.env.uid), ('state', 'in', ['submitted', 'returned', 'approved', 'forwarded']),
+            ('exam_date', '>=', year.start_date), ('exam_date', '<=', year.end_date)]
+        if department_id:
+            update_domain += [('department_id', '=', department_id)]
+        updates = self.env['campus.question.paper'].sudo().search(update_domain, order='exam_date desc, write_date desc, id desc')
+        links = self.env['op.exam'].search(company + [('coe_paper_id', 'in', updates.ids)])
+        progress = {}
+        for exam in exams:
+            key = (exam.course_id.department_id.id, exam.coe_study_year or '', exam.subject_id.id)
+            progress.setdefault(key, {'department_id': key[0], 'study_year': key[1], 'subject_id': key[2],
+                'subject': exam.subject_id.name, 'code': exam.subject_id.code or '', 'exam_ids': [], 'updates': []})['exam_ids'].append(exam.id)
+        update_rows = {}
+        for paper in updates:
+            candidates = all_exams.filtered(lambda e: e.subject_id == paper.subject_id and e.course_id.department_id == paper.department_id)
+            linked = links.filtered(lambda e: e.coe_paper_id == paper)
+            dated = candidates.filtered(lambda e: fields.Datetime.context_timestamp(self, e.start_time).date() == paper.exam_date)
+            cohorts = set((linked or dated or candidates).mapped('coe_study_year')) - {False}
+            cohort = next(iter(cohorts)) if len(cohorts) == 1 else ''
+            if study and (cohort or 'unassigned') != study:
+                continue
+            status = 'Dispatched' if paper.coe_dispatched_at else 'Received by COE' if paper.coe_received_at else dict(paper._fields['state'].selection)[paper.state]
+            item = {'state': paper.state, 'status': status, 'hod': paper.hod_id.name,
+                    'updated': fields.Datetime.to_string(paper.write_date), 'exam_date': str(paper.exam_date),
+                    'department_id': paper.department_id.id, 'subject_id': paper.subject_id.id, 'study_year': cohort}
+            update_rows[paper.id] = item
+            key = (paper.department_id.id, cohort, paper.subject_id.id)
+            progress.setdefault(key, {'department_id': key[0], 'study_year': cohort, 'subject_id': key[2],
+                'subject': paper.subject_id.name, 'code': paper.subject_id.code or '', 'exam_ids': [], 'updates': []})['updates'].append(item)
         now = fields.Datetime.now()
         rows = []
         for exam in exams:
@@ -149,20 +178,22 @@ class COEWorkspace(models.AbstractModel):
                 'paper_id': exam.coe_paper_id.id, 'notes': exam.note or ''})
         papers = self.env['campus.question.paper'].get_workspace('coe')['rows']
         paper_records = self.env['campus.question.paper'].browse([r['id'] for r in papers])
-        links = self.env['op.exam'].search(company + [('coe_paper_id', 'in', paper_records.ids)])
         for row in papers:
             rec = paper_records.browse(row['id'])
             linked = links.filtered(lambda e: e.coe_paper_id == rec)[:1]
+            cohort = update_rows.get(rec.id, {}).get('study_year', '')
             row.update(received_at=fields.Datetime.to_string(rec.coe_received_at) if rec.coe_received_at else '',
                        dispatched_at=fields.Datetime.to_string(rec.coe_dispatched_at) if rec.coe_dispatched_at else '',
-                       dispatch_note=rec.coe_dispatch_note or '', exam_id=linked.id, study_year=linked.coe_study_year or '',
+                       dispatch_note=rec.coe_dispatch_note or '', exam_id=linked.id, study_year=cohort,
                        hod=rec.sudo().hod_id.name, approved_at=fields.Datetime.to_string(rec.approved_at) if rec.approved_at else '')
         papers = [r for r in papers if year.start_date <= fields.Date.to_date(r['exam_date']) <= year.end_date
                   and (not department_id or r['department_id'] == department_id)
-                  and (not study or r['study_year'] == study)]
+                  and (not study or (r['study_year'] or 'unassigned') == study)]
         cases = self.env['campus.coe.case'].search(company + [('exam_id', 'in', exams.ids)])
         case_rows = [{'id': c.id, 'exam_id': c.exam_id.id, 'name': c.name, 'exam': c.exam_id.name, 'reference': c.reference or '',
-                      'kind': c.kind, 'state': c.state, 'note': c.note, 'department': c.exam_id.course_id.department_id.name} for c in cases]
+                      'kind': c.kind, 'state': c.state, 'note': c.note, 'department': c.exam_id.course_id.department_id.name,
+                      'department_id': c.exam_id.course_id.department_id.id, 'study_year': c.exam_id.coe_study_year,
+                      'subject_id': c.exam_id.subject_id.id} for c in cases]
         summaries = []
         for dept in departments:
             subset = [r for r in rows if r['department_id'] == dept.id]
@@ -177,14 +208,21 @@ class COEWorkspace(models.AbstractModel):
             ('model_name', 'in', ['op.exam', 'campus.question.paper', 'campus.coe.case']),
             ('create_date', '>=', str(year.start_date)), ('create_date', '<', str(year.end_date + timedelta(days=1)))], limit=80)
         audit = audit.filtered(lambda a: a.record_id in (exams.ids if a.model_name == 'op.exam' else [r['id'] for r in papers] if a.model_name == 'campus.question.paper' else cases.ids))
+        audit_scope = {('op.exam', e.id): {'department_id': e.course_id.department_id.id,
+            'study_year': e.coe_study_year, 'subject_id': e.subject_id.id} for e in exams}
+        audit_scope.update({('campus.question.paper', r['id']): {key: r[key] for key in ('department_id', 'study_year', 'subject_id')} for r in papers})
+        audit_scope.update({('campus.coe.case', r['id']): {key: r[key] for key in ('department_id', 'study_year', 'subject_id')} for r in case_rows})
         return {'view': view, 'title': COE_VIEWS[view][1], 'company': self.env.company.name, 'today': str(today),
-            'year_id': year.id, 'year': year.name, 'years': [{'id': y.id, 'name': y.name, 'start': str(y.start_date), 'end': str(y.end_date)} for y in years],
+            'year_id': year.id, 'year': year.name,
+            'default_year_id': (years.filtered(lambda y: y.start_date <= today <= y.end_date)[:1] or years[:1]).id,
+            'years': [{'id': y.id, 'name': y.name, 'start': str(y.start_date), 'end': str(y.end_date)} for y in years],
             'departments': [{'id': d.id, 'name': d.name, 'code': d.code or ''} for d in departments], 'exams': rows, 'papers': papers,
-            'cases': case_rows, 'summaries': summaries,
+            'cases': case_rows, 'summaries': summaries, 'subject_progress': list(progress.values()),
             'routes': [{'id': d.id, 'department': d.name, 'hod': routes.filtered(lambda r: r.department_id == d)[:1].hod_id.name or 'Not configured',
                         'coe': routes.filtered(lambda r: r.department_id == d)[:1].coe_id.name or 'Not configured'}
                        for d in departments if not department_id or d.id == department_id],
-            'audit': [{'id': a.id, 'action': a.name, 'actor': a.actor_id.name, 'at': fields.Datetime.to_string(a.create_date), 'reason': a.reason or ''} for a in audit],
+            'audit': [{'id': a.id, 'action': a.name, 'actor': a.actor_id.name, 'at': fields.Datetime.to_string(a.create_date),
+                       'reason': a.reason or '', **audit_scope.get((a.model_name, a.record_id), {})} for a in audit],
             'counts': {'exams': len(rows), 'upcoming': sum(r['period'] == 'upcoming' for r in rows), 'papers': len(papers),
                        'unreceived': sum(not r['received_at'] and r['state'] == 'forwarded' for r in papers),
                        'cases': len(cases.filtered(lambda c: c.state != 'resolved')),
