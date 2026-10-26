@@ -215,6 +215,10 @@ class CampusBase extends Component {
     ownerCanOpen(xmlid) { return this.state.navigation.some(row => row.action === xmlid); }
     ownerPrint() { window.print(); }
     ownerMoney(value) { return `${this.ownerUI.currency_symbol || ""} ${this.number(value)}`.trim(); }
+    ownerCompactMoney(value) {
+        const magnitude = Math.abs(value);
+        return `${this.ownerUI.currency_symbol || ""}${this.number(value / (magnitude >= 10000000 ? 10000000 : magnitude >= 100000 ? 100000 : 1))}${magnitude >= 10000000 ? "Cr" : magnitude >= 100000 ? "L" : ""}`;
+    }
     ownerMonth(value) { return new Date(`${value.slice(0, 7)}-15T12:00:00Z`).toLocaleDateString(undefined, {month: "short", year: "2-digit", timeZone: "UTC"}); }
     ownerDay(value) { return value.slice(8, 10); }
     ownerMonthShort(value) { return new Date(`${value.slice(0, 10)}T12:00:00Z`).toLocaleDateString(undefined, {month: "short", timeZone: "UTC"}).toUpperCase(); }
