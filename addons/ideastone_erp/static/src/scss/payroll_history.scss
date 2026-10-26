@@ -143,8 +143,8 @@
         .payroll_table_scroller { max-height: 340px; } }
 }
 
-// Match the Faculty & Staff heading, filter, KPI and panel scale for the admin view.
-.campus_payroll_history.payroll_admin {
+// Share the Faculty & Staff heading, filter, KPI and panel scale across both logins.
+.campus_payroll_history {
     --payroll-ink: #102b59;
     --payroll-line: #dce6f3;
     padding: 22px 24px 40px;
@@ -163,8 +163,8 @@
     .payroll_hero p { color: #6d84a1; font-size: 12px; }
     .payroll_hero_note { color: #526681; font-size: 12px; }
 
-    .payroll_filters { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1.25fr)
-        minmax(0, .65fr) minmax(0, .7fr) auto; gap: 12px; min-height: 0; padding: 14px; margin-bottom: 12px; }
+    .payroll_filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 12px; min-height: 0; padding: 14px; margin-bottom: 12px; }
     .payroll_filters label { min-width: 0; gap: 8px; color: #34496b; font-weight: 650; }
     .payroll_filters label select, .payroll_filters label:first-child select { min-width: 0; width: 100%; flex: 1;
         height: 40px; border-radius: 6px; color: #203b66; }

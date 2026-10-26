@@ -1,0 +1,45 @@
+{
+  "admin": {
+    "history": "#\tMonth\tYear\tNet Salary (INR)\tLate Days\tLate Deduction (INR)\tP.F (INR)\tT.D.S (INR)\n1\tSeptember\t2026\t₹ 24,000\t4\t₹ 2,000\t₹ 0\t₹ 0\n2\tAugust\t2026\t₹ 26,000\t1\t₹ 0\t₹ 0\t₹ 0",
+    "punches": [
+      "2026-09-01\t09:10\t17:10\tPaid permission",
+      "2026-09-02\t09:10\t17:10\tPaid permission",
+      "2026-09-03\t09:10\t17:10\t1 day deducted",
+      "2026-09-04\t09:10\t17:10\t1 day deducted",
+      "2026-09-05\t08:50\t17:00\tNo late deduction"
+    ],
+    "staffSelector": true,
+    "style": {
+      "color": "rgb(41, 68, 111)",
+      "font": "\"Segoe UI\", Arial, sans-serif",
+      "size": "12px"
+    },
+    "summary": "ATTENDANCE · PAYROLL\n9:00 AM late punch policy\n2 paid days / month\n\nThe first two late working days are paid. Each later late day deducts one day of salary.\n\nLate punch days\n4\nPaid permission used\n2 / 2\nDays deducted\n2\nLate punch deduction\n₹ 2,000\nDeducted dates: 2026-09-03, 2026-09-04"
+  },
+  "faculty": {
+    "history": "#\tMonth\tYear\tNet Salary (INR)\tLate Days\tLate Deduction (INR)\tP.F (INR)\tT.D.S (INR)\n1\tSeptember\t2026\t₹ 24,000\t4\t₹ 2,000\t₹ 0\t₹ 0\n2\tAugust\t2026\t₹ 26,000\t1\t₹ 0\t₹ 0\t₹ 0",
+    "punches": [
+      "2026-09-01\t09:10\t17:10\tPaid permission",
+      "2026-09-02\t09:10\t17:10\tPaid permission",
+      "2026-09-03\t09:10\t17:10\t1 day deducted",
+      "2026-09-04\t09:10\t17:10\t1 day deducted",
+      "2026-09-05\t08:50\t17:00\tNo late deduction"
+    ],
+    "staffSelector": false,
+    "style": {
+      "color": "rgb(41, 68, 111)",
+      "font": "\"Segoe UI\", Arial, sans-serif",
+      "size": "12px"
+    },
+    "summary": "ATTENDANCE · PAYROLL\n9:00 AM late punch policy\n2 paid days / month\n\nThe first two late working days are paid. Each later late day deducts one day of salary.\n\nLate punch days\n4\nPaid permission used\n2 / 2\nDays deducted\n2\nLate punch deduction\n₹ 2,000\nDeducted dates: 2026-09-03, 2026-09-04"
+  },
+  "identicalCsv": true,
+  "selectedAugust": {
+    "net": 26000,
+    "late_days": 1,
+    "paid_permissions": 1,
+    "deducted_days": 0,
+    "late_deduction": 0
+  },
+  "emptyMonthPolicyVisible": true
+}

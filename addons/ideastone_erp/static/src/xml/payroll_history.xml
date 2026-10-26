@@ -29,27 +29,27 @@
           <section class="payroll_history_panel">
             <div class="payroll_history_header"><div class="payroll_heading_icon"><i class="fa fa-file-text"/></div><div><span class="payroll_eyebrow" t-esc="state.isAdmin ? 'SELECTED STAFF' : 'YOUR RECORDS'"/><h2 t-esc="state.isAdmin ? (state.employeeName || 'Payroll History') : 'Payroll History'"/><p>Monthly take-home pay and deductions, all in one place.</p></div><span class="payroll_record_count"><t t-esc="visibleRows.length"/> payslips</span></div>
             <div t-if="latest" class="payroll_featured"><div><span>LATEST PAYSLIP</span><strong t-esc="latestLabel"/><small>Approved payroll record</small></div><div class="payroll_featured_amount"><span>NET PAY</span><strong t-esc="formatMoney(latest.net)"/></div></div>
-            <section t-if="state.isAdmin &amp;&amp; latest" class="payroll_late_summary" aria-label="Late punch payroll allowance">
-              <div class="payroll_late_header"><div><span class="payroll_eyebrow">ATTENDANCE · EXTRA FEATURE</span><h3>9:00 AM late punch policy</h3></div><span class="payroll_late_rule">2 paid days / month</span></div>
+            <section class="payroll_late_summary" aria-label="Late punch payroll allowance">
+              <div class="payroll_late_header"><div><span class="payroll_eyebrow">ATTENDANCE · PAYROLL</span><h3>9:00 AM late punch policy</h3></div><span class="payroll_late_rule">2 paid days / month</span></div>
               <p>The first two late working days are paid. Each later late day deducts one day of salary.</p>
-              <div class="payroll_late_stats">
-                <div><span>Late punch days</span><strong t-esc="latest.late_days"/></div>
-                <div><span>Paid permission used</span><strong><t t-esc="latest.late_grace_days"/> / 2</strong></div>
-                <div><span>Days deducted</span><strong t-esc="latest.late_deducted_days"/></div>
+              <p t-if="!latest">Late-punch totals appear after payroll approval for the selected period.</p><div class="payroll_late_stats">
+                <div><span>Late punch days</span><strong t-esc="latest ? latest.late_days : &apos;—&apos;"/></div>
+                <div><span>Paid permission used</span><strong><t t-esc="latest ? latest.late_grace_days : &apos;—&apos;"/> / 2</strong></div>
+                <div><span>Days deducted</span><strong t-esc="latest ? latest.late_deducted_days : &apos;—&apos;"/></div>
               </div>
-              <div class="payroll_late_total"><span>Late punch deduction</span><strong t-esc="formatMoney(latest.late_deduction)"/></div>
-              <small t-if="latest.late_deduction_dates">Deducted dates: <t t-esc="latest.late_deduction_dates"/></small>
+              <div class="payroll_late_total"><span>Late punch deduction</span><strong t-esc="latest ? formatMoney(latest.late_deduction) : &apos;—&apos;"/></div>
+              <small t-if="latest &amp;&amp; latest.late_deduction_dates">Deducted dates: <t t-esc="latest.late_deduction_dates"/></small>
             </section>
-            <div class="payroll_table_scroller" tabindex="0" aria-label="Scrollable payroll history"><table><thead><tr><th>#</th><th>Month</th><th>Year</th><th>Net Salary (<t t-esc="state.isAdmin ? state.currencyCode : '₹'"/>)</th><th t-if="state.isAdmin">Late Days</th><th t-if="state.isAdmin">Late Deduction (<t t-esc="state.currencyCode"/>)</th><th>P.F (<t t-esc="state.isAdmin ? state.currencyCode : '₹'"/>)</th><th>T.D.S (<t t-esc="state.isAdmin ? state.currencyCode : '₹'"/>)</th></tr></thead><tbody>
-              <t t-foreach="visibleRows" t-as="row" t-key="row.id"><tr t-att-class="latest &amp;&amp; row.id === latest.id ? 'payroll_latest_row' : ''"><td><span class="payroll_row_number" t-esc="row_index + 1"/></td><td class="payroll_month" t-esc="rowMonth(row)"/><td t-esc="rowYear(row)"/><td class="payroll_net" t-esc="formatMoney(row.net)"/><td t-if="state.isAdmin" t-esc="row.late_days"/><td t-if="state.isAdmin" t-esc="formatMoney(row.late_deduction)"/><td t-esc="formatMoney(row.pf)"/><td t-esc="formatMoney(row.tds)"/></tr></t>
-              <tr t-if="!visibleRows.length"><td t-att-colspan="state.isAdmin ? 8 : 6" class="payroll_empty">No approved payslips match these filters.</td></tr>
+            <div class="payroll_table_scroller" tabindex="0" aria-label="Scrollable payroll history"><table><thead><tr><th>#</th><th>Month</th><th>Year</th><th>Net Salary (<t t-esc="state.currencyCode"/>)</th><th>Late Days</th><th>Late Deduction (<t t-esc="state.currencyCode"/>)</th><th>P.F (<t t-esc="state.currencyCode"/>)</th><th>T.D.S (<t t-esc="state.currencyCode"/>)</th></tr></thead><tbody>
+              <t t-foreach="visibleRows" t-as="row" t-key="row.id"><tr t-att-class="latest &amp;&amp; row.id === latest.id ? 'payroll_latest_row' : ''"><td><span class="payroll_row_number" t-esc="row_index + 1"/></td><td class="payroll_month" t-esc="rowMonth(row)"/><td t-esc="rowYear(row)"/><td class="payroll_net" t-esc="formatMoney(row.net)"/><td t-esc="row.late_days"/><td t-esc="formatMoney(row.late_deduction)"/><td t-esc="formatMoney(row.pf)"/><td t-esc="formatMoney(row.tds)"/></tr></t>
+              <tr t-if="!visibleRows.length"><td colspan="8" class="payroll_empty">No approved payslips match these filters.</td></tr>
             </tbody></table></div>
-            <section t-if="state.isAdmin &amp;&amp; latest" class="payroll_entry_panel" aria-label="Staff punch entries">
+            <section t-if="latest" class="payroll_entry_panel" aria-label="Staff punch entries">
               <h3>Punch entries · <t t-esc="latestLabel"/></h3>
-              <p>Recorded check-in and checkout for <t t-esc="state.employeeName"/>. The first two late working days are paid permissions.</p>
+              <p>Recorded check-in and checkout for <t t-esc="state.employeeName"/>. Times come from attendance; payroll treatment comes from the approved payslip.</p>
               <div t-if="state.entryError" class="payroll_message payroll_error" role="alert" t-esc="state.entryError"/>
               <div class="payroll_entry_scroller" tabindex="0"><table><thead><tr><th>Date</th><th>Check-in</th><th>Checkout</th><th>Payroll treatment</th></tr></thead><tbody>
-                <t t-foreach="state.entries" t-as="entry" t-key="entry.id"><tr><td t-esc="entry.date"/><td t-esc="entry.check_in"/><td t-esc="entry.check_out"/><td><span class="payroll_entry_status" t-att-class="entry.treatment === 'Deduction due' ? 'payroll_entry_deducted' : entry.treatment === 'Paid permission' ? 'payroll_entry_paid' : ''" t-esc="entry.treatment"/></td></tr></t>
+                <t t-foreach="state.entries" t-as="entry" t-key="entry.id"><tr><td t-esc="entry.date"/><td t-esc="entry.check_in"/><td t-esc="entry.check_out"/><td><span class="payroll_entry_status" t-att-class="entry.treatment === '1 day deducted' ? 'payroll_entry_deducted' : entry.treatment === 'Paid permission' ? 'payroll_entry_paid' : ''" t-esc="entry.treatment"/></td></tr></t>
                 <tr t-if="!state.entries.length &amp;&amp; !state.entryError"><td colspan="4" class="payroll_empty">No punch entries recorded for this payroll period.</td></tr>
               </tbody></table></div>
             </section>

@@ -43,24 +43,35 @@ class Payslip(models.Model):
                           "late_days", "late_grace_days", "late_deducted_days", "late_deduction",
                           "late_punch_dates", "late_deduction_dates"}
 
-    def _admin_history_employees(self):
+    def _history_employees(self):
+        if not self.env.user.has_group("base.group_user"):
+            raise AccessError(_("Sign in with a staff account to view payroll history."))
+        domain = [("company_id", "in", [False, self.env.company.id])]
         if not self.env.user.has_group("ideastone_erp.group_manager"):
-            raise AccessError(_("Campus admin permission is required to review staff payroll."))
-        return self.env["hr.employee"].sudo().search(
-            [("company_id", "in", [False, self.env.company.id])], order="name, id")
+            domain.append(("user_id", "=", self.env.uid))
+        return self.env["hr.employee"].sudo().search(domain, order="name, id")
+
+    def _history_employee_id(self, value):
+        if value is None or value is False or value == "":
+            return 0
+        if isinstance(value, bool) or not isinstance(value, (int, str)) or not str(value).isdigit() or int(value) <= 0:
+            raise ValidationError(_("Choose a valid staff member."))
+        return int(value)
 
     @api.model
     def get_history_data(self, employee_id=None):
-        """Return payroll details only to the campus admin for this company."""
-        employees = self._admin_history_employees()
-        selected = employees.filtered(lambda employee: employee.id == int(employee_id or 0))[:1]
+        """Use the same approved records for admin review and staff self-service."""
+        employees = self._history_employees()
+        selected_id = self._history_employee_id(employee_id)
+        selected = employees.filtered(lambda employee: employee.id == selected_id)[:1]
         if employee_id and not selected:
             raise AccessError(_("This staff member is outside your permitted payroll scope."))
         if not selected:
-            latest = self.search([("employee_id", "in", employees.ids),
+            latest = self.search([("employee_id", "in", employees.ids), ("company_id", "=", self.env.company.id),
                                   ("state", "in", ["approved", "done"])], order="date_from desc, id desc", limit=1)
             selected = latest.employee_id or employees[:1]
-        slips = self.search([("employee_id", "=", selected.id), ("state", "in", ["approved", "done"])],
+        slips = self.search([("employee_id", "=", selected.id), ("company_id", "=", self.env.company.id),
+                             ("state", "in", ["approved", "done"])],
                             order="date_from desc, id desc") if selected else self.browse()
         columns = ["name", "date_from", "date_to", "net", "pf", "tds", "state", "late_days",
                    "late_grace_days", "late_deducted_days", "late_deduction", "late_punch_dates",
@@ -69,40 +80,48 @@ class Payslip(models.Model):
         return {"employee_id": selected.id or False,
                 "employee_name": selected.name or "", "staff": [
                     {"id": employee.id, "name": employee.name} for employee in employees
+                    if self.env.user.has_group("ideastone_erp.group_manager")
                 ], "records": slips.read(columns),
                 "currency_symbol": currency.symbol, "currency_code": currency.name,
                 "currency_position": currency.position}
 
     @api.model
     def get_punch_entries(self, employee_id, date_from, date_to):
-        """Show a selected employee's check-in/out only to the campus admin."""
-        employees = self._admin_history_employees()
-        employee = employees.filtered(lambda record: record.id == int(employee_id or 0))[:1]
+        """Show own punches, or an admin's selected staff member, for approved payroll."""
+        employees = self._history_employees()
+        selected_id = self._history_employee_id(employee_id)
+        employee = employees.filtered(lambda record: record.id == selected_id)[:1]
         if not employee:
             raise AccessError(_("This staff member is outside your permitted payroll scope."))
-        start_day = fields.Date.to_date(date_from)
-        end_day = fields.Date.to_date(date_to)
+        try:
+            start_day = fields.Date.to_date(date_from)
+            end_day = fields.Date.to_date(date_to)
+        except (TypeError, ValueError) as exc:
+            raise ValidationError(_("Choose a valid payroll month.")) from exc
         if not start_day or not end_day or end_day < start_day or start_day.year != end_day.year or start_day.month != end_day.month:
             raise ValidationError(_("Choose a valid payroll month."))
+        slip = self.search([("employee_id", "=", employee.id), ("company_id", "=", self.env.company.id), ("date_from", "=", start_day),
+                            ("date_to", "=", end_day), ("state", "in", ["approved", "done"])], limit=1)
+        if not slip:
+            raise AccessError(_("Punch history is available for approved payroll periods only."))
         timezone = pytz.timezone(employee.resource_calendar_id.tz or "UTC")
         start = local_bounds(start_day, timezone)[0]
         end = local_bounds(end_day + timedelta(days=1), timezone)[0]
         attendance = self.env["hr.attendance"].sudo().search([
             ("employee_id", "=", employee.id), ("check_in", ">=", start), ("check_in", "<", end),
         ], order="check_in asc")
-        monthly_late = late_punch_dates(self.sudo().env, employee, start_day.replace(day=1))
-        paid_late = set(monthly_late[:MONTHLY_GRACE_DAYS])
-        late_days = set(monthly_late)
+        late_days = set((slip.late_punch_dates or "").split(", "))
+        deducted = set((slip.late_deduction_dates or "").split(", "))
         result = []
         for entry in attendance:
             check_in = pytz.UTC.localize(fields.Datetime.to_datetime(entry.check_in)).astimezone(timezone)
             check_out = (pytz.UTC.localize(fields.Datetime.to_datetime(entry.check_out)).astimezone(timezone)
                          if entry.check_out else None)
-            day = check_in.date()
-            result.append({"id": entry.id, "date": day.isoformat(), "check_in": check_in.strftime("%H:%M"),
+            day = check_in.date().isoformat()
+            result.append({"id": entry.id, "date": day, "check_in": check_in.strftime("%H:%M"),
                            "check_out": check_out.strftime("%H:%M") if check_out else "Open",
-                           "treatment": "Paid permission" if day in paid_late else
-                           "Deduction due" if day in late_days else "On time"})
+                           "treatment": "1 day deducted" if day in deducted else
+                           "Paid permission" if day in late_days else "No late deduction"})
         return result
 
     @api.constrains("date_from", "date_to", "working_days", "paid_leave_days", "advance_deduction")

@@ -409,7 +409,13 @@ class TestVcetWorkspace(TransactionCase):
         self.assertEqual([row["id"] for row in admin_history["records"]], slip.ids)
         self.assertEqual(admin_history["currency_code"], self.env.company.currency_id.name)
         staff_admin = new_test_user(self.env, login="qa_staff_admin_history", groups="ideastone_erp.group_people")
-        for user in (staff_admin, self.teacher):
+        own_history = self.env["campus.payslip"].with_user(self.teacher).get_history_data()
+        self.assertEqual(own_history["records"], admin_history["records"])
+        self.assertEqual(own_history["currency_code"], admin_history["currency_code"])
+        self.assertEqual(own_history["staff"], [])
+        self.assertEqual(self.env["campus.payslip"].with_user(self.teacher).get_punch_entries(
+            employee.id, "2035-01-01", "2035-01-31"), [])
+        for user in (staff_admin, self.other_teacher):
             with self.assertRaises(AccessError):
                 self.env["campus.payslip"].with_user(user).get_history_data(employee.id)
             with self.assertRaises(AccessError):
