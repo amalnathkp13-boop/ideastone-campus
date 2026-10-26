@@ -8,6 +8,8 @@ from odoo.exceptions import AccessError, ValidationError
 
 
 LEVELS = [('balanced', 'Balanced'), ('moderate', 'Moderate'), ('advanced', 'Advanced')]
+STUDY_YEARS = [('1', '1st Year'), ('2', '2nd Year'), ('3', '3rd Year'), ('4', '4th Year')]
+SEMESTERS = [(roman, roman) for roman in ('I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII')]
 STATES = [('draft', 'Draft'), ('submitted', 'Awaiting HOD'), ('returned', 'Revision required'),
           ('approved', 'Approved'), ('forwarded', 'Forwarded to COE')]
 
@@ -48,6 +50,8 @@ class QuestionPaper(models.Model):
     exam_type = fields.Char(required=True)
     exam_date = fields.Date(required=True)
     paper_code = fields.Char(required=True)
+    study_year = fields.Selection(STUDY_YEARS, string='Year of study')
+    semester = fields.Selection(SEMESTERS)
     duration = fields.Selection([('3 hours', '3 hours'), ('2 hours', '2 hours'), ('90 minutes', '90 minutes'), ('1 hour', '1 hour')], default='3 hours', required=True)
     notes = fields.Text()
     state = fields.Selection(STATES, default='draft', required=True, index=True)
@@ -60,6 +64,16 @@ class QuestionPaper(models.Model):
     history = fields.Json(default=list)
     approved_at = fields.Datetime()
     forwarded_at = fields.Datetime()
+
+    @api.constrains('study_year', 'semester')
+    def _check_year_semester(self):
+        for paper in self:
+            # Older submissions keep their missing metadata until the author edits them.
+            if not paper.study_year and not paper.semester:
+                continue
+            if (not paper.study_year or not paper.semester or paper.semester not in
+                    [key for key, label in SEMESTERS][2 * (int(paper.study_year) - 1):2 * int(paper.study_year)]):
+                raise ValidationError(_('Choose a semester belonging to the selected year of study.'))
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -111,7 +125,7 @@ class QuestionPaper(models.Model):
     @api.model
     def save_submission(self, values, files=None, record_id=None, submit=False, levels=None):
         faculty = self._faculty()
-        allowed = {'subject_id', 'department_id', 'exam_type', 'exam_date', 'paper_code', 'duration', 'notes'}
+        allowed = {'subject_id', 'department_id', 'exam_type', 'exam_date', 'paper_code', 'duration', 'notes', 'study_year', 'semester'}
         if not isinstance(values, dict) or set(values) - allowed or not isinstance(submit, bool):
             raise ValidationError(_('Use the question-paper form fields.'))
         if any(isinstance(values.get(key), bool) or not isinstance(values.get(key), int) for key in ('subject_id', 'department_id')):
@@ -120,6 +134,9 @@ class QuestionPaper(models.Model):
         if len(subject) != 1 or values.get('department_id') != subject.department_id.id:
             raise AccessError(_('Choose a subject and department assigned to your faculty account.'))
         vals = dict(values)
+        if any(not isinstance(vals.get(key), str) or vals[key] not in dict(self._fields[key].selection)
+               for key in ('study_year', 'semester')):
+            raise ValidationError(_('Select the year of study and semester before saving.'))
         try:
             due = fields.Date.to_date(vals.get('exam_date'))
         except (TypeError, ValueError) as exc:
@@ -262,7 +279,8 @@ class QuestionPaper(models.Model):
             rows.append({'id': rec.id, 'subject_id': rec.subject_id.id, 'subject': rec.subject_id.name,
                 'department_id': rec.department_id.id, 'department': rec.department_id.name, 'department_code': rec.department_id.code,
                 'staff': rec.faculty_id.name, 'exam_type': rec.exam_type, 'exam_date': str(rec.exam_date),
-                'paper_code': rec.paper_code, 'duration': rec.duration, 'notes': rec.notes or '', 'revision': rec.revision,
+                'paper_code': rec.paper_code, 'study_year': rec.study_year or '', 'semester': rec.semester or '',
+                'duration': rec.duration, 'notes': rec.notes or '', 'revision': rec.revision,
                 'state': rec.state, 'status': dict(STATES)[rec.state], 'updated': fields.Datetime.to_string(rec.write_date),
                 'review_note': rec.review_note or '', 'history': rec.history or [], 'selected_set_id': rec.selected_set_id.id,
                 'sets': [{'id': s.id, 'level': s.level, 'label': dict(LEVELS)[s.level], 'filename': s.filename, 'pages': s.page_count} for s in sets]})

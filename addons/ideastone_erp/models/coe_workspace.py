@@ -47,15 +47,16 @@ class COEExam(models.Model):
     coe_evaluation_due = fields.Date(string='Evaluation deadline')
     coe_paper_id = fields.Many2one('campus.question.paper', string='Official question paper', ondelete='restrict')
 
-    @api.constrains('coe_expected', 'coe_present', 'coe_paper_id', 'company_id', 'subject_id')
+    @api.constrains('coe_expected', 'coe_present', 'coe_paper_id', 'company_id', 'subject_id', 'coe_study_year')
     def _check_coe_operations(self):
         for exam in self:
             if not 0 <= exam.coe_present <= exam.coe_expected:
                 raise ValidationError(_('Present candidates must be between zero and the expected count.'))
             paper = exam.coe_paper_id
             if paper and (paper.company_id != exam.company_id or paper.subject_id != exam.subject_id
-                          or paper.department_id != exam.course_id.department_id):
-                raise ValidationError(_('Link a question paper for this subject, department and college.'))
+                          or paper.department_id != exam.course_id.department_id
+                          or paper.study_year and paper.study_year != exam.coe_study_year):
+                raise ValidationError(_('Link a question paper for this subject, year, department and college.'))
 
 
 class COEPaper(models.Model):
@@ -150,13 +151,14 @@ class COEWorkspace(models.AbstractModel):
             linked = links.filtered(lambda e: e.coe_paper_id == paper)
             dated = candidates.filtered(lambda e: fields.Datetime.context_timestamp(self, e.start_time).date() == paper.exam_date)
             cohorts = set((linked or dated or candidates).mapped('coe_study_year')) - {False}
-            cohort = next(iter(cohorts)) if len(cohorts) == 1 else ''
+            cohort = paper.study_year or (next(iter(cohorts)) if len(cohorts) == 1 else '')
             if study and (cohort or 'unassigned') != study:
                 continue
             status = 'Dispatched' if paper.coe_dispatched_at else 'Received by COE' if paper.coe_received_at else dict(paper._fields['state'].selection)[paper.state]
             item = {'state': paper.state, 'status': status, 'hod': paper.hod_id.name,
                     'updated': fields.Datetime.to_string(paper.write_date), 'exam_date': str(paper.exam_date),
-                    'department_id': paper.department_id.id, 'subject_id': paper.subject_id.id, 'study_year': cohort}
+                    'department_id': paper.department_id.id, 'subject_id': paper.subject_id.id, 'study_year': cohort,
+                    'semester': paper.semester or ''}
             update_rows[paper.id] = item
             key = (paper.department_id.id, cohort, paper.subject_id.id)
             progress.setdefault(key, {'department_id': key[0], 'study_year': cohort, 'subject_id': key[2],

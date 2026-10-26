@@ -6,6 +6,8 @@ import { FacultyQuestionPapers } from "./faculty_question_papers";
 
 const examViews = ["records", "upcoming", "recent", "past", "timetable", "halls", "invigilation", "attendance", "evaluation", "results", "attention"];
 const paperViews = ["papers", "received", "dispatch"];
+// Keep scope while navigating; a document reload starts at all departments/years.
+const filterScopes = new Map();
 export class COEWorkspace extends Component {
     static template = "ideastone_erp.COEWorkspace";
     static props = ["*"];
@@ -16,14 +18,10 @@ export class COEWorkspace extends Component {
         this.view = this.props.action?.params?.view || "overview";
         const hash = this.router.current.hash;
         this.filtersKey = "campus-coe-filters:"+String(hash.cids || "default");
-        let saved={};
-        try {saved=JSON.parse(sessionStorage.getItem(this.filtersKey) || "{}");} catch { /* Ignore an expired filter preference. */ }
-        const restored=this.props.action?.context?.coe_filters;
+        const saved=filterScopes.get(this.filtersKey) || {};
         this.requestId=0;
         this.state = useState({data:null, loading:false, busy:false, error:"", search:"", subject:"", modal:null, form:{},
-            year:String(restored?.year ?? hash.coe_year ?? saved.year ?? ""),
-            department:String(restored?.department ?? hash.coe_department ?? saved.department ?? ""),
-            study:String(restored?.study ?? hash.coe_study ?? saved.study ?? "")});
+            year:String(saved.year ?? ""), department:String(saved.department ?? ""), study:String(saved.study ?? "")});
         onWillStart(() => this.load());
         onMounted(() => document.body.classList.add("campus_question_paper_shell"));
         onWillUnmount(() => {this.requestId++;document.body.classList.remove("campus_question_paper_shell");});
@@ -45,7 +43,7 @@ export class COEWorkspace extends Component {
     }
     persistFilters() {
         const scope={year:this.state.year,department:this.state.department,study:this.state.study};
-        sessionStorage.setItem(this.filtersKey,JSON.stringify(scope));
+        filterScopes.set(this.filtersKey,scope);
         this.router.pushState({coe_year:scope.year,coe_department:scope.department,coe_study:scope.study});
         return scope;
     }
@@ -72,6 +70,7 @@ export class COEWorkspace extends Component {
     }
     selectSubject(id="") {this.state.subject=String(id);this.state.search="";this.pageRef.el?.scrollTo({top:0});}
     date(value, time=false) {return FacultyQuestionPapers.prototype.date.call(this,value,time);}
+    cohort(row) {return FacultyQuestionPapers.prototype.cohort.call(this,row);}
     get heading() {return this.state.data?.title || "COE workspace";}
     get isPaperView() {return paperViews.includes(this.view);}
     get isExamView() {return examViews.includes(this.view);}
@@ -108,9 +107,9 @@ export class COEWorkspace extends Component {
         let columns=[], rows=[];
         const cols=(...items)=>items.map(([key,label])=>({key,label}));
         if(this.isPaperView) {
-            columns=cols(["code","Paper / subject"],["staff","Author"],["department","Department / year"],["exam_date","Exam date"],["version","Official set"],["hod","Approved by"],["status","COE status"]);
+            columns=cols(["code","Paper / subject"],["staff","Author"],["department","Department / year / semester"],["exam_date","Exam date"],["version","Official set"],["hod","Approved by"],["status","COE status"]);
             rows=this.papers.filter(r=>this.view !== "received" || r.received_at).filter(r=>this.view !== "dispatch" || r.dispatched_at)
-                .map(r=>({...r,kind:"paper",raw:r,code:r.paper_code+" · "+r.subject,department:r.department+" · "+(r.study_year?"Year "+r.study_year:"Needs year assignment"),
+                .map(r=>({...r,kind:"paper",raw:r,code:r.paper_code+" · "+r.subject,department:r.department+" · "+this.cohort(r),
                     exam_date:this.date(r.exam_date),version:r.sets[0]?.label || "—",
                     status:r.dispatched_at?"Dispatched":r.received_at?"Received":r.state === "approved"?"Awaiting HOD transfer":"Receipt pending"}));
         } else if(this.isExamView || this.isReportView) {
@@ -149,7 +148,7 @@ export class COEWorkspace extends Component {
             const ids=new Set(records.map(r=>r.subject_id));
             entries=entries.filter(s=>ids.has(s.subject_id));
         }
-        return entries.map(s=>{const statuses=[...new Set(s.updates.map(u=>u.status))];
+        return entries.map(s=>{const statuses=[...new Set(s.updates.map(u=>(u.semester?"Semester "+u.semester+" · ":"")+u.status))];
             const latest=[...s.updates].sort((a,b)=>b.updated.localeCompare(a.updated))[0],route=this.state.data.routes.find(r=>r.id===s.department_id);
             return {...s,id:s.department_id+":"+(s.study_year||"unassigned")+":"+s.subject_id,
                 latest,hod:latest?.hod || route?.hod || "Not configured",
@@ -219,7 +218,7 @@ export class COEWorkspace extends Component {
         finally {this.state.busy=false;}
     }
     download(item) {return FacultyQuestionPapers.prototype.download.call({...this,notice:(message,type)=>this.notification.add(message,{type})},item);}
-    get dispatchExams() {const p=this.state.modal?.raw;return this.exams.filter(e=>e.subject_id===p?.subject_id && e.department_id===p?.department_id && e.period === "upcoming" && new Date(e.start.replace(" ","T")+"Z").toLocaleDateString("en-CA",{timeZone:"Asia/Kolkata"})===p.exam_date);}
+    get dispatchExams() {const p=this.state.modal?.raw;return this.exams.filter(e=>e.subject_id===p?.subject_id && e.department_id===p?.department_id && (!p.study_year || e.study_year===p.study_year) && e.period === "upcoming" && new Date(e.start.replace(" ","T")+"Z").toLocaleDateString("en-CA",{timeZone:"Asia/Kolkata"})===p.exam_date);}
     async marks() {await this.action.doAction(await this.orm.call("campus.coe.workspace","exam_action",[this.state.modal.id]));}
     async newExam() {await this.action.doAction(await this.orm.call("campus.coe.workspace","exam_action",[]));}
     exportCSV() {

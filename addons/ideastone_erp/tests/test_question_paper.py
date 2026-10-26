@@ -27,7 +27,8 @@ class TestQuestionPapers(TransactionCase):
                 'main_department_id': cls.dept.id, 'faculty_subject_ids': [(6, 0, cls.subject.ids)]})
         cls.env['campus.question.paper.routing'].create({'department_id': cls.dept.id, 'hod_id': cls.hod.id, 'coe_id': cls.coe.id})
         cls.values = {'subject_id': cls.subject.id, 'department_id': cls.dept.id, 'exam_type': 'CAT II',
-            'exam_date': str(fields.Date.today() + timedelta(days=10)), 'paper_code': 'QPQA', 'duration': '3 hours', 'notes': 'QA'}
+            'exam_date': str(fields.Date.today() + timedelta(days=10)), 'paper_code': 'QPQA', 'duration': '3 hours', 'notes': 'QA',
+            'study_year': '3', 'semester': 'V'}
         writer = PdfFileWriter()
         writer.addBlankPage(width=595, height=842)
         out = io.BytesIO()
@@ -114,7 +115,7 @@ class TestQuestionPapers(TransactionCase):
         updates = api.get_workspace('papers', scope)['subject_progress'][0]['updates']
         self.assertEqual(updates[0]['state'], 'returned')
         self.assertNotIn('Confidential HOD revision detail', str(updates))
-        self.assertEqual(set(updates[0]), {'state', 'status', 'hod', 'updated', 'exam_date', 'department_id', 'subject_id', 'study_year'})
+        self.assertEqual(set(updates[0]), {'state', 'status', 'hod', 'updated', 'exam_date', 'department_id', 'subject_id', 'study_year', 'semester'})
         self.api.save_submission(self.values, [self.file], record_id, True)
         row = self.api.get_workspace()['rows'][0]
         reviewer.decide(record_id, 'approve', row['sets'][0]['id'])
@@ -132,7 +133,8 @@ class TestQuestionPapers(TransactionCase):
         exam = self.coe_exam()
         exam.copy({'exam_code': 'COEQA-SECOND', 'coe_study_year': '4',
                    'start_time': exam.start_time + timedelta(hours=4), 'end_time': exam.end_time + timedelta(hours=4)})
-        self.submit()
+        record_id = self.submit()
+        self.env['campus.question.paper'].browse(record_id).sudo().write({'study_year': False, 'semester': False})
         api = self.env['campus.coe.workspace'].with_user(self.coe)
         scope = {'year_id': exam.campus_year_id.id, 'department_id': self.dept.id}
         data = api.get_workspace('papers', scope)
@@ -144,6 +146,42 @@ class TestQuestionPapers(TransactionCase):
         self.assertEqual(data['exams'], [])
         self.assertEqual(len(data['subject_progress']), 1)
         self.assertEqual(len(data['subject_progress'][0]['updates']), 1)
+
+    def test_year_and_roman_semester_validation_and_handoff(self):
+        for year, semester in [('', ''), ('5', 'IX'), (True, 'I'), ([], 'I'), ('3', 'II'), ('4', 'V'), ('2', '')]:
+            with self.assertRaises(ValidationError), self.env.cr.savepoint():
+                self.api.save_submission(dict(self.values, study_year=year, semester=semester), [self.file], submit=True)
+        for year, semesters in [('1', ('I', 'II')), ('2', ('III', 'IV')), ('3', ('V', 'VI')), ('4', ('VII', 'VIII'))]:
+            for semester in semesters:
+                record_id = self.api.save_submission(dict(self.values, study_year=year, semester=semester), [self.file])
+                self.assertEqual(self.env['campus.question.paper'].browse(record_id).semester, semester)
+        record_id = self.submit()
+        reviewer = self.api.with_user(self.hod)
+        row = next(r for r in reviewer.get_workspace('hod')['rows'] if r['id'] == record_id)
+        self.assertEqual((row['study_year'], row['semester']), ('3', 'V'))
+        reviewer.decide(record_id, 'approve', row['sets'][0]['id'])
+        reviewer.decide(record_id, 'forward')
+        for api, role in [(self.api, 'faculty'), (reviewer, 'hod'), (self.api.with_user(self.coe), 'coe')]:
+            row = next(r for r in api.get_workspace(role)['rows'] if r['id'] == record_id)
+            self.assertEqual((row['study_year'], row['semester']), ('3', 'V'))
+        with self.assertRaises(AccessError):
+            self.api.save_submission(dict(self.values, study_year='4', semester='VIII'), [], record_id)
+
+    def test_explicit_paper_year_overrides_scheduled_subject_year(self):
+        exam = self.coe_exam()
+        record_id = self.api.save_submission(dict(self.values, study_year='4', semester='VIII'), [self.file], submit=True)
+        api = self.env['campus.coe.workspace'].with_user(self.coe)
+        scope = {'year_id': exam.campus_year_id.id, 'department_id': self.dept.id, 'study_year': '4'}
+        update = api.get_workspace('papers', scope)['subject_progress'][0]['updates'][0]
+        self.assertEqual((update['study_year'], update['semester']), ('4', 'VIII'))
+        self.assertFalse(api.get_workspace('papers', dict(scope, study_year='3'))['subject_progress'][0]['updates'])
+        reviewer = self.api.with_user(self.hod)
+        reviewer.decide(record_id, 'approve', self.env['campus.question.paper'].browse(record_id).set_ids.id)
+        reviewer.decide(record_id, 'forward')
+        api.paper_action(record_id, 'receive')
+        api.save_operations(exam.id, {'coe_hall': 'QA Hall', 'coe_invigilator': 'QA Invigilator'})
+        with self.assertRaises(ValidationError), self.env.cr.savepoint():
+            api.paper_action(record_id, 'dispatch', 'Wrong study year', exam.id)
 
     def test_coe_approved_selected_pdf_receipt_and_dispatch(self):
         exam = self.coe_exam()

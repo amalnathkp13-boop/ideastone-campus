@@ -3,7 +3,8 @@ import { Component, onWillStart, onMounted, onWillUnmount, useEffect, useRef, us
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
-const emptyForm = () => ({ department_id: "", subject_id: "", exam_type: "", exam_date: "", paper_code: "", duration: "3 hours", notes: "" });
+const emptyForm = () => ({ department_id: "", subject_id: "", study_year: "", semester: "", exam_type: "", exam_date: "", paper_code: "", duration: "3 hours", notes: "" });
+const semesters = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
 
 export class FacultyQuestionPapers extends Component {
     static template = "ideastone_erp.FacultyQuestionPapers";
@@ -38,6 +39,9 @@ export class FacultyQuestionPapers extends Component {
             && (!this.state.examType || r.exam_type === this.state.examType));
     }
     get subjects() { return (this.state.data?.subjects || []).filter(s => !this.state.form.department_id || s.department_id === Number(this.state.form.department_id)); }
+    get semesters() { const year=Number(this.state.form.study_year); return year ? semesters.slice((year-1)*2,year*2) : []; }
+    yearChanged() { if(!this.semesters.includes(this.state.form.semester)) this.state.form.semester=""; }
+    cohort(row) { return `${({1:"1st Year",2:"2nd Year",3:"3rd Year",4:"4th Year"})[row.study_year] || "Year not recorded"} · Semester ${row.semester || "not recorded"}`; }
     get events() { return (this.state.data?.rows || []).flatMap(r => r.history.map((e,index) => ({ ...e, subject: r.subject, key: `${r.id}-${index}`, order:index }))).sort((a,b) => b.at.localeCompare(a.at) || b.order-a.order).slice(0, 8); }
     get departmentCards() { return (this.state.data?.departments || []).map(d => { const rows=this.state.data.rows.filter(r => r.department_id===d.id); const reviewed=rows.filter(r => ["approved","forwarded"].includes(r.state)).length; return {...d,total:rows.length, reviewed, pending:rows.filter(r=>r.state==="submitted").length, percent:rows.length?Math.round(reviewed*100/rows.length):0}; }); }
     count(key) { const counts=this.state.data?.counts || {}; return String((counts[key] || 0) + (key === "approved" ? counts.forwarded || 0 : 0)).padStart(2,"0"); }
@@ -119,7 +123,7 @@ export class FacultyQuestionPapers extends Component {
     }
     exportCSV() {
         const quote=x=>'"'+String(x??"").replaceAll('"','""').replace(/^[=+@-]/,"'$&")+'"';
-        const csv=[["Subject","Staff","Department","Examination","Exam date","Status"],...this.rows.map(r=>[r.subject,r.staff,r.department,r.exam_type,r.exam_date,r.status])].map(r=>r.map(quote).join(",")).join("\r\n");
+        const csv=[["Subject","Staff","Department","Year / semester","Examination","Exam date","Status"],...this.rows.map(r=>[r.subject,r.staff,r.department,this.cohort(r),r.exam_type,r.exam_date,r.status])].map(r=>r.map(quote).join(",")).join("\r\n");
         const url=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"})); const a=document.createElement("a"); a.href=url;a.download="question-paper-status.csv";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
     }
 }

@@ -160,6 +160,7 @@ for di, code in enumerate(('CSE', 'ECE', 'EEE', 'MECH', 'CIVIL', 'IT')):
             paper = env['campus.question.paper'].search([('paper_code', '=', paper_code), ('faculty_id.user_id', '=', teacher.id)], limit=1)
             if not paper:
                 record_id = paper_api.save_submission({'department_id': department.id, 'subject_id': subject.id,
+                    'study_year': str(study), 'semester': ('I', 'III', 'V', 'VII')[study - 1],
                     'exam_type': 'Model Examination', 'exam_date': str(fields.Datetime.context_timestamp(api, exam.start_time).date()),
                     'paper_code': paper_code, 'duration': '3 hours', 'notes': 'SAMPLE ONLY. Units I-V; 100 marks; compare all three versions.'},
                     [pdf(subject, paper_code, level) for level in ('balanced', 'moderate', 'advanced')], submit=True)
