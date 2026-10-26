@@ -24,6 +24,7 @@ Ideastone Campus is a unified college ERP + LMS for Indian engineering and arts 
 | **Learning (LMS)** | Course content, SCORM, question banks, online tests, forums, e-portfolios — opens *inside* the ERP |
 | **Single sign-on** | One username/password for ERP and LMS (OpenID Connect); can federate the college's existing Active Directory |
 | **Campus home** | One launcher screen with a tile per module and live student/faculty/programme counts |
+| **AI Pack** (add-on) | **Student Success Radar**: an explainable early-warning score per student with the reason and a suggested action, plus guidance in the student and parent portals, no external service needed. **Campus Assistant**: plain-English questions over live college figures, notice drafting and feedback themes with any OpenAI-compatible provider, including an on-campus Ollama. See [docs/ai-pack.md](docs/ai-pack.md) |
 
 ### How the pieces fit
 
@@ -125,6 +126,11 @@ Then open http://localhost:8069 (`admin` / `admin`). OpenOlat and Keycloak are o
 * **LMS accounts**: *Create LMS account* button on student and faculty forms, bulk action on lists, nightly cron (`Create LMS accounts automatically`), sync status on a *Learning (LMS)* tab.
 * **Enrolment**: set the OpenOlat course key on a programme (Courses → *OpenOlat course key*) and every student of that programme is enrolled when provisioned.
 * Settings panel: Ideastone Campus → Settings (LMS URLs, API user/key, initial password policy).
+
+### `ideastone_ai` — the AI Pack (optional add-on)
+* **Student Success Radar**: early-warning score per student from attendance trend and projection, results, overdue fees and leave/OD, with the reason behind every point. Owner, HOD and mentor views; guidance cards in the student and parent portals. Runs entirely on the college's own data.
+* **Campus Assistant**: ask about the college in plain English, draft notices and circulars, summarise feedback into themes. Works with OpenAI, Groq or an on-campus Ollama server; off until configured; every call logged; only aggregates and the user's own text are sent.
+* Details, scoring rules and packaging advice: [docs/ai-pack.md](docs/ai-pack.md).
 
 Everything the client asks for goes into these modules or a new sibling module under `addons/`. **Never edit files under `vendor/`** — see [docs/architecture.md](docs/architecture.md) for how to extend OpenEduCat through inheritance instead.
 

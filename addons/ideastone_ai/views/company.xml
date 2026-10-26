@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="mvp_college_form_ai" model="ir.ui.view">
+    <field name="name">mvp.college.form.ai</field>
+    <field name="model">res.company</field>
+    <field name="inherit_id" ref="ideastone_erp.mvp_college_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//sheet/group" position="after">
+        <group string="AI assistant" groups="ideastone_erp.group_manager,ideastone_erp.group_mvp_owner">
+          <field name="campus_ai_enabled"/>
+          <field name="campus_ai_endpoint" placeholder="https://api.openai.com/v1 or http://ollama:11434/v1"/>
+          <field name="campus_ai_model" placeholder="gpt-4o-mini, llama3.1, ..."/>
+          <field name="campus_ai_api_key" password="True" groups="base.group_system,ideastone_erp.group_mvp_owner"/>
+          <field name="campus_ai_monthly_limit"/>
+          <div class="text-muted" colspan="2">The assistant sends only aggregate figures and the text typed by the administrator. Student, staff and guardian records never leave this server. Every call is recorded under AI insights &#8594; Assistant log.</div>
+        </group>
+      </xpath>
+    </field>
+  </record>
+</odoo>
