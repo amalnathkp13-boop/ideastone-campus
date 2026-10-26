@@ -1,7 +1,7 @@
 # OpenOlat LMS on Tomcat 10.1 / Java 17 (per docs.openolat.org install guide).
 # The WAR is downloaded at build time from the official release directory.
 ARG OPENOLAT_VERSION=2103
-FROM tomcat:10.1-jre17-temurin
+FROM tomcat:11.0-jre17-temurin
 
 ARG OPENOLAT_VERSION
 ENV CATALINA_BASE=/home/openolat \
