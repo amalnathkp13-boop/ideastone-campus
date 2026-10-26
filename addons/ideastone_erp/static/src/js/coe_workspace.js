@@ -33,6 +33,7 @@ export class COEWorkspace extends Component {
         const request=++this.requestId;
         const scope={year:this.state.year,department:this.state.department,study:this.state.study};
         this.state.loading = true; this.state.error = "";
+        this.persistFilters();
         try {
             const data = await this.orm.call("campus.coe.workspace", "get_workspace", [this.view,
                 {year_id:scope.year, department_id:scope.department, study_year:scope.study}]);
