@@ -1,8 +1,8 @@
 from datetime import timedelta
 
-from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, ValidationError
 
+from odoo import _, api, fields, models
 
 COE_MODULES = [
     ('coe-home', 'COE overview', 'home', [('overview', 'Overview'), ('attention', 'Action queue')]),
@@ -147,9 +147,9 @@ class COEWorkspace(models.AbstractModel):
                 'subject': exam.subject_id.name, 'code': exam.subject_id.code or '', 'exam_ids': [], 'updates': []})['exam_ids'].append(exam.id)
         update_rows = {}
         for paper in updates:
-            candidates = all_exams.filtered(lambda e: e.subject_id == paper.subject_id and e.course_id.department_id == paper.department_id)
-            linked = links.filtered(lambda e: e.coe_paper_id == paper)
-            dated = candidates.filtered(lambda e: fields.Datetime.context_timestamp(self, e.start_time).date() == paper.exam_date)
+            candidates = all_exams.filtered(lambda e, paper=paper: e.subject_id == paper.subject_id and e.course_id.department_id == paper.department_id)
+            linked = links.filtered(lambda e, paper=paper: e.coe_paper_id == paper)
+            dated = candidates.filtered(lambda e, paper=paper: fields.Datetime.context_timestamp(self, e.start_time).date() == paper.exam_date)
             cohorts = set((linked or dated or candidates).mapped('coe_study_year')) - {False}
             cohort = paper.study_year or (next(iter(cohorts)) if len(cohorts) == 1 else '')
             if study and (cohort or 'unassigned') != study:
@@ -182,7 +182,7 @@ class COEWorkspace(models.AbstractModel):
         paper_records = self.env['campus.question.paper'].browse([r['id'] for r in papers])
         for row in papers:
             rec = paper_records.browse(row['id'])
-            linked = links.filtered(lambda e: e.coe_paper_id == rec)[:1]
+            linked = links.filtered(lambda e, rec=rec: e.coe_paper_id == rec)[:1]
             cohort = update_rows.get(rec.id, {}).get('study_year', '')
             row.update(received_at=fields.Datetime.to_string(rec.coe_received_at) if rec.coe_received_at else '',
                        dispatched_at=fields.Datetime.to_string(rec.coe_dispatched_at) if rec.coe_dispatched_at else '',
@@ -220,8 +220,8 @@ class COEWorkspace(models.AbstractModel):
             'years': [{'id': y.id, 'name': y.name, 'start': str(y.start_date), 'end': str(y.end_date)} for y in years],
             'departments': [{'id': d.id, 'name': d.name, 'code': d.code or ''} for d in departments], 'exams': rows, 'papers': papers,
             'cases': case_rows, 'summaries': summaries, 'subject_progress': list(progress.values()),
-            'routes': [{'id': d.id, 'department': d.name, 'hod': routes.filtered(lambda r: r.department_id == d)[:1].hod_id.name or 'Not configured',
-                        'coe': routes.filtered(lambda r: r.department_id == d)[:1].coe_id.name or 'Not configured'}
+            'routes': [{'id': d.id, 'department': d.name, 'hod': routes.filtered(lambda r, d=d: r.department_id == d)[:1].hod_id.name or 'Not configured',
+                        'coe': routes.filtered(lambda r, d=d: r.department_id == d)[:1].coe_id.name or 'Not configured'}
                        for d in departments if not department_id or d.id == department_id],
             'audit': [{'id': a.id, 'action': a.name, 'actor': a.actor_id.name, 'at': fields.Datetime.to_string(a.create_date),
                        'reason': a.reason or '', **audit_scope.get((a.model_name, a.record_id), {})} for a in audit],
