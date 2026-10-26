@@ -48,23 +48,22 @@ class HodODUI(models.AbstractModel):
     def get_page_data(self, class_key=None):
         routes = self._routes()
         today = fields.Date.context_today(self)
-        term = self.env["op.academic.term"].sudo().search([
-            ("company_id", "=", self.env.company.id),
-            ("term_start_date", "<=", today), ("term_end_date", ">=", today),
-        ], order="term_start_date desc, id desc", limit=1)
+        # A college runs several semesters at once (I, III, V, VII ...): use the semesters the
+        # HOD's students are currently enrolled in, not one college-wide "current" term.
+        placements = routes.student_id.course_detail_ids.filtered(
+            lambda item: item.company_id == self.env.company and item.state == "running"
+            and item.academic_term_id and item.course_id.department_id == self.env.user.dept_id)
+        terms = placements.academic_term_id
         classes = {}
-        for route in routes:
-            for placement in route.student_id.course_detail_ids.filtered(
-                    lambda item: item.company_id == self.env.company and item.state == "running"
-                    and (not term or item.academic_term_id == term)):
-                key = f"{placement.batch_id.id}:{placement.academic_term_id.id}"
-                classes[key] = placement.batch_id.name or _("Unassigned class")
+        for placement in placements:
+            key = f"{placement.batch_id.id}:{placement.academic_term_id.id}"
+            classes[key] = placement.batch_id.name or _("Unassigned class")
         if class_key and class_key not in classes:
             raise AccessError(_("This class is not assigned to your HOD account."))
         records = self.env["campus.student.od"].sudo().search([
             ("hod_id", "=", self.env.uid), ("routing_id", "in", routes.ids),
-            ("company_id", "=", self.env.company.id),
-        ] + ([("term_id", "=", term.id)] if term else []), order="create_date desc, id desc", limit=1000)
+            ("company_id", "=", self.env.company.id), ("term_id", "in", terms.ids),
+        ], order="create_date desc, id desc", limit=1000)
         if class_key:
             batch_id, term_id = (int(value) for value in class_key.split(":"))
             records = records.filtered(lambda rec: rec.enrolment_id.batch_id.id == batch_id and rec.term_id.id == term_id)
@@ -101,7 +100,7 @@ class HodODUI(models.AbstractModel):
                           for index, start in enumerate(week_start - timedelta(days=offset * 7) for offset in (3, 2, 1, 0))]
         return {
             "role": "hod", "hod_name": self.env.user.name, "company_name": self.env.company.name,
-            "semester": term.name or _("Current semester"), "class_key": class_key or "",
+            "semester": terms.name if len(terms) == 1 else _("Current semesters"), "class_key": class_key or "",
             "classes": [{"key": key, "label": name} for key, name in sorted(classes.items(), key=lambda item: item[1])],
             "rows": rows, "approved_rows": [row for row in rows if row["state"] == "completed"],
             "withheld_rows": [row for row in rows if row["state"] in {"withheld", "proof_review"}],

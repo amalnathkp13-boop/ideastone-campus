@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <template id="student_dashboard_success" inherit_id="ideastone_erp.student_dashboard" name="Student Success guidance">
+    <xpath expr="//div[hasclass('student_dashboard')]/section[hasclass('student_welcome')]" position="after">
+      <t t-call="ideastone_ai.success_nudge"/>
+    </xpath>
+  </template>
+
+  <template id="success_nudge" name="Student Success nudge card">
+    <t t-set="success" t-value="d.get('success')"/>
+    <section t-if="success" t-attf-class="success_nudge success_#{success['band']}" aria-label="Student success guidance">
+      <div class="success_nudge_head">
+        <span class="success_nudge_icon"><i class="fa fa-heartbeat" aria-hidden="true"/></span>
+        <div>
+          <t t-set="for_parent" t-value="bool(d.get('parent_name'))"/>
+          <strong t-if="success['band'] == 'low'"><t t-if="for_parent"><t t-esc="success['name']"/> is on track</t><t t-else="">You are on track</t></strong>
+          <strong t-elif="success['band'] == 'watch'">Worth a closer look this week</strong>
+          <strong t-else="">Needs attention now</strong>
+          <p class="success_nudge_message" t-esc="success['parent_message'] if for_parent else success['message']"/>
+        </div>
+      </div>
+      <ul t-if="success['factors']" class="success_nudge_factors">
+        <li t-foreach="success['factors']" t-as="factor"><strong t-esc="factor['label']"/>: <t t-esc="factor['detail']"/></li>
+      </ul>
+      <p t-if="success['band'] != 'low'" class="success_nudge_action"><i class="fa fa-lightbulb-o" aria-hidden="true"/> <t t-esc="success['action']"/></p>
+    </section>
+  </template>
+</odoo>
