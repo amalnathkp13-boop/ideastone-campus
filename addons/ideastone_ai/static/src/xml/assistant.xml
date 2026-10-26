@@ -1,0 +1,97 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_ai.CampusAssistantPage">
+    <main class="campus_ai_page assistant_page">
+      <div t-if="state.error" class="ai_error" role="alert"><t t-esc="state.error"/> <button type="button" t-on-click="load">Retry</button></div>
+      <div t-if="state.loading" class="ai_loading" role="status">Loading…</div>
+      <t t-elif="state.status">
+        <section class="ai_heading">
+          <span class="ai_heading_icon"><i class="fa fa-magic" aria-hidden="true"/></span>
+          <div><h1>Campus Assistant</h1><p>Ask about the college in plain English, draft notices, and turn feedback into themes. Grounded in your live figures; nothing personal leaves the server.</p></div>
+          <span t-attf-class="ai_status #{state.status.configured ? 'on' : 'off'}">
+            <t t-if="state.status.configured">Connected · <t t-esc="state.status.model"/> · <t t-esc="state.status.used"/><t t-if="state.status.limit"> / <t t-esc="state.status.limit"/></t> calls in <t t-esc="state.status.month"/></t>
+            <t t-else="">Not configured</t>
+          </span>
+        </section>
+
+        <section t-if="!state.status.configured" class="ai_panel ai_setup">
+          <h2>Switch the assistant on</h2>
+          <p>The assistant works with any OpenAI-compatible provider. For colleges that keep data on campus, a free local server such as Ollama works too.</p>
+          <ol>
+            <li>Open <strong>College profile</strong> and fill the <strong>AI assistant</strong> section: endpoint, model and (if needed) API key.</li>
+            <li>Tick <strong>Enable the Campus Assistant</strong> and save.</li>
+            <li>Come back here and ask your first question.</li>
+          </ol>
+          <button t-if="state.status.can_configure" type="button" class="ai_button" t-on-click="openSettings">Open College profile</button>
+          <p t-else="" class="ai_note">Ask a college administrator to configure it.</p>
+        </section>
+
+        <nav class="ai_tabs" aria-label="Assistant features">
+          <button type="button" t-attf-class="ai_tab #{state.tab === 'ask' ? 'active' : ''}" t-on-click="() => this.selectTab('ask')"><i class="fa fa-comments-o" aria-hidden="true"/> Ask the campus</button>
+          <button type="button" t-attf-class="ai_tab #{state.tab === 'notice' ? 'active' : ''}" t-on-click="() => this.selectTab('notice')"><i class="fa fa-bullhorn" aria-hidden="true"/> Draft a notice</button>
+          <button type="button" t-attf-class="ai_tab #{state.tab === 'feedback' ? 'active' : ''}" t-on-click="() => this.selectTab('feedback')"><i class="fa fa-commenting-o" aria-hidden="true"/> Feedback themes</button>
+        </nav>
+
+        <section t-if="state.tab === 'ask'" class="ai_panel">
+          <form class="ai_ask" t-on-submit="ask">
+            <label for="ai_question">Your question</label>
+            <textarea id="ai_question" rows="3" maxlength="1000" placeholder="e.g. Which programme has the lowest attendance this month?" t-att-value="state.question" t-on-input="(ev) => this.state.question = ev.target.value" t-att-disabled="!state.status.configured || state.busy"/>
+            <div class="ai_ask_actions">
+              <button type="submit" class="ai_button" t-att-disabled="!state.status.configured || state.busy || !state.question.trim()"><t t-esc="state.busy ? 'Thinking…' : 'Ask'"/></button>
+              <div class="ai_suggestions"><button t-foreach="suggestions" t-as="text" t-key="text" type="button" class="ai_chip" t-on-click="() => this.useSuggestion(text)" t-esc="text"/></div>
+            </div>
+          </form>
+          <article t-foreach="state.answers" t-as="item" t-key="item_index" class="ai_answer">
+            <p class="ai_answer_q"><i class="fa fa-user" aria-hidden="true"/> <t t-esc="item.question"/></p>
+            <div class="ai_answer_a"><i class="fa fa-magic" aria-hidden="true"/> <pre t-esc="item.answer"/></div>
+            <small>Based on figures for <t t-esc="item.period.from"/> to <t t-esc="item.period.to"/>. Shared with the provider: <t t-esc="item.shared.join(', ')"/>.</small>
+          </article>
+        </section>
+
+        <section t-if="state.tab === 'notice'" class="ai_panel">
+          <form class="ai_ask" t-on-submit="draft">
+            <label for="ai_brief">What should the notice say?</label>
+            <textarea id="ai_brief" rows="4" maxlength="2000" placeholder="e.g. Internal assessment 2 for all third-year students from 10 to 14 November; hall tickets from the exam cell; 75% attendance required." t-att-value="state.brief" t-on-input="(ev) => this.state.brief = ev.target.value" t-att-disabled="!state.status.configured || state.busy"/>
+            <div class="ai_ask_options">
+              <label>Audience <select t-att-value="state.audience" t-on-change="(ev) => this.state.audience = ev.target.value"><option value="all">Everyone</option><option value="student">Students</option><option value="parent">Parents</option><option value="faculty">Staff</option></select></label>
+              <label>Tone <select t-att-value="state.tone" t-on-change="(ev) => this.state.tone = ev.target.value"><option value="formal">Formal</option><option value="friendly">Friendly</option><option value="urgent">Urgent</option></select></label>
+              <button type="submit" class="ai_button" t-att-disabled="!state.status.configured || state.busy || !state.brief.trim()"><t t-esc="state.busy ? 'Drafting…' : 'Draft notice'"/></button>
+            </div>
+          </form>
+          <article t-if="state.notice" class="ai_answer">
+            <h3 t-if="state.notice.title" t-esc="state.notice.title"/>
+            <div class="ai_notice_body" t-out="state.notice.body_html"/>
+            <div class="ai_ask_actions">
+              <button t-if="state.notice.create_action" type="button" class="ai_button" t-on-click="createCircular">Create circular from this draft</button>
+              <button type="button" class="ai_link" t-on-click="copyNotice">Copy text</button>
+            </div>
+            <small>Review before publishing: the draft is generated from your brief and may need dates or names corrected.</small>
+          </article>
+        </section>
+
+        <section t-if="state.tab === 'feedback'" class="ai_panel">
+          <form class="ai_ask" t-on-submit="summarise">
+            <div class="ai_ask_options">
+              <label>Feedback from <select t-att-value="state.kind" t-on-change="changeKind"><option value="student">Students</option><option value="parent">Parents</option><option value="staff">Staff</option></select></label>
+              <label>Period <select t-att-value="state.period" t-on-change="(ev) => this.state.period = ev.target.value"><option value="">All periods</option><t t-foreach="state.periods" t-as="p" t-key="p"><option t-att-value="p" t-esc="p"/></t></select></label>
+              <button type="submit" class="ai_button" t-att-disabled="!state.status.configured || state.busy"><t t-esc="state.busy ? 'Reading…' : 'Find themes'"/></button>
+            </div>
+          </form>
+          <article t-if="state.feedback" class="ai_answer">
+            <p class="ai_answer_q"><t t-esc="state.feedback.responses"/> responses (<t t-esc="state.feedback.with_comments"/> with comments), average score <t t-esc="state.feedback.average"/> / 5 · <t t-esc="state.feedback.period"/></p>
+            <div class="ai_answer_a"><pre t-esc="state.feedback.summary"/></div>
+            <small>Comments are sent anonymously: scores and text only, never names.</small>
+          </article>
+        </section>
+
+        <section class="ai_panel ai_privacy">
+          <h2>What the assistant shares</h2>
+          <div class="ai_privacy_grid">
+            <div><strong>Sent to the provider</strong><ul><li t-foreach="state.status.shares" t-as="line" t-key="line" t-esc="line"/></ul></div>
+            <div><strong>Never sent</strong><ul><li t-foreach="state.status.never_shares" t-as="line" t-key="line" t-esc="line"/></ul></div>
+          </div>
+          <p class="ai_note">Every call is recorded under AI insights → Assistant log with the user, feature, data categories shared and timing.</p>
+        </section>
+      </t>
+    </main>
+  </t>
+</templates>

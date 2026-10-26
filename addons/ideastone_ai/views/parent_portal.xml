@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <template id="parent_dashboard_success" inherit_id="ideastone_erp.parent_dashboard" name="Parent: child success guidance">
+    <xpath expr="//section[hasclass('parent_welcome')]" position="after">
+      <t t-call="ideastone_ai.success_nudge"/>
+    </xpath>
+  </template>
+</odoo>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="action_success_radar" model="ir.actions.client">
+    <field name="name">Student Success Radar</field>
+    <field name="tag">ideastone_ai.success_radar</field>
+  </record>
+  <record id="action_assistant" model="ir.actions.client">
+    <field name="name">Campus Assistant</field>
+    <field name="tag">ideastone_ai.assistant</field>
+  </record>
+  <menuitem id="menu_ai" name="AI insights" parent="ideastone_erp.menu_operations" sequence="9"/>
+  <menuitem id="menu_success_radar" name="Student Success Radar" parent="menu_ai" action="action_success_radar" sequence="1"/>
+  <menuitem id="menu_assistant" name="Campus Assistant" parent="menu_ai" action="action_assistant" sequence="2" groups="ideastone_erp.group_mvp_owner,ideastone_erp.group_mvp_registrar,ideastone_erp.group_manager"/>
+</odoo>

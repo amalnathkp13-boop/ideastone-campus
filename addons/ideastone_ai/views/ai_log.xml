@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_ai_log_tree" model="ir.ui.view">
+    <field name="name">campus.ai.log.tree</field>
+    <field name="model">campus.ai.log</field>
+    <field name="arch" type="xml">
+      <tree create="false" edit="false" delete="false">
+        <field name="create_date"/>
+        <field name="user_id"/>
+        <field name="feature"/>
+        <field name="model_name"/>
+        <field name="shared"/>
+        <field name="prompt_chars"/>
+        <field name="response_chars"/>
+        <field name="duration_ms"/>
+        <field name="ok"/>
+        <field name="error"/>
+      </tree>
+    </field>
+  </record>
+  <record id="action_ai_log" model="ir.actions.act_window">
+    <field name="name">Assistant log</field>
+    <field name="res_model">campus.ai.log</field>
+    <field name="view_mode">tree</field>
+  </record>
+  <menuitem id="menu_ai_log" name="Assistant log" parent="menu_ai" action="action_ai_log" sequence="3" groups="ideastone_erp.group_mvp_owner,ideastone_erp.group_mvp_registrar,ideastone_erp.group_manager"/>
+</odoo>

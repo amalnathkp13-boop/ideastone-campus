@@ -34,6 +34,10 @@ class TestFacultyLeaveUI(TransactionCase):
     def payload(self, **changes):
         day = self.today + timedelta(days=7)
         day += timedelta(days=(7 - day.weekday()) % 7)
+        # Odoo demo data declares a mandatory working day next month; leave cannot be requested on it.
+        mandatory = self.env["hr.leave.mandatory.day"].sudo()
+        while mandatory.search_count([("start_date", "<=", day), ("end_date", ">=", day)]):
+            day += timedelta(days=7)
         return dict({"leave_type_id": self.kind.id, "date_from": str(day), "date_to": str(day),
                      "from_session": "FN", "to_session": "AN", "reason": "Synthetic leave audit"}, **changes)
 
