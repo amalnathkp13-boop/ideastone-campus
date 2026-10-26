@@ -152,3 +152,21 @@ class TestQuestionPapers(TransactionCase):
         self.assertEqual([s['level'] for s in self.api.get_workspace()['rows'][0]['sets']], ['advanced'])
         with self.assertRaises(ValidationError):
             self.api.save_submission(self.values, [], submit=True, levels=['moderate'])
+
+    def test_hod_and_faculty_navigation_use_separate_actions(self):
+        self.env['op.faculty'].create({'first_name': 'Question paper', 'last_name': 'HOD QA', 'gender': 'male', 'birth_date': '1980-01-01',
+            'partner_id': self.env['res.partner'].create({'name': 'HOD QA', 'user_id': self.hod.id, 'company_id': self.env.company.id}).id,
+            'main_department_id': self.dept.id})
+        for account, expected in [(self.teacher,'ideastone_erp.action_faculty_question_papers'), (self.hod,'ideastone_erp.action_hod_question_papers')]:
+            data=self.env['campus.dashboard'].with_user(account).get_overview()
+            teaching=next(m for m in data['faculty_modules'] if m['key']=='teaching')
+            action=next(i for i in teaching['items'] if i['label']=='Examinations')
+            self.assertEqual(action['action'], expected)
+
+    def test_revoked_hod_and_past_exam_submission_are_rejected(self):
+        record_id=self.submit()
+        self.hod.groups_id -= self.env.ref('ideastone_erp.group_exam_paper_hod')
+        with self.assertRaises(AccessError):
+            self.api.with_user(self.hod).decide(record_id,'return',note='Review')
+        with self.assertRaises(ValidationError):
+            self.api.save_submission(dict(self.values,exam_date=str(fields.Date.today()-timedelta(days=1))),[self.file],submit=True)

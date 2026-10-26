@@ -1,0 +1,5 @@
+<odoo>
+ <record id="action_hod_question_papers" model="ir.actions.client"><field name="name">Examinations</field><field name="tag">ideastone_erp.hod_question_papers</field><field name="context">{'campus_module':'teaching'}</field></record>
+ <record id="action_coe_question_papers" model="ir.actions.client"><field name="name">Official question-paper receipts</field><field name="tag">ideastone_erp.coe_question_papers</field><field name="context">{'campus_module':'exams'}</field></record>
+ <menuitem id="menu_coe_question_papers" name="Exam control: official papers" action="action_coe_question_papers" groups="group_exam_paper_coe" sequence="90"/>
+</odoo>
