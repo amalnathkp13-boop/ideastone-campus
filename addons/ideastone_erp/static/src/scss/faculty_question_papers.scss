@@ -130,6 +130,9 @@ tbody tr:hover{background:#f9fbfe}
 }
 .qp-faculty { width:100%; height:100%; overflow-y:auto; background:#f3f7fc; font:14px/1.45 Inter,"Segoe UI",Arial,sans-serif; color:#17334f;
  h1,h2,h3,h4,p,button,input,select,textarea,table {font-family:inherit;}
+ h1,h2,h3,h4 {line-height:inherit;}
+ select {appearance:auto;line-height:normal;}
+ input::placeholder,textarea::placeholder {color:#757575;opacity:1;}
  .row-link {border:0;background:transparent;padding:0;text-align:left;font:inherit;font-weight:700;color:#0866e8;}
  .file-chip {margin:2px;} .btn:disabled {opacity:.55;cursor:wait;} .breadcrumb {display:block;background:transparent;padding:0;line-height:inherit;border-radius:0;}
  .qp-modal-back {position:fixed;inset:0;background:#102d4a77;display:flex;align-items:center;justify-content:center;padding:18px;z-index:110;}
@@ -138,9 +141,10 @@ tbody tr:hover{background:#f9fbfe}
 }
 body.campus_question_paper_shell {
  font-family:Inter,"Segoe UI",Arial,sans-serif;
+ * {scrollbar-width:thin;scrollbar-color:#cbd5e1 #f6f8fb;}
  .campus_sidebar {width:286px;background:#0b2d47;padding:22px 16px;}
  .campus_nav_link {font-size:14px;font-weight:650;min-height:46px;padding:13px 14px;}
- .campus_brand img {width:190px;height:68px;}
+ .campus_brand img {width:190px;height:68px;content:url('/ideastone_campus/static/src/img/vcet-wordmark.png');}
  .o_navbar {height:52px;} .o_main_navbar {min-height:52px;}
  &.o_web_client > .o_navbar, &.o_web_client > .o_main_navbar {margin-left:286px;}
  &.o_web_client > .o_action_manager {margin-left:286px;margin-top:64px;}

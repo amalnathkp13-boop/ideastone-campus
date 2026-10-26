@@ -38,7 +38,7 @@ export class FacultyQuestionPapers extends Component {
             && (!this.state.examType || r.exam_type === this.state.examType));
     }
     get subjects() { return (this.state.data?.subjects || []).filter(s => !this.state.form.department_id || s.department_id === Number(this.state.form.department_id)); }
-    get events() { return (this.state.data?.rows || []).flatMap(r => r.history.map(e => ({ ...e, subject: r.subject, key: `${r.id}-${e.at}-${e.action}` }))).sort((a,b) => b.at.localeCompare(a.at)).slice(0, 8); }
+    get events() { return (this.state.data?.rows || []).flatMap(r => r.history.map((e,index) => ({ ...e, subject: r.subject, key: `${r.id}-${index}`, order:index }))).sort((a,b) => b.at.localeCompare(a.at) || b.order-a.order).slice(0, 8); }
     get departmentCards() { return (this.state.data?.departments || []).map(d => { const rows=this.state.data.rows.filter(r => r.department_id===d.id); const reviewed=rows.filter(r => ["approved","forwarded"].includes(r.state)).length; return {...d,total:rows.length, reviewed, pending:rows.filter(r=>r.state==="submitted").length, percent:rows.length?Math.round(reviewed*100/rows.length):0}; }); }
     count(key) { const counts=this.state.data?.counts || {}; return String((counts[key] || 0) + (key === "approved" ? counts.forwarded || 0 : 0)).padStart(2,"0"); }
     tone(state) { return ({submitted:"review",approved:"approved",returned:"returned",forwarded:"forwarded"})[state] || "draft"; }
