@@ -3,9 +3,9 @@ import { Component, onWillStart, onWillUnmount, useEffect, useExternalListener, 
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
+import { FacultyHome, FacultyDepartments } from "./faculty_home";
 import { NavigationCustomizer } from "@ideastone_campus/js/navigation_customizer";
 import { navigationItems } from "@ideastone_campus/js/navigation_state";
-import { FacultyHome, FacultyDepartments } from "./faculty_home";
 
 class OwnerReportFilters extends Component {
     static template = "ideastone_erp.OwnerReportFilters";

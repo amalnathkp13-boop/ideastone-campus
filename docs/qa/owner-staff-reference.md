@@ -25,7 +25,7 @@ owner client actions.
 
 ## Validation (27 October 2026)
 
-- Module upgrade plus 24 selected backend tests: zero failures/errors.
+- Module upgrade plus 33 selected backend integration tests: zero failures/errors.
   Includes directory counts, current-college isolation even when a user can access
   multiple companies, native leave decisions and the existing owner/leave workflows.
 - Repository Ruff checks, XML parsing, JavaScript syntax and whitespace checks pass.
@@ -44,7 +44,6 @@ college with INR, eight departments, 20 sample staff, leave requests and approve
 August–October 2026 payslips. Main accounting data and the existing previews were
 not modified. The preview runs at `http://owner-staff.localhost:18083`.
 
-For deployment, upgrade `ideastone_erp` to load the three client actions and the
-new assets. The source branch retains the previously approved shared theme and
-navigation customization dependency; neither a PR nor a remote push is part of
-this preview task.
+For deployment, upgrade `ideastone_campus` and `ideastone_erp` to load the three
+client actions and refresh the shared assets. The existing theme, navigation,
+Academics and Faculty Home integrations are retained.
