@@ -198,6 +198,8 @@ async function markup(page) {
         await page.getByLabel('Name of the student',{exact:true}).fill('Owner QA portfolio entry');
         await page.locator('.appraisal_entry button[type=submit]').click();
         await page.getByRole('cell',{name:'Owner QA portfolio entry',exact:true}).waitFor();
+        await page.locator('.campus_sidebar').getByRole('button',{name:'Faculty & Staff',exact:true}).click();
+        await page.locator('.campus_owner_staff').waitFor({state:'visible'});
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Leave Management',exact:true}).click();
         await page.getByRole('heading',{name:'Online Leave Apply & Status',exact:true}).waitFor();
         await page.locator('.leave_loading').waitFor({state:'hidden'});
