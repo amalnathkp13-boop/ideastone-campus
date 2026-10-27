@@ -6,6 +6,8 @@ Branch: `codex/faculty-home-reference` (based on `a0bc5a2`).
 ## Scope
 
 The faculty Home content follows the reference overview and department directory.
+Home's subnavigation contains only Faculty overview and My departments; Find a
+module remains available under the existing Search module.
 The existing campus sidebar, top bar, personal tasks, attendance, assessments and
 faculty → HOD → COE question-paper workflows remain in place. Home links open those
 existing workflows. This Home is enabled for faculty accounts; management, HOD and
@@ -77,4 +79,6 @@ live counts naturally change as time passes or saved records change.
 
 Detailed results are in `browser-verification.json`. Screenshots show the desktop
 overview, department cards and student roster, plus phone overview and roster.
+Those reference-alignment screenshots precede the navigation cleanup;
+`home-navigation-updated.png` shows the final two-item Home navigation after reload.
 Raw local Odoo logs are ignored by Git.

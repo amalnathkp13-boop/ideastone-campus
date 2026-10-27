@@ -16,6 +16,7 @@ class FacultyHomeNavigation(models.AbstractModel):
             data["faculty_home_enabled"] = True
             home = next((module for module in data["faculty_modules"] if module["key"] == "home"), None)
             if home:
+                home["items"] = [item for item in home["items"] if item.get("page") != "modules"]
                 home["items"].insert(1, {"label": "My departments", "page": "faculty-departments"})
         return data
 

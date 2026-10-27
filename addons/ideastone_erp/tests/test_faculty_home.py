@@ -21,7 +21,7 @@ class TestFacultyHome(OwnerMVPFixture, TransactionCase):
         data = self.env["campus.dashboard"].with_user(self.teacher).get_overview()
         self.assertTrue(data["faculty_home_enabled"])
         home = next(module for module in data["faculty_modules"] if module["key"] == "home")
-        self.assertIn("My departments", [r["label"] for r in home["items"]])
+        self.assertEqual([r["label"] for r in home["items"]], ["Faculty overview", "My departments"])
         self.assertFalse(self.env["campus.dashboard"].with_user(self.owner).get_overview().get("faculty_home_enabled"))
         with self.assertRaises(AccessError):
             self.env["campus.faculty.home"].with_user(self.outsider).get_home()
