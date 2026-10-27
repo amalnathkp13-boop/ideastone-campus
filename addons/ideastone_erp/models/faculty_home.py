@@ -171,11 +171,11 @@ class FacultyHome(models.AbstractModel):
             if not session:
                 raise AccessError(_("This class is outside your confirmed teaching allocations."))
             return session.action_campus_attendance()
-        actions = {"attendance": "ideastone_erp.action_subject_attendance_workspace",
+        actions = {"attendance": "ideastone_erp.action_my_teaching_subjects",
             "tasks": "ideastone_erp.action_faculty_task", "papers": "ideastone_erp.action_faculty_question_papers"}
         if kind in actions:
             action = self.env["ir.actions.actions"]._for_xml_id(actions[kind])
-            action["context"] = dict(self.env.context, campus_module="attendance" if kind == "attendance" else "teaching")
+            action["context"] = dict(self.env.context, campus_module="teaching")
             return action
         if kind in {"timetable", "results"}:
             model = "op.session" if kind == "timetable" else "op.exam"
