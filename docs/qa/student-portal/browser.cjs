@@ -214,7 +214,8 @@ async function save(page, control) {
         await page.locator('.student_subnav').getByRole('link',{name:'Notices & Circulars',exact:true}).click();
         assert.equal(await page.locator('[data-notice-record] .badge.urgent').first().evaluate(element=>getComputedStyle(element).color),'rgb(179, 49, 64)');
         const noticeTypography=await page.locator('[data-notice-record] .notice-body span').first().evaluate(element=>({color:getComputedStyle(element).color,size:getComputedStyle(element).fontSize,font:getComputedStyle(element).fontFamily}));
-        assert.equal(noticeTypography.color,'rgb(97, 123, 150)'); assert.equal(noticeTypography.size,'12px'); assert.match(noticeTypography.font,/^Roboto,/);
+        // Saved rich text inherits the shared paragraph size, rather than metadata sizing.
+        assert.equal(noticeTypography.color,'rgb(97, 123, 150)'); assert.equal(noticeTypography.size,'13px'); assert.match(noticeTypography.font,/^Roboto,/);
         await page.locator('[data-notices-filter="search"]').fill('no-such-published-notice');
         await page.locator('[data-notices-apply="notices"]').click();
         assert.equal(await page.locator('[data-notice-record]:visible').count(),0);
