@@ -1,0 +1,95 @@
+/* Only the main Calendar page and its form; the existing admin shell owns navigation. */
+.campus_college_calendar, .campus_calendar_form {
+  --navy:#0b2f4b;--blue:#1769e8;--pale:#eaf3ff;--bg:#f3f7fc;--line:#dbe6f4;--text:#102f4e;--muted:#6380a1;--green:#16845b;--amber:#ad6a00;--shadow:0 8px 24px #163e6509;
+  font:14px/1.45 "Segoe UI",Arial,sans-serif;color:var(--text);
+  *, *:before, *:after {box-sizing:border-box}
+  button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:wait}
+  button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #88b8fa;outline-offset:2px}
+  h1,h2,h3,h4{font-family:inherit;color:var(--text);font-weight:700}
+  .btn{border:1px solid var(--line);background:white;color:var(--text);border-radius:10px;padding:10px 14px;font-weight:700;white-space:nowrap;box-shadow:none}
+  .btn.primary{background:var(--blue);border-color:var(--blue);color:white}
+  .btn.soft{background:var(--pale);border-color:#d5e7ff;color:var(--blue)}
+  .square{width:34px;height:34px;border:1px solid var(--line);background:white;border-radius:8px;color:var(--blue);font-weight:800;flex-shrink:0}
+  .actions{display:flex;gap:8px;align-items:center}
+  .notice{padding:12px 15px;border-radius:10px;background:var(--pale);margin-bottom:15px}
+  .notice.error{background:#fff0f1;color:#a22e3d;border:1px solid #f0c8cf}
+  .formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .field label{display:block;font-size:11px;font-weight:750;color:var(--muted);margin-bottom:5px}
+  .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;color:var(--text);background:white;min-width:0}
+  .field textarea{min-height:88px;resize:vertical}
+  .field.full{grid-column:1/-1}
+  .schedulehead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+  .schedulehead h3{font-size:13px;margin:0}
+  .schedule-row{display:grid;grid-template-columns:130px minmax(0,1fr) 34px;gap:8px;align-items:center;margin-bottom:8px}
+}
+.campus_calendar_form fieldset{border:0;padding:0;margin:0;min-width:0}
+.campus_college_calendar {
+  height:100%;min-width:0;overflow:auto;background:var(--bg);
+  .content{padding:25px 28px 30px;max-width:1800px;margin:auto}
+  .crumb{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;margin-bottom:17px}
+  .heading{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:22px}
+  .eyebrow{color:var(--blue);font-size:10px;font-weight:850;letter-spacing:1.2px}
+  .heading h1{font-size:30px;line-height:1.2;letter-spacing:-.7px;margin:6px 0}
+  .heading p{margin:7px 0 0;color:var(--muted)}
+  .hero{background:linear-gradient(110deg,#0b3453,#175c95);border-radius:17px;padding:21px 24px;color:white;display:flex;align-items:center;justify-content:space-between;gap:18px;box-shadow:var(--shadow);margin-bottom:18px;position:relative;overflow:hidden}
+  .hero:after{content:"";position:absolute;width:250px;height:250px;border:1px solid #ffffff1c;border-radius:50%;right:13%;top:-170px;box-shadow:0 0 0 30px #ffffff08,0 0 0 65px #ffffff06;pointer-events:none}
+  .hero .eyebrow{color:#b6dcff}.hero h2{margin:6px 0;font-size:22px;color:white}
+  .hero p{margin:0;color:#d5e8fa;max-width:760px}
+  .hero-stat{text-align:right;min-width:125px;position:relative;z-index:1}
+  .hero-stat strong{display:block;font-size:30px}.hero-stat span{font-size:11px;color:#d5e8fa}
+  .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:19px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 17px;box-shadow:var(--shadow)}
+  .stathead{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)}
+  .staticon{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:var(--pale);color:var(--blue);font-size:17px}
+  .staticon.green{background:#e4f7ed;color:#16845b}.staticon.amber{background:#fff2df;color:#a96300}
+  .stat strong{display:block;font-size:25px;margin:8px 0 2px}.stat small{font-size:11px;color:var(--muted)}
+  .toolbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin:20px 0 14px;font-size:14px}
+  .filters{display:flex;flex-wrap:wrap;gap:8px}
+  .filters select,.filters input{width:auto;border:1px solid var(--line);background:white;color:var(--text);border-radius:9px;padding:10px 12px;min-width:145px}
+  .filters select{appearance:auto}
+  .viewtoggle{display:flex;border:1px solid var(--line);background:#fff;border-radius:9px;padding:3px}
+  .viewtoggle button{border:0;background:transparent;padding:8px 12px;border-radius:7px;color:var(--muted);font-weight:700}
+  .viewtoggle button.active{background:var(--pale);color:var(--blue)}
+  .workspace{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,.9fr);gap:16px;align-items:start}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px;box-shadow:var(--shadow);min-width:0}
+  .panelhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+  .panelhead h2{font-size:16px;margin:0}.monthnav{display:flex;align-items:center;gap:8px}
+  .monthnav strong{min-width:150px;text-align:center;font-size:16px}
+  .calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .weekday{padding:10px 4px;background:#f2f7fd;text-align:center;color:#617f9e;font-size:10px;font-weight:800;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .day{min-height:91px;padding:6px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:#fff;min-width:0}
+  .day.outside{background:#fafcff;color:#a9b8c8}.day.selected{box-shadow:inset 0 0 0 2px var(--blue);background:#f6faff}
+  .day-select{display:block;width:100%;background:transparent;border:0;color:inherit;text-align:left;padding:0}
+  .day.today .daynum{background:var(--blue);color:white}
+  .daynum{width:24px;height:24px;display:grid;place-items:center;border-radius:50%;font-size:11px;font-weight:700;margin-bottom:4px}
+  .eventdot{display:block;max-width:100%;width:100%;text-align:left;border:0;border-radius:4px;padding:3px 4px;font-size:9px;line-height:1.25;font-weight:750;margin:3px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#e7f0ff;color:#1a5fbe}
+  .eventdot.cultural{background:#f0eaff;color:#7046c5}.eventdot.workshop{background:#dff6ea;color:#137a4b}
+  .eventdot.exam{background:#fff0d9;color:#a96300}.eventdot.holiday{background:#ffe8ea;color:#b13b4b}
+  .more{font-size:9px;color:var(--muted);background:none;border:0;padding:0}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:13px;font-size:10px;color:var(--muted)}
+  .legend span{display:flex;align-items:center;gap:5px}.legend i{width:8px;height:8px;border-radius:3px;display:inline-block;background:var(--blue)}
+  .legend .cultural{background:#8b65d6}.legend .exam{background:#d99724}.legend .holiday{background:#d65b68}.legend .workshop{background:#16845b}
+  .rightcol{display:grid;gap:14px}.eventlist{display:grid;gap:9px}.agenda{min-height:240px;align-content:start}
+  .eventrow{display:grid;grid-template-columns:52px minmax(0,1fr);gap:11px;padding:11px;border:1px solid var(--line);border-radius:11px;cursor:pointer;background:white;text-align:left;color:var(--text);width:100%;align-items:stretch}
+  .eventrow:hover{border-color:#9ec5fa;background:#fbfdff}
+  .eventdate{border-radius:9px;background:#edf5ff;color:var(--blue);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 2px}
+  .eventdate b{font-size:19px;line-height:1.1}.eventdate small{font-size:9px;font-weight:800;text-transform:uppercase}
+  .eventrow-title{display:block;font-size:12px;font-weight:700;margin:0 0 4px;overflow-wrap:anywhere}
+  .eventrow-meta{display:block;font-size:10px;color:var(--muted);margin:0;line-height:1.5}
+  .tag{display:inline-flex;font-size:9px;font-weight:800;border-radius:5px;padding:4px 6px;background:#e8f1ff;color:#1b61bd;margin-top:6px}
+  .tag.completed{background:#e0f6e9;color:#137b4b}.tag.planning{background:#fff0d9;color:#9a5a00}.tag.sample{margin-left:6px}
+  .detailempty{text-align:center;padding:25px 10px;color:var(--muted);font-size:12px}
+  .detailcategory{margin-top:12px}.detailtitle{font-size:18px;margin:7px 0;overflow-wrap:anywhere}
+  .description{font-size:11px;color:var(--muted);margin:0;white-space:pre-line;overflow-wrap:anywhere}
+  .detailmeta{display:grid;gap:10px;margin:14px 0}.meta{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;font-size:11px;overflow-wrap:anywhere}
+  .meta .mi{color:var(--blue);font-size:15px}.meta b{display:block;font-size:10px;color:var(--muted);margin-bottom:2px}
+  .subevents{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}.subevents h4{font-size:12px;margin:0 0 9px}
+  .subevent{border-left:2px solid #9bc3f8;padding:0 0 11px 12px;margin-left:4px;font-size:11px;overflow-wrap:anywhere}
+  .subevent:last-child{padding-bottom:0}.subevent b{display:block}.subevent span{color:var(--muted);font-size:10px}
+  .statusline{display:flex;justify-content:space-between;gap:10px;align-items:center;background:#f7faff;border:1px solid var(--line);padding:10px;border-radius:9px;font-size:11px}
+  .detailactions{margin-top:15px;flex-wrap:wrap}.empty{color:var(--muted);font-size:12px;padding:15px;text-align:center}
+  .footer{text-align:center;color:var(--muted);font-size:10px;padding:26px 0 5px}
+  @media(max-width:1200px){.workspace{grid-template-columns:1fr}.rightcol{grid-template-columns:1fr 1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.day{min-height:76px}}
+  @media(max-width:800px){.content{padding:18px 12px}.heading{flex-wrap:wrap}.heading h1{font-size:25px}.hero{align-items:flex-start;padding:18px}.hero h2{font-size:18px}.hero-stat{min-width:65px}.hero-stat strong{font-size:23px}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:22px}.rightcol{grid-template-columns:1fr}.day{min-height:62px;padding:3px}.eventdot{font-size:8px}.calendarpanel{padding:9px}.filters select,.filters input{min-width:130px}.monthnav strong{min-width:0;font-size:13px}.panelhead{flex-wrap:wrap}.monthnav{gap:5px}.calendarpanel>.panelhead>h2{display:none}}
+}
+@media(max-width:500px){.campus_calendar_form{.formgrid{grid-template-columns:1fr}.schedule-row{grid-template-columns:90px minmax(0,1fr) 34px}}}

@@ -95,7 +95,7 @@ class CampusBase extends Component {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
-        if ((["od", "attendance"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics"].includes(module.key))) && module.items?.[0]?.action) {
+        if ((["od", "attendance"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics", "calendar"].includes(module.key))) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
@@ -244,7 +244,7 @@ class CampusBase extends Component {
         return [{label: "Review admissions", detail: "Applications & decisions", icon: "envelope-o", action: "ideastone_erp.mvp_applications"},
             {label: "Record a payment", detail: "Student fee accounts", icon: "inr", action: "ideastone_erp.mvp_fees"},
             {label: "Track attendance", detail: "Completed class registers", icon: "check", action: "ideastone_erp.mvp_attendance"},
-            {label: "Manage timetable", detail: "Review schedules", icon: "calendar", action: "ideastone_erp.mvp_timetable"},
+            {label: "College calendar", detail: "Plan campus activities", icon: "calendar", action: "ideastone_erp.action_college_calendar"},
             {label: "Plan examinations", detail: "Schedules & marks", icon: "file-text-o", action: "ideastone_erp.mvp_exams"},
             {label: "Manage staff", detail: "Faculty directory", icon: "users", action: "ideastone_erp.mvp_faculty"},
             {label: "Service desk", detail: "Open campus requests", icon: "flag-o", kind: "services", allowed: this.ownerUI.kpis.some(card => card.kind === "services" && card.allowed)},
