@@ -1,5 +1,6 @@
 // Exercise the real Odoo UI against a disposable, loopback-only CI database.
 const {chromium} = require('playwright');
+const {assertCampusTheme} = require('../campus-theme.cjs');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const base = 'http://127.0.0.1:18069';
@@ -29,9 +30,11 @@ async function diagnosticMarkup(page) {
         await page.goto(base+'/web#action=ideastone_erp.action_dashboard');
         await page.locator('body.campus_faculty_workspace').waitFor();
         await page.getByRole('heading', {name:'Welcome back, QA Faculty'}).waitFor();
+        await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'faculty-overview-1440.png')});
         await page.locator('.campus_sidebar').getByRole('button',{name:'My task list',exact:true}).click();
         await page.getByRole('heading',{name:'My task list',exact:true,level:1}).waitFor();
+        await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'faculty-module-1440.png')});
         await page.reload();
         await page.getByRole('heading',{name:'My task list',exact:true,level:1}).waitFor();
@@ -55,6 +58,7 @@ async function diagnosticMarkup(page) {
             return response.json();
         });
         if (saved.result?.length !== 1) throw Error('Diary was not persisted by the real form');
+        await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'faculty-diary-1440.png')});
         const assessment = await page.evaluate(async () => {
             const response=await fetch('/web/dataset/call_kw/campus.faculty.assessment/search_read',{
@@ -78,6 +82,7 @@ async function diagnosticMarkup(page) {
         if (markSaveData.error || markSaveData.result?.[0]?.total !== 25.2) throw Error('Reopened calculation did not persist the expected mark');
         await page.getByRole('button',{name:'Complete calculation',exact:true}).click();
         await page.getByRole('button',{name:'Reopen calculation',exact:true}).waitFor();
+        await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'faculty-assessment-1440.png')});
         await page.reload();
         await page.getByRole('button',{name:'Reopen calculation',exact:true}).waitFor();
@@ -94,6 +99,7 @@ async function diagnosticMarkup(page) {
         if(!await page.locator('.leave_balance').innerText().then(text=>text.includes('4 days'))) throw Error('Pending leave did not reserve balance');
         await page.reload();
         await page.locator('.leave_history tr').filter({hasText:'QA browser leave request'}).waitFor();
+        await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'faculty-leave-1440.png')});
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Faculty development and appraisal',exact:true}).click();
         await page.getByRole('heading',{name:'Professional Development and Appraisal',exact:true}).waitFor();
@@ -118,6 +124,7 @@ async function diagnosticMarkup(page) {
         await page.keyboard.press('Escape');
         await page.locator('.campus_sidebar:not(.is-open)').waitFor({state:'attached'});
         await page.locator('.campus_sidebar').waitFor({state:'hidden'});
+        await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'faculty-mobile-390.png')});
         await fs.writeFile(path.join(out,'mobile-dom.html'),await diagnosticMarkup(page));
         const unobscured=await page.evaluate(()=>Boolean(document.elementFromPoint(window.innerWidth/2,window.innerHeight/2)?.closest('.o_list_view')));

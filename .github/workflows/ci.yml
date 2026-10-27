@@ -36,6 +36,8 @@ jobs:
         run: ruff check addons/ scripts/ --output-format=github
       - name: Validate XML
         run: python -c "import glob,xml.etree.ElementTree as E; [E.parse(f) for f in glob.glob('addons/**/*.xml', recursive=True)]; print('xml ok')"
+      - name: Validate personal navigation state
+        run: node docs/qa/navigation-state.cjs
       - name: Validate shell scripts
         run: for f in odoo/*.sh openolat/*.sh scripts/*.sh; do bash -n "$f"; done
       - name: Validate compose file

@@ -3,6 +3,8 @@ import { Component, onWillStart, onWillUnmount, useEffect, useExternalListener, 
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
+import { NavigationCustomizer } from "@ideastone_campus/js/navigation_customizer";
+import { navigationItems } from "@ideastone_campus/js/navigation_state";
 
 class OwnerReportFilters extends Component {
     static template = "ideastone_erp.OwnerReportFilters";
@@ -42,7 +44,7 @@ class CampusBase extends Component {
             busy: false, query: "", cardQuery: "", unit: "", card: "", loanPage: 0, desk: { units: [], cards: [], loans: [], next: false } });
         // Handle the drawer before Odoo's global Escape shortcut consumes the key.
         useExternalListener(window, "keydown", (event) => {
-            if (event.key === "Escape" && this.state.open) { this.closeNav(); event.stopPropagation(); }
+            if (event.key === "Escape" && this.state.open && !document.querySelector(".campus_nav_dialog[open]")) { this.closeNav(); event.stopPropagation(); }
         }, { capture: true });
         useBus(this.env.bus, "CAMPUS:PAGE", (event) => { this.state.page = event.detail; });
         onWillStart(() => this.load());
@@ -290,18 +292,75 @@ export class CampusNavigation extends CampusBase {
     static props = ["*"];
     setup() {
         super.setup();
+        this.navPreferences = useState({revision: 0, items: []});
         useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", () => this.syncFacultyRoute());
         useEffect(() => {
             if (this.action.currentController?.action.tag?.includes("question_papers")) {
                 this.subnavRef.el?.querySelector("button.active")?.scrollIntoView({block: "nearest", inline: "nearest"});
             }
         }, () => [this.state.activeAction, this.state.module, this.state.faculty_modules.length]);
-        onWillUnmount(() => document.body.classList.remove("campus_faculty_workspace"));
+        onWillUnmount(() => { document.body.classList.remove("campus_faculty_workspace"); this.navCustomizer?.close(); });
     }
     async load() {
         await super.load();
         document.body.classList.toggle("campus_faculty_workspace", this.state.faculty_modules.length > 0);
         this.syncFacultyRoute();
+        try { Object.assign(this.navPreferences, await this.orm.call("res.users", "campus_get_navigation", [this.navigationScope])); }
+        catch { /* Default navigation remains usable if preferences cannot load. */ }
+    }
+    get navigationScope() {
+        return this.state.is_coe_workspace ? "coe" : this.state.is_owner_workspace ? "owner" : this.state.is_hod ? "hod" : this.state.faculty_modules.length ? "faculty" : "staff";
+    }
+    get navigationCatalog() {
+        const catalog = [];
+        if (this.state.faculty_modules.length) {
+            for (const module of this.state.faculty_modules) {
+                catalog.push({id: `module/${module.key}`, label: module.label, icon: module.icon, main: true, kind: "module", data: module});
+                for (const item of module.items || []) {
+                    const key = item.action || item.tool || (item.page && `page-${item.page}`) || (item.profile_id && "profile") || (item.url && "url");
+                    if (!key || item.allowed === false) continue;
+                    catalog.push({id: `item/${module.key}/${key}`, label: item.label, icon: module.icon, group: module.label, kind: "item", module: module.key, data: item});
+                }
+            }
+        } else {
+            for (const page of this.state.pages) catalog.push({id: `page/${page.key}`, label: page.label, icon: page.icon, main: true, kind: "page", data: page});
+            for (const item of this.state.navigation.filter(item => item.allowed)) {
+                catalog.push({id: `action/${item.action}`, label: item.label, icon: "folder-open-o", group: item.group, kind: "action", data: item});
+            }
+        }
+        return [...new Map(catalog.map(item => [item.id, item])).values()];
+    }
+    get sidebarItems() {
+        const catalog = this.navigationCatalog;
+        return navigationItems(catalog, this.navPreferences.items).filter(row => row.visible && !row.removed).map(row => {
+            const target = catalog.find(item => item.id === row.target);
+            const active = target.kind === "module" ? this.state.module === target.data.key : target.kind === "page" ? this.state.page === target.data.key :
+                this.state.module === target.module && (target.data.action_id ? this.state.activeAction === target.data.action_id : target.data.tool ? this.state.activeTool === target.data.tool : this.state.page === target.data.page);
+            return {...row, icon: target.icon, active};
+        });
+    }
+    async openSidebarItem(row) {
+        const target = this.navigationCatalog.find(item => item.id === row.target);
+        if (!target) return;
+        if (target.kind === "module") return this.chooseModule(target.data);
+        if (target.kind === "page") return this.go(target.data);
+        if (target.kind === "action") return this.open(target.data);
+        this.state.module = target.module;
+        return this.facultyGo(target.data);
+    }
+    async customizeNavigation() {
+        try {
+            const scope = this.navigationScope;
+            const preferences = await this.orm.call("res.users", "campus_get_navigation", [scope]);
+            Object.assign(this.navPreferences, preferences);
+            this.navCustomizer?.close();
+            this.navCustomizer = new NavigationCustomizer({catalog: this.navigationCatalog, preferences,
+                save: (items, revision) => this.orm.call("res.users", "campus_save_navigation", [scope, items, revision]),
+                apply: saved => Object.assign(this.navPreferences, saved)});
+            this.navCustomizer.open();
+        } catch {
+            this.notification.add("Navigation customization could not be loaded. Please retry.", {type: "danger"});
+        }
     }
     syncFacultyRoute() {
         const action = this.action.currentController?.action;

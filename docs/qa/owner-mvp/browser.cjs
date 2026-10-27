@@ -1,5 +1,6 @@
 // Real Odoo screens and RPCs on a disposable database; no mock server or production login.
 const {chromium} = require('playwright');
+const {assertCampusTheme} = require('../campus-theme.cjs');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const out = process.env.OWNER_QA_OUT;
@@ -40,6 +41,7 @@ async function markup(page) {
         const firstMetrics = await rpc(page,'campus.dashboard','get_owner_metrics');
         const studentCard = firstMetrics.stats.find(s=>s.kind==='active_students');
         if(studentCard.value!==3) throw Error('Owner demo does not reconcile with its saved students');
+        await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-dashboard-1440.png'),fullPage:true});
         await page.locator('.collection-panel').evaluate(element=>element.scrollIntoView({block:'start'}));
         const feeMonths=firstMetrics.overview_ui.fee_months;
@@ -55,11 +57,12 @@ async function markup(page) {
         if(Math.abs(panelHeights[0]-panelHeights[1])>1) throw Error('Fee and insights cards are not balanced on desktop');
         await page.getByRole('heading',{name:'Decision Overview',exact:true}).waitFor();
         if(await page.locator('.decision-grid .deadlines-panel').evaluate(el=>getComputedStyle(el).gridColumn)!=='1 / -1') throw Error('Dashboard deadlines do not span the full row');
+        await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-charts-1440.png')});
         if(await page.locator('.admin_overview .kpi').count()!==8) throw Error('Admin overview does not show eight indicators');
         if(await page.locator('.event-card').count()!==3) throw Error('Admin event cards do not reflect the four saved events');
-        if(await page.locator('.admin_overview .kpi-value').first().evaluate(el=>getComputedStyle(el).color)!=='rgb(12, 46, 76)') throw Error('Saved KPI text does not use the reference color');
-        if(await page.locator('.event-category').first().evaluate(el=>getComputedStyle(el).color)!=='rgb(101, 81, 198)') throw Error('Saved event category does not use the reference color');
+        if(await page.locator('.admin_overview .kpi-value').first().evaluate(el=>getComputedStyle(el).color)!=='rgb(16, 45, 73)') throw Error('Saved KPI text does not use the reference color');
+        if(await page.locator('.event-category').first().evaluate(el=>getComputedStyle(el).color)!=='rgb(115, 85, 199)') throw Error('Saved event category does not use the reference color');
         for(const width of [320,390,768,1440]) {
             await page.setViewportSize({width,height:1000});
             if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)) throw Error(`Admin overview overflows at ${width}`);
@@ -100,12 +103,14 @@ async function markup(page) {
             const radar=await rpc(page,'campus.success.radar','get_workspace',[{}]);
             if(radar.summary.students<1 || radar.rows.some(row=>row.score<0 || row.score>100)) throw Error('Student Success Radar returned no scored students or an out-of-range score');
             if(await page.locator('.radar_row').count()!==radar.rows.length) throw Error('Radar table does not list every scored student');
+            await assertCampusTheme(page);
             await page.screenshot({path:path.join(out,'owner-success-radar-1440.png'),fullPage:true});
             await page.locator('.campus_sidebar').getByRole('button',{name:'AI insights',exact:true}).click();
             await page.getByRole('button',{name:'Campus Assistant',exact:true}).click();
             await page.getByRole('heading',{name:'Campus Assistant',exact:true,level:1}).waitFor();
             await page.getByText('Not configured',{exact:true}).waitFor();
             if(await page.locator('#ai_question').isEnabled()) throw Error('Assistant accepts questions before a provider is configured');
+            await assertCampusTheme(page);
             await page.screenshot({path:path.join(out,'owner-assistant-1440.png'),fullPage:true});
             await page.locator('.campus_sidebar').getByRole('button',{name:'Dashboard',exact:true}).click();
             await page.locator('.admin_overview .kpi').first().waitFor();
@@ -170,6 +175,7 @@ async function markup(page) {
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Staff Profile',exact:true}).click();
         await page.getByRole('cell',{name:'Owner QA qualification',exact:true}).waitFor();
         if(await page.locator('.staff_profile_alert').count()) throw Error('Owner profile displays a record access error');
+        await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-staff-profile.png'),fullPage:true});
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Faculty development and appraisal',exact:true}).click();
         await page.getByRole('heading',{name:'Professional Development and Appraisal',exact:true}).waitFor();
@@ -217,6 +223,7 @@ async function markup(page) {
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Academics',exact:true}).click();
         await page.getByRole('heading',{name:'Academics',exact:true,level:1}).waitFor();
+        await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-academics-1440.png')});
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Subjects & curriculum',exact:true}).click();
         const create = page.locator('.o_list_button_add:visible');
@@ -236,6 +243,7 @@ async function markup(page) {
         await page.reload();
         await page.locator('.o_form_view:visible').waitFor();
         if(await page.locator('.g2_review_container').count()) throw Error('Upstream promotional dialog blocks the Owner workspace');
+        await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-subject-1440.png')});
         const apps=await rpc(page,'op.admission','search_read',[[['name','=','QA Concurrent Applicant']]],{fields:['campus_stage']});
         await Promise.all([rpc(page,'op.admission','enroll_student',[[apps[0].id]]),rpc(page,'op.admission','enroll_student',[[apps[0].id]])]);
@@ -258,6 +266,7 @@ async function markup(page) {
         const metrics=await rpc(page,'campus.dashboard','get_owner_metrics');
         if(metrics.stats.find(s=>s.kind==='active_students').value!==4 || !metrics.stats.find(s=>s.kind==='collection').value.includes('400.00')) throw Error('Dashboard did not reflect the committed lifecycle changes');
         await page.setViewportSize({width:1024,height:768});
+        await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-desktop-1024.png')});
         await page.setViewportSize({width:390,height:844});
         await page.locator('.campus_mobile_toggle').click();
@@ -265,6 +274,7 @@ async function markup(page) {
         await page.keyboard.press('Escape');
         await page.locator('.campus_sidebar').waitFor({state:'hidden'});
         if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)) throw Error('Owner dashboard overflows the mobile viewport');
+        await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-mobile-390.png')});
         if(errors.length) throw Error(errors.join('\n'));
         await fs.writeFile(path.join(out,'verification.json'),JSON.stringify({passed:true,checkedViews,checks:['13 owner modules','all permitted submodule views','7 real CSV exports','owner staff qualification save and reload','owner appraisal save','owner leave page','numbering settings','native empty-state help renders as HTML','shared timetable action retains selected module','shared fee heads visible','student request register opens as a list','college attendance policy save and restore','invalid reporting period recovery','faculty shell reused','live KPI reconciliation','real subject form save and reload','concurrent admission conversion','concurrent payment posting','receipt PDF','1024 desktop','390 mobile drawer and overflow','browser console'],metrics,errors},null,2));
