@@ -263,10 +263,9 @@ class Dashboard(models.AbstractModel):
         if not faculty or not self.env.user.has_group("openeducat_core.group_op_faculty"):
             raise AccessError(_("A linked faculty account is required."))
         if tool == "subject_attendance":
-            action = self.env.ref("ideastone_erp.action_subject_attendance_workspace")
-            return {"type": "ir.actions.client", "id": action.id,
-                    "name": action.name, "tag": action.tag,
-                    "context": dict(self.env.context, campus_module="attendance", campus_tool=tool)}
+            action = self.env["ir.actions.actions"]._for_xml_id("ideastone_erp.action_subject_attendance_workspace")
+            action["context"] = dict(self.env.context, campus_module="attendance", campus_tool=tool)
+            return action
         specs = {
             "assigned_students": ("My assigned students", "op.student", [], {}),
             "alternate": ("Alternate teaching hour", "campus.service.request", [("kind", "=", "alternate")], {"default_kind": "alternate", "default_faculty_id": faculty.id}),
