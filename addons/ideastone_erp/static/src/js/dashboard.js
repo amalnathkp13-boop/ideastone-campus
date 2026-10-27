@@ -3,6 +3,7 @@ import { Component, onWillStart, onWillUnmount, useEffect, useExternalListener, 
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
+import { FacultyHome, FacultyDepartments } from "./faculty_home";
 
 class OwnerReportFilters extends Component {
     static template = "ideastone_erp.OwnerReportFilters";
@@ -78,6 +79,8 @@ class CampusBase extends Component {
     }
     get facultyModule() { return this.state.faculty_modules.find(item => item.key === this.state.module) || this.state.faculty_modules[0]; }
     get pageTitle() {
+        if (this.state.faculty_home_enabled && this.state.page === "overview") return "Faculty overview";
+        if (this.state.page === "faculty-departments") return "My departments";
         if (this.state.page === "owner-overview") return "Admin overview";
         if (this.state.page === "faculty-module") return this.facultyModule?.label || "Faculty workspace";
         if (this.state.page === "help") return "Faculty guide";
@@ -284,6 +287,7 @@ class CampusBase extends Component {
 export class CampusDashboard extends CampusBase {
     static template = "ideastone_erp.Dashboard";
     static props = ["*"];
+    static components = { FacultyHome, FacultyDepartments };
 }
 export class CampusNavigation extends CampusBase {
     static template = "ideastone_erp.Navigation";
