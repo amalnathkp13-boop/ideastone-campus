@@ -6,9 +6,9 @@
       <t t-elif="state.status">
         <section class="ai_heading">
           <span class="ai_heading_icon"><i class="fa fa-magic" aria-hidden="true"/></span>
-          <div><h1>Campus Assistant</h1><p>Ask about the college in plain English, draft notices, and turn feedback into themes. Grounded in your live figures; nothing personal leaves the server.</p></div>
+          <div><h1>Campus Assistant</h1><p>Ask about aggregate college figures, draft notices, and review feedback theme counts. Your question or brief is sent to the configured provider; do not paste personal records.</p></div>
           <span t-attf-class="ai_status #{state.status.configured ? 'on' : 'off'}">
-            <t t-if="state.status.configured">Connected · <t t-esc="state.status.model"/> · <t t-esc="state.status.used"/><t t-if="state.status.limit"> / <t t-esc="state.status.limit"/></t> calls in <t t-esc="state.status.month"/></t>
+            <t t-if="state.status.configured">Configured · <t t-esc="state.status.model"/> · <t t-esc="state.status.used"/><t t-if="state.status.limit"> / <t t-esc="state.status.limit"/></t> attempts in <t t-esc="state.status.month"/> (UTC)</t>
             <t t-else="">Not configured</t>
           </span>
         </section>
@@ -34,7 +34,7 @@
         <section t-if="state.tab === 'ask'" class="ai_panel">
           <form class="ai_ask" t-on-submit="ask">
             <label for="ai_question">Your question</label>
-            <textarea id="ai_question" rows="3" maxlength="1000" placeholder="e.g. Which programme has the lowest attendance this month?" t-att-value="state.question" t-on-input="(ev) => this.state.question = ev.target.value" t-att-disabled="!state.status.configured || state.busy"/>
+            <textarea id="ai_question" rows="3" maxlength="1000" placeholder="e.g. How many students need attention and what factors are driving the score?" t-att-value="state.question" t-on-input="(ev) => this.state.question = ev.target.value" t-att-disabled="!state.status.configured || state.busy"/>
             <div class="ai_ask_actions">
               <button type="submit" class="ai_button" t-att-disabled="!state.status.configured || state.busy || !state.question.trim()"><t t-esc="state.busy ? 'Thinking…' : 'Ask'"/></button>
               <div class="ai_suggestions"><button t-foreach="suggestions" t-as="text" t-key="text" type="button" class="ai_chip" t-on-click="() => this.useSuggestion(text)" t-esc="text"/></div>
@@ -71,15 +71,15 @@
         <section t-if="state.tab === 'feedback'" class="ai_panel">
           <form class="ai_ask" t-on-submit="summarise">
             <div class="ai_ask_options">
-              <label>Feedback from <select t-att-value="state.kind" t-on-change="changeKind"><option value="student">Students</option><option value="parent">Parents</option><option value="staff">Staff</option></select></label>
-              <label>Period <select t-att-value="state.period" t-on-change="(ev) => this.state.period = ev.target.value"><option value="">All periods</option><t t-foreach="state.periods" t-as="p" t-key="p"><option t-att-value="p" t-esc="p"/></t></select></label>
-              <button type="submit" class="ai_button" t-att-disabled="!state.status.configured || state.busy"><t t-esc="state.busy ? 'Reading…' : 'Find themes'"/></button>
+              <label>Feedback from <select t-att-value="state.kind" t-on-change="changeKind" t-att-disabled="state.busy"><option value="student">Students</option><option value="parent">Parents</option><option value="staff">Staff</option></select></label>
+              <label>Period <select t-att-value="state.period" t-on-change="(ev) => this.state.period = ev.target.value" t-att-disabled="state.busy || state.periodsLoading"><option value="">All periods</option><t t-foreach="state.periods" t-as="p" t-key="p"><option t-att-value="p" t-esc="p"/></t></select></label>
+              <button type="submit" class="ai_button" t-att-disabled="!state.status.configured || state.busy || state.periodsLoading"><t t-esc="state.busy ? 'Reading…' : 'Find themes'"/></button>
             </div>
           </form>
           <article t-if="state.feedback" class="ai_answer">
             <p class="ai_answer_q"><t t-esc="state.feedback.responses"/> responses (<t t-esc="state.feedback.with_comments"/> with comments), average score <t t-esc="state.feedback.average"/> / 5 · <t t-esc="state.feedback.period"/></p>
             <div class="ai_answer_a"><pre t-esc="state.feedback.summary"/></div>
-            <small>Comments are sent anonymously: scores and text only, never names.</small>
+            <small>Only rating totals and predefined English keyword theme counts are sent. Stored comments stay on the server. <t t-esc="state.feedback.uncategorised"/> comment(s) need local topic review; categories may overlap.</small>
           </article>
         </section>
 

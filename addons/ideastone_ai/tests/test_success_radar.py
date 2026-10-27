@@ -1,4 +1,5 @@
 from datetime import datetime, time, timedelta
+from unittest.mock import patch
 
 from odoo.addons.ideastone_erp.tests.test_owner_mvp import OwnerMVPFixture
 from odoo.exceptions import AccessError
@@ -54,7 +55,7 @@ class TestSuccessRadar(OwnerMVPFixture, TransactionCase):
         row = self.row(self.student)
         self.assertEqual((row["score"], row["band"], row["factors"]), (0, "low", []))
         self.assertEqual(row["attendance"]["rate"], 90.0)
-        self.assertIn("On track", row["action"])
+        self.assertIn("No scored concerns", row["action"])
 
     def test_attendance_shortage_is_scored_explained_and_projected(self):
         self.attend(self.student, 12, 8)   # 60% term-to-date
@@ -68,12 +69,12 @@ class TestSuccessRadar(OwnerMVPFixture, TransactionCase):
         self.assertFalse(attendance["reachable"])
         self.assertEqual(row["factors"][0]["key"], "attendance")
         self.assertEqual(row["factors"][0]["points"], 40)
-        self.assertIn("can no longer be reached", row["factors"][0]["detail"])
-        self.assertIn("condonation", row["action"])
+        self.assertIn("currently scheduled classes", row["factors"][0]["detail"])
+        self.assertIn("remaining timetable", row["action"])
         self.assertEqual(row["band"], "watch")
 
         nudge = self.radar.sudo().student_nudge(self.student)
-        self.assertIn("can no longer reach 75", nudge["message"])
+        self.assertIn("Currently scheduled classes alone", nudge["message"])
 
     def test_reachable_shortage_tells_the_student_exactly_what_to_do(self):
         self.attend(self.student, 14, 6)   # 70%
@@ -81,9 +82,67 @@ class TestSuccessRadar(OwnerMVPFixture, TransactionCase):
         portal = self.env["campus.student.portal"].with_user(self.student_user).snapshot()["success"]
         # 75% of 32 = 24 -> needs 10 of the next 12.
         self.assertEqual(portal["attendance"]["need"], 10)
-        self.assertEqual(portal["message"], "Attend 10 of your next 12 classes to finish the semester at or above 75%.")
+        self.assertIn("Attend 10 of your next 12 scheduled classes", portal["message"])
         self.assertEqual(portal["band"], "watch")
-        self.assertIn("attend 10 of the next 12 classes", self.row(self.student)["action"])
+        self.assertIn("attend 10 of the next 12 scheduled classes", self.row(self.student)["action"])
+
+    def test_low_attendance_without_future_timetable_is_not_called_on_track(self):
+        self.attend(self.student, 0, 2, start_offset=-2)
+        nudge = self.radar.sudo().student_nudge(self.student)
+        self.assertEqual(nudge["attendance"]["rate"], 0)
+        self.assertIn("below 75", nudge["message"])
+        self.assertEqual(nudge["title"], "Attendance needs attention")
+        self.assertEqual(nudge["display_band"], "watch")
+        self.assertNotIn("on track", nudge["parent_message"])
+        self.env.company.campus_attendance_threshold = 0
+        self.assertEqual(self.radar.sudo().student_nudge(self.student)["attendance"]["threshold"], 0)
+
+    def test_hod_requires_an_assigned_department_for_every_hod_group(self):
+        self.hod.dept_id = False
+        with self.assertRaises(AccessError):
+            self.radar.with_user(self.hod).get_workspace()
+        plain_hod = new_test_user(self.env, login="plain_radar_hod", groups="ideastone_erp.group_mvp_hod")
+        with self.assertRaises(AccessError):
+            self.radar.with_user(plain_hod).get_workspace()
+        plain_hod.dept_id = self.department
+        self.assertEqual(self.radar.with_user(plain_hod).get_workspace()["role"], "hod")
+
+    def test_old_department_placement_does_not_leak_the_current_department(self):
+        other_department = self.env["op.department"].create({"name": "Transferred department", "code": "RADART"})
+        other_course = self.env["op.course"].create({"name": "Transferred course", "code": "RADART", "department_id": other_department.id})
+        self.env["op.student.course"].create({"student_id": self.student.id, "course_id": other_course.id,
+            "state": "running", "campus_date_from": self.today - timedelta(days=1)})
+        rows = self.radar.with_user(self.hod).get_workspace()["rows"]
+        self.assertNotIn(self.student.id, [row["id"] for row in rows])
+        with self.assertRaises(AccessError):
+            self.radar.with_user(self.hod).get_counseling_action(self.student.id)
+
+    def test_filtered_radar_does_not_score_every_student_twice(self):
+        original = type(self.radar)._assess
+        calls = []
+        def assess(recordset, student, today):
+            calls.append(student.id)
+            return original(recordset, student, today)
+        with patch.object(type(self.radar), "_assess", assess):
+            self.radar.with_user(self.owner).get_workspace({"query": self.student.name})
+        self.assertEqual(sorted(calls), sorted([self.student.id, self.peer.id]))
+
+    def test_new_counseling_resolves_old_followup_and_future_leave_is_not_counted(self):
+        route = self.env["campus.student.leave.routing"].search([("student_id", "=", self.student.id)])
+        leave = self.env["campus.student.leave"].with_user(self.mentor).create({"name": "Future leave", "routing_id": route.id,
+            "reason": "Future event", "date": self.today + timedelta(days=5), "deadline": self.today + timedelta(days=8)})
+        leave.action_submit()
+        leave.with_user(self.mentor).action_approve()
+        # Build an approved fixture; this test scores leave rather than its separate approval workflow.
+        leave.with_user(self.hod).sudo().action_approve()
+        self.env["campus.counseling"].create([
+            {"name": "Old followup", "student_id": self.student.id, "mentor_id": self.faculty.id,
+             "discussion": "Review", "date": self.today - timedelta(days=10), "follow_up_date": self.today - timedelta(days=5)},
+            {"name": "Completed followup", "student_id": self.student.id, "mentor_id": self.faculty.id,
+             "discussion": "Reviewed", "date": self.today}])
+        row = self.row(self.student)
+        self.assertEqual(row["engagement"]["leave_days"], 0)
+        self.assertEqual(row["engagement"]["overdue_follow_up"], 0)
 
     def test_results_fees_and_engagement_factors(self):
         # A non-managed exam can be completed directly; managed exams go through the publication workflow.

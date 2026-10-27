@@ -7,14 +7,14 @@
         <section class="ai_heading">
           <span class="ai_heading_icon"><i class="fa fa-heartbeat" aria-hidden="true"/></span>
           <div><h1>Student Success Radar</h1><p>Early-warning scores from attendance, results, fees and engagement, with the reason behind every point. <t t-esc="roleLabel"/> · <t t-esc="state.data.company"/> · <t t-esc="state.data.today"/></p></div>
-          <button type="button" class="ai_icon_button" title="Download CSV" aria-label="Download CSV" t-on-click="exportCsv"><i class="fa fa-download" aria-hidden="true"/></button>
+          <button type="button" class="ai_icon_button" title="Export displayed rows (up to 500)" aria-label="Export displayed rows (up to 500)" t-on-click="exportCsv"><i class="fa fa-download" aria-hidden="true"/></button>
         </section>
 
         <section class="ai_metrics" aria-label="Risk summary">
           <article class="ai_metric"><small>Students scored</small><strong t-esc="state.data.summary.students"/><span>Active, current semester</span></article>
           <article class="ai_metric tone_high"><small>Needs attention</small><strong t-esc="state.data.summary.high"/><span><t t-esc="percent(state.data.summary.high)"/>% of students · score 50+</span></article>
           <article class="ai_metric tone_watch"><small>Watch</small><strong t-esc="state.data.summary.watch"/><span><t t-esc="percent(state.data.summary.watch)"/>% · score 25–49</span></article>
-          <article class="ai_metric tone_low"><small>On track</small><strong t-esc="state.data.summary.low"/><span><t t-esc="percent(state.data.summary.low)"/>% · score under 25</span></article>
+          <article class="ai_metric tone_low"><small>Low recorded score</small><strong t-esc="state.data.summary.low"/><span><t t-esc="percent(state.data.summary.low)"/>% · score under 25; check data coverage</span></article>
         </section>
 
         <section class="ai_panel radar_factors" t-if="state.data.summary.top_factors.length" aria-label="Leading factors">
@@ -31,7 +31,7 @@
         <form class="ai_filters" t-on-submit="search" aria-label="Filters">
           <label>Department <select t-att-value="state.departmentId" t-on-change="changeDepartment"><option value="">All departments</option><t t-foreach="state.data.departments" t-as="d" t-key="d.id"><option t-att-value="d.id" t-att-selected="isSelected(d.id, state.departmentId)" t-esc="d.name"/></t></select></label>
           <label>Class <select t-att-value="state.batchId" t-on-change="changeBatch"><option value="">All classes</option><t t-foreach="batches" t-as="b" t-key="b.id"><option t-att-value="b.id" t-att-selected="isSelected(b.id, state.batchId)" t-esc="b.name"/></t></select></label>
-          <label>Band <select t-att-value="state.band" t-on-change="changeBand"><option value="">All bands</option><option value="high" t-att-selected="state.band === 'high'">Needs attention</option><option value="watch" t-att-selected="state.band === 'watch'">Watch</option><option value="low" t-att-selected="state.band === 'low'">On track</option></select></label>
+          <label>Band <select t-att-value="state.band" t-on-change="changeBand"><option value="">All bands</option><option value="high" t-att-selected="state.band === 'high'">Needs attention</option><option value="watch" t-att-selected="state.band === 'watch'">Watch</option><option value="low" t-att-selected="state.band === 'low'">Low recorded score</option></select></label>
           <label>Search <input type="search" placeholder="Name or number" t-att-value="state.query" t-on-input="updateQuery"/></label>
           <button type="submit" class="ai_button">Apply</button>
         </form>
@@ -45,10 +45,10 @@
                 <tr t-attf-class="radar_row band_#{row.band}">
                   <td><strong t-esc="row.name"/><small><t t-esc="row.number"/><t t-if="row.mentor"> · Mentor: <t t-esc="row.mentor"/></t></small></td>
                   <td><t t-esc="row.batch"/><small t-esc="row.semester"/></td>
-                  <td><span t-attf-class="radar_score band_#{row.band}" t-esc="row.score"/><small t-esc="bandLabel(row.band)"/></td>
+                  <td><span t-attf-class="radar_score band_#{row.band}" t-esc="row.score"/><small t-esc="row.provisional ? 'Limited attendance history' : bandLabel(row.band)"/></td>
                   <td>
                     <span t-foreach="row.factors" t-as="factor" t-key="factor.key" t-attf-class="radar_chip factor_#{factor.key}" t-att-title="factor.detail"><t t-esc="factorLabel(factor.key)"/> +<t t-esc="factor.points"/></span>
-                    <span t-if="!row.factors.length" class="radar_chip factor_ok">No concerns</span>
+                    <span t-if="!row.factors.length" class="radar_chip factor_ok">No scored concerns</span>
                   </td>
                   <td class="radar_action" t-esc="row.action"/>
                   <td class="radar_buttons">
@@ -63,7 +63,7 @@
                       <li t-foreach="row.factors" t-as="factor" t-key="factor.key"><strong t-esc="factorLabel(factor.key)"/> (+<t t-esc="factor.points"/>): <t t-esc="factor.detail"/></li>
                       <li><strong>Attendance</strong>: <t t-esc="row.attendance.rate === null ? 'not recorded' : row.attendance.rate + '%'"/> of <t t-esc="row.attendance.conducted"/> classes; <t t-esc="row.attendance.remaining"/> scheduled classes remain<t t-if="row.attendance.need !== null">; needs <t t-esc="row.attendance.need"/> more to reach <t t-esc="row.attendance.threshold"/>%</t>.</li>
                       <li><strong>Results</strong>: <t t-esc="row.academics.average === null ? 'no published exams' : row.academics.average + '% average across ' + row.academics.exams + ' exams, ' + row.academics.fails + ' below pass marks'"/>.</li>
-                      <li><strong>Fees</strong>: <t t-esc="row.fees.overdue ? '₹ ' + row.fees.overdue + ' overdue (' + row.fees.days + ' days)' : 'nothing overdue'"/>.</li>
+                      <li><strong>Fees</strong>: <t t-esc="row.fees.overdue ? state.data.currency_symbol + ' ' + row.fees.overdue + ' overdue (' + row.fees.days + ' days)' : 'nothing overdue'"/>.</li>
                       <li><strong>Engagement</strong>: <t t-esc="row.engagement.od_days"/> OD and <t t-esc="row.engagement.leave_days"/> leave day(s) this semester<t t-if="row.engagement.last_counseling">; last counselling <t t-esc="row.engagement.last_counseling"/></t>.</li>
                     </ul>
                   </td>

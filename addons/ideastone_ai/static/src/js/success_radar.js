@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
 const FACTOR_LABELS = { attendance: "Attendance", academics: "Results", fees: "Fees", engagement: "Engagement" };
-const BAND_LABELS = { high: "Needs attention", watch: "Watch", low: "On track" };
+const BAND_LABELS = { high: "Needs attention", watch: "Watch", low: "Low recorded score" };
 
 export class SuccessRadarPage extends Component {
     static template = "ideastone_ai.SuccessRadarPage";
@@ -14,6 +14,7 @@ export class SuccessRadarPage extends Component {
         this.orm = useService("orm");
         this.action = useService("action");
         this.notification = useService("notification");
+        this.requestId = 0;
         this.state = useState({ loading: true, error: "", data: null, departmentId: "", batchId: "", band: "", query: "", open: null });
         this.factorLabels = FACTOR_LABELS;
         this.bandLabels = BAND_LABELS;
@@ -21,16 +22,18 @@ export class SuccessRadarPage extends Component {
     }
 
     async load() {
+        const requestId = ++this.requestId;
         this.state.loading = true;
         this.state.error = "";
         try {
-            this.state.data = await this.orm.call("campus.success.radar", "get_workspace", [{
+            const data = await this.orm.call("campus.success.radar", "get_workspace", [{
                 department_id: this.state.departmentId, batch_id: this.state.batchId, band: this.state.band, query: this.state.query,
             }]);
+            if (requestId === this.requestId) { this.state.data = data; this.state.open = null; }
         } catch (error) {
-            this.state.error = error.data?.message || "The Student Success Radar could not be loaded. Please retry.";
+            if (requestId === this.requestId) this.state.error = error.data?.message || "The Student Success Radar could not be loaded. Please retry.";
         } finally {
-            this.state.loading = false;
+            if (requestId === this.requestId) this.state.loading = false;
         }
     }
 
@@ -66,11 +69,14 @@ export class SuccessRadarPage extends Component {
         await this.action.doAction({ type: "ir.actions.act_window", res_model: "op.student", res_id: row.id, views: [[false, "form"]], target: "current" });
     }
     exportCsv() {
-        const rows = [["Student", "Number", "Programme", "Class", "Semester", "Mentor", "Score", "Band", "Attendance %", "Results %", "Overdue fees", "Top factor", "Suggested action"],
+        const rows = [["Student", "Number", "Programme", "Class", "Semester", "Mentor", "Score", "Band", "Attendance %", "Results %", `Overdue fees (${this.state.data?.currency_code || ''})`, "Top factor", "Suggested action"],
             ...(this.state.data?.rows || []).map((row) => [row.name, row.number, row.programme, row.batch, row.semester, row.mentor, row.score,
                 BAND_LABELS[row.band], row.attendance.rate ?? "", row.academics.average ?? "", row.fees.overdue,
                 row.factors[0] ? FACTOR_LABELS[row.factors[0].key] : "", row.action])];
-        const csv = "﻿" + rows.map((row) => row.map((value) => `"${String(value ?? "").replaceAll('"', '""')}"`).join(",")).join("\r\n");
+        const csv = "﻿" + rows.map((row) => row.map((value) => {
+            const text = String(value ?? "");
+            return `"${(/^[=+\-@\t\r\n]/.test(text) ? "'" + text : text).replaceAll('"', '""')}"`;
+        }).join(",")).join("\r\n");
         const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
         const link = document.createElement("a");
         link.href = url;
