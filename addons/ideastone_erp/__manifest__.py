@@ -27,6 +27,7 @@
     ],
     "assets": {
         "web.assets_frontend": [
+            "ideastone_erp/static/src/js/session_sync.js",
             "ideastone_erp/static/src/scss/student_portal.scss",
             "ideastone_erp/static/src/scss/student_profile.scss",
             "ideastone_erp/static/src/scss/student_account.scss",
@@ -49,6 +50,7 @@
             "ideastone_erp/static/src/js/student_od.js",
         ],
         "web.assets_backend": [
+            "ideastone_erp/static/src/js/session_sync.js",
             "ideastone_erp/static/src/js/faculty_question_papers.js",
             "ideastone_erp/static/src/xml/faculty_question_papers.xml",
             "ideastone_erp/static/src/js/examinations.js",
