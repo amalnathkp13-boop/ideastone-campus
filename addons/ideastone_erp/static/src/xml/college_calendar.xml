@@ -7,7 +7,7 @@
   </t>
 
   <t t-name="ideastone_erp.CollegeCalendar">
-    <main class="campus_college_calendar">
+    <main id="college-calendar-page" class="campus_college_calendar">
       <div class="content">
         <div t-if="state.loading" class="notice" role="status">Loading college calendar…</div>
         <div t-if="state.error" class="notice error" role="alert"><span t-esc="state.error"/> <button class="btn" t-on-click="load">Retry</button></div>
