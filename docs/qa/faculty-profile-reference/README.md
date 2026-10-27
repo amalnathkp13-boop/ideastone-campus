@@ -91,3 +91,23 @@ names, evidence files, contacts and financial amounts are for interface testing.
 
 Screenshots show each desktop page, selected phone layouts, and the phone upload
 form. Raw local logs are ignored by Git. The supplied source document is unchanged.
+
+## Scrolling repair
+
+The original overflow selector expected a wrapper around the client component,
+but Odoo mounts its `main` directly in `.o_action_manager`. That left tall content
+clipped by the action manager. The direct child now has a bounded 100% height,
+zero minimum height and native vertical scrolling. It is keyboard focusable too.
+Appraisal summary cards are in the page body after portfolio filters, outside
+the heading's action buttons.
+
+`scroll-verification.json` records 28 bottom-to-top checks across all seven pages
+at 1440, 768, 390 and 320 px, using an 800 px viewport height. Every page returned
+to scroll offset zero without horizontal page overflow. Native keyboard scrolling
+and wheel input were exercised; wheel checks were observed after browser scroll
+animation settled. The user's visible preview tab was refreshed and independently
+returned from offset 1892.8 to zero. Screenshots were updated; `scroll-restored.png`
+shows that visible preview back at the profile heading.
+
+This repair changes only scoped CSS and the client template. XML structure and
+Git whitespace checks pass; the earlier 156-test backend result is unchanged.
