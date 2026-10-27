@@ -27,6 +27,8 @@
       <p t-if="state.loading" role="status"><i class="fa fa-spinner fa-spin me-2"/>Loading your campus…</p>
       <t t-elif="!state.error">
         <t t-if="state.page === 'owner-overview' &amp;&amp; state.is_owner_workspace"><t t-call="ideastone_erp.OwnerOverview"/></t>
+        <t t-elif="state.faculty_home_enabled &amp;&amp; state.page === 'overview'"><FacultyHome/></t>
+        <t t-elif="state.faculty_home_enabled &amp;&amp; state.page === 'faculty-departments'"><FacultyDepartments/></t>
         <t t-elif="state.page === 'overview'">
           <section t-if="state.faculty_modules.length" class="campus_faculty_welcome"><div><span>YOUR CAMPUS, CONNECTED</span><h2>Welcome back, <t t-esc="state.user"/></h2><p>Plan your day, manage your classes and keep every responsibility in view.</p><button class="btn btn-light" t-on-click="() => this.open({action:'ideastone_erp.action_faculty_task'})"><i class="fa fa-check-square-o me-2"/>Open my tasks</button></div><i class="fa fa-graduation-cap" aria-hidden="true"/></section>
           <section class="campus_stats" aria-label="Current campus summary"><t t-foreach="state.stats" t-as="stat" t-key="stat.label"><article class="campus_stat"><div><span t-esc="stat.label"/><strong t-esc="stat.value"/><small t-esc="stat.detail"/></div><i class="fa fa-bar-chart" aria-hidden="true"/></article></t></section>

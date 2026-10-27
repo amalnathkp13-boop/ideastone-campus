@@ -1,0 +1,395 @@
+{
+  "responsive": [
+    {
+      "bodyWidth": 1440,
+      "contentWidth": 1175,
+      "page": "Academics",
+      "scrollWidth": 1175,
+      "viewport": 1440
+    },
+    {
+      "bodyWidth": 1440,
+      "contentWidth": 1175,
+      "page": "Academic years",
+      "scrollWidth": 1175,
+      "viewport": 1440
+    },
+    {
+      "bodyWidth": 1440,
+      "contentWidth": 1175,
+      "page": "Departments",
+      "scrollWidth": 1175,
+      "viewport": 1440
+    },
+    {
+      "bodyWidth": 1440,
+      "contentWidth": 1175,
+      "page": "Programmes",
+      "scrollWidth": 1175,
+      "viewport": 1440
+    },
+    {
+      "bodyWidth": 1440,
+      "contentWidth": 1175,
+      "page": "Semesters",
+      "scrollWidth": 1175,
+      "viewport": 1440
+    },
+    {
+      "bodyWidth": 1440,
+      "contentWidth": 1175,
+      "page": "Sections",
+      "scrollWidth": 1175,
+      "viewport": 1440
+    },
+    {
+      "bodyWidth": 1440,
+      "contentWidth": 1175,
+      "page": "Subjects & curriculum",
+      "scrollWidth": 1175,
+      "viewport": 1440
+    },
+    {
+      "bodyWidth": 768,
+      "contentWidth": 753,
+      "page": "Academics",
+      "scrollWidth": 753,
+      "viewport": 768
+    },
+    {
+      "bodyWidth": 768,
+      "contentWidth": 753,
+      "page": "Academic years",
+      "scrollWidth": 753,
+      "viewport": 768
+    },
+    {
+      "bodyWidth": 768,
+      "contentWidth": 753,
+      "page": "Departments",
+      "scrollWidth": 753,
+      "viewport": 768
+    },
+    {
+      "bodyWidth": 768,
+      "contentWidth": 753,
+      "page": "Programmes",
+      "scrollWidth": 753,
+      "viewport": 768
+    },
+    {
+      "bodyWidth": 768,
+      "contentWidth": 753,
+      "page": "Semesters",
+      "scrollWidth": 753,
+      "viewport": 768
+    },
+    {
+      "bodyWidth": 768,
+      "contentWidth": 753,
+      "page": "Sections",
+      "scrollWidth": 753,
+      "viewport": 768
+    },
+    {
+      "bodyWidth": 768,
+      "contentWidth": 753,
+      "page": "Subjects & curriculum",
+      "scrollWidth": 753,
+      "viewport": 768
+    },
+    {
+      "bodyWidth": 390,
+      "contentWidth": 375,
+      "page": "Academics",
+      "scrollWidth": 375,
+      "viewport": 390
+    },
+    {
+      "bodyWidth": 390,
+      "contentWidth": 375,
+      "page": "Academic years",
+      "scrollWidth": 375,
+      "viewport": 390
+    },
+    {
+      "bodyWidth": 390,
+      "contentWidth": 375,
+      "page": "Departments",
+      "scrollWidth": 375,
+      "viewport": 390
+    },
+    {
+      "bodyWidth": 390,
+      "contentWidth": 375,
+      "page": "Programmes",
+      "scrollWidth": 375,
+      "viewport": 390
+    },
+    {
+      "bodyWidth": 390,
+      "contentWidth": 375,
+      "page": "Semesters",
+      "scrollWidth": 375,
+      "viewport": 390
+    },
+    {
+      "bodyWidth": 390,
+      "contentWidth": 375,
+      "page": "Sections",
+      "scrollWidth": 375,
+      "viewport": 390
+    },
+    {
+      "bodyWidth": 390,
+      "contentWidth": 375,
+      "page": "Subjects & curriculum",
+      "scrollWidth": 375,
+      "viewport": 390
+    },
+    {
+      "bodyWidth": 320,
+      "contentWidth": 305,
+      "page": "Academics",
+      "scrollWidth": 305,
+      "viewport": 320
+    },
+    {
+      "bodyWidth": 320,
+      "contentWidth": 305,
+      "page": "Academic years",
+      "scrollWidth": 305,
+      "viewport": 320
+    },
+    {
+      "bodyWidth": 320,
+      "contentWidth": 305,
+      "page": "Departments",
+      "scrollWidth": 305,
+      "viewport": 320
+    },
+    {
+      "bodyWidth": 320,
+      "contentWidth": 305,
+      "page": "Programmes",
+      "scrollWidth": 305,
+      "viewport": 320
+    },
+    {
+      "bodyWidth": 320,
+      "contentWidth": 305,
+      "page": "Semesters",
+      "scrollWidth": 305,
+      "viewport": 320
+    },
+    {
+      "bodyWidth": 320,
+      "contentWidth": 305,
+      "page": "Sections",
+      "scrollWidth": 305,
+      "viewport": 320
+    },
+    {
+      "bodyWidth": 320,
+      "contentWidth": 305,
+      "page": "Subjects & curriculum",
+      "scrollWidth": 305,
+      "viewport": 320
+    }
+  ],
+  "referenceTypography": {
+    ".ai-title": {
+      "color": "rgb(16, 47, 76)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "23.2px",
+      "size": "16px",
+      "weight": "750"
+    },
+    ".curriculum-toolbar h2": {
+      "color": "rgb(16, 47, 76)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "23.2px",
+      "size": "16px",
+      "weight": "700"
+    },
+    ".dept-toolbar h2": {
+      "color": "rgb(22, 55, 84)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "21.75px",
+      "size": "15px",
+      "weight": "700"
+    },
+    ".insight h3": {
+      "color": "rgb(27, 60, 89)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "17.4px",
+      "size": "12px",
+      "weight": "700"
+    },
+    ".metric-value": {
+      "color": "rgb(16, 47, 76)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "29.7px",
+      "size": "27px",
+      "weight": "750"
+    },
+    ".panel-title": {
+      "color": "rgb(20, 54, 83)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "23.2px",
+      "size": "16px",
+      "weight": "750"
+    },
+    ".programme-card h3": {
+      "color": "rgb(16, 51, 81)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "19.6px",
+      "size": "14px",
+      "weight": "700"
+    },
+    ".section-card h3": {
+      "color": "rgb(16, 51, 81)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "19.6px",
+      "size": "14px",
+      "weight": "700"
+    },
+    ".semester-card h3": {
+      "color": "rgb(16, 51, 81)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "20.3px",
+      "size": "14px",
+      "weight": "700"
+    },
+    ".subtitle": {
+      "color": "rgb(104, 129, 155)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "20.3px",
+      "size": "14px",
+      "weight": "400"
+    },
+    "h1": {
+      "color": "rgb(13, 48, 77)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "36px",
+      "size": "30px",
+      "weight": "700"
+    }
+  },
+  "implementedTypography": {
+    ".ai-title": {
+      "color": "rgb(16, 47, 76)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "23.2px",
+      "size": "16px",
+      "weight": "750"
+    },
+    ".insight h3": {
+      "color": "rgb(27, 60, 89)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "17.4px",
+      "size": "12px",
+      "weight": "700"
+    },
+    ".metric-value": {
+      "color": "rgb(16, 47, 76)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "29.7px",
+      "size": "27px",
+      "weight": "750"
+    },
+    ".panel-title": {
+      "color": "rgb(20, 54, 83)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "23.2px",
+      "size": "16px",
+      "weight": "750"
+    },
+    ".subtitle": {
+      "color": "rgb(104, 129, 155)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "20.3px",
+      "size": "14px",
+      "weight": "400"
+    },
+    "h1": {
+      "color": "rgb(13, 48, 77)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "36px",
+      "size": "30px",
+      "weight": "700"
+    },
+    ".programme-card h3": {
+      "color": "rgb(16, 51, 81)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "19.6px",
+      "size": "14px",
+      "weight": "700"
+    },
+    ".dept-toolbar h2": {
+      "color": "rgb(22, 55, 84)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "21.75px",
+      "size": "15px",
+      "weight": "700"
+    },
+    ".semester-card h3": {
+      "color": "rgb(16, 51, 81)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "20.3px",
+      "size": "14px",
+      "weight": "700"
+    },
+    ".section-card h3": {
+      "color": "rgb(16, 51, 81)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "19.6px",
+      "size": "14px",
+      "weight": "700"
+    },
+    ".curriculum-toolbar h2": {
+      "color": "rgb(16, 47, 76)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "23.2px",
+      "size": "16px",
+      "weight": "700"
+    }
+  },
+  "newRecordStyle": {
+    "existing": {
+      "background": "rgb(255, 255, 255)",
+      "color": "rgb(16, 51, 81)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "19.6px",
+      "size": "14px",
+      "weight": "700"
+    },
+    "newRecord": {
+      "background": "rgb(255, 255, 255)",
+      "color": "rgb(16, 51, 81)",
+      "font": "Inter, \"Segoe UI\", Roboto, Arial, sans-serif",
+      "lineHeight": "19.6px",
+      "size": "14px",
+      "weight": "700"
+    }
+  },
+  "createdThroughUI": [
+    "department SAS-QA",
+    "programme SAS-BSC",
+    "academic year AY2027-QA",
+    "Semester I · Applied Sciences",
+    "section SAS2027-A",
+    "subject SAS101"
+  ],
+  "updatedSubjectCredits": 3.5,
+  "persistedAfterReload": true,
+  "finalPageConsoleErrors": [],
+  "finalValidationStartedAt": "2026-10-27T08:43:15.149Z",
+  "resolvedEarlierFormError": [
+    {
+      "timestamp": "2026-10-27T08:29:44.716Z",
+      "message": "Caused by: TypeError: ctx.String is not a function",
+      "resolution": "Removed template String() calls; all six forms saved successfully after correction."
+    }
+  ]
+}
