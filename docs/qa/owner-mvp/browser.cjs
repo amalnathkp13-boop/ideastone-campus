@@ -122,7 +122,7 @@ async function markup(page) {
         await page.locator('.campus_sidebar').getByRole('button',{name:'Admissions',exact:true}).click();
         await page.getByRole('heading',{name:'Admissions',exact:true}).waitFor();
         if(await page.locator('.campus_admissions_workspace .stat').count()!==4) throw Error('Admissions overview does not show four live indicators');
-        if(await page.locator('.campus_admissions_workspace h1').evaluate(el=>getComputedStyle(el).fontSize)!=='27px') throw Error('Admissions heading differs from the established admin typography');
+        await assertCampusTheme(page);
         for(const [label,title] of [['Enquiries','Enquiry studio'],['Applications & review','Applications & review'],['Documents','Document verification desk'],['Admission register','Admission register']]) {
             await page.locator('.campus_faculty_subnav').getByRole('button',{name:label,exact:true}).click();
             await page.getByRole('heading',{name:title,exact:true,level:1}).waitFor();
@@ -132,7 +132,7 @@ async function markup(page) {
         await page.locator('.campus_sidebar').getByRole('button',{name:'Students',exact:true}).click();
         await page.getByRole('heading',{name:'Student directory',exact:true,level:1}).waitFor();
         if(await page.locator('.campus_students_workspace .kpi').count()!==4) throw Error('Students directory does not show four indicators');
-        if(await page.locator('.campus_students_workspace h1').evaluate(el=>getComputedStyle(el).fontSize)!=='27px') throw Error('Students heading differs from the established typography');
+        await assertCampusTheme(page);
         const directoryDepartment=await page.locator('.campus_students_workspace .dept h3').first().innerText();
         await page.locator('.campus_students_workspace .dept .textbtn').first().click();
         await page.getByRole('heading',{name:directoryDepartment,exact:true,level:1}).waitFor();
