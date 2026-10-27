@@ -18,14 +18,14 @@ The AI pack now restricts each staff role to its students, gives attendance guid
 | Monthly limit | Only successful calls counted and concurrent calls could exceed the cap. | All reserved attempts count in the UTC month; a company lock and READ COMMITTED audit cursor prevent stale concurrent reservations. Two requests with one remaining slot produce one provider call. |
 | Provider errors | Malformed response shapes could crash; redirects could forward payloads elsewhere. Configuration was labelled Connected before a call succeeded. | Validate response types, reject redirects, show controlled errors, refresh failed-attempt usage, label configuration accurately. OpenAI's default host requires a key; local compatible endpoints can work without one. |
 | UI state and layout | Late filter responses could overwrite current selections. The model/status badge overflowed at mobile widths. | Ignore stale requests; clear previous feedback when its category changes; wrap headings, badges and generated text within the feature page. |
-| Notice drafts | Local models can return a bold TITLE marker; the title was then lost. New circular defaults did not select the managed workflow. | Parse plain/bold title markers, escape the generated body, open an unsaved managed circular for human review. |
+| Notice drafts | Local models can return a bold TITLE marker or omit it; the title was then lost. New circular defaults did not select the managed workflow. | Parse plain/bold title markers, fall back to the user's brief if the model omits a title, escape the generated body, open an unsaved managed circular for human review. |
 | Generated factual accuracy | The small local model misstated feedback counts in a real test. | Show server-calculated topic and rating counts separately from AI suggestions, with review guidance. The model's prose is not treated as an authoritative report. |
 
 ## Validation
 
-- Odoo 17 with the pinned OpenEduCat vendor and this add-on: **22 test cases, zero failures or errors**. Odoo's statistics include four fixture entries and report 26 tests.
+- Odoo 17 with the pinned OpenEduCat vendor and this add-on: **23 test cases, zero failures or errors**. Odoo's statistics include four fixture entries and report 27 tests.
 - Four Node tests cover stale requests, failed-attempt usage refresh, and CSV escaping/currency.
-- Nine real Odoo HTTP/browser checks cover owner/HOD/mentor isolation, student/parent messages, safe notice rendering, provider-payload privacy, durable failure logs, malformed responses, concurrent limits and the disabled gate. A deterministic local provider makes failure/concurrency checks repeatable.
+- Ten real Odoo HTTP/browser checks cover owner/HOD/mentor isolation, student/parent messages, safe notice rendering, the editable circular handoff, provider-payload privacy, durable failure logs, malformed responses, concurrent limits and the disabled gate. A deterministic local provider makes failure/concurrency checks repeatable.
 - Assistant feedback layouts are checked at 390, 1440 and 1728 pixels. CI uploads screenshots and results as `ai-audit-proof`.
 - Local Mac: Ollama `qwen2.5:1.5b` answered the exact active-student count, drafted a notice, and generated feedback suggestions through the ERP UI. Chromium and WebKit rendered the Radar and completed a real provider question without page errors. A 390-pixel generated-feedback screen was checked for horizontal overflow.
 - Ruff, XML parsing, JavaScript syntax and whitespace checks pass.

@@ -103,6 +103,14 @@ assert(out && process.env.AI_QA_PASSWORD, 'QA output and runtime password requir
         await page.locator('.ai_notice_body').waitFor();
         assert.equal(await page.locator('.ai_notice_body b').count(), 0);
         checks.push('ask and notice workflows render provider output safely');
+        await page.getByRole('button', { name: 'Create circular from this draft', exact: true }).click();
+        const title = page.locator('.o_field_widget[name="name"] input');
+        await title.waitFor();
+        assert.equal(await title.inputValue(), 'Synthetic notice');
+        assert(await title.isEditable());
+        checks.push('generated notice opens as an editable unsaved circular');
+        await page.goto(base + '/web#action=ideastone_ai.action_assistant');
+        await page.getByRole('heading', { name: 'Campus Assistant', exact: true }).waitFor();
 
         await page.getByRole('button', { name: 'Feedback themes', exact: true }).click();
         await page.getByRole('button', { name: 'Find themes', exact: true }).click();

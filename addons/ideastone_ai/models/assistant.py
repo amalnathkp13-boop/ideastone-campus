@@ -239,6 +239,8 @@ class CampusAssistant(models.AbstractModel):
         heading = re.fullmatch(r"(?:\*\*|__)?TITLE:(?:\*\*|__)?\s*(.*)", first, re.IGNORECASE)
         if heading:
             title, body = heading[1].strip(), rest.strip()
+        if not title:
+            title = brief.splitlines()[0][:120]
         paragraphs = [escape(p.strip()) for p in body.split("\n\n") if p.strip()] or [escape(body)]
         html = "".join("<p>%s</p>" % p.replace("\n", "<br/>") for p in paragraphs)
         create = None

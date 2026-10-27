@@ -157,6 +157,12 @@ class TestCampusAssistant(OwnerMVPFixture, TransactionCase):
             self.assertEqual(draft["title"], "Library access")
             self.assertEqual(draft["body_text"], "Bring your card.")
 
+    def test_missing_provider_title_uses_the_users_brief_for_the_editable_draft(self):
+        with patch.object(assistant_module.requests, "post", self.fake_post(FakeResponse(content="Bring your identity card to the library."))):
+            draft = self.assistant.draft_notice("Library access notice")
+        self.assertEqual(draft["create_action"]["context"]["default_name"], "Library access notice")
+        self.assertEqual(draft["body_text"], "Bring your identity card to the library.")
+
     def test_malformed_provider_payloads_and_redirects_are_audited(self):
         self.company.sudo().campus_ai_monthly_limit = 0
         for raw in [[], {"choices": "wrong"}, {"choices": [None]}, {"choices": [{"message": None}]}, {"choices": [{"message": {"content": ["wrong"]}}]}]:
