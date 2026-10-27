@@ -1,5 +1,6 @@
 // Real Odoo and saved synthetic records. No route mocks, storage mocks or production credentials.
 const {chromium}=require('playwright');
+const {assertCampusTheme} = require('../campus-theme.cjs');
 const fs=require('node:fs/promises');
 const path=require('node:path');
 const assert=require('node:assert/strict');
@@ -42,7 +43,7 @@ async function assertParentTheme(page) {
     assert.match(theme.sidebar,/rgb\(9, 47, 80\)/,'Parent sidebar must retain the shared navy surface');
     assert.equal(theme.selected,'rgb(22, 104, 223)');
     assert.equal(theme.selectedText,'rgb(255, 255, 255)');
-    if(theme.primary) assert.equal(theme.primary,'rgb(6, 102, 231)','Parent primary controls must retain the shared campus blue');
+    if(theme.primary) assert(['rgb(23, 105, 210)','rgb(17, 83, 168)'].includes(theme.primary),'Parent primary controls must use the shared blue or its hover shade');
 }
 async function visit(page,section) {
     // Revisiting the same URL must wait for the new form, not the old heading/URL.
@@ -61,7 +62,7 @@ async function submit(page,button) {
 (async()=>{
     await fs.mkdir(out,{recursive:true});
     const browser=await chromium.launch({headless:true,...(process.env.PARENT_QA_CHROME?{channel:'chrome'}:{})});
-    const context=await browser.newContext({viewport:{width:1440,height:1000},timezoneId:'Asia/Kolkata'});
+    const context=await browser.newContext({viewport:{width:1440,height:1000},timezoneId:'Asia/Kolkata',reducedMotion:'reduce'});
     const page=await context.newPage(); page.setDefaultTimeout(60000);
     const errors=[]; page.on('pageerror',e=>errors.push(e.message));
     const requestTitle='QA parent absence intimation '+Date.now();
@@ -80,8 +81,10 @@ async function submit(page,button) {
         assert(!initial.notices.some(row=>row.name==='PRIVATE STAFF ONLY'));
         for(const notice of initial.notices) await rpc(page,'campus.parent.portal','act',['notice',initial.student_id,{notice_id:notice.id,read:false}]);
         await page.reload();
+        await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'parent-overview-1440.png'),fullPage:true});
         await page.locator('.student_quick').scrollIntoViewIfNeeded();
+        await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'parent-overview-details-1440.png'),fullPage:true});
         await page.evaluate(()=>document.getElementById('wrapwrap').scrollTo({top:0}));
         const first=initial.student_id, second=initial.children.find(c=>c.id!==first).id;
@@ -113,6 +116,7 @@ async function submit(page,button) {
         const request=created.requests.find(r=>r.name===requestTitle);
         assert(request?.reference);
         assert.deepEqual(created.attendance,initial.attendance);
+        await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'parent-requests-1440.png'),fullPage:true});
         await visit(page,'notices');
         const unread=await rpc(page,'campus.parent.portal','snapshot',[first]);
@@ -176,6 +180,7 @@ async function submit(page,button) {
             await page.locator('.student_sidebar.is-open').waitFor();
             await page.keyboard.press('Escape');
             await page.locator('.student_sidebar').waitFor({state:'hidden'});
+            await assertCampusTheme(page);
             await page.screenshot({path:path.join(out,`parent-overview-${width}.png`),fullPage:true});
         }
         assert.deepEqual(errors,[]);

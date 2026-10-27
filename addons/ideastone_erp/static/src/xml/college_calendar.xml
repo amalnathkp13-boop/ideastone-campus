@@ -22,7 +22,7 @@
               <select aria-label="Event status" t-model="state.status"><option value="all">All statuses</option><option t-foreach="statuses" t-as="status" t-key="status[0]" t-att-value="status[0]" t-esc="status[1]"/></select>
               <input type="search" aria-label="Search events" placeholder="Search events..." t-model="state.query"/>
             </div>
-            <div class="viewtoggle" role="group" aria-label="Calendar view"><button t-att-class="{active: state.view === 'month'}" t-att-aria-pressed="state.view === 'month'" t-on-click="() => state.view = 'month'">Month</button><button t-att-class="{active: state.view === 'agenda'}" t-att-aria-pressed="state.view === 'agenda'" t-on-click="() => state.view = 'agenda'">Agenda</button></div>
+            <div class="viewtoggle" role="group" aria-label="Calendar view"><button t-att-class="{active: state.view === 'month'}" t-att-aria-pressed="state.view === 'month' ? 'true' : 'false'" t-on-click="() => state.view = 'month'">Month</button><button t-att-class="{active: state.view === 'agenda'}" t-att-aria-pressed="state.view === 'agenda' ? 'true' : 'false'" t-on-click="() => state.view = 'agenda'">Agenda</button></div>
           </div>
           <div class="workspace">
             <section class="panel calendarpanel" aria-label="College activities calendar">
@@ -30,7 +30,7 @@
               <div t-if="state.view === 'month'" class="calendar">
                 <div t-foreach="weekdays" t-as="weekday" t-key="weekday" class="weekday" t-esc="weekday"/>
                 <div t-foreach="days" t-as="cell" t-key="cell.key" class="day" t-att-class="{outside: cell.outside, today: cell.today, selected: cell.selected}">
-                  <button class="day-select" t-on-click="() => this.selectDate(cell.key)" t-att-aria-label="formatDate(cell.key) + ', ' + cell.events.length + ' events'" t-att-aria-pressed="cell.selected"><span class="daynum" t-esc="cell.day"/></button>
+                  <button class="day-select" t-on-click="() => this.selectDate(cell.key)" t-att-aria-label="formatDate(cell.key) + ', ' + cell.events.length + ' events'" t-att-aria-pressed="cell.selected ? 'true' : 'false'"><span class="daynum" t-esc="cell.day"/></button>
                   <button t-foreach="cell.events.slice(0,2)" t-as="event" t-key="event.id" class="eventdot" t-att-class="event.category" t-att-title="event.name" t-on-click="() => this.selectEvent(event)" t-esc="event.name"/>
                   <button t-if="cell.events.length &gt; 2" class="more" t-on-click="() => { this.selectDate(cell.key); state.view = 'agenda'; }">+<t t-esc="cell.events.length - 2"/> more</button>
                 </div>
