@@ -16,3 +16,4 @@ from . import test_student_od
 from . import test_navigation_preferences
 from . import test_owner_staff_ui
 from . import test_academics_ui
+from . import test_faculty_home

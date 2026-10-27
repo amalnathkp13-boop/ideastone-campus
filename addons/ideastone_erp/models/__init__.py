@@ -62,4 +62,5 @@ from . import question_paper
 from . import hod_question_paper
 from . import coe_workspace
 from . import owner_staff_ui
+from . import faculty_home
 from . import academics_ui
