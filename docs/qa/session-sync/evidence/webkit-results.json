@@ -1,0 +1,12 @@
+{
+  "engine": "webkit",
+  "results": [
+    "same-account module navigation",
+    "background staff tab follows portal sign-in",
+    "portal identity refreshes even when URL is unchanged",
+    "portal tab follows staff sign-in without old action hash",
+    "logout clears stale authenticated tabs",
+    "focus detects changed cookie without a storage announcement"
+  ],
+  "errors": []
+}
