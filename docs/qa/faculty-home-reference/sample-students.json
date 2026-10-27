@@ -1,0 +1,205 @@
+{
+  "ECE": {
+    "name": "Electronics & Communication Engineering",
+    "years": [
+      {
+        "label": "Year 2",
+        "sections": [
+          {
+            "label": "Section A",
+            "students": [
+              [
+                "Aarav Kumar",
+                "ECE24A001",
+                "B.E. ECE",
+                "aarav.kumar@college.edu"
+              ],
+              [
+                "Diya Raman",
+                "ECE24A002",
+                "B.E. ECE",
+                "diya.raman@college.edu"
+              ],
+              [
+                "Nithin Raj",
+                "ECE24A003",
+                "B.E. ECE",
+                "nithin.raj@college.edu"
+              ]
+            ]
+          },
+          {
+            "label": "Section B",
+            "students": [
+              [
+                "Meera S",
+                "ECE24B014",
+                "B.E. ECE",
+                "meera.s@college.edu"
+              ],
+              [
+                "Kavin Prakash",
+                "ECE24B015",
+                "B.E. ECE",
+                "kavin.prakash@college.edu"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Year 3",
+        "sections": [
+          {
+            "label": "Section A",
+            "students": [
+              [
+                "Ananya Devi",
+                "ECE23A006",
+                "B.E. ECE",
+                "ananya.devi@college.edu"
+              ],
+              [
+                "Rohan V",
+                "ECE23A009",
+                "B.E. ECE",
+                "rohan.v@college.edu"
+              ]
+            ]
+          },
+          {
+            "label": "Section B",
+            "students": [
+              [
+                "Harish M",
+                "ECE23B011",
+                "B.E. ECE",
+                "harish.m@college.edu"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Year 4",
+        "sections": [
+          {
+            "label": "Section A",
+            "students": [
+              [
+                "Sanjay Kumar",
+                "ECE22A004",
+                "B.E. ECE",
+                "sanjay.kumar@college.edu"
+              ],
+              [
+                "Pooja N",
+                "ECE22A018",
+                "B.E. ECE",
+                "pooja.n@college.edu"
+              ]
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "CSE": {
+    "name": "Computer Science & Engineering",
+    "years": [
+      {
+        "label": "Year 2",
+        "sections": [
+          {
+            "label": "Section A",
+            "students": [
+              [
+                "Ishaan R",
+                "CSE24A003",
+                "B.E. CSE",
+                "ishaan.r@college.edu"
+              ],
+              [
+                "Rithika P",
+                "CSE24A010",
+                "B.E. CSE",
+                "rithika.p@college.edu"
+              ]
+            ]
+          },
+          {
+            "label": "Section B",
+            "students": [
+              [
+                "Vikram S",
+                "CSE24B007",
+                "B.E. CSE",
+                "vikram.s@college.edu"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Year 3",
+        "sections": [
+          {
+            "label": "Section A",
+            "students": [
+              [
+                "Janani K",
+                "CSE23A012",
+                "B.E. CSE",
+                "janani.k@college.edu"
+              ],
+              [
+                "Adithya M",
+                "CSE23A019",
+                "B.E. CSE",
+                "adithya.m@college.edu"
+              ]
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "EEE": {
+    "name": "Electrical & Electronics Engineering",
+    "years": [
+      {
+        "label": "Year 3",
+        "sections": [
+          {
+            "label": "Section A",
+            "students": [
+              [
+                "Pranav T",
+                "EEE23A005",
+                "B.E. EEE",
+                "pranav.t@college.edu"
+              ],
+              [
+                "Swetha R",
+                "EEE23A016",
+                "B.E. EEE",
+                "swetha.r@college.edu"
+              ]
+            ]
+          },
+          {
+            "label": "Section B",
+            "students": [
+              [
+                "Dinesh K",
+                "EEE23B008",
+                "B.E. EEE",
+                "dinesh.k@college.edu"
+              ]
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

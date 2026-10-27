@@ -1,0 +1,545 @@
+{
+  "reference": "faculty_dashboard_with_departments.html",
+  "verifiedAt": "2026-10-27T09:40:49.656Z",
+  "viewportChecks": [
+    {
+      "stage": "overview",
+      "width": 1440,
+      "documentWidth": 1440,
+      "localTables": [
+        {
+          "scroll": 600,
+          "width": 600
+        },
+        {
+          "scroll": 271,
+          "width": 271
+        }
+      ],
+      "overlaps": [],
+      "parentScrollWidth": 1175,
+      "parentWidth": 1175,
+      "rootScrollWidth": 1175,
+      "rootWidth": 1175,
+      "viewport": 1440
+    },
+    {
+      "stage": "overview",
+      "width": 768,
+      "documentWidth": 768,
+      "localTables": [
+        {
+          "scroll": 693,
+          "width": 693
+        },
+        {
+          "scroll": 693,
+          "width": 693
+        }
+      ],
+      "overlaps": [],
+      "parentScrollWidth": 753,
+      "parentWidth": 753,
+      "rootScrollWidth": 753,
+      "rootWidth": 753,
+      "viewport": 768
+    },
+    {
+      "stage": "overview",
+      "width": 390,
+      "documentWidth": 390,
+      "localTables": [
+        {
+          "scroll": 500,
+          "width": 324
+        },
+        {
+          "scroll": 350,
+          "width": 324
+        }
+      ],
+      "overlaps": [],
+      "parentScrollWidth": 375,
+      "parentWidth": 375,
+      "rootScrollWidth": 375,
+      "rootWidth": 375,
+      "viewport": 390
+    },
+    {
+      "stage": "overview",
+      "width": 320,
+      "documentWidth": 320,
+      "localTables": [
+        {
+          "scroll": 500,
+          "width": 253
+        },
+        {
+          "scroll": 350,
+          "width": 253
+        }
+      ],
+      "overlaps": [],
+      "parentScrollWidth": 305,
+      "parentWidth": 305,
+      "rootScrollWidth": 305,
+      "rootWidth": 305,
+      "viewport": 320
+    },
+    {
+      "stage": "departments",
+      "width": 1440,
+      "documentWidth": 1440,
+      "localTables": [],
+      "overlaps": [],
+      "parentScrollWidth": 1190,
+      "parentWidth": 1190,
+      "rootScrollWidth": 1190,
+      "rootWidth": 1190,
+      "viewport": 1440
+    },
+    {
+      "stage": "departments",
+      "width": 768,
+      "documentWidth": 768,
+      "localTables": [],
+      "overlaps": [],
+      "parentScrollWidth": 753,
+      "parentWidth": 753,
+      "rootScrollWidth": 753,
+      "rootWidth": 753,
+      "viewport": 768
+    },
+    {
+      "stage": "departments",
+      "width": 390,
+      "documentWidth": 390,
+      "localTables": [],
+      "overlaps": [],
+      "parentScrollWidth": 375,
+      "parentWidth": 375,
+      "rootScrollWidth": 375,
+      "rootWidth": 375,
+      "viewport": 390
+    },
+    {
+      "stage": "departments",
+      "width": 320,
+      "documentWidth": 320,
+      "localTables": [],
+      "overlaps": [],
+      "parentScrollWidth": 305,
+      "parentWidth": 305,
+      "rootScrollWidth": 305,
+      "rootWidth": 305,
+      "viewport": 320
+    },
+    {
+      "stage": "years",
+      "width": 1440,
+      "documentWidth": 1440,
+      "localTables": [],
+      "overlaps": [],
+      "parentScrollWidth": 1190,
+      "parentWidth": 1190,
+      "rootScrollWidth": 1190,
+      "rootWidth": 1190,
+      "viewport": 1440
+    },
+    {
+      "stage": "years",
+      "width": 768,
+      "documentWidth": 768,
+      "localTables": [],
+      "overlaps": [],
+      "parentScrollWidth": 768,
+      "parentWidth": 768,
+      "rootScrollWidth": 768,
+      "rootWidth": 768,
+      "viewport": 768
+    },
+    {
+      "stage": "years",
+      "width": 390,
+      "documentWidth": 390,
+      "localTables": [],
+      "overlaps": [],
+      "parentScrollWidth": 390,
+      "parentWidth": 390,
+      "rootScrollWidth": 390,
+      "rootWidth": 390,
+      "viewport": 390
+    },
+    {
+      "stage": "years",
+      "width": 320,
+      "documentWidth": 320,
+      "localTables": [],
+      "overlaps": [],
+      "parentScrollWidth": 320,
+      "parentWidth": 320,
+      "rootScrollWidth": 320,
+      "rootWidth": 320,
+      "viewport": 320
+    },
+    {
+      "stage": "sections",
+      "width": 1440,
+      "documentWidth": 1440,
+      "localTables": [],
+      "overlaps": [],
+      "parentScrollWidth": 1190,
+      "parentWidth": 1190,
+      "rootScrollWidth": 1190,
+      "rootWidth": 1190,
+      "viewport": 1440
+    },
+    {
+      "stage": "sections",
+      "width": 768,
+      "documentWidth": 768,
+      "localTables": [],
+      "overlaps": [],
+      "parentScrollWidth": 768,
+      "parentWidth": 768,
+      "rootScrollWidth": 768,
+      "rootWidth": 768,
+      "viewport": 768
+    },
+    {
+      "stage": "sections",
+      "width": 390,
+      "documentWidth": 390,
+      "localTables": [],
+      "overlaps": [],
+      "parentScrollWidth": 390,
+      "parentWidth": 390,
+      "rootScrollWidth": 390,
+      "rootWidth": 390,
+      "viewport": 390
+    },
+    {
+      "stage": "sections",
+      "width": 320,
+      "documentWidth": 320,
+      "localTables": [],
+      "overlaps": [],
+      "parentScrollWidth": 320,
+      "parentWidth": 320,
+      "rootScrollWidth": 320,
+      "rootWidth": 320,
+      "viewport": 320
+    },
+    {
+      "stage": "students",
+      "width": 1440,
+      "documentWidth": 1440,
+      "localTables": [
+        {
+          "scroll": 1075,
+          "width": 1075
+        }
+      ],
+      "overlaps": [],
+      "parentScrollWidth": 1175,
+      "parentWidth": 1175,
+      "rootScrollWidth": 1175,
+      "rootWidth": 1175,
+      "viewport": 1440
+    },
+    {
+      "stage": "students",
+      "width": 768,
+      "documentWidth": 768,
+      "localTables": [
+        {
+          "scroll": 693,
+          "width": 693
+        }
+      ],
+      "overlaps": [],
+      "parentScrollWidth": 753,
+      "parentWidth": 753,
+      "rootScrollWidth": 753,
+      "rootWidth": 753,
+      "viewport": 768
+    },
+    {
+      "stage": "students",
+      "width": 390,
+      "documentWidth": 390,
+      "localTables": [
+        {
+          "scroll": 650,
+          "width": 324
+        }
+      ],
+      "overlaps": [],
+      "parentScrollWidth": 375,
+      "parentWidth": 375,
+      "rootScrollWidth": 375,
+      "rootWidth": 375,
+      "viewport": 390
+    },
+    {
+      "stage": "students",
+      "width": 320,
+      "documentWidth": 320,
+      "localTables": [
+        {
+          "scroll": 650,
+          "width": 253
+        }
+      ],
+      "overlaps": [],
+      "parentScrollWidth": 305,
+      "parentWidth": 305,
+      "rootScrollWidth": 305,
+      "rootWidth": 305,
+      "viewport": 320
+    }
+  ],
+  "typography": [
+    {
+      "selector": ".directory-card h3",
+      "matches": true,
+      "reference": {
+        "color": "rgb(16, 40, 70)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "15px",
+        "weight": "730"
+      },
+      "actual": {
+        "color": "rgb(16, 40, 70)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "15px",
+        "weight": "730"
+      }
+    },
+    {
+      "selector": ".insight-copy",
+      "matches": true,
+      "reference": {
+        "color": "rgb(49, 76, 102)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "17.05px",
+        "size": "11px",
+        "weight": "400"
+      },
+      "actual": {
+        "color": "rgb(49, 76, 102)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "17.05px",
+        "size": "11px",
+        "weight": "400"
+      }
+    },
+    {
+      "selector": ".insight-title",
+      "matches": true,
+      "reference": {
+        "color": "rgb(8, 115, 74)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "13px",
+        "weight": "750"
+      },
+      "actual": {
+        "color": "rgb(8, 115, 74)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "13px",
+        "weight": "750"
+      }
+    },
+    {
+      "selector": ".panel-title",
+      "matches": true,
+      "reference": {
+        "color": "rgb(16, 40, 70)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "15px",
+        "weight": "760"
+      },
+      "actual": {
+        "color": "rgb(16, 40, 70)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "15px",
+        "weight": "760"
+      }
+    },
+    {
+      "selector": ".stat-label",
+      "matches": true,
+      "reference": {
+        "color": "rgb(98, 122, 150)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "12px",
+        "weight": "400"
+      },
+      "actual": {
+        "color": "rgb(98, 122, 150)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "12px",
+        "weight": "400"
+      }
+    },
+    {
+      "selector": ".stat-value",
+      "matches": true,
+      "reference": {
+        "color": "rgb(16, 46, 76)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "28.6px",
+        "size": "26px",
+        "weight": "780"
+      },
+      "actual": {
+        "color": "rgb(16, 46, 76)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "28.6px",
+        "size": "26px",
+        "weight": "780"
+      }
+    },
+    {
+      "selector": ".subtitle",
+      "matches": true,
+      "reference": {
+        "color": "rgb(98, 122, 150)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "13px",
+        "weight": "400"
+      },
+      "actual": {
+        "color": "rgb(98, 122, 150)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "13px",
+        "weight": "400"
+      }
+    },
+    {
+      "selector": ".welcome h2",
+      "matches": true,
+      "reference": {
+        "color": "rgb(255, 255, 255)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "24px",
+        "weight": "700"
+      },
+      "actual": {
+        "color": "rgb(255, 255, 255)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "24px",
+        "weight": "700"
+      }
+    },
+    {
+      "selector": "h1",
+      "matches": true,
+      "reference": {
+        "color": "rgb(16, 47, 77)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "29px",
+        "weight": "760"
+      },
+      "actual": {
+        "color": "rgb(16, 47, 77)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "29px",
+        "weight": "760"
+      }
+    },
+    {
+      "selector": "td",
+      "matches": true,
+      "reference": {
+        "color": "rgb(41, 68, 95)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "11px",
+        "weight": "400"
+      },
+      "actual": {
+        "color": "rgb(41, 68, 95)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "11px",
+        "weight": "400"
+      }
+    },
+    {
+      "selector": "th",
+      "matches": true,
+      "reference": {
+        "color": "rgb(82, 107, 134)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "11px",
+        "weight": "700"
+      },
+      "actual": {
+        "color": "rgb(82, 107, 134)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "11px",
+        "weight": "700"
+      }
+    },
+    {
+      "selector": ".directory-year strong",
+      "matches": true,
+      "reference": {
+        "color": "rgb(16, 40, 70)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "14px",
+        "weight": "700"
+      },
+      "actual": {
+        "color": "rgb(16, 40, 70)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "normal",
+        "size": "14px",
+        "weight": "700"
+      }
+    }
+  ],
+  "newTask": {
+    "afterCreate": "⚑\nOpen\nTasks due\n6\n3 due today · 3 upcoming",
+    "afterReload": "⚑\nOpen\nTasks due\n6\n3 due today · 3 upcoming",
+    "afterComplete": "⚑\nOpen\nTasks due\n5\n2 due today · 3 upcoming"
+  },
+  "navigation": [
+    "Full timetable opened confirmed faculty allocations",
+    "Open examinations opened existing question-paper submission workspace with 2 draft papers",
+    "Department > year > section > roster and Back navigation verified"
+  ],
+  "backNavigation": [
+    {
+      "backStep": 1,
+      "title": "▦\nYear 2"
+    },
+    {
+      "backStep": 2,
+      "title": "▦\nElectronics & Communication Engineering"
+    },
+    {
+      "backStep": 3,
+      "title": "▦\nDepartments allocated to you"
+    }
+  ],
+  "consoleErrors": []
+}

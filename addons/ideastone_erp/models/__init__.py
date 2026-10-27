@@ -61,3 +61,4 @@ from . import examinations_ui
 from . import question_paper
 from . import hod_question_paper
 from . import coe_workspace
+from . import faculty_home
