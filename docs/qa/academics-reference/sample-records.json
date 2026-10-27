@@ -1,0 +1,570 @@
+{
+  "departments": [
+    {
+      "data-name": "Computer Science and Engineering",
+      "data-code": "CSE",
+      "data-area": "engineering",
+      "data-students": "248",
+      "data-capacity": "300",
+      "data-sections": "8",
+      "data-faculty": "24"
+    },
+    {
+      "data-name": "Electronics and Communication Engineering",
+      "data-code": "ECE",
+      "data-area": "engineering",
+      "data-students": "196",
+      "data-capacity": "240",
+      "data-sections": "6",
+      "data-faculty": "19"
+    },
+    {
+      "data-name": "Information Technology",
+      "data-code": "IT",
+      "data-area": "engineering",
+      "data-students": "184",
+      "data-capacity": "210",
+      "data-sections": "6",
+      "data-faculty": "18"
+    },
+    {
+      "data-name": "Electrical and Electronics Engineering",
+      "data-code": "EEE",
+      "data-area": "engineering",
+      "data-students": "152",
+      "data-capacity": "180",
+      "data-sections": "5",
+      "data-faculty": "16"
+    },
+    {
+      "data-name": "Mechanical Engineering",
+      "data-code": "MECH",
+      "data-area": "engineering",
+      "data-students": "168",
+      "data-capacity": "210",
+      "data-sections": "6",
+      "data-faculty": "17"
+    },
+    {
+      "data-name": "Civil Engineering",
+      "data-code": "CIVIL",
+      "data-area": "engineering",
+      "data-students": "126",
+      "data-capacity": "150",
+      "data-sections": "4",
+      "data-faculty": "13"
+    },
+    {
+      "data-name": "Biomedical Engineering",
+      "data-code": "BME",
+      "data-area": "engineering",
+      "data-students": "92",
+      "data-capacity": "120",
+      "data-sections": "3",
+      "data-faculty": "11"
+    },
+    {
+      "data-name": "Science and Humanities",
+      "data-code": "S&H",
+      "data-area": "science",
+      "data-students": "110",
+      "data-capacity": "150",
+      "data-sections": "3",
+      "data-faculty": "14"
+    },
+    {
+      "data-name": "Department of Business Law",
+      "data-code": "D1",
+      "data-area": "management",
+      "data-students": "54",
+      "data-capacity": "80",
+      "data-sections": "2",
+      "data-faculty": "8"
+    },
+    {
+      "data-name": "Department of Science",
+      "data-code": "D2",
+      "data-area": "science",
+      "data-students": "58",
+      "data-capacity": "90",
+      "data-sections": "2",
+      "data-faculty": "9"
+    },
+    {
+      "data-name": "Department of Accounts",
+      "data-code": "D3",
+      "data-area": "management",
+      "data-students": "74",
+      "data-capacity": "100",
+      "data-sections": "2",
+      "data-faculty": "10"
+    },
+    {
+      "data-name": "Department of Management and Marketing",
+      "data-code": "D4",
+      "data-area": "management",
+      "data-students": "108",
+      "data-capacity": "140",
+      "data-sections": "2",
+      "data-faculty": "12"
+    }
+  ],
+  "programmes": [
+    {
+      "data-name": "Bachelor of Accountancy",
+      "data-code": "BOA",
+      "data-department": "Department of Accounts",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "BOA-Sem-1",
+      "data-code": "BOA1",
+      "data-department": "Department of Accounts",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "BOA-Sem-2",
+      "data-code": "BOA2",
+      "data-department": "Department of Accounts",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "Computer Engineering",
+      "data-code": "COMP",
+      "data-department": "Department of Science",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "Civil Engineering",
+      "data-code": "CIVIL",
+      "data-department": "Department of Science",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "Chemical Engineering",
+      "data-code": "CHEM",
+      "data-department": "Department of Science",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "Diploma in Business Management",
+      "data-code": "DBM",
+      "data-department": "Department of Management and Marketing",
+      "data-level": "diploma",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "Bachelor of Business Management",
+      "data-code": "BBM",
+      "data-department": "Department of Management and Marketing",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "Bachelor of Management Studies",
+      "data-code": "BMS",
+      "data-department": "Department of Management and Marketing",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "Master of Business Administration",
+      "data-code": "MBA",
+      "data-department": "Department of Management and Marketing",
+      "data-level": "postgraduate",
+      "data-duration": "2"
+    },
+    {
+      "data-name": "Healthcare Law",
+      "data-code": "HL",
+      "data-department": "Department of Business Law",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "Sports Law",
+      "data-code": "SL",
+      "data-department": "Department of Business Law",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "B.E. Computer Science and Engineering",
+      "data-code": "BE-CSE",
+      "data-department": "Computer Science and Engineering",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "B.E. Electronics and Communication Engineering",
+      "data-code": "BE-ECE",
+      "data-department": "Electronics and Communication Engineering",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "B.E. Electrical and Electronics Engineering",
+      "data-code": "BE-EEE",
+      "data-department": "Electrical and Electronics Engineering",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "B.E. Mechanical Engineering",
+      "data-code": "BE-MECH",
+      "data-department": "Mechanical Engineering",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "B.E. Civil Engineering",
+      "data-code": "BE-CIVIL",
+      "data-department": "Civil Engineering",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "B.E. Biomedical Engineering",
+      "data-code": "BE-BME",
+      "data-department": "Biomedical Engineering",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "B.Tech. Information Technology",
+      "data-code": "BTECH-IT",
+      "data-department": "Information Technology",
+      "data-level": "undergraduate",
+      "data-duration": "4"
+    },
+    {
+      "data-name": "M.E. Computer Science and Engineering",
+      "data-code": "ME-CSE",
+      "data-department": "Computer Science and Engineering",
+      "data-level": "postgraduate",
+      "data-duration": "2"
+    }
+  ],
+  "semesters": [
+    {
+      "data-name": "1st Semester",
+      "data-year": "2021-2022",
+      "data-type": "semester"
+    },
+    {
+      "data-name": "2nd Semester",
+      "data-year": "2021-2022",
+      "data-type": "semester"
+    },
+    {
+      "data-name": "3rd Semester",
+      "data-year": "2022-2023",
+      "data-type": "semester"
+    },
+    {
+      "data-name": "4th Semester",
+      "data-year": "2022-2023",
+      "data-type": "semester"
+    },
+    {
+      "data-name": "Semester 1",
+      "data-year": "2020-2021",
+      "data-type": "semester"
+    },
+    {
+      "data-name": "Quarter 1",
+      "data-year": "2020-2021",
+      "data-type": "quarter"
+    },
+    {
+      "data-name": "Quarter 2",
+      "data-year": "2020-2021",
+      "data-type": "quarter"
+    },
+    {
+      "data-name": "Semester 2",
+      "data-year": "2020-2021",
+      "data-type": "semester"
+    },
+    {
+      "data-name": "Quarter 3",
+      "data-year": "2020-2021",
+      "data-type": "quarter"
+    },
+    {
+      "data-name": "Quarter 4",
+      "data-year": "2020-2021",
+      "data-type": "quarter"
+    },
+    {
+      "data-name": "Odd semester 2026-27",
+      "data-year": "2026-27",
+      "data-type": "semester"
+    },
+    {
+      "data-name": "Even semester 2026-27",
+      "data-year": "2026-27",
+      "data-type": "semester"
+    }
+  ],
+  "sections": [
+    {
+      "data-name": "BOA-S1",
+      "data-code": "boas1",
+      "data-course": "Bachelor of Accountancy · BOA-Sem-1",
+      "data-group": "business",
+      "data-year": "not-set",
+      "data-mapping": "review",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "BOA-S2",
+      "data-code": "boas2",
+      "data-course": "Bachelor of Accountancy · BOA-Sem-2",
+      "data-group": "business",
+      "data-year": "not-set",
+      "data-mapping": "review",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "COMP Batch",
+      "data-code": "COMP-01",
+      "data-course": "Computer Engineering",
+      "data-group": "engineering",
+      "data-year": "not-set",
+      "data-mapping": "review",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "CIVIL Batch 1",
+      "data-code": "CIVIL-01",
+      "data-course": "Civil Engineering",
+      "data-group": "engineering",
+      "data-year": "not-set",
+      "data-mapping": "review",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "Civil Batch 2",
+      "data-code": "CIVIL-02",
+      "data-course": "Civil Engineering",
+      "data-group": "engineering",
+      "data-year": "not-set",
+      "data-mapping": "review",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "CHEM Batch",
+      "data-code": "CHEM-01",
+      "data-course": "Chemical Engineering",
+      "data-group": "engineering",
+      "data-year": "not-set",
+      "data-mapping": "review",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "BBM Batch",
+      "data-code": "BBM-01",
+      "data-course": "Bachelor of Business Management",
+      "data-group": "business",
+      "data-year": "not-set",
+      "data-mapping": "review",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "BMS Batch",
+      "data-code": "BMS-01",
+      "data-course": "Bachelor of Management Studies",
+      "data-group": "business",
+      "data-year": "not-set",
+      "data-mapping": "review",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "MBA Batch",
+      "data-code": "MBA-01",
+      "data-course": "Master of Business Administration",
+      "data-group": "business",
+      "data-year": "not-set",
+      "data-mapping": "review",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "DS Batch",
+      "data-code": "DS-01",
+      "data-course": "Data Scientist",
+      "data-group": "data",
+      "data-year": "not-set",
+      "data-mapping": "review",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "DA Batch",
+      "data-code": "DA-01",
+      "data-course": "Data Analyst",
+      "data-group": "data",
+      "data-year": "not-set",
+      "data-mapping": "review",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "FSL Batch",
+      "data-code": "DL-01",
+      "data-course": "Financial Services Law",
+      "data-group": "business",
+      "data-year": "not-set",
+      "data-mapping": "review",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "HL Batch",
+      "data-code": "HL-01",
+      "data-course": "Healthcare Law",
+      "data-group": "business",
+      "data-year": "not-set",
+      "data-mapping": "review",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "SL Batch",
+      "data-code": "SL-01",
+      "data-course": "Sports Law",
+      "data-group": "business",
+      "data-year": "not-set",
+      "data-mapping": "review",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "MBBS Batch",
+      "data-code": "MBBS-01",
+      "data-course": "Bachelor of Medicine and Bachelor of Surgery",
+      "data-group": "health",
+      "data-year": "not-set",
+      "data-mapping": "review",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "BPT Batch",
+      "data-code": "BPT-01",
+      "data-course": "Bachelor of Physiotherapy",
+      "data-group": "health",
+      "data-year": "not-set",
+      "data-mapping": "review",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "2026–2030 CSE",
+      "data-code": "CSE-2026",
+      "data-course": "B.E. Computer Science and Engineering",
+      "data-group": "engineering",
+      "data-year": "2026–2030",
+      "data-mapping": "mapped",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "2026–2030 ECE",
+      "data-code": "ECE-2026",
+      "data-course": "B.E. Electronics and Communication Engineering",
+      "data-group": "engineering",
+      "data-year": "2026–2030",
+      "data-mapping": "mapped",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "2026–2030 Mechanical",
+      "data-code": "MECH-2026",
+      "data-course": "B.E. Mechanical Engineering",
+      "data-group": "engineering",
+      "data-year": "2026–2030",
+      "data-mapping": "mapped",
+      "data-semester": "Not specified"
+    },
+    {
+      "data-name": "2026–2030 Biomedical",
+      "data-code": "BME-2026",
+      "data-course": "B.E. Biomedical Engineering",
+      "data-group": "engineering",
+      "data-year": "2026–2030",
+      "data-mapping": "mapped",
+      "data-semester": "Not specified"
+    }
+  ],
+  "subjects": [
+    {
+      "data-name": "Financial Accounting",
+      "data-code": "BOA1-001",
+      "data-dept": "accounts",
+      "data-credit": "zero",
+      "data-semester": "missing"
+    },
+    {
+      "data-name": "Taxation",
+      "data-code": "BOA1-002",
+      "data-dept": "accounts",
+      "data-credit": "zero",
+      "data-semester": "missing"
+    },
+    {
+      "data-name": "Law & Ethics",
+      "data-code": "BOA1-003",
+      "data-dept": "accounts",
+      "data-credit": "zero",
+      "data-semester": "missing"
+    },
+    {
+      "data-name": "Business Management",
+      "data-code": "BOA1-004",
+      "data-dept": "accounts",
+      "data-credit": "zero",
+      "data-semester": "missing"
+    },
+    {
+      "data-name": "Advanced Financial Accounting",
+      "data-code": "BOA2-001",
+      "data-dept": "accounts",
+      "data-credit": "zero",
+      "data-semester": "missing"
+    },
+    {
+      "data-name": "Advanced Taxation",
+      "data-code": "BOA2-002",
+      "data-dept": "accounts",
+      "data-credit": "zero",
+      "data-semester": "missing"
+    },
+    {
+      "data-name": "Management Accounting",
+      "data-code": "BOA2-003",
+      "data-dept": "accounts",
+      "data-credit": "zero",
+      "data-semester": "missing"
+    },
+    {
+      "data-name": "Integrated Accounting Systems",
+      "data-code": "BOA2-004",
+      "data-dept": "accounts",
+      "data-credit": "zero",
+      "data-semester": "missing"
+    },
+    {
+      "data-name": "Data Structure and Algorithm",
+      "data-code": "DSA-9",
+      "data-dept": "science",
+      "data-credit": "zero",
+      "data-semester": "missing"
+    },
+    {
+      "data-name": "Web Development",
+      "data-code": "WD-10",
+      "data-dept": "science",
+      "data-credit": "zero",
+      "data-semester": "missing"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+<odoo>
+  <record id="action_academics_overview" model="ir.actions.client"><field name="name">Academics</field><field name="tag">ideastone_erp.academics</field><field name="params">{'view': 'overview'}</field><field name="context">{'campus_module': 'academics'}</field></record>
+  <record id="action_academics_years" model="ir.actions.client"><field name="name">Academic years</field><field name="tag">ideastone_erp.academics</field><field name="params">{'view': 'years'}</field><field name="context">{'campus_module': 'academics'}</field></record>
+  <record id="action_academics_departments" model="ir.actions.client"><field name="name">Departments</field><field name="tag">ideastone_erp.academics</field><field name="params">{'view': 'departments'}</field><field name="context">{'campus_module': 'academics'}</field></record>
+  <record id="action_academics_programmes" model="ir.actions.client"><field name="name">Programmes</field><field name="tag">ideastone_erp.academics</field><field name="params">{'view': 'programmes'}</field><field name="context">{'campus_module': 'academics'}</field></record>
+  <record id="action_academics_semesters" model="ir.actions.client"><field name="name">Semesters</field><field name="tag">ideastone_erp.academics</field><field name="params">{'view': 'semesters'}</field><field name="context">{'campus_module': 'academics'}</field></record>
+  <record id="action_academics_sections" model="ir.actions.client"><field name="name">Sections</field><field name="tag">ideastone_erp.academics</field><field name="params">{'view': 'sections'}</field><field name="context">{'campus_module': 'academics'}</field></record>
+  <record id="action_academics_curriculum" model="ir.actions.client"><field name="name">Subjects &amp; curriculum</field><field name="tag">ideastone_erp.academics</field><field name="params">{'view': 'curriculum'}</field><field name="context">{'campus_module': 'academics'}</field></record>
+</odoo>

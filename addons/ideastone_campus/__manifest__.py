@@ -17,7 +17,7 @@ timetable, attendance, exams, library, parents portal) and layers on:
 * Single sign-on: Keycloak OpenID Connect provider pre-configured ("Log in with Ideastone SSO")
 * Menu "Ideastone Campus" that groups the daily-use screens for college office staff
 """,
-    "version": "17.0.1.0.3",
+    "version": "17.0.1.0.5",
     "category": "Education",
     "author": "Ideastone Technologies Pvt Ltd",
     "website": "https://github.com/ideastone",
@@ -44,9 +44,18 @@ timetable, attendance, exams, library, parents portal) and layers on:
         "web.assets_backend": [
             "ideastone_campus/static/src/js/tab_branding.js",
             "ideastone_campus/static/src/scss/brand.scss",
+            "ideastone_campus/static/src/scss/design_system.scss",
+            "ideastone_campus/static/src/scss/navigation_customizer.scss",
+            "ideastone_campus/static/src/js/navigation_state.js",
+            "ideastone_campus/static/src/js/navigation_customizer.js",
         ],
         "web.assets_frontend": [
             "ideastone_campus/static/src/scss/brand.scss",
+            "ideastone_campus/static/src/scss/design_system.scss",
+            "ideastone_campus/static/src/scss/navigation_customizer.scss",
+            "ideastone_campus/static/src/js/navigation_state.js",
+            "ideastone_campus/static/src/js/navigation_customizer.js",
+            "ideastone_campus/static/src/js/navigation_portal.js",
         ],
     },
     "images": ["static/description/banner.png"],

@@ -6,9 +6,9 @@
       <aside id="campus_sidebar" class="campus_sidebar" t-att-class="{ 'is-open': state.open }" aria-label="Campus navigation">
         <button class="campus_brand" t-on-click="home" aria-label="Campus overview"><img src="/ideastone_campus/static/src/img/vcet-tab-icon.png" alt="VCET shield"/><span>Campus Management ERP</span></button>
         <div class="campus_nav_heading" t-esc="state.is_coe_workspace ? 'COE ADMINISTRATION' : state.is_owner_workspace ? 'COLLEGE WORKSPACE' : state.is_hod ? 'HOD WORKSPACE' : state.faculty_modules.length ? 'FACULTY WORKSPACE' : 'WORKSPACES'"/>
-        <nav t-if="state.faculty_modules.length" t-att-aria-label="state.is_coe_workspace ? 'COE main modules' : 'Faculty main modules'"><t t-foreach="state.faculty_modules" t-as="module" t-key="module.key"><button class="campus_nav_link" t-att-class="{active: state.module === module.key}" t-att-aria-current="state.module === module.key ? 'page' : undefined" t-on-click="() => this.chooseModule(module)"><i t-att-class="'fa fa-' + module.icon" aria-hidden="true"/><span t-esc="module.label"/></button></t></nav>
-        <nav t-else=""><t t-foreach="state.pages" t-as="item" t-key="item.key"><button class="campus_nav_link" t-att-class="{active: state.page === item.key}" t-on-click="() => this.go(item)"><i t-att-class="'fa fa-' + item.icon" aria-hidden="true"/><span t-esc="item.label"/></button></t></nav>
+        <nav t-att-aria-label="state.is_coe_workspace ? 'COE main modules' : state.faculty_modules.length ? 'Faculty main modules' : 'Campus main modules'"><t t-foreach="sidebarItems" t-as="item" t-key="item.id"><button class="campus_nav_link" t-att-class="{active: item.active}" t-att-aria-current="item.active ? 'page' : undefined" t-on-click="() => this.openSidebarItem(item)"><i t-att-class="'fa fa-' + item.icon" aria-hidden="true"/><span t-esc="item.label"/></button></t></nav>
         <div t-if="state.error" role="alert"><p t-esc="state.error"/><button class="btn btn-light" t-on-click="load">Retry</button></div>
+        <button type="button" class="campus_customize_navigation" t-on-click="customizeNavigation"><i class="fa fa-sliders" aria-hidden="true"/>Customize Navigation</button>
         <div class="campus_side_bottom"><strong t-esc="state.company"/><span t-esc="state.workspace_role"/><a href="/my/campus">My campus self-service <i class="fa fa-external-link"/></a></div>
       </aside>
       <nav t-if="facultyModule &amp;&amp; state.module !== 'od' &amp;&amp; state.module !== 'attendance'" class="campus_faculty_subnav" t-att-aria-label="state.is_coe_workspace ? 'COE submodules' : 'Faculty submodules'">
@@ -27,6 +27,8 @@
       <p t-if="state.loading" role="status"><i class="fa fa-spinner fa-spin me-2"/>Loading your campus…</p>
       <t t-elif="!state.error">
         <t t-if="state.page === 'owner-overview' &amp;&amp; state.is_owner_workspace"><t t-call="ideastone_erp.OwnerOverview"/></t>
+        <t t-elif="state.faculty_home_enabled &amp;&amp; state.page === 'overview'"><FacultyHome/></t>
+        <t t-elif="state.faculty_home_enabled &amp;&amp; state.page === 'faculty-departments'"><FacultyDepartments/></t>
         <t t-elif="state.page === 'overview'">
           <section t-if="state.faculty_modules.length" class="campus_faculty_welcome"><div><span>YOUR CAMPUS, CONNECTED</span><h2>Welcome back, <t t-esc="state.user"/></h2><p>Plan your day, manage your classes and keep every responsibility in view.</p><button class="btn btn-light" t-on-click="() => this.open({action:'ideastone_erp.action_faculty_task'})"><i class="fa fa-check-square-o me-2"/>Open my tasks</button></div><i class="fa fa-graduation-cap" aria-hidden="true"/></section>
           <section class="campus_stats" aria-label="Current campus summary"><t t-foreach="state.stats" t-as="stat" t-key="stat.label"><article class="campus_stat"><div><span t-esc="stat.label"/><strong t-esc="stat.value"/><small t-esc="stat.detail"/></div><i class="fa fa-bar-chart" aria-hidden="true"/></article></t></section>

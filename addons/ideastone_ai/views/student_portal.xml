@@ -8,14 +8,12 @@
 
   <template id="success_nudge" name="Student Success nudge card">
     <t t-set="success" t-value="d.get('success')"/>
-    <section t-if="success" t-attf-class="success_nudge success_#{success['band']}" aria-label="Student success guidance">
+    <section t-if="success" t-attf-class="success_nudge success_#{success['display_band']}" aria-label="Student success guidance">
       <div class="success_nudge_head">
         <span class="success_nudge_icon"><i class="fa fa-heartbeat" aria-hidden="true"/></span>
         <div>
           <t t-set="for_parent" t-value="bool(d.get('parent_name'))"/>
-          <strong t-if="success['band'] == 'low'"><t t-if="for_parent"><t t-esc="success['name']"/> is on track</t><t t-else="">You are on track</t></strong>
-          <strong t-elif="success['band'] == 'watch'">Worth a closer look this week</strong>
-          <strong t-else="">Needs attention now</strong>
+          <strong t-esc="success['title']"/>
           <p class="success_nudge_message" t-esc="success['parent_message'] if for_parent else success['message']"/>
         </div>
       </div>

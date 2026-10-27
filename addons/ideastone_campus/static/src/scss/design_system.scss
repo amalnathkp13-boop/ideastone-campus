@@ -1,0 +1,298 @@
+/* Shared visual contract, taken from Student Dashboard and Academics.
+ * Loaded in both Odoo bundles so portals, client actions and native record views
+ * use the same tokens. Important declarations intentionally beat older, scoped
+ * module skins; geometry, workflow states and icon fonts stay with each module.
+ * A named layer makes this contract's important rules outrank unlayered legacy
+ * important rules without escalating selector specificity in every new module.
+ */
+@layer campus-theme {
+:root {
+    --ui-font: Roboto, "Odoo Unicode Support Noto", Arial, sans-serif;
+    --ui-ink: #102d49;
+    --ui-title: #0e3151;
+    --ui-muted: #617b96;
+    --ui-blue: #1769d2;
+    --ui-blue-soft: #eaf3ff;
+    --ui-canvas: #f4f7fb;
+    --ui-surface: #fff;
+    --ui-line: #dfe8f2;
+    --ui-table-head: #f3f7fb;
+    --ui-green: #16835d;
+    --ui-green-soft: #eaf8f1;
+    --ui-amber: #9b620d;
+    --ui-amber-soft: #fff5e5;
+    --ui-red: #b33140;
+    --ui-red-soft: #ffeded;
+    --ui-purple: #7355c7;
+    --ui-purple-soft: #f1edff;
+    --ui-teal: #117c87;
+    --ui-teal-soft: #e7f8f8;
+    --ui-radius: 15px;
+    --ui-shadow: 0 5px 18px rgba(19, 48, 78, .035);
+    --ui-hero: linear-gradient(110deg, #103958, #1c5b91);
+    --ui-sidebar: linear-gradient(180deg, #092f50, #06233b);
+
+    --campus-navy: #06233b !important;
+    --campus-navy-secondary: #103958 !important;
+    --campus-ink: var(--ui-ink) !important;
+    --campus-muted: var(--ui-muted) !important;
+    --campus-blue: var(--ui-blue) !important;
+    --campus-blue-dark: #1153a8 !important;
+    --campus-line: var(--ui-line) !important;
+    --campus-body: var(--ui-canvas) !important;
+    --campus-green: var(--ui-green) !important;
+    --campus-amber: var(--ui-amber) !important;
+    --campus-red: var(--ui-red) !important;
+    --campus-shadow: var(--ui-shadow) !important;
+    --campus-radius: var(--ui-radius) !important;
+}
+
+/* Include the independently previewed faculty/HOD/COE workspaces as well as
+ * the common Odoo shell. No role-specific template needs to duplicate tokens. */
+$ui-roots: ".o_web_client, .campus_portal, .student_workspace, .parent_workspace, .vcet_login, .qp-faculty, .qp-hod, .coe-workspace";
+$ui-pages: ".campus_dashboard, .admin_overview, .student_main, .parent_main, .student_profile_view, .student_academics_view, .student_timetable_view, .student_od_view, .account_view, .attendance_view, .exam_view, .fee_view, .help_view, .library_view, .notices_view, .requests_view, .campus_admissions_workspace, .campus_students_workspace, .campus_exams_workspace, .campus_appraisal, .campus_attendance_page, .campus_leave_page, .campus_staff_profile, .campus_payroll_history, .campus_staff_od_management, .campus_student_attendance, .campus_subject_attendance, .campus_ai_page, .coe-workspace, .qp-faculty, .qp-hod, .qp-faculty .content, .qp-hod .content, .o_ideastone_lms_frame";
+
+:is(#{$ui-roots}) {
+    font-family: var(--ui-font) !important;
+    font-size: 14px !important;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ui-ink);
+    background-color: var(--ui-canvas);
+
+    // Text elements sometimes set Inter or Segoe UI directly. Leave glyph fonts
+    // and code editors alone; changing those turns icons into empty squares.
+    :where(div, section, article, header, footer, nav, main, aside, h1, h2, h3, h4, h5, h6,
+        p, span, a, strong, b, small, em, label, legend, dt, dd, li, th, td, caption,
+        button, input, select, option, textarea, summary):not(.fa):not(.oi):not([class*="fa-"]):not([class*="oi-"]):not(.material-icons):not(.ace_content):not(.ace_line) {
+        font-family: var(--ui-font) !important;
+    }
+
+    h1 { font-size: 31px !important; font-weight: 760 !important; line-height: 1.2 !important; letter-spacing: -.8px !important; color: var(--ui-title) !important; overflow-wrap: anywhere; }
+    h2 { font-size: 17px !important; font-weight: 760 !important; line-height: 1.2 !important; letter-spacing: -.25px !important; color: var(--ui-ink) !important; }
+    h3 { font-size: 15px !important; font-weight: 650 !important; line-height: 1.3 !important; letter-spacing: -.15px !important; color: var(--ui-ink) !important; }
+    h4 { font-size: 14px !important; font-weight: 650 !important; line-height: 1.35 !important; color: var(--ui-ink) !important; }
+    h5 { font-size: 13px !important; font-weight: 650 !important; color: var(--ui-ink) !important; }
+    h6 { font-size: 12px !important; font-weight: 650 !important; color: var(--ui-ink) !important; }
+    p { font-size: 13px !important; line-height: 1.55 !important; color: var(--ui-muted) !important; }
+    strong, b { font-weight: 600 !important; }
+    :is(h1, h2, h3, h4, h5, h6) :is(strong, b) { font-weight: inherit !important; }
+    small, .small, .text-muted { font-size: 12px !important; color: var(--ui-muted) !important; }
+    a:not(.btn):not([role="button"]) { text-underline-offset: 3px; }
+    dt { font-size: 12px !important; font-weight: 400 !important; color: var(--ui-muted) !important; }
+    dd { font-size: 12px !important; font-weight: 600 !important; color: var(--ui-ink) !important; }
+    label, .o_form_label { font-size: 12px !important; font-weight: 650 !important; color: var(--ui-muted) !important; }
+    :is(input, select, textarea, .o_input):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]) {
+        font-size: 12px !important; font-weight: 400 !important; color: var(--ui-ink) !important;
+        border-color: var(--ui-line) !important; border-radius: 9px !important;
+        max-width: 100%; min-width: 0;
+    }
+    input::placeholder, textarea::placeholder { color: var(--ui-muted) !important; opacity: 1; }
+    button, .btn, [role="button"] { font-size: 12px !important; font-weight: 650 !important; }
+    .btn-primary, .o_form_button_save, .o_list_button_add {
+        color: white !important; background: var(--ui-blue) !important; border-color: var(--ui-blue) !important;
+        font-weight: 750 !important;
+    }
+    .btn-outline-primary { color: var(--ui-blue) !important; border-color: var(--ui-blue) !important; }
+    .btn-outline-primary:hover, .btn-primary:hover { background: #1153a8 !important; border-color: #1153a8 !important; color: white !important; }
+    :is(button, a, input, select, textarea, summary):focus-visible { outline: 3px solid #9bc5f8; outline-offset: 2px; }
+
+    table:not(.o_calendar_widget table) {
+        th { font-size: 12px !important; font-weight: 750 !important; color: #526f8f !important; background-color: var(--ui-table-head) !important; border-color: var(--ui-line) !important; }
+        td { font-size: 12px !important; color: var(--ui-ink); border-color: var(--ui-line) !important; }
+    }
+    .modal-content, .o_dialog .modal-content, .o_form_sheet {
+        background: var(--ui-surface) !important; border-color: var(--ui-line) !important;
+        border-radius: var(--ui-radius) !important; box-shadow: var(--ui-shadow);
+    }
+    .modal-title { font-size: 17px !important; font-weight: 760 !important; color: var(--ui-ink) !important; }
+    .o_kanban_record:not([class*="o_kanban_color_"]) {
+        background-color: var(--ui-surface) !important; border-color: var(--ui-line) !important;
+        border-radius: var(--ui-radius) !important; box-shadow: var(--ui-shadow) !important;
+    }
+    .dropdown-menu, .o_popover, .popover, .student_profile_menu > div {
+        background-color: var(--ui-surface) !important; border-color: var(--ui-line) !important;
+        border-radius: 12px !important; box-shadow: var(--ui-shadow) !important;
+    }
+    .dropdown-item.active { background-color: var(--ui-blue) !important; color: white !important; }
+    .o_control_panel, .o_list_renderer, .o_form_renderer, .o_notebook_headers { background-color: var(--ui-surface); }
+    .o_content, .o_form_view { background-color: var(--ui-canvas); }
+}
+
+:is(#{$ui-pages}) {
+    // Bridge existing local variables to the common palette, including the
+    // independently maintained exam workspaces. Values are semantic, not data.
+    --navy: var(--ui-title) !important; --navy-2: #103958 !important;
+    --text: var(--ui-ink) !important; --ink: var(--ui-ink) !important;
+    --muted: var(--ui-muted) !important; --line: var(--ui-line) !important;
+    --blue: var(--ui-blue) !important; --blue-2: #1153a8 !important;
+    --blue-soft: var(--ui-blue-soft) !important; --page: var(--ui-canvas) !important;
+    --white: var(--ui-surface) !important; --shadow: var(--ui-shadow) !important;
+    --green: var(--ui-green) !important; --green-soft: var(--ui-green-soft) !important;
+    --amber: var(--ui-amber) !important; --amber-soft: var(--ui-amber-soft) !important;
+    --red: var(--ui-red) !important; --red-soft: var(--ui-red-soft) !important;
+    @each $namespace in academic, profile, timetable, tt, attendance, sa, swa, exam, fee, help, library, notices, requests, account, od, parent, staff, leave, mentor, payroll, app, dash, ai, coe {
+        --#{$namespace}-blue: var(--ui-blue) !important;
+        --#{$namespace}-ink: var(--ui-ink) !important;
+        --#{$namespace}-text: var(--ui-ink) !important;
+        --#{$namespace}-muted: var(--ui-muted) !important;
+        --#{$namespace}-line: var(--ui-line) !important;
+        --#{$namespace}-body: var(--ui-canvas) !important;
+        --#{$namespace}-green: var(--ui-green) !important;
+        --#{$namespace}-green-bg: var(--ui-green-soft) !important;
+    }
+    --ai-navy: var(--ui-title) !important;
+    --ai-high: var(--ui-red) !important; --ai-high-bg: var(--ui-red-soft) !important;
+    --ai-watch: var(--ui-amber) !important; --ai-watch-bg: var(--ui-amber-soft) !important;
+    --ai-low: var(--ui-green) !important; --ai-low-bg: var(--ui-green-soft) !important;
+    background-color: var(--ui-canvas) !important;
+    color: var(--ui-ink) !important;
+    font-size: 14px !important;
+
+    :is(.panel, .card, .kpi, .stat, .metric, .mini-stat, .campus_panel, .campus_stat,
+        .student_panel, .student_stat, .staff_profile_hero, .academic_card, .academic_metric, .profile_card, .profile_metric,
+        .timetable_card, .timetable_stat, .attendance_panel, .attendance_kpi, .attendance_filter_card,
+        .exam_panel, .exam_assessment_card, .exam_filter_card, .appraisal_panel, .appraisal_hero,
+        .appraisal_filters, .attendance_metric, .leave_panel, .staff_profile_panel, .staff_profile_sidecard,
+        .payroll_panel, .payroll_history_panel, .payroll_hero, .payroll_filters, .payroll_metric,
+        .mentor_panel, .sa_panel, .sa_metric, .swa_panel, .coe-panel, .coe-stat, .coe-browse-card,
+        .coe-subject-card, .department-panel, .dept-snapshot-card, .dept-card, .workspace-card,
+        .book-card, .notice-card, .event-card, .certificate-card, .request-type-card, .resource-card,
+        .ai_panel, .ai_metric, .filterbox, .filter-panel, .academic_placement_select, .qp-modal,
+        .coe-modal, .qp-hod .modal, .o_ideastone_tile, .campus_faculty_module_intro, .campus_queue,
+        .admin_overview .filters, .admin_overview .insight, .admin_overview .quick, .snapshot-strip,
+        .campus_admissions_workspace .lead, .summary-box, .paper-item, .leave_kpi, .leave_modal,
+        .hod_dialog, .mentor_title, .campus_students_workspace .dept, .qp-hod .dept, .sectile,
+        .exam_kpi, .library-dialog, .request-dialog, .notices_view .category) {
+        background: var(--ui-surface) !important;
+        border-color: var(--ui-line) !important;
+        border-radius: var(--ui-radius) !important;
+        box-shadow: var(--ui-shadow) !important;
+        min-width: 0;
+        &.active, &.selected, &[aria-selected="true"], &[aria-pressed="true"] {
+            background-color: var(--ui-blue-soft) !important; border-color: var(--ui-blue) !important;
+        }
+    }
+    .campus_admissions_workspace .lead { font-size: 14px !important; font-weight: 400 !important; }
+    :is(.panel-head, .panelhead, .section-head, .sectionhead, .academic_card_head, .profile_card_head,
+        .timetable_card_head, .attendance_panel_head, .exam_panel_head, .coe-panel-head) :is(h3, strong):first-child {
+        font-size: 17px !important; font-weight: 760 !important; color: var(--ui-ink) !important;
+    }
+    button:is(.kpi, .stat, .campus_stat, .student_stat, .workspace-card, .coe-browse-card, .dept) { font-weight: 400 !important; }
+    :is(.kpi-value, .kpi .value, .stat-num, .stat-value, .coe-stat > b, .stat > .num, .student_stat strong,
+        .attendance_kpi strong, .attendance_metric strong, .staff_profile_metric strong, .payroll_metric strong,
+        .sa_metric strong, .academic_metric > strong, .profile_metric strong, .timetable_stat strong) {
+        font-size: 27px !important; line-height: 1.2 !important; font-weight: 760 !important;
+        letter-spacing: -.6px !important; color: var(--ui-ink) !important;
+    }
+    // Long programme/subject names are values, but are not numeric KPIs.
+    .academic_metric > .academic_metric_text { font-size: 17px !important; letter-spacing: -.25px !important; }
+    :is(.muted, .subtitle, .subtext, .sub, .label, .foot, .stat-foot, .kpi-label, .kpi-note, .kpi-foot,
+        .student_subtitle, .academic_metric_label, .academic_metric small, .profile_metric small,
+        .staff_profile_subtitle, .notice-body > span, .coe-crumb, .coe-eyebrow) {
+        color: var(--ui-muted) !important; font-size: 12px !important; font-weight: 400 !important;
+    }
+    :is([class$="_label"], [class$="-label"], [class$="_subtitle"], [class$="-subtitle"],
+        [class$="_meta"], [class$="-meta"], [class$="_caption"], [class$="-caption"]) {
+        color: var(--ui-muted) !important; font-size: 12px !important; font-weight: 400 !important;
+    }
+    :is(.btn, .academic_button, .academic_outline_button, .profile_outline_button, .timetable_button,
+        .attendance_button, .exam_button, .staff_profile_button, .od_primary_button, .od_outline_button,
+        .coe-btn, .smallbtn) { border-radius: 9px !important; }
+    :is(button.primary, .btn.primary, .academic_button, .academic_placement_select button, .timetable_button,
+        .attendance_button.primary, .exam_button.primary, .staff_profile_button.primary,
+        .od_primary_button, .coe-btn.primary, .ai_button, .payroll_export, .sa_primary, .swa_primary) {
+        background: var(--ui-blue) !important; border-color: var(--ui-blue) !important; color: white !important;
+        font-weight: 750 !important; border-radius: 9px !important;
+    }
+    :is(.academic_link, .profile_outline_button, .academic_outline_button, .coe-link) { color: var(--ui-blue) !important; }
+    a:not(.btn):not([role="button"]):not([class*="button"]) { color: var(--ui-blue) !important; }
+
+    // Status chips keep their meaning across every module, with the same tint.
+    :is(.badge, .pill, .status, .campus_badge, .student_status, .student_chip, .academic_status, .profile_status,
+        .timetable_status, .attendance_status, .exam_badge, .exam_grade, .leave_status,
+        .attendance_pill, .staff_profile_status, .mentor_status, .swa_status, .swa_badge, .coe-badge, .paper-status, .status-badge) {
+        font-size: 11px !important; font-weight: 700 !important;
+        color: var(--ui-muted) !important; background-color: #f0f4f8 !important;
+        &.good, &.green, &.present, &.approved, &.published, &.paid, &.done, &.verified, &.completed, &.submitted,
+        &.available, &.ready, &.event, &.elective, &.tone-good, &.bg-success, &.text-bg-success, &.text-success {
+            color: var(--ui-green) !important; background-color: var(--ui-green-soft) !important;
+        }
+        &.amber, &.warning, &.warn, &.pending, &.pending_hod, &.proof_review, &.review, &.late, &.returned,
+        &.due, &.soon, &.withheld, &.tone-warn, &.bg-warning, &.text-bg-warning, &.text-warning {
+            color: var(--ui-amber) !important; background-color: var(--ui-amber-soft) !important;
+        }
+        &.red, &.danger, &.bad, &.absent, &.urgent, &.overdue, &.rejected, &.refused, &.invalid, &.missing,
+        &.tone-bad, &.bg-danger, &.text-bg-danger, &.text-danger {
+            color: var(--ui-red) !important; background-color: var(--ui-red-soft) !important;
+        }
+        &.purple, &.violet, &.forwarded, &.excused, &.onduty, &.docs { color: var(--ui-purple) !important; background-color: var(--ui-purple-soft) !important; }
+        &.blue, &.new, &.next, &.issued, &.student_unread, &.bg-primary, &.text-bg-primary, &.bg-info, &.text-bg-info { color: var(--ui-blue) !important; background-color: var(--ui-blue-soft) !important; }
+        &.neutral, &.draft, &.closed, &.cancelled, &.bg-secondary, &.text-bg-secondary { color: var(--ui-muted) !important; background-color: #f0f4f8 !important; }
+        // Assigned category colors are user data, rather than workflow status.
+        &[class*="o_tag_color_"] { color: revert-layer !important; background-color: revert-layer !important; }
+    }
+    :is(.academic_metric_icon, .metric_icon, .kpi-icon, .sicon) {
+        color: var(--ui-blue) !important; background-color: var(--ui-blue-soft) !important;
+        &.green { color: var(--ui-green) !important; background-color: var(--ui-green-soft) !important; }
+        &.amber { color: var(--ui-amber) !important; background-color: var(--ui-amber-soft) !important; }
+        &.purple, &.violet { color: var(--ui-purple) !important; background-color: var(--ui-purple-soft) !important; }
+    }
+    .academic_metric.green .academic_metric_icon { color: var(--ui-green) !important; background-color: var(--ui-green-soft) !important; }
+    .academic_metric.purple .academic_metric_icon { color: var(--ui-purple) !important; background-color: var(--ui-purple-soft) !important; }
+    .academic_metric.teal .academic_metric_icon { color: var(--ui-teal) !important; background-color: var(--ui-teal-soft) !important; }
+    .feedback-receipt .saved-comments { color: var(--ui-green) !important; }
+    .event-category { color: var(--ui-purple) !important; }
+    :is(.title, .book-title, .notice-title, .student_notice_title, .exam-title, .result-title) {
+        color: var(--ui-ink) !important; font-size: 15px !important; font-weight: 650 !important;
+    }
+}
+
+/* The two reference banners share a navy/blue gradient and white headings. */
+:is(#{$ui-roots}) :is(.student_welcome, .academic_hero, .profile_hero, .timetable_hero, .campus_faculty_welcome,
+    .mentor_hero, .parent_welcome, .admin_overview .hero, .campus_admissions_workspace .hero,
+    .campus_students_workspace .hero, .campus_students_workspace .detailhero, .fee_view .balance-card) {
+    background: var(--ui-hero) !important; color: white !important; border-radius: var(--ui-radius) !important;
+    :is(h1, h2, h3) { color: white !important; }
+    h2 { font-size: 21px !important; font-weight: 760 !important; }
+    p { color: #d7eaff !important; font-size: 12px !important; }
+    small { color: #c7e2ff !important; }
+    .label, [class$="_meta"], [class$="-meta"] { color: #d7eaff !important; }
+}
+:is(#{$ui-roots}) :is(.campus_sidebar, .student_sidebar, .parent_sidebar, .qp-faculty .sidebar, .qp-hod .sidebar) {
+    background: var(--ui-sidebar) !important; color: white !important;
+    a, button { color: #e9f2fb; }
+    :is(.campus_nav_link, .student_nav_link, .nav-link) { font-size: 13px !important; font-weight: 650 !important; }
+    :is(.campus_nav_link, .student_nav_link, .nav-link).active { background: #1668df !important; color: white !important; border-radius: 9px !important; }
+}
+:is(#{$ui-roots}) :is(.student_header, .student_subnav, .campus_subnav, .campus_faculty_subnav, .o_main_navbar) {
+    background-color: var(--ui-surface) !important; border-color: var(--ui-line) !important;
+}
+:is(#{$ui-roots}) :is(.student_subnav, .campus_faculty_subnav) {
+    > strong { font-size: 13px !important; font-weight: 700 !important; color: var(--ui-title) !important; }
+    a, button:not(.campus_subnav_scroll) { font-size: 12px !important; font-weight: 400 !important; color: #425d78 !important; }
+    .active { font-weight: 650 !important; color: var(--ui-blue) !important; }
+}
+:is(#{$ui-roots}) .student_header_title { font-size: 15px !important; font-weight: 650 !important; }
+:is(#{$ui-roots}) .academic_placement_select button { white-space: nowrap; flex: none; }
+:is(#{$ui-roots}) .vcet_login_visual {
+    :is(h1, h2, h3) { color: white !important; }
+    p { color: #d7eaff !important; }
+}
+:is(#{$ui-roots}) {
+    .text-danger, .alert-danger p { color: var(--ui-red) !important; }
+    .text-success, .alert-success p { color: var(--ui-green) !important; }
+    .text-warning, .alert-warning p { color: var(--ui-amber) !important; }
+}
+
+@media (max-width: 767px) {
+    :is(#{$ui-roots}) h1 { font-size: 28px !important; }
+    :is(#{$ui-pages}) :is(.heading, .headingrow, .pagehead, .page-head, .academic_page_head, .coe-heading) { min-width: 0; flex-wrap: wrap; }
+    :is(#{$ui-pages}) :is(.btn, .smallbtn, .coe-btn) { max-width: 100%; white-space: normal; }
+    :is(#{$ui-pages}) :is(.kpi-value, .stat-num, .stat-value, .coe-stat > b, .stat > .num) { font-size: 24px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :is(#{$ui-roots}) *, :is(#{$ui-roots}) *::before, :is(#{$ui-roots}) *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+}
+}
