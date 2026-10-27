@@ -23,7 +23,7 @@ class Dashboard(models.AbstractModel):
             ("Subjects", "op.subject", "ideastone_erp.action_subjects", "Academics"),
             ("Timetable", "op.session", "openeducat_timetable.act_open_op_session_view", "Academics"),
             ("Student Attendance", "op.attendance.sheet", "ideastone_erp.action_student_attendance_workspace", "Academics"),
-            ("Subject-wise Attendance", "op.attendance.sheet", "ideastone_erp.action_subject_attendance_workspace", "Academics"),
+            ("Subject-wise Attendance", "op.attendance.sheet", "ideastone_erp.action_subject_attendance_workspace", "Staff"),
             ("Examinations", "op.exam", "openeducat_exam.act_open_op_exam_view", "Academics"),
             ("Results", "op.result.line", "ideastone_erp.action_results", "Academics"),
             ("Assignments", "op.assignment", "openeducat_assignment.act_open_op_assignment_view", "Academics"),
@@ -69,6 +69,10 @@ class Dashboard(models.AbstractModel):
                 item["group"] = "Examination & results"
             if item["label"] in {"Mentor counseling"}:
                 item["group"] = "Mentorship & student support"
+            if item["label"] == "Subject-wise Attendance":
+                if not self.env.user.has_group("openeducat_core.group_op_faculty"):
+                    continue
+                item["group"] = "Subject Attendance"
             if admin or item["allowed"]:
                 visible.append(item)
         faculty = self.env["op.faculty"].search([("user_id", "=", self.env.uid), "|", ("company_id", "=", False), ("company_id", "=", self.env.company.id)], limit=1) if self.env["op.faculty"].check_access_rights("read", raise_exception=False) else self.env["op.faculty"]
@@ -164,6 +168,7 @@ class Dashboard(models.AbstractModel):
             ("teaching", "My task list", "graduation-cap", ["Academic management", "Examination & results", "Mentorship & student support"]),
             ("search", "Search", "search", []),
             ("staff", "My profile & payroll", "user", ["HR & payroll"]),
+            ("attendance", "Subject-wise Attendance", "calendar-check-o", ["Subject Attendance"]),
             ("od", "OD Management", "calendar-check-o", ["OD Management"]),
             ("library", "Library & learning", "book", ["Library & learning"]),
             ("grievances", "Grievances & others", "commenting-o", []),
@@ -257,9 +262,12 @@ class Dashboard(models.AbstractModel):
         faculty = self.env["op.faculty"].search([("user_id", "=", self.env.uid), "|", ("company_id", "=", False), ("company_id", "=", self.env.company.id)], limit=1)
         if not faculty or not self.env.user.has_group("openeducat_core.group_op_faculty"):
             raise AccessError(_("A linked faculty account is required."))
+        if tool == "subject_attendance":
+            action = self.env["ir.actions.actions"]._for_xml_id("ideastone_erp.action_subject_attendance_workspace")
+            action["context"] = dict(self.env.context, campus_module="attendance", campus_tool=tool)
+            return action
         specs = {
             "assigned_students": ("My assigned students", "op.student", [], {}),
-            "subject_attendance": ("Subject-wise attendance", "op.attendance.sheet", [("faculty_id", "=", faculty.id)], {"group_by": "campus_subject_id"}),
             "alternate": ("Alternate teaching hour", "campus.service.request", [("kind", "=", "alternate")], {"default_kind": "alternate", "default_faculty_id": faculty.id}),
             "club": ("Club functions & attendance", "campus.faculty.activity", [("kind", "=", "club")], {"default_kind": "club"}),
             "sdp": ("SDP functions & attendance", "campus.faculty.activity", [("kind", "=", "sdp")], {"default_kind": "sdp"}),
