@@ -14,3 +14,4 @@ from . import test_faculty_leave_ui
 from . import test_question_paper
 from . import test_student_od
 from . import test_navigation_preferences
+from . import test_owner_staff_ui

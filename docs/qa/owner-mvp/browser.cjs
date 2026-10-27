@@ -160,7 +160,20 @@ async function markup(page) {
         await page.locator('.o_control_panel').getByText('Student requests & support',{exact:true}).last().waitFor();
         if(await page.locator('.o_list_button_add:visible').count()) throw Error('Request review register offers a blank request creation form');
         await page.locator('.campus_sidebar').getByRole('button',{name:'Faculty & Staff',exact:true}).click();
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Staff Profile',exact:true}).click();
+        await page.locator('.campus_owner_staff h1').getByText('Staff Directory',{exact:true}).waitFor();
+        await page.locator('.campus_owner_staff .dept').first().waitFor();
+        await assertCampusTheme(page);
+        const staffTabs=await page.locator('.campus_faculty_subnav button:not(.campus_subnav_scroll)').allTextContents();
+        const staffTabNames=staffTabs.map(t=>t.trim()).filter(t=>!['','',''].includes(t));
+        if(staffTabNames.join('|')!=='Staff directory|Leave Management|Payroll History') throw Error('Owner staff tabs differ from the approved three-page design');
+        await page.locator('.campus_owner_staff .dept-actions').first().click();
+        await page.getByRole('button',{name:'View teaching staff',exact:true}).click();
+        await page.locator('.campus_owner_staff .view').first().click();
+        await page.getByRole('heading',{name:'Personal details',exact:true}).waitFor();
+        // Hidden owner tabs keep their original records and workflows; exercise them directly.
+        const profileAction=(await rpc(page,'ir.actions.client','search_read',[[['tag','=','ideastone_erp.faculty_profile']]],{fields:['id'],limit:1}))[0].id;
+        const appraisalAction=(await rpc(page,'ir.actions.client','search_read',[[['tag','=','ideastone_erp.faculty_appraisal']]],{fields:['id'],limit:1}))[0].id;
+        await page.goto(`${base}/web#action=${profileAction}&campus_module=staff`);
         await page.locator('#staff_profile_select').waitFor();
         await page.locator('.staff_profile_alert').waitFor({state:'hidden'});
         if(await page.locator('#staff_profile_select option').count()!==1) throw Error('Owner staff profile includes staff outside the active college');
@@ -172,12 +185,13 @@ async function markup(page) {
         await page.locator('.o_form_button_save:visible').click();
         const detailResult=await(await detailSave).json();
         if(detailResult.error) throw Error(detailResult.error.data?.message || detailResult.error.message);
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Staff Profile',exact:true}).click();
+        await page.goto(`${base}/web#action=${profileAction}&campus_module=staff`);
+        await page.reload();
         await page.getByRole('cell',{name:'Owner QA qualification',exact:true}).waitFor();
         if(await page.locator('.staff_profile_alert').count()) throw Error('Owner profile displays a record access error');
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-staff-profile.png'),fullPage:true});
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Faculty development and appraisal',exact:true}).click();
+        await page.goto(`${base}/web#action=${appraisalAction}&campus_module=staff`);
         await page.getByRole('heading',{name:'Professional Development and Appraisal',exact:true}).waitFor();
         await page.locator('.appraisal_loading').waitFor({state:'hidden'});
         if(await page.locator('.appraisal_error').count()) throw Error('Owner appraisal failed to load');
