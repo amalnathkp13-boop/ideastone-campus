@@ -19,11 +19,12 @@ export class CampusAssistantPage extends Component {
         this.action = useService("action");
         this.notification = useService("notification");
         this.suggestions = SUGGESTIONS;
+        this.periodRequest = 0;
         this.state = useState({
             loading: true, error: "", status: null, tab: "ask", busy: false,
             question: "", answers: [],
             brief: "", audience: "all", tone: "formal", notice: null,
-            period: "", periods: [], kind: "student", feedback: null,
+            period: "", periods: [], kind: "student", feedback: null, periodsLoading: false,
         });
         onWillStart(() => this.load());
     }
@@ -42,7 +43,10 @@ export class CampusAssistantPage extends Component {
     }
 
     selectTab(tab) { this.state.tab = tab; }
-    fail(error, fallback) { this.notification.add(error.data?.message || fallback, { type: "danger", sticky: true }); }
+    async fail(error, fallback) {
+        this.notification.add(error.data?.message || fallback, { type: "danger", sticky: true });
+        try { this.state.status = await this.orm.call("campus.ai.assistant", "get_status", []); } catch {}
+    }
 
     async ask(event) {
         event?.preventDefault();
@@ -55,7 +59,7 @@ export class CampusAssistantPage extends Component {
             this.state.question = "";
             this.state.status.used += 1;
         } catch (error) {
-            this.fail(error, "The assistant could not answer.");
+            await this.fail(error, "The assistant could not answer.");
         } finally {
             this.state.busy = false;
         }
@@ -72,7 +76,7 @@ export class CampusAssistantPage extends Component {
             this.state.notice = { ...notice, body_html: markup(notice.body_html) };
             this.state.status.used += 1;
         } catch (error) {
-            this.fail(error, "The notice could not be drafted.");
+            await this.fail(error, "The notice could not be drafted.");
         } finally {
             this.state.busy = false;
         }
@@ -90,19 +94,30 @@ export class CampusAssistantPage extends Component {
     }
 
     async changeKind(event) {
+        const request = ++this.periodRequest;
         this.state.kind = event.target.value;
         this.state.period = "";
-        this.state.periods = await this.orm.call("campus.ai.assistant", "feedback_periods", [this.state.kind]);
+        this.state.periods = [];
+        this.state.feedback = null;
+        this.state.periodsLoading = true;
+        try {
+            const periods = await this.orm.call("campus.ai.assistant", "feedback_periods", [this.state.kind]);
+            if (request === this.periodRequest) this.state.periods = periods;
+        } catch (error) {
+            if (request === this.periodRequest) await this.fail(error, "Feedback periods could not be loaded.");
+        } finally {
+            if (request === this.periodRequest) this.state.periodsLoading = false;
+        }
     }
     async summarise(event) {
         event?.preventDefault();
-        if (this.state.busy) return;
+        if (this.state.busy || this.state.periodsLoading) return;
         this.state.busy = true;
         try {
             this.state.feedback = await this.orm.call("campus.ai.assistant", "summarise_feedback", [this.state.period || false, this.state.kind]);
             this.state.status.used += 1;
         } catch (error) {
-            this.fail(error, "Feedback could not be summarised.");
+            await this.fail(error, "Feedback could not be summarised.");
         } finally {
             this.state.busy = false;
         }

@@ -40,6 +40,10 @@ jobs:
         run: for f in odoo/*.sh openolat/*.sh scripts/*.sh; do bash -n "$f"; done
       - name: Validate compose file
         run: docker compose config -q
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: Campus session navigation checks
+        run: node --test docs/qa/session-sync/session-sync.test.cjs
 
   install:
     name: install
@@ -100,6 +104,7 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/faculty-ui-tools" playwright
           "$RUNNER_TEMP/faculty-ui-tools/node_modules/.bin/playwright" install --with-deps chromium
           export NODE_PATH="$RUNNER_TEMP/faculty-ui-tools/node_modules"
+          node --test docs/qa/ai-audit/ui.test.cjs
           node docs/qa/faculty-workspace/browser.cjs
       - name: Owner lifecycle and UI on disposable Odoo
         shell: bash
@@ -152,6 +157,7 @@ jobs:
             --workers=0 --max-cron-threads=0 --no-http < docs/qa/parent-portal/seed.py
           export NODE_PATH="$RUNNER_TEMP/faculty-ui-tools/node_modules"
           node docs/qa/parent-portal/browser.cjs
+          SESSION_QA_PASSWORD="$PARENT_QA_PASSWORD" node docs/qa/session-sync/browser.cjs
       - name: Preserve Parent Portal evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -182,6 +188,31 @@ jobs:
         with:
           name: finance-learning-proof
           path: ${{ runner.temp }}/finance-learning-proof
+          retention-days: 14
+      - name: AI permissions, privacy, audit durability and concurrent limit on disposable Odoo
+        shell: bash
+        run: |
+          set -euo pipefail
+          export AI_QA_PASSWORD=$(openssl rand -hex 20)
+          export AI_QA_ENDPOINT=http://127.0.0.1:18081/v1
+          export AI_QA_OUT="$RUNNER_TEMP/ai-audit-proof"
+          mkdir -p "$AI_QA_OUT"
+          docker run --rm -i --network host --entrypoint odoo \
+            -v faculty-ci-data:/var/lib/odoo \
+            -v "$PWD/addons:/mnt/ideastone-addons:ro" \
+            -v "$PWD/vendor/openeducat_erp:/mnt/openeducat:ro" \
+            -e AI_QA_PASSWORD -e AI_QA_ENDPOINT odoo:17.0 shell \
+            --db_host=127.0.0.1 --db_user=odoo --db_password=odoo -d ci \
+            --addons-path=/mnt/ideastone-addons,/mnt/openeducat,/usr/lib/python3/dist-packages/odoo/addons \
+            --workers=0 --max-cron-threads=0 --no-http < docs/qa/ai-audit/seed.py
+          export NODE_PATH="$RUNNER_TEMP/faculty-ui-tools/node_modules"
+          node docs/qa/ai-audit/browser.cjs
+      - name: Preserve AI audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-audit-proof
+          path: ${{ runner.temp }}/ai-audit-proof
           retention-days: 14
       - name: Upgrade installed campus modules
         shell: bash
