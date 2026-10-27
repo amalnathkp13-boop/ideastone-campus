@@ -196,6 +196,56 @@ class TestCampusWorkflows(TransactionCase):
             slip.action_compute()
             self.assertEqual((slip.late_days, slip.late_deducted_days, slip.late_deduction), expected)
 
+    def test_staff_and_admin_share_approved_late_payroll_without_exposing_other_staff(self):
+        self.employee.user_id = self.faculty_user
+        agreement = self._approve(self.env["campus.salary.agreement"].create({
+            "name": "Self-service late salary", "employee_id": self.employee.id,
+            "date_from": "2026-01-01", "basic": 3000, "daily_hours": 8,
+        }))
+        punches = self.env["hr.attendance"]
+        for day in range(1, 6):
+            punches |= self.env["hr.attendance"].create({"employee_id": self.employee.id,
+                "check_in": datetime(2026, 1, day, 9, 1) if day < 5 else datetime(2026, 1, day, 9),
+                "check_out": datetime(2026, 1, day, 17)})
+        slip = self.env["campus.payslip"].with_user(self.manager).create({
+            "name": "Self-service late payroll", "agreement_id": agreement.id,
+            "date_from": "2026-01-01", "date_to": "2026-01-31", "working_days": 5,
+        })
+        slip.action_compute()
+        self.assertEqual((slip.late_days, slip.late_grace_days, slip.late_deducted_days), (4, 2, 2))
+        self.assertEqual(slip.late_deduction, 1200)
+        self.assertEqual((slip.gross, slip.net), (3000, 1800))
+        self._approve(slip)
+        admin = self.env["campus.payslip"].with_user(self.manager)
+        staff = self.env["campus.payslip"].with_user(self.faculty_user)
+        self.assertEqual(admin.get_history_data(self.employee.id)["records"], staff.get_history_data()["records"])
+        self.assertEqual(staff.get_history_data()["staff"], [])
+        for invalid in (True, -1, [], "not-an-id"):
+            with self.assertRaises(ValidationError):
+                staff.get_history_data(invalid)
+        self.assertEqual(admin.get_punch_entries(self.employee.id, "2026-01-01", "2026-01-31"),
+                         staff.get_punch_entries(self.employee.id, "2026-01-01", "2026-01-31"))
+        entries = staff.get_punch_entries(self.employee.id, "2026-01-01", "2026-01-31")
+        self.assertEqual([entry["treatment"] for entry in entries],
+                         ["Paid permission", "Paid permission", "1 day deducted", "1 day deducted", "No late deduction"])
+        # Attendance corrections must not silently rewrite an approved salary snapshot.
+        punches[2].check_in = datetime(2026, 1, 3, 8)
+        self.assertEqual(staff.get_punch_entries(self.employee.id, "2026-01-01", "2026-01-31")[2]["treatment"], "1 day deducted")
+        self.assertEqual(slip.late_deduction, 1200)
+        for user in (self.outsider, self.operator):
+            with self.assertRaises(AccessError):
+                staff.with_user(user).get_history_data(self.employee.id)
+            with self.assertRaises(AccessError):
+                staff.with_user(user).get_punch_entries(self.employee.id, "2026-01-01", "2026-01-31")
+        foreign = self.env["res.company"].create({"name": "Other payroll college"})
+        self.faculty_user.company_ids |= foreign
+        with self.assertRaises(AccessError):
+            staff.with_context(allowed_company_ids=[foreign.id]).get_history_data(self.employee.id)
+        with self.assertRaises(AccessError):
+            staff.get_punch_entries(self.employee.id, "2026-02-01", "2026-02-28")
+        with self.assertRaises(ValidationError):
+            staff.get_punch_entries(self.employee.id, "invalid", "2026-01-31")
+
     def test_paid_late_permission_does_not_excuse_early_checkout(self):
         agreement = self._approve(self.env["campus.salary.agreement"].create({
             "name": "Short shift salary", "employee_id": self.employee.id,
