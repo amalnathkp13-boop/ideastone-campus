@@ -15,4 +15,5 @@ from . import test_question_paper
 from . import test_student_od
 from . import test_academics_ui
 from . import test_faculty_home
+from . import test_faculty_library
 from . import test_navigation_preferences

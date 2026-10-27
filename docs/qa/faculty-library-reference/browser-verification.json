@@ -1,0 +1,271 @@
+{
+  "checkedAt": "2026-10-27T19:00:12.222Z",
+  "checks": [
+    {
+      "check": "author search",
+      "rows": 1,
+      "text": "B00123\t\nDigital Signal Processing\n\tOppenheim A. V.\tPearson\t2018\tECE\tAvailable\tMain Library\t621.382\tR1"
+    },
+    {
+      "check": "combined filters",
+      "empty": "No catalogue records match your search."
+    },
+    {
+      "check": "department filter",
+      "rows": "Python Programming\nJohn Smith\n\tLIB-123322223\tComputer Science\tTechPress\t3rd\t005.133\tC4\tAvailable"
+    },
+    {
+      "check": "library enquiry saved",
+      "toast": "Your enquiry was saved for the library desk."
+    },
+    {
+      "check": "renewal persists after reload",
+      "counts": "▤\nBooks issued to you\n2\nActive loan records\n◷\nDue within 7 days\n1\nPlan your return\n↻\nRenewal requests\n1\nAwaiting library review\n₹\nOutstanding fine\n₹0.00\nRecorded library balance",
+      "field": "13px",
+      "heading": "28px",
+      "loans": "B01234\t\nElectronics Circuits\n\t22 Oct 2026\t05 Nov 2026\t—\tIssued\tRequest renewal\nB00456\t\nSignals and Systems\n\t15 Oct 2026\t29 Oct 2026\t—\tRenewal pending\t—\nB01890\t\nVLSI Design\n\t02 Sept 2026\t16 Sept 2026\t15 Sept 2026\tReturned\t—",
+      "panels": 2
+    },
+    {
+      "check": "configured LMS link",
+      "href": "/lms/"
+    },
+    {
+      "cardsFit": true,
+      "check": "responsive",
+      "documentOverflow": false,
+      "mainOverflow": false,
+      "tables": [
+        {
+          "scroll": 1076,
+          "visible": 1076
+        }
+      ],
+      "title": "Library & learning",
+      "titleFont": "28px",
+      "width": 1440
+    },
+    {
+      "cardsFit": true,
+      "check": "responsive",
+      "documentOverflow": false,
+      "mainOverflow": false,
+      "tables": [
+        {
+          "scroll": 1076,
+          "visible": 1076
+        }
+      ],
+      "title": "Library catalogue",
+      "titleFont": "28px",
+      "width": 1440
+    },
+    {
+      "cardsFit": true,
+      "check": "responsive",
+      "documentOverflow": false,
+      "mainOverflow": false,
+      "tables": [
+        {
+          "scroll": 1076,
+          "visible": 1076
+        }
+      ],
+      "title": "Library circulation",
+      "titleFont": "28px",
+      "width": 1440
+    },
+    {
+      "cardsFit": true,
+      "check": "responsive",
+      "documentOverflow": false,
+      "mainOverflow": false,
+      "tables": [],
+      "title": "Learning platform",
+      "titleFont": "28px",
+      "width": 1440
+    },
+    {
+      "cardsFit": true,
+      "check": "responsive",
+      "documentOverflow": false,
+      "mainOverflow": false,
+      "tables": [
+        {
+          "scroll": 1034,
+          "visible": 670
+        }
+      ],
+      "title": "Library & learning",
+      "titleFont": "28px",
+      "width": 768
+    },
+    {
+      "cardsFit": true,
+      "check": "responsive",
+      "documentOverflow": false,
+      "mainOverflow": false,
+      "tables": [
+        {
+          "scroll": 850,
+          "visible": 670
+        }
+      ],
+      "title": "Library catalogue",
+      "titleFont": "28px",
+      "width": 768
+    },
+    {
+      "cardsFit": true,
+      "check": "responsive",
+      "documentOverflow": false,
+      "mainOverflow": false,
+      "tables": [
+        {
+          "scroll": 850,
+          "visible": 670
+        }
+      ],
+      "title": "Library circulation",
+      "titleFont": "28px",
+      "width": 768
+    },
+    {
+      "cardsFit": true,
+      "check": "responsive",
+      "documentOverflow": false,
+      "mainOverflow": false,
+      "tables": [],
+      "title": "Learning platform",
+      "titleFont": "28px",
+      "width": 768
+    },
+    {
+      "cardsFit": true,
+      "check": "responsive",
+      "documentOverflow": false,
+      "mainOverflow": false,
+      "tables": [
+        {
+          "scroll": 1034,
+          "visible": 320
+        }
+      ],
+      "title": "Library & learning",
+      "titleFont": "24px",
+      "width": 390
+    },
+    {
+      "cardsFit": true,
+      "check": "responsive",
+      "documentOverflow": false,
+      "mainOverflow": false,
+      "tables": [
+        {
+          "scroll": 850,
+          "visible": 320
+        }
+      ],
+      "title": "Library catalogue",
+      "titleFont": "24px",
+      "width": 390
+    },
+    {
+      "cardsFit": true,
+      "check": "responsive",
+      "documentOverflow": false,
+      "mainOverflow": false,
+      "tables": [
+        {
+          "scroll": 850,
+          "visible": 320
+        }
+      ],
+      "title": "Library circulation",
+      "titleFont": "24px",
+      "width": 390
+    },
+    {
+      "cardsFit": true,
+      "check": "responsive",
+      "documentOverflow": false,
+      "mainOverflow": false,
+      "tables": [],
+      "title": "Learning platform",
+      "titleFont": "24px",
+      "width": 390
+    },
+    {
+      "cardsFit": true,
+      "check": "responsive",
+      "documentOverflow": false,
+      "mainOverflow": false,
+      "tables": [
+        {
+          "scroll": 1034,
+          "visible": 250
+        }
+      ],
+      "title": "Library & learning",
+      "titleFont": "24px",
+      "width": 320
+    },
+    {
+      "cardsFit": true,
+      "check": "responsive",
+      "documentOverflow": false,
+      "mainOverflow": false,
+      "tables": [
+        {
+          "scroll": 850,
+          "visible": 250
+        }
+      ],
+      "title": "Library catalogue",
+      "titleFont": "24px",
+      "width": 320
+    },
+    {
+      "cardsFit": true,
+      "check": "responsive",
+      "documentOverflow": false,
+      "mainOverflow": false,
+      "tables": [
+        {
+          "scroll": 850,
+          "visible": 250
+        }
+      ],
+      "title": "Library circulation",
+      "titleFont": "24px",
+      "width": 320
+    },
+    {
+      "cardsFit": true,
+      "check": "responsive",
+      "documentOverflow": false,
+      "mainOverflow": false,
+      "tables": [],
+      "title": "Learning platform",
+      "titleFont": "24px",
+      "width": 320
+    },
+    {
+      "check": "reference catalogue order",
+      "first": "B00123\t\nDigital Signal Processing\n\tOppenheim A. V.\tPearson\t2018\tECE\tAvailable\tMain Library\t621.382\tR1",
+      "rows": 12
+    },
+    {
+      "check": "phone search",
+      "documentOverflow": false,
+      "fieldSize": "13px",
+      "rows": "Digital Signal Processing\nOppenheim A. V.\n\tB00123\tECE\tPearson\t3rd\t621.382\tR1\tAvailable"
+    }
+  ],
+  "consoleErrors": [],
+  "materialDownload": {
+    "url": "/my/campus/resource/2",
+    "authenticatedHttpStatus": 200,
+    "evidence": "Odoo HTTP log; browser download event was not captured"
+  }
+}

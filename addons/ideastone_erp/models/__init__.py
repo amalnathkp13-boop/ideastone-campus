@@ -63,3 +63,4 @@ from . import hod_question_paper
 from . import coe_workspace
 from . import faculty_home
 from . import academics_ui
+from . import faculty_library
