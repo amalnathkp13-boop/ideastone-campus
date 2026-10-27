@@ -40,6 +40,10 @@ jobs:
         run: for f in odoo/*.sh openolat/*.sh scripts/*.sh; do bash -n "$f"; done
       - name: Validate compose file
         run: docker compose config -q
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: Campus session navigation checks
+        run: node --test docs/qa/session-sync/session-sync.test.cjs
 
   install:
     name: install
@@ -152,6 +156,7 @@ jobs:
             --workers=0 --max-cron-threads=0 --no-http < docs/qa/parent-portal/seed.py
           export NODE_PATH="$RUNNER_TEMP/faculty-ui-tools/node_modules"
           node docs/qa/parent-portal/browser.cjs
+          SESSION_QA_PASSWORD="$PARENT_QA_PASSWORD" node docs/qa/session-sync/browser.cjs
       - name: Preserve Parent Portal evidence
         if: always()
         uses: actions/upload-artifact@v4
