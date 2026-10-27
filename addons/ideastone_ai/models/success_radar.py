@@ -62,7 +62,8 @@ class SuccessRadar(models.AbstractModel):
     def _attendance(self, student, placement, today):
         company = student.company_id
         term = placement.academic_term_id
-        start = max(term.term_start_date or today.replace(day=1), placement.campus_date_from or today.replace(day=1))
+        start = term.term_start_date or placement.campus_date_from or today.replace(day=1)
+        start = max(start, placement.campus_date_from or start)
         end = min(term.term_end_date or today, placement.campus_date_to or term.term_end_date or today)
         lines = self.env["op.attendance.line"].sudo().search([
             ("company_id", "=", company.id), ("student_id", "=", student.id), ("attendance_id.state", "=", "done"),
@@ -125,7 +126,8 @@ class SuccessRadar(models.AbstractModel):
 
     def _engagement(self, student, placement, today):
         term = placement.academic_term_id
-        start = max(term.term_start_date or today.replace(day=1), placement.campus_date_from or today.replace(day=1))
+        start = term.term_start_date or placement.campus_date_from or today.replace(day=1)
+        start = max(start, placement.campus_date_from or start)
         end = min(today, term.term_end_date or today, placement.campus_date_to or today)
         od_dates, leave_dates = set(), set()
         def dates(first, last):
@@ -315,6 +317,15 @@ class SuccessRadar(models.AbstractModel):
             message = _("Attendance is on track. Keep it above %s%%.") % att["threshold"]
             parent_message = _("%(name)s's attendance is on track, above %(t)s%%.") % {"name": name, "t": att["threshold"]}
         shortage = bool(att["conducted"] and att["attended"] * 100 < att["threshold"] * att["conducted"])
-        title = _("Attendance needs attention") if shortage else _("Limited attendance history") if att["conducted"] < 5 else _("On track from available records") if row["band"] == "low" else _("Worth a closer look this week") if row["band"] == "watch" else _("Needs attention now")
+        if row["band"] == "high":
+            title = _("Needs attention now")
+        elif shortage:
+            title = _("Attendance needs attention")
+        elif row["band"] == "watch":
+            title = _("Worth a closer look this week")
+        elif att["conducted"] < 5:
+            title = _("Limited attendance history")
+        else:
+            title = _("On track from available records")
         return {"score": row["score"], "band": row["band"], "display_band": "watch" if shortage and row["band"] == "low" else row["band"], "title": title, "factors": row["factors"], "action": row["action"],
                 "attendance": att, "message": message, "parent_message": parent_message, "name": name}

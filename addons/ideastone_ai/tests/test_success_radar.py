@@ -97,6 +97,20 @@ class TestSuccessRadar(OwnerMVPFixture, TransactionCase):
         self.env.company.campus_attendance_threshold = 0
         self.assertEqual(self.radar.sudo().student_nudge(self.student)["attendance"]["threshold"], 0)
 
+    def test_missing_effective_date_keeps_prior_month_term_attendance(self):
+        self.attend(self.student, 1, 0, start_offset=-30)
+        # Represent a legacy import without rewriting a protected historic placement.
+        self.env.cr.execute("UPDATE op_student_course SET campus_date_from = NULL WHERE id = %s", [self.student.course_detail_ids.id])
+        self.student.course_detail_ids.invalidate_recordset(["campus_date_from"])
+        self.assertEqual(self.row(self.student)["attendance"]["conducted"], 1)
+
+    def test_provisional_attendance_does_not_hide_other_high_risk_factors(self):
+        row = self.radar.sudo()._assess(self.student, self.today)
+        row.update(score=60, band="high", action="Review fees and results")
+        with patch.object(type(self.radar), "_assess", return_value=row):
+            nudge = self.radar.sudo().student_nudge(self.student)
+        self.assertEqual(nudge["title"], "Needs attention now")
+
     def test_hod_requires_an_assigned_department_for_every_hod_group(self):
         self.hod.dept_id = False
         with self.assertRaises(AccessError):

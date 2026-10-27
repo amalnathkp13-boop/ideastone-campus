@@ -78,6 +78,11 @@
           </form>
           <article t-if="state.feedback" class="ai_answer">
             <p class="ai_answer_q"><t t-esc="state.feedback.responses"/> responses (<t t-esc="state.feedback.with_comments"/> with comments), average score <t t-esc="state.feedback.average"/> / 5 · <t t-esc="state.feedback.period"/></p>
+            <h3>Recorded counts</h3>
+            <ul><li t-foreach="state.feedback.themes" t-as="theme" t-key="theme.label"><t t-esc="theme.label"/>: <strong t-esc="theme.count"/></li></ul>
+            <p><t t-foreach="state.feedback.ratings" t-as="rating" t-key="rating.score"><t t-esc="rating.score"/> / 5: <strong t-esc="rating.count"/> · </t></p>
+            <h3>AI suggestions</h3>
+            <p class="ai_note">Check these suggestions against the recorded counts above before acting.</p>
             <div class="ai_answer_a"><pre t-esc="state.feedback.summary"/></div>
             <small>Only rating totals and predefined English keyword theme counts are sent. Stored comments stay on the server. <t t-esc="state.feedback.uncategorised"/> comment(s) need local topic review; categories may overlap.</small>
           </article>

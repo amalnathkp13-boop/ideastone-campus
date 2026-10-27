@@ -45,7 +45,7 @@
                 <tr t-attf-class="radar_row band_#{row.band}">
                   <td><strong t-esc="row.name"/><small><t t-esc="row.number"/><t t-if="row.mentor"> · Mentor: <t t-esc="row.mentor"/></t></small></td>
                   <td><t t-esc="row.batch"/><small t-esc="row.semester"/></td>
-                  <td><span t-attf-class="radar_score band_#{row.band}" t-esc="row.score"/><small t-esc="row.provisional ? 'Limited attendance history' : bandLabel(row.band)"/></td>
+                  <td><span t-attf-class="radar_score band_#{row.band}" t-esc="row.score"/><small t-esc="bandLabel(row.band)"/><small t-if="row.provisional">Limited attendance history</small></td>
                   <td>
                     <span t-foreach="row.factors" t-as="factor" t-key="factor.key" t-attf-class="radar_chip factor_#{factor.key}" t-att-title="factor.detail"><t t-esc="factorLabel(factor.key)"/> +<t t-esc="factor.points"/></span>
                     <span t-if="!row.factors.length" class="radar_chip factor_ok">No scored concerns</span>

@@ -231,9 +231,14 @@ class CampusAssistant(models.AbstractModel):
         ]
         text = self._complete("notice", messages, [_("your brief"), _("audience"), _("tone")])
         title, body = "", text
-        if text.upper().startswith("TITLE:"):
-            first, _sep, rest = text.partition("\n")
-            title, body = first[6:].strip(), rest.strip()
+        first, _sep, rest = text.partition("\n")
+        first = first.strip()
+        for marker in ("**", "__"):
+            if first.startswith(marker) and first.endswith(marker):
+                first = first[len(marker):-len(marker)]
+        heading = re.fullmatch(r"(?:\*\*|__)?TITLE:(?:\*\*|__)?\s*(.*)", first, re.IGNORECASE)
+        if heading:
+            title, body = heading[1].strip(), rest.strip()
         paragraphs = [escape(p.strip()) for p in body.split("\n\n") if p.strip()] or [escape(body)]
         html = "".join("<p>%s</p>" % p.replace("\n", "<br/>") for p in paragraphs)
         create = None
@@ -272,6 +277,7 @@ class CampusAssistant(models.AbstractModel):
             themes.update(matched)
             uncategorised += int(not matched)
         average = round(sum(rows.mapped("score")) / len(rows), 2)
+        ratings = dict(Counter(rows.mapped("score")))
         messages = [
             {"role": "system", "content": (
                 "You analyse aggregate feedback for a college administrator. Describe the supplied predefined theme counts "
@@ -279,11 +285,13 @@ class CampusAssistant(models.AbstractModel):
                 "invent quotations, paraphrases, sentiment per theme, or individual cases. Explain that uncategorised comments "
                 "need local review and the English keyword categories do not capture every topic or language. Plain text, under 250 words.")},
             {"role": "user", "content": json.dumps({"responses": len(rows), "average_score": average,
-                "rating_counts": dict(Counter(rows.mapped("score"))), "theme_counts": dict(themes),
+                "rating_counts": ratings, "theme_counts": dict(themes),
                 "comments_with_text": with_comments, "uncategorised_comments": uncategorised})},
         ]
         summary = self._complete("feedback", messages, [_("feedback score totals"), _("predefined feedback theme counts")], max_tokens=600)
         return {"summary": summary, "responses": len(rows), "with_comments": with_comments, "uncategorised": uncategorised, "average": average,
+                "themes": [{"label": label, "count": count} for label, count in themes.most_common()],
+                "ratings": [{"score": score, "count": ratings.get(score, 0)} for score in range(1, 6)],
                 "period": period or _("all periods"), "kind": kind}
 
     @api.model

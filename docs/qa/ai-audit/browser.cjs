@@ -108,6 +108,12 @@ assert(out && process.env.AI_QA_PASSWORD, 'QA output and runtime password requir
         await page.getByRole('button', { name: 'Find themes', exact: true }).click();
         await page.locator('.ai_answer_a').waitFor();
         assert((await page.locator('.ai_answer_a').innerText()).includes('category counts'));
+        await page.getByRole('heading', { name: 'Recorded counts', exact: true }).waitFor();
+        for (const width of [1440, 1728, 390]) {
+            await page.setViewportSize({ width, height: 1000 });
+            assert(!await page.locator('.campus_ai_page').evaluate(el => el.scrollWidth > el.clientWidth + 2));
+            await page.screenshot({ path: path.join(out, `assistant-feedback-${width}.png`) });
+        }
         assert(!JSON.stringify(calls).includes('PRIVATE'));
         assert(!JSON.stringify(calls).includes('@example.test'));
         checks.push('provider payload contains no saved feedback text or student identifiers');

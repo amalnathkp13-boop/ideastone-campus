@@ -144,9 +144,18 @@ class TestCampusAssistant(OwnerMVPFixture, TransactionCase):
         self.assertEqual(aggregate["theme_counts"]["Facilities and laboratories"], 1)
         self.assertNotIn(student.name, sent)
         self.assertNotIn(self.teacher.name, sent)
+        self.assertEqual(result["ratings"], [{"score": score, "count": int(score in {2, 4})} for score in range(1, 6)])
+        self.assertEqual(next(item["count"] for item in result["themes"] if item["label"] == "Library and learning resources"), 1)
         with self.assertRaisesRegex(UserError, "No parent feedback"):
             with patch.object(assistant_module.requests, "post", self.fake_post()):
                 self.assistant.summarise_feedback("2026-27", "parent")
+
+    def test_markdown_title_from_local_model_becomes_a_circular_title(self):
+        for heading in ("**TITLE: Library access**", "**TITLE:** Library access", "TITLE: Library access"):
+            with patch.object(assistant_module.requests, "post", self.fake_post(FakeResponse(content=heading + "\n\nBring your card."))):
+                draft = self.assistant.draft_notice("Bring your card")
+            self.assertEqual(draft["title"], "Library access")
+            self.assertEqual(draft["body_text"], "Bring your card.")
 
     def test_malformed_provider_payloads_and_redirects_are_audited(self):
         self.company.sudo().campus_ai_monthly_limit = 0
