@@ -117,7 +117,7 @@ async function markup(page) {
         }
         for (const module of overview.faculty_modules.filter(module=>module.key!=='home')) {
             await page.locator('.campus_sidebar').getByRole('button',{name:module.label,exact:true}).click();
-            await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory'})[module.key]||module.label,exact:true,level:1}).waitFor();
+            await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory',staff:'Staff Directory'})[module.key]||module.label,exact:true,level:1}).waitFor();
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Admissions',exact:true}).click();
         await page.getByRole('heading',{name:'Admissions',exact:true}).waitFor();
