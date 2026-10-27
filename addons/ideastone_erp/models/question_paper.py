@@ -265,7 +265,7 @@ class QuestionPaper(models.Model):
             if not self.env.user.has_group('ideastone_erp.group_exam_paper_' + role):
                 raise AccessError(_('This reviewer workspace is not assigned to your login.'))
             subjects = self.env['op.subject']
-            domain = [(role + '_id', '=', self.env.uid), ('state', '=', 'forwarded')] if role == 'coe' else [
+            domain = [(role + '_id', '=', self.env.uid), ('state', 'in', ['approved', 'forwarded'])] if role == 'coe' else [
                 ('hod_id', '=', self.env.uid), ('department_id', '=', self.env.user.dept_id.id), ('state', '!=', 'draft')]
         records = self.search(domain + [('company_id', '=', self.env.company.id)])
         rows = []

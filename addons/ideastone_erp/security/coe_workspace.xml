@@ -1,0 +1,5 @@
+<odoo>
+ <record id="group_coe_admin" model="res.groups"><field name="name">Controller of Examinations</field><field name="category_id" ref="category_campus"/><field name="implied_ids" eval="[(4,ref('group_exam_paper_coe')),(4,ref('group_mvp_exams'))]"/></record>
+ <record id="acl_coe_case" model="ir.model.access"><field name="name">COE case register</field><field name="model_id" ref="model_campus_coe_case"/><field name="group_id" ref="group_coe_admin"/><field name="perm_read" eval="True"/><field name="perm_write" eval="True"/><field name="perm_create" eval="True"/></record>
+ <record id="rule_coe_case_company" model="ir.rule"><field name="name">COE cases in allowed colleges</field><field name="model_id" ref="model_campus_coe_case"/><field name="domain_force">[('company_id','in',company_ids)]</field></record>
+</odoo>
