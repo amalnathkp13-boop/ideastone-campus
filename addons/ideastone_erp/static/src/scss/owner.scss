@@ -56,6 +56,48 @@ font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif
 }
 @media(max-width:760px){.campus_dashboard:has(.admin_overview){padding:17px 13px}}
 
+.admin_overview {
+  .decision-list{display:grid;gap:0}
+  .decision-item{display:grid;grid-template-columns:38px minmax(0,1fr) auto;align-items:start;gap:10px;padding:13px 0;border-bottom:1px solid #edf1f6}
+  .decision-item:last-child{border-bottom:0;padding-bottom:2px}
+  .decision-icon{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:18px;font-weight:700}
+  .decision-icon.cultural{background:#fff0f2;color:#dc4354}
+  .decision-icon.sponsor,.decision-icon.campaign{background:#eaf3ff;color:#1769e8}
+  .decision-copy{min-width:0;overflow-wrap:anywhere}
+  .decision-copy h4{font-size:12px;line-height:1.4;margin:0 0 4px;color:#153451;font-weight:750}
+  .decision-open{font:inherit;color:inherit;line-height:inherit;border:0;background:none;padding:0;text-align:left}
+  .decision-open:hover{text-decoration:underline}
+  .decision-deadline{display:flex;align-items:center;gap:5px;flex-wrap:wrap;color:#71859a;font-size:10px;margin-bottom:4px}
+  .decision-impact{font-size:10px;line-height:1.45;color:#647b91}
+  .decision-impact strong{color:#536d86;font-weight:700}
+  .decision-budget{font-size:17px;line-height:1.1;font-weight:800;letter-spacing:-.5px;color:#102e4b;white-space:nowrap;align-self:start;padding-top:2px}
+  .decision-footer{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;border-top:1px solid #edf1f6;margin-top:12px;padding-top:12px;color:#8293a5;font-size:9px}
+  .decision-footer strong{color:#24445f}
+  .decision-grid .deadlines-panel{grid-column:1 / -1}
+  .decision-grid .deadlines-panel .deadline-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+  .decision-grid .deadlines-panel .deadline{padding:10px 14px;border-bottom:0;border-right:1px solid #edf1f6;min-width:0}
+  .decision-grid .deadlines-panel .deadline:last-child{border-right:0}
+  .decision-grid .deadlines-panel .deadline-info strong{line-height:1.4}
+  .collection-panel{display:flex;flex-direction:column;align-self:stretch}
+  .fee-chart{margin-top:4px;display:flex;flex:1;min-height:0;flex-direction:column}
+  .fee-chart-legend{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:10px;color:#70849a;margin-bottom:10px}
+  .fee-key{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
+  .fee-key.collected{background:#1769e8}.fee-key.target{background:#e7eef7}
+  .fee-unit{margin-left:auto;color:#8798aa}
+  .fee-bars{display:grid;flex:1;min-height:190px;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;align-items:stretch}
+  .fee-month{display:grid;grid-template-rows:auto minmax(130px,1fr) auto auto;gap:5px;text-align:center;min-width:0}
+  .fee-values{display:flex;flex-direction:column;align-items:center;line-height:1.35;white-space:nowrap}
+  .fee-values strong{font-size:11px;color:#173955}.fee-values small{font-size:9px;color:#8495a7}
+  .fee-bar-track{height:100%;min-height:130px;width:58%;max-width:80px;margin:0 auto;background:#edf2f8;border-radius:7px 7px 4px 4px;display:flex;align-items:flex-end;overflow:hidden;position:relative}
+  .fee-bar-fill{width:100%;background:linear-gradient(180deg,#4d9aff,#1769e8);border-radius:7px 7px 3px 3px;transition:height .2s}
+  .fee-month-label{font-size:11px;font-weight:750;color:#3c5872}.fee-percent{font-size:9px;color:#8293a5}
+  .fee-month.current .fee-percent{color:#138b69;font-weight:750}
+  .fee-note{margin-top:13px;display:block}.fee-note strong{color:#173955}
+  @media(max-width:1200px){.decision-grid .deadlines-panel .deadline-list{grid-template-columns:minmax(0,1fr)}.decision-grid .deadlines-panel .deadline{padding:11px 0;border-right:0;border-bottom:1px solid #edf1f6}.decision-grid .deadlines-panel .deadline:last-child{border-bottom:0}}
+  @media(max-width:1100px){.decision-item{grid-template-columns:36px minmax(0,1fr) auto;gap:9px}.decision-budget{font-size:16px}}
+  @media(max-width:760px){.decision-budget{padding-top:1px}.decision-footer{flex-direction:column}.fee-chart{flex:none}.fee-bars{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 7px;min-height:0}.fee-month{grid-template-rows:auto 82px auto auto}.fee-bar-track{height:82px;min-height:82px;width:58%}.fee-values strong{font-size:10px}.fee-percent{font-size:8px}.fee-chart-legend{gap:8px}.fee-unit{margin-left:0}}
+  @media(prefers-reduced-motion:reduce){.fee-bar-fill{transition:none}}
+}
 .admin_overview .event-feature-copy > p {display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
 @media print {
   html:has(.admin_overview), body:has(.admin_overview) {height:auto!important;overflow:visible!important;}
