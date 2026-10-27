@@ -1,5 +1,6 @@
 // Shared by the existing authenticated browser suites. Check rendered styles,
 // including data-backed headings, rather than merely searching the stylesheet.
+// Callers use reduced motion so checks sample the final palette, not a hover transition.
 const assert = require('node:assert/strict');
 async function assertCampusTheme(page) {
     const result = await page.evaluate(() => {
@@ -48,7 +49,7 @@ async function assertCampusTheme(page) {
         assert.equal(result.card.radius, '15px', 'Card radius drifted');
     }
     if (result.button) {
-        assert(['rgb(23, 105, 210)', 'rgb(17, 83, 168)'].includes(result.button.background), 'Primary or hover color drifted');
+        assert(['rgb(23, 105, 210)', 'rgb(17, 83, 168)'].includes(result.button.background), `Primary or hover color drifted: ${result.button.background}`);
         assert.equal(result.button.size, '12px', 'Primary font size drifted');
         assert.equal(result.button.weight, '750', 'Primary font weight drifted');
     }

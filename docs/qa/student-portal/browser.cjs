@@ -39,7 +39,7 @@ async function save(page, control) {
 (async()=>{
     await fs.mkdir(out,{recursive:true});
     const browser=await chromium.launch({headless:true});
-    const context=await browser.newContext({viewport:{width:1440,height:1000}});
+    const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
     const page=await context.newPage();
     page.setDefaultTimeout(60000);
     const errors=[];

@@ -62,7 +62,7 @@ async function submit(page,button) {
 (async()=>{
     await fs.mkdir(out,{recursive:true});
     const browser=await chromium.launch({headless:true,...(process.env.PARENT_QA_CHROME?{channel:'chrome'}:{})});
-    const context=await browser.newContext({viewport:{width:1440,height:1000},timezoneId:'Asia/Kolkata'});
+    const context=await browser.newContext({viewport:{width:1440,height:1000},timezoneId:'Asia/Kolkata',reducedMotion:'reduce'});
     const page=await context.newPage(); page.setDefaultTimeout(60000);
     const errors=[]; page.on('pageerror',e=>errors.push(e.message));
     const requestTitle='QA parent absence intimation '+Date.now();
