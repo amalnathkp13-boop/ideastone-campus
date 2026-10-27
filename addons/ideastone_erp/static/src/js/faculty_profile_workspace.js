@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, useEffect, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -15,8 +15,8 @@ class StaffRecordDialog extends Component {
         this.orm = useService("orm"); this.action = useService("action");
         this.state = useState({busy:false,error:"",values:{name:"",kind:this.props.kind === "document" ? "document" : "fdp",campus_category:"academic",campus_expiry_date:"",date_from:this.props.data.today,date_to:"",campus_hours:0,description:"",...this.props.record,description:this.props.record?.description||"",date_to:this.props.record?.date_to||"",campus_expiry_date:this.props.record?.campus_expiry_date||""}});
     }
-    get readOnly() { return this.props.kind === "agreement" || (this.props.kind === "activity" && this.props.record && this.props.record.state !== "draft"); }
-    get title() { return this.props.record?.name || (this.props.kind === "document" ? "Upload document" : "Add development activity"); }
+    get readOnly() { return ["agreement","leave"].includes(this.props.kind) || (this.props.kind === "activity" && this.props.record && this.props.record.state !== "draft"); }
+    get title() { return this.props.kind === "leave" ? "Leave request" : this.props.record?.name || (this.props.kind === "document" ? "Upload document" : "Add development activity"); }
     async file(event) {
         this.state.error=""; const file=event.target.files[0]; if(!file)return;
         if(file.size>10*1024*1024){this.state.error="Choose a file up to 10 MB.";return;}
@@ -45,8 +45,11 @@ export class FacultyProfileWorkspace extends Component {
         this.orm=useService("orm");this.action=useService("action");this.dialog=useService("dialog");this.notification=useService("notification");
         const page=this.props.action?.params?.page||"myprofile";
         this.page=Object.hasOwn(PAGES,page)?page:"myprofile";
-        this.state=useState({data:null,loading:true,busy:false,error:"",editing:false,profile:{},query:"",status:"",category:"all",month:"",year:"",report:"Complete History",slip:0,leaveDuration:"one",leaveView:"apply",leaveForm:{leave_type_id:"",date_from:"",date_to:"",from_session:"FN",to_session:"AN",reason:""}});
+        this.state=useState({data:null,loading:true,busy:false,error:"",editing:false,profile:{},query:"",status:"",category:"all",month:"",year:"",report:"Complete History",slip:0,addActivity:false,activity:{},leaveDuration:"one",leaveView:"apply",leaveForm:{leave_type_id:"",date_from:"",date_to:"",from_session:"FN",to_session:"AN",reason:""}});
         this.request=0;onWillStart(()=>this.load());
+        useEffect(() => {
+            if (this.state.addActivity) document.getElementById("activityFormPanel")?.scrollIntoView({block:"nearest"});
+        }, () => [this.state.addActivity]);
     }
     async load(){const request=++this.request;this.state.loading=true;this.state.error="";try{const data=await this.orm.call("campus.faculty.workspace","get_workspace",[]);if(request!==this.request)return;this.state.data=data;this.state.profile=Object.fromEntries(["email","mobile","campus_emergency_phone","campus_communication_address"].map(k=>[k,data.profile[k]||""]));if(!data.payroll.some(p=>p.id===Number(this.state.slip)))this.state.slip=data.payroll[0]?.id||0;if(!this.state.leaveForm.date_from)this.resetLeave();}catch(error){if(request===this.request)this.state.error=error.data?.message||"Your staff workspace could not be loaded. Retry.";}finally{if(request===this.request)this.state.loading=false;}}
     get d(){return this.state.data;} get p(){return this.d.profile;} get title(){return PAGES[this.page];}
@@ -63,7 +66,15 @@ export class FacultyProfileWorkspace extends Component {
     get activityVerified(){return this.d.activities.filter(r=>["approved","done"].includes(r.state)).length;}
     get evidenced(){return this.d.activities.filter(r=>r.filename).length;}
     get readiness(){return this.d.activities.length?Math.round(this.activityVerified/this.d.activities.length*100):0;}
-    get categories(){return CATEGORIES.map(c=>({...c,count:this.d.activities.filter(r=>!c.kinds||c.kinds.includes(r.kind)).length}));}
+    get categories(){return CATEGORIES.map((c,i)=>({...c,color:["blue","violet","green","amber","teal","blue","violet","green"][i],copy:c.key==="reviews"?"Peer review, editorial work, consultancy":c.copy,count:this.d.activities.filter(r=>!c.kinds||c.kinds.includes(r.kind)).length}));}
+    activityCategory(kind){const c=this.categories.slice(1).find(c=>c.kinds.includes(kind));return {color:c?.color||"blue",label:{research:"Research",training:"Training",reviews:"Participation",courses:"Courses",vacation:"Vacation",guest:"Guest",resource:"Resource"}[c?.key]||this.kindName(kind)};}
+    documentCategory(kind){return {academic:"Academic",identity:"Identity",professional:"Professional development",membership:"Membership"}[kind]||this.capitalize(kind);}
+    get developmentHours(){return this.d.activities.reduce((sum,r)=>sum+r.campus_hours,0);}
+    get evidenceCompleteness(){return this.d.activities.length?Math.round(this.evidenced/this.d.activities.length*100):0;}
+    get coveredCategories(){return this.categories.slice(1).filter(c=>c.count).length;}
+    get academicCycle(){const date=this.d.today,year=Number(date.slice(0,4))-(Number(date.slice(5,7))<6?1:0);return year+"–"+String(year+1).slice(-2)+" cycle";}
+    compactMoney(value){return new Intl.NumberFormat("en-IN",{style:"currency",currency:this.d.currency,notation:"compact",maximumFractionDigits:1}).format(value||0);}
+    get salaryTrendCopy(){const rows=this.trend;if(!rows.length)return "No approved payslips match the selected period.";const first=rows[0],last=rows[rows.length-1];return rows.length===1?"Net pay is "+this.money(last.net)+" for "+this.period(last.date_from)+".":"Net pay changed from "+this.money(first.net)+" in "+this.period(first.date_from)+" to "+this.money(last.net)+" in "+this.period(last.date_from)+".";}
     kindName(kind){return this.d.kinds.find(k=>k.id===kind)?.name||kind;}
     get documents(){return this.d.documents.filter(r=>(!this.state.status||r.status===this.state.status)&&r.name.toLowerCase().includes(this.state.query.toLowerCase()));}
     get activities(){const cat=CATEGORIES.find(c=>c.key===this.state.category);return this.d.activities.filter(r=>(!cat?.kinds||cat.kinds.includes(r.kind))&&(!this.state.status||(this.state.status==="Missing"?!r.filename:this.state.status==="Verified"?["approved","done"].includes(r.state):!!r.filename&&!["approved","done"].includes(r.state)))&&(r.name+" "+(r.description||"")).toLowerCase().includes(this.state.query.toLowerCase()));}
@@ -83,24 +94,33 @@ export class FacultyProfileWorkspace extends Component {
     monthName(value){return this.months[Number(value.slice(5,7))-1];}
     get months(){return ["January","February","March","April","May","June","July","August","September","October","November","December"];}
     get stats(){const docs=this.d.documents,activities=this.d.activities,a=this.agreement,l=this.d.leave;return {
-        myprofile:[["Profile completion",this.p.completion+"%",this.p.missing+" details need attention","◔"],["Documents verified",this.verified+" / "+docs.length,"Saved qualification and document records","▤"],["Service tenure",this.p.tenure===null?"—":this.p.tenure+" yrs","Joined "+this.date(this.p.campus_joining_date),"◷"],["Next profile review",this.date(this.p.campus_profile_review_date),"Annual staff data review","▣"]],
-        qualifications:[["Total documents",docs.length,"Academic credentials and staff records","▤"],["Verified",this.verified,"HR-verified records","✓"],["Pending review",docs.filter(r=>r.verification!=="verified").length,"Awaiting HR verification","◷"],["Expiring soon",docs.filter(r=>r.status==="Expiring soon"||r.status==="Expired").length,"Review validity date","⚑"]],
+        myprofile:[["Profile completion",this.p.completion+"%",this.p.missing+" details need attention","◔"],["Documents verified",this.verified+" / "+docs.length,this.verified===docs.length?"All records are up to date":"Review pending records","▤"],["Service tenure",this.p.tenure===null?"—":this.p.tenure+" yrs","Joined "+this.date(this.p.campus_joining_date),"◷"],["Next profile review",this.date(this.p.campus_profile_review_date),"Annual staff data review","▣"]],
+        qualifications:[["Total documents",docs.length,"Across "+new Set(docs.map(r=>r.campus_category||r.kind)).size+" document groups","▤"],["Verified",this.verified,(docs.length?Math.round(this.verified/docs.length*100):0)+"% verification rate","✓"],["Pending review",docs.filter(r=>r.verification!=="verified").length,"Awaiting HR verification","◷"],["Expiring soon",docs.filter(r=>r.status==="Expiring soon"||r.status==="Expired").length,"Review validity date","⚑"]],
         development:[["Appraisal readiness",this.readiness+"%","Approved activities / recorded activities","◔"],["Activities recorded",activities.length,"Across research, training and service","▤"],["Development hours",this.num(activities.reduce((sum,r)=>sum+r.campus_hours,0))+" hrs","From saved development activities","◷"],["Evidence pending",activities.filter(r=>!r.filename).length,"Upload supporting documents","⚑"]],
         agreements:[["Current agreement",a?.name||"Not recorded","Approved and effective terms","▤"],["Effective from",this.date(a?.date_from),"Current salary agreement","▣"],["Basic monthly pay",a?this.money(a.basic):"—","Approved salary terms","₹"],["Agreement status",a?this.stateLabel(a.state):"No active agreement","HR / Finance approval","✓"]],
         history:[["Latest Net Salary",this.latest?this.money(this.latest.net):"—",this.period(this.latest?.date_from),"▣"],["YTD PF Contribution",this.money(this.ytd.pf),this.ytd.year+" · "+this.ytd.count+" payslips","▤"],["YTD TDS Deducted",this.money(this.ytd.tds),this.ytd.year+" · Approved payroll","％"],["Payslips Available",this.history.length,"Filtered approved salary records","▤"]],
         leave:[["Available Casual Leave",l.balance===null?"—":this.num(l.balance),"Leaves available for application","▦"],["This Month Eligibility",l.monthly_eligibility===null?"—":this.num(l.monthly_eligibility),"According to configured leave policy","▤"],["Approved Requests",l.approved_count,"Total approved leave applications","✓"],["Pending Approval",l.pending_count,"Leave applications awaiting approval","◷"]]
     }[this.page]||[];}
-    get guidance(){return {
-        myprofile:["AI profile assistant","Personalised checklist",`${this.p.missing} profile details remain incomplete. Keep contact and emergency details current.`,"Official employment details are maintained by HR. Contact your reporting authority for corrections.","Review bank details privately through the authorised payroll office."],
-        qualifications:["Document intelligence","Completeness & validity",`${this.d.documents.length-this.verified} records still await verification. Only an authorised HR reviewer can verify evidence.`,"Check expiry dates and use a clear StaffID_DocumentType_Year filename.","Document checks do not certify authenticity."],
-        development:["AI appraisal coach","Portfolio guidance · Advisory",`${this.d.activities.filter(r=>!r.filename).length} activities have no attached evidence. Add certificates or approved supporting proof.`,`${this.d.activities.filter(r=>r.state==='submitted').length} activities await an authorised reviewer.`,"Readiness reflects recorded approvals and does not determine an official appraisal score."],
-        agreements:["AI agreement review","Consistency checks","Confirm the approved agreement is effective for the payroll period.","Changes to basic pay or allowances require authorised HR / Finance approval.","Salary documents are private. These checks do not determine salary entitlements."],
-        monthly:["AI payroll assistant","Explain & verify","Gross earnings minus the listed deductions equals the displayed net pay.","Review changes against the previous month and raise unexplained differences with payroll.","Only approved campus payslips are shown. These checks do not change payroll or give tax advice."]
-    }[this.page]||["Payroll insights","Recorded payroll",`${this.history.length} approved payslips match the selected period.`,`Recorded TDS for ${this.ytd.year}: ${this.money(this.ytd.tds)}.`,"Review late days and deductions against approved attendance records."];}
     get agreementDetails(){const a=this.agreement;return [["Employee",this.p.name+" · "+(this.p.campus_staff_code||"—")],["Designation",this.p.campus_designation],["Basic pay / month",a?this.money(a.basic):"—"],["Allowances / month",a?this.money(a.allowance):"—"],["Gross monthly pay",a?this.money(a.basic+a.allowance):"—"],["Effective date",this.date(a?.date_from)],["Approved by",this.relation(a?.approved_by)],["Review due",a?.date_to?this.date(a.date_to):"As per institutional policy"]];}
     async go(page){return this.action.doAction("ideastone_erp.action_faculty_profile_"+page);}
     async saveProfile(){if(!this.state.editing||this.state.busy)return;this.state.busy=true;this.state.error="";try{await this.orm.call("campus.faculty.workspace","save_profile",[this.state.profile]);await this.load();this.state.editing=false;this.notification.add("Contact details saved.",{type:"success"});}catch(error){this.state.error=error.data?.message||"Your profile could not be saved.";}finally{this.state.busy=false;}}
     edit(kind,record=null){this.dialog.add(StaffRecordDialog,{kind,record,data:this.d,saved:()=>this.load()});}
+    openActivityForm(){this.state.activity={name:"",kind:"",date_from:this.d.today,campus_hours:"",description:""};this.state.addActivity=true;}
+    focusActivities(){const input=document.getElementById("devSearch");input?.scrollIntoView({block:"center"});input?.focus();}
+    filterActivities(status){this.state.category="all";this.state.query="";this.state.status=status;this.focusActivities();}
+    async activityFile(event){
+        const file=event.target.files[0];delete this.state.activity.evidence;delete this.state.activity.filename;
+        if(!file)return;
+        if(file.size>10*1024*1024){event.target.value="";this.notification.add("Choose a file up to 10 MB.",{type:"danger"});return;}
+        this.state.busy=true;
+        try{this.state.activity.evidence=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result.split(",")[1]);reader.onerror=reject;reader.readAsDataURL(file);});this.state.activity.filename=file.name;}
+        catch{this.notification.add("This file could not be read. Choose it again.",{type:"danger"});}finally{this.state.busy=false;}
+    }
+    async saveActivity(event){
+        event.preventDefault();if(this.state.busy)return;this.state.busy=true;
+        try{await this.orm.call("campus.faculty.workspace","save_record",["activity",{...this.state.activity,campus_hours:Number(this.state.activity.campus_hours||0)}]);this.state.addActivity=false;this.state.category="all";this.state.status="";this.state.query="";await this.load();this.focusActivities();this.notification.add("Development activity saved.",{type:"success"});}
+        catch(error){this.notification.add(error.data?.message||"The activity could not be saved.",{type:"danger"});}finally{this.state.busy=false;}
+    }
     async recordAction(kind,id){if(!id)return;try{const result=await this.orm.call("campus.faculty.workspace","record_action",[kind,id]);if(kind==="submit")await this.load();else await this.action.doAction(result);}catch(error){this.notification.add(error.data?.message||"This record could not be opened.",{type:"danger"});}}
     selectSlip(id){this.state.slip=Number(id);if(this.page!=="monthly")this.go("monthly");}
     async saveSupervision(event){event.preventDefault();if(this.state.busy)return;const form=event.target;this.state.busy=true;try{await this.orm.call("campus.faculty.workspace","save_record",["activity",{name:form.elements.student.value,kind:"mphil",date_from:form.elements.date.value,description:form.elements.remarks.value}]);form.reset();await this.load();}catch(error){this.notification.add(error.data?.message||"Supervision could not be saved.",{type:"danger"});}finally{this.state.busy=false;}}

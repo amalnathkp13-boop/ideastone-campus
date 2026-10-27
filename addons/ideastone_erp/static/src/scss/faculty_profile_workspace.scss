@@ -97,3 +97,10 @@ font:13px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
 .campus_faculty_profile_workspace .breadcrumb{background:transparent;padding:0;border-radius:0}
 
 .campus_faculty_profile_workspace .profile-summary .pill{white-space:normal;overflow-wrap:anywhere;max-width:100%}
+
+/* Keep titles and badges in the reference's shared header row. */
+.campus_faculty_profile_workspace {
+    .panel-head { flex-wrap: nowrap; }
+    .panel-head > div { min-width: 0; }
+    .panel-head > .pill { flex-shrink: 0; }
+}

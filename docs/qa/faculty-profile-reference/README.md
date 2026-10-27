@@ -111,3 +111,37 @@ shows that visible preview back at the profile heading.
 
 This repair changes only scoped CSS and the client template. XML structure and
 Git whitespace checks pass; the earlier 156-test backend result is unchanged.
+
+## Reference widget restoration
+
+Restored the supplied document's widget structure across all seven pages. The
+M.Phil form and saved register are separate cards with a full-width remark field.
+Development again includes colored categories, five appraisal milestones, the
+three-tile appraisal coach and its adjacent portfolio snapshot. The activity
+entry form opens inline as in the reference. Profile/document/payroll assistants
+retain their bold checklist items, and payroll history has the three colored
+insight cards. Header badges, statistic units, progress bars and icon colors use
+the reference styling. Values and review statuses continue to come from saved
+records; unconfigured appraisal dates are not invented.
+
+`widget-verification.json` records **121 rendered widget style samples** across
+the seven pages. Font family, size, weight, line height, text/background colors,
+borders, radii, padding and gaps match the rendered reference. The sole computed
+style difference is the readiness ring's percentage, which reflects the saved
+approval ratio rather than the reference's illustrative 42%. This comparison was
+captured before adding the two new verification records below.
+
+`widget-responsive-verification.json` records **28 layout/scroll checks** at
+1440, 768, 390 and 320 px. No overlapping sibling cards or horizontal page overflow;
+all pages returned to offset zero. Two early wheel samples captured unfinished
+keyboard animations; both were independently checked again with settled keyboard
+scrolling and returned to zero. Wide registers scroll inside their own tables.
+
+`widget-interaction-verification.json` records an inline activity save with a PDF
+and 3.5 development hours, plus a supervision save in the separate register. Both
+survived reload. Appraisal evidence filters, readonly leave details and payroll
+filters worked. Payroll still showed three late days, two paid permissions, one
+deducted day and INR 3,684.21 late deduction. Entering the main module still opened
+My staff profile. Both test tabs and the refreshed user tab reported no browser
+errors. JavaScript syntax, template XML, asset compilation and whitespace checks
+passed. Backend models and approval workflows are unchanged in this restoration.
