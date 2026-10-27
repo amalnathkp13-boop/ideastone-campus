@@ -92,7 +92,7 @@ class CampusBase extends Component {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
-        if ((["od", "attendance"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams"].includes(module.key))) && module.items?.[0]?.action) {
+        if (((module.key === "staff" && this.state.faculty_profile_enabled) || ["od", "attendance"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams"].includes(module.key))) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
