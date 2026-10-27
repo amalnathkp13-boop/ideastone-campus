@@ -5,11 +5,13 @@
         "#student_attendance_overview": "overview",
         "#student_attendance_summary": "summary",
         "#student_attendance_register": "register",
+        "#student_attendance_hourly": "hourly",
         "#student_attendance_calendar": "calendar",
     };
-    const labels = {overview: "My Attendance", summary: "Attendance Summary", register: "Session Register", calendar: "Attendance Calendar"};
+    const labels = {overview: "My Attendance", summary: "Attendance Summary", register: "Session Register", hourly: "Hourly Attendance", calendar: "Attendance Calendar"};
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const statuses = ["absent", "late", "excused", "present"];
+    const statuses = ["absent", "late", "onduty", "excused", "present", "cancelled"];
+    const statusLabel = status => status === "onduty" ? "On Duty" : status[0].toUpperCase() + status.slice(1);
     const dateFrom = value => new Date(`${value}T12:00:00`);
     const isoDate = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     const moveDay = (date, amount) => { const next = new Date(date); next.setDate(next.getDate() + amount); return next; };
@@ -34,13 +36,14 @@
             renderWeek(attendance);
             renderMonth(attendance);
             filterRegister(attendance);
+            filterHourly(attendance);
         }
     }
 
     function dayState(rows, iso, today) {
         const matches = rows.filter(row => row.date === iso);
         const status = statuses.find(value => matches.some(row => row.status === value));
-        return {status: status || "future", label: matches.length ? `${matches.length} ${matches.length === 1 ? "class" : "classes"} · ${status[0].toUpperCase() + status.slice(1)}` : iso > today ? "Future" : "No class"};
+        return {status: status || "future", label: matches.length ? `${matches.length} ${matches.length === 1 ? "class" : "classes"} · ${statusLabel(status)}` : iso > today ? "Future" : "No class"};
     }
     function dayCard(date, rows, today, heading = false) {
         const iso = isoDate(date);
@@ -101,6 +104,48 @@
         section.querySelector("[data-attendance-count]").textContent = `Showing ${visible} of ${section.querySelectorAll(".attendance_register_row").length} submitted sessions`;
         section.querySelector(".attendance_no_matches").hidden = visible !== 0 || section.querySelectorAll(".attendance_register_row").length === 0;
     }
+    function timeMinutes(value) {
+        const match = value.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+        return match ? Number(match[1]) % 12 * 60 + Number(match[2]) + (/PM/i.test(match[3]) ? 720 : 0) : 1440;
+    }
+    function filterHourly(attendance) {
+        const section = attendance.querySelector('[data-attendance-page="hourly"]');
+        const value = key => section.querySelector(`[data-attendance-hourly-filter="${key}"]`).value;
+        const date = value("date"), subject = value("subject"), status = value("status"), search = value("search").trim().toLocaleLowerCase();
+        const rows = [...section.querySelectorAll(".attendance_hourly_row")].sort((a, b) => a.dataset.date.localeCompare(b.dataset.date) || timeMinutes(a.dataset.time) - timeMinutes(b.dataset.time));
+        const body = section.querySelector("[data-attendance-hourly-body]");
+        const slots = new Map();
+        const counts = {attended: 0, recorded: 0, other: 0, absent: 0};
+        for (const row of rows) {
+            body.append(row);
+            const time = row.dataset.time;
+            if (!slots.has(time)) slots.set(time, {recorded: 0, attended: 0, absent: 0, other: 0});
+            row.hidden = Boolean(date && row.dataset.date !== date) || (subject !== "all" && row.dataset.subject !== subject)
+                || (status !== "all" && row.dataset.status !== status) || !row.textContent.toLocaleLowerCase().includes(search);
+            if (row.hidden) continue;
+            const kind = ["present", "late"].includes(row.dataset.status) ? "attended" : row.dataset.status === "absent" ? "absent" : "other";
+            counts.recorded++; counts[kind]++;
+            slots.get(time).recorded++; slots.get(time)[kind]++;
+        }
+        for (const [key, count] of Object.entries(counts)) section.querySelector(`[data-attendance-hourly-count="${key}"]`).textContent = count;
+        section.querySelector("[data-attendance-hourly-total]").textContent = `Showing ${counts.recorded} of ${rows.length} recorded class sessions`;
+        section.querySelector(".attendance_hourly_no_matches").hidden = counts.recorded !== 0 || rows.length === 0;
+        const slotRows = [...slots].sort(([a], [b]) => timeMinutes(a) - timeMinutes(b)).map(([time, count]) => {
+            const row = document.createElement("tr");
+            for (const [index, value] of [time === "—" ? "Time not recorded" : time, count.recorded, count.attended, count.absent, count.other].entries()) {
+                const cell = document.createElement("td");
+                const text = document.createElement(index === 0 ? "strong" : "span");
+                text.textContent = value; cell.append(text); row.append(cell);
+            }
+            return row;
+        });
+        if (!slotRows.length) {
+            const row = document.createElement("tr"), cell = document.createElement("td");
+            cell.colSpan = 5; cell.className = "attendance_empty"; cell.textContent = "No recorded time slots are available for this period.";
+            row.append(cell); slotRows.push(row);
+        }
+        section.querySelector("[data-attendance-hourly-slots]").replaceChildren(...slotRows);
+    }
     function exportTable(table, name, rows) {
         const lines = [...rows].map(row => [...row.cells].map(cell => {
             let value = cell.textContent.trim().replace(/\s+/g, " ");
@@ -143,6 +188,15 @@
             section.querySelector('[data-attendance-filter="search"]').value = "";
             filterRegister(attendance);
         }
+        if (event.target.closest("[data-attendance-hourly-reset]")) {
+            const section = attendance.querySelector('[data-attendance-page="hourly"]');
+            section.querySelector('[data-attendance-hourly-filter="date"]').value = "";
+            section.querySelector('[data-attendance-hourly-filter="subject"]').value = "all";
+            section.querySelector('[data-attendance-hourly-filter="status"]').value = "all";
+            section.querySelector('[data-attendance-hourly-filter="search"]').value = "";
+            filterHourly(attendance);
+        }
+        if (event.target.closest("[data-attendance-hourly-apply]")) filterHourly(attendance);
         const exportButton = event.target.closest("[data-attendance-export]");
         if (exportButton && attendance.contains(exportButton)) {
             const summary = exportButton.dataset.attendanceExport === "summary";
@@ -153,6 +207,11 @@
     });
     document.addEventListener("input", event => { if (event.target.matches("[data-attendance-filter]")) { const attendance = view(); if (attendance?.contains(event.target)) filterRegister(attendance); } });
     document.addEventListener("change", event => { if (event.target.matches("[data-attendance-filter]")) { const attendance = view(); if (attendance?.contains(event.target)) filterRegister(attendance); } });
+    for (const event of ["input", "change"]) document.addEventListener(event, event => {
+        if (event.target.matches("[data-attendance-hourly-filter]")) {
+            const attendance = view(); if (attendance?.contains(event.target)) filterHourly(attendance);
+        }
+    });
     window.addEventListener("hashchange", showPage);
     window.addEventListener("popstate", showPage);
     function watch() {

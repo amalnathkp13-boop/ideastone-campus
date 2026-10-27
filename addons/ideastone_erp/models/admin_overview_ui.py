@@ -17,6 +17,8 @@ class AdminOverviewUI(models.AbstractModel):
     def _admin_source(self, kind, filters):
         company = [("company_id", "=", self.env.company.id)]
         today, now = fields.Date.context_today(self), fields.Datetime.now()
+        if kind == "decisions":
+            return "campus.service.request", company + [("state", "=", "submitted"), ("amount", ">", 0)]
         if kind in {"services", "overdue_services"}:
             domain = company + [("state", "not in", ["done", "cancelled", "rejected"])]
             if kind == "overdue_services":
@@ -63,11 +65,11 @@ class AdminOverviewUI(models.AbstractModel):
             source.check_access_rights("create")
             action.update(view_mode="form", views=[(False, "form")])
         elif event_id is not None:
-            if kind != "events" or isinstance(event_id, bool) or not isinstance(event_id, int) or not 1 <= event_id <= 2147483647:
-                raise ValidationError(_("Choose a valid campus event."))
+            if kind not in {"events", "decisions"} or isinstance(event_id, bool) or not isinstance(event_id, int) or not 1 <= event_id <= 2147483647:
+                raise ValidationError(_("Choose a valid overview record."))
             event = source.search(domain + [("id", "=", event_id)], limit=1)
             if not event:
-                raise AccessError(_("This event is outside the active college or upcoming event window."))
+                raise AccessError(_("This record is outside the active college or overview scope."))
             action.update(view_mode="form", views=[(False, "form")], res_id=event.id)
         return action
 
@@ -100,7 +102,31 @@ class AdminOverviewUI(models.AbstractModel):
         services = self._mvp_records(*self._admin_source("services", f))
         overdue_services = services.filtered(lambda r: r.date_to and r.date_to < today)
         pending = self._mvp_records(*self._admin_source("attendance_pending", f))
-        dues = self._mvp_report_rows("dues", f, self._mvp_records(*self._mvp_source("dues", f)))
+        invoices = self._mvp_records(*self._mvp_source("dues", f))
+        dues = self._mvp_report_rows("dues", f, invoices)
+        # A billed-fee target uses the same invoice cohort as its collected amount.
+        # Receipt posting months and outstanding due months must not be added together.
+        end_month = f["date_to"].replace(day=1)
+        months = [fields.Date.subtract(end_month, months=n) for n in reversed(range(6))]
+        fee_months = {month.strftime("%Y-%m"): {"target": 0, "collected": 0} for month in months}
+        balances = {row["id"]: row["balance"] for row in dues}
+        for invoice in invoices:
+            month = (invoice.invoice_date_due or invoice.invoice_date).strftime("%Y-%m")
+            if month in fee_months:
+                fee_months[month]["target"] += invoice.amount_total
+                fee_months[month]["collected"] += max(0, invoice.amount_total - balances.get(invoice.id, 0))
+        fee_rows = [{"label": month, **values, "percent": round(values["collected"] * 100 / values["target"], 1) if values["target"] else None}
+                    for month, values in fee_months.items()]
+        billed = sum(row["target"] for row in fee_rows)
+        decisions = self._mvp_records(*self._admin_source("decisions", f)).sorted(lambda rec: (rec.date_to or fields.Date.to_date("9999-12-31"), rec.id))
+        decision_rows = []
+        for request in decisions[:3]:
+            days = (request.date_to - today).days if request.date_to else None
+            name = request.name.lower()
+            tone, icon = ("cultural", "♫") if "cultur" in name else ("campaign", "⚑") if "campaign" in name else ("sponsor", "♧")
+            decision_rows.append({"id": request.id, "name": request.name, "amount": request.amount,
+                "deadline": request.date_to.strftime("%d %b %Y") if request.date_to else None, "days": days,
+                "impact": request.description, "tone": tone, "icon": icon})
         overdue_dues = [row for row in dues if row["due"] and row["due"] < str(f["date_to"])]
         events = self._mvp_records(*self._admin_source("events", f)).sorted("date_begin")
         event_rows = []
@@ -143,6 +169,10 @@ class AdminOverviewUI(models.AbstractModel):
             {"kind": "overdue_dues", "label": _("Overdue fee invoices"), "count": len(overdue_dues), "detail": _("Outstanding invoices past due in the selected academic scope"), "icon": "inr", "tone": "amber", "allowed": stats["dues"]["allowed"]},
             {"kind": "attendance_pending", "label": _("Attendance not submitted"), "count": len(pending), "detail": _("Elapsed sessions in this period without completed attendance"), "icon": "check", "tone": "blue", "allowed": self.env["op.attendance.sheet"].check_access_rights("read", raise_exception=False)}]
         data["overview_ui"] = {"kpis": kpis, "activity": activity, "departments": department_rows, "threshold": threshold, "currency_symbol": "₹",
+            "fee_months": fee_rows, "fee_allowed": self.env["account.move"].check_access_rights("read", raise_exception=False),
+            "fee_percent": round(sum(row["collected"] for row in fee_rows) * 100 / billed) if billed else None,
+            "decisions": decision_rows, "decision_count": len(decisions), "decision_budget": sum(decisions.mapped("amount")),
+            "decision_allowed": self.env["campus.service.request"].check_access_rights("read", raise_exception=False),
             "events": event_rows, "event_count": len(events), "event_allowed": self._admin_events_allowed(),
             "event_create": self._admin_events_allowed() and self.env["event.event"].check_access_rights("create", raise_exception=False),
             "insights": insights, "watchlist": watches, "updated": fields.Datetime.context_timestamp(self, now).strftime("%d %b %Y, %H:%M"),

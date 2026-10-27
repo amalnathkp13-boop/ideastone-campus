@@ -280,6 +280,9 @@ class TestVcetWorkspace(TransactionCase):
                 if not item.get("tool"):
                     continue
                 action = dashboard.get_faculty_action(item["tool"])
+                if action["type"] == "ir.actions.client":
+                    self.assertTrue(action["tag"])
+                    continue
                 model = self.env[action["res_model"]].with_user(self.teacher).with_context(action["context"])
                 model.search(action["domain"], limit=1)
                 model.get_views(action["views"], {"toolbar": True})
