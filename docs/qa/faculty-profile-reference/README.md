@@ -1,6 +1,7 @@
 # Faculty profile and payroll reference
 
-Branch: `codex/faculty-profile-payroll-reference`, based on `origin/main` (`a0bc5a2`).
+Branch: `codex/faculty-profile-payroll-reference`, originally based on `a0bc5a2`;
+integrated with `origin/main` (`072223a`) before opening the pull request.
 Reference: the user-supplied `Faculty_Profile_Payroll_Leave_Application_FINAL_VERIFIED.html`.
 
 Only the faculty middle content and the staff module's submodule entries change.
