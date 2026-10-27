@@ -1,7 +1,7 @@
 {
     "name": "Ideastone Campus Operations",
     "summary": "Teaching, campus services, staff administration and institutional engagement",
-    "version": "17.0.1.0.17",
+    "version": "17.0.1.0.19",
     "category": "Education",
     "author": "Ideastone Technologies Pvt Ltd",
     "license": "OPL-1",
