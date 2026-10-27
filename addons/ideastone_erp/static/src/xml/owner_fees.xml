@@ -1,0 +1,988 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.OwnerFeesWorkspace">
+    <main class="campus_owner_fees_workspace" tabindex="0">
+      <div class="content">
+        <div class="crumb">Campus / Owner workspace / Fees &amp; Payments / <strong t-esc="title"/>
+        </div>
+        <p t-if="state.loading" role="status">Refreshing finance records…</p>
+        <div t-if="state.error" class="finance-error" role="alert">
+          <t t-esc="state.error"/>
+          <button class="btn" t-on-click="load">Retry</button>
+        </div>
+        <t t-if="d">
+          <section id="page-overview" class="page" t-if="page === 'overview'">
+            <div class="title-row">
+              <div>
+                <div class="eyebrow" t-esc="'Finance · Academic year '+(year?.name || 'Not configured')"/>
+                <h1>Fees &amp; Payments</h1>
+                <div class="subtitle">Track college income, expenses, fee collections and outstanding dues from one financial workspace.</div>
+              </div>
+              <div class="toolbar">
+                <select class="select" t-model="state.year" id="yearSelect" aria-label="Academic year" t-on-change="changeYear">
+                  <option t-foreach="d.years" t-as="option" t-key="option.id" t-att-value="option.id" t-esc="option.name"/>
+                </select>
+                <button class="btn" t-on-click="load" t-att-disabled="state.loading">↻ Refresh</button>
+                <button class="btn primary" t-on-click="() =&gt; this.edit('payment')" t-att-disabled="!d.can_write">＋ Record payment</button>
+              </div>
+            </div>
+            <div class="grid kpis">
+              <div class="kpi">
+                <div class="kpi-top">Amount received <span class="kpi-icon">↙</span>
+                </div>
+                <div class="value positive" id="incomeTotal" t-esc="stats[0]"/>
+                <div class="foot" t-esc="'Posted receipts, net of reversals in this period'"/>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Amount spent <span class="kpi-icon">↗</span>
+                </div>
+                <div class="value" id="expenseTotal" t-esc="stats[1]"/>
+                <div class="foot" t-esc="'Posted supplier payments, net of reversals'"/>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Net cash flow <span class="kpi-icon">⇄</span>
+                </div>
+                <div class="value positive" id="netTotal" t-esc="stats[2]"/>
+                <div class="foot" t-esc="'Received minus supplier payments recorded'"/>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Outstanding dues <span class="kpi-icon">◷</span>
+                </div>
+                <div class="value negative" t-esc="stats[3]"/>
+                <div class="foot" t-esc="d.accounts.length+' student accounts · '+(year?.name || '')"/>
+              </div>
+            </div>
+            <div class="grid two-col">
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h2>Income vs expense — month-wise</h2>
+                    <div class="panel-desc">Academic year trend · amounts shown in lakh of the college currency</div>
+                  </div>
+                  <div class="legend">
+                    <span>
+                      <i class="dot" style="background:#2f78e8"/>Amount received</span>
+                    <span>
+                      <i class="dot" style="background:#f0b64a"/>Amount spent</span>
+                  </div>
+                </div>
+                <div class="chart" id="chart">
+                  <div class="monthbar" t-foreach="d.monthly" t-as="month" t-key="month.key">
+                    <div class="bars">
+                      <div class="bar income" t-att-style="barStyle(month.income)" t-att-title="'Received '+money(month.income)"/>
+                      <div class="bar expense" t-att-style="barStyle(month.expense)" t-att-title="'Spent '+money(month.expense)"/>
+                    </div>
+                    <div class="monthlabel" t-esc="monthName(month.date,true)"/>
+                  </div>
+                </div>
+                <div class="chart-note">Posted cash movements for the selected academic-year dates. Reversals are counted on their reversal date.</div>
+              </div>
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h2>Month snapshot</h2>
+                    <div class="panel-desc" id="monthSnapshotLabel" t-esc="monthName(snapshot.date)"/>
+                  </div>
+                  <select class="select" aria-label="Snapshot month" t-model="state.month">
+                    <option t-foreach="d.monthly" t-as="month" t-key="month.key" t-att-value="month.key" t-esc="monthOnly(month.date)"/>
+                  </select>
+                </div>
+                <div class="balance-box">
+                  <div class="small">Net cash flow for selected month</div>
+                  <div class="big" id="monthNet" t-esc="compact(snapshot.income-snapshot.expense)"/>
+                  <div class="split">
+                    <span>Received <strong id="monthIncome" t-esc="compact(snapshot.income)"/>
+                    </span>
+                    <span>Spent <strong id="monthExpense" t-esc="compact(snapshot.expense)"/>
+                    </span>
+                  </div>
+                </div>
+                <div class="mini-list">
+                  <div class="mini-row">
+                    <div class="row-left">
+                      <div class="small-icon">₹</div>
+                      <div>
+                        <div class="row-title">Fee collection target</div>
+                        <div class="row-sub">Against scheduled fees due this month</div>
+                      </div>
+                    </div>
+                    <div class="amount" t-esc="percent(snapshot.income,snapshot.scheduled)"/>
+                  </div>
+                  <div class="mini-row">
+                    <div class="row-left">
+                      <div class="small-icon">◷</div>
+                      <div>
+                        <div class="row-title">Dues to follow up</div>
+                        <div class="row-sub">Students with overdue balance</div>
+                      </div>
+                    </div>
+                    <div class="amount negative" t-esc="overdueStudents"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="grid lower-grid">
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h2>Academic-year monthly ledger summary</h2>
+                    <div class="panel-desc">Income, expenses and net cash flow by month</div>
+                  </div>
+                  <button class="btn lightblue" t-on-click="() =&gt; this.exportData('overview')">Export CSV</button>
+                </div>
+                <div class="table-wrap">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Month</th>
+                        <th>Amount received</th>
+                        <th>Amount spent</th>
+                        <th>Net cash flow</th>
+                        <th>Collection status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr t-foreach="d.monthly" t-as="month" t-key="month.key">
+                        <td>
+                          <strong t-esc="monthOnly(month.date)"/>
+                        </td>
+                        <td t-att-class="month.income &lt; 0 ? 'negative' : 'positive'" t-esc="lakh(month.income)"/>
+                        <td t-esc="lakh(month.expense)"/>
+                        <td t-att-class="month.income-month.expense &lt; 0 ? 'negative' : 'positive'" t-esc="lakh(month.income-month.expense)"/>
+                        <td>
+                          <span class="pill" t-att-class="month.key === d.today.slice(0,7) ? 'amber' : 'green'" t-esc="month.key === d.today.slice(0,7) ? 'In progress' : month.key &gt; d.today.slice(0,7) &amp;&amp; !month.income &amp;&amp; !month.expense ? 'Scheduled' : 'Recorded'"/>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h2>Finance attention</h2>
+                    <div class="panel-desc">Items that may need action</div>
+                  </div>
+                  <span class="pill amber" t-esc="'4 queues'"/>
+                </div>
+                <div class="mini-list">
+                  <div class="mini-row" t-on-click="() =&gt; this.go('followup')" tabindex="0" t-on-keydown="(ev) =&gt; this.activateAttention(ev,'followup')" role="button">
+                    <div class="row-left">
+                      <div class="small-icon">!</div>
+                      <div>
+                        <div class="row-title">Overdue fee balances</div>
+                        <div class="row-sub" t-esc="overdueStudents+' student accounts · '+compact(d.summary.overdue)"/>
+                      </div>
+                    </div>
+                    <span class="pill red">Action</span>
+                  </div>
+                  <div class="mini-row" t-on-click="() =&gt; this.go('receipts')" tabindex="0" t-on-keydown="(ev) =&gt; this.activateAttention(ev,'receipts')" role="button">
+                    <div class="row-left">
+                      <div class="small-icon">↻</div>
+                      <div>
+                        <div class="row-title">Payment reconciliation</div>
+                        <div class="row-sub" t-esc="d.receipts.filter(r =&gt; r.status === 'Awaiting settlement').length+' transactions awaiting bank settlement'"/>
+                      </div>
+                    </div>
+                    <span class="pill amber">Review</span>
+                  </div>
+                  <div class="mini-row" t-on-click="() =&gt; this.go('assign')" tabindex="0" t-on-keydown="(ev) =&gt; this.activateAttention(ev,'assign')" role="button">
+                    <div class="row-left">
+                      <div class="small-icon">▤</div>
+                      <div>
+                        <div class="row-title">Fee structures not assigned</div>
+                        <div class="row-sub" t-esc="d.summary.unassigned+' student accounts'"/>
+                      </div>
+                    </div>
+                    <span class="pill amber">Review</span>
+                  </div>
+                  <div class="mini-row" t-on-click="() =&gt; this.go('invoices')" tabindex="0" t-on-keydown="(ev) =&gt; this.activateAttention(ev,'invoices')" role="button">
+                    <div class="row-left">
+                      <div class="small-icon">↗</div>
+                      <div>
+                        <div class="row-title">Expense records pending posting</div>
+                        <div class="row-sub" t-esc="d.summary.pending_expenses+' supplier bills awaiting posting'"/>
+                      </div>
+                    </div>
+                    <span class="pill amber">Review</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="panel ai-panel" style="margin-top:18px">
+              <div class="panel-head">
+                <div>
+                  <h2>AI finance insights &amp; organising plan</h2>
+                  <div class="panel-desc">Record-based planning guidance. Verify the ledger before acting; no external AI provider is used.</div>
+                </div>
+                <span class="pill">Planning assistant</span>
+              </div>
+              <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:14px">
+                <div class="ai-insight-card">
+                  <div style="font-size:11px;font-weight:800;letter-spacing:.7px;color:#7451d4;text-transform:uppercase;margin-bottom:8px">01 · Collection priority</div>
+                  <h3 style="font-size:14px;margin:0 0 7px">Start with ageing dues</h3>
+                  <p style="font-size:13px;color:#657c91;line-height:1.55;margin:0 0 12px" t-esc="overdueStudents+' student accounts have overdue balances totalling '+compact(d.summary.overdue)+'. Record an owner and next-action date for each account.'"/>
+                  <div style="font-size:12px;font-weight:700;color:#152f48">Suggested action: daily 20-minute follow-up queue</div>
+                </div>
+                <div class="ai-insight-card">
+                  <div style="font-size:11px;font-weight:800;letter-spacing:.7px;color:#287b9b;text-transform:uppercase;margin-bottom:8px">02 · Expense control</div>
+                  <h3 style="font-size:14px;margin:0 0 7px">Plan predictable spending</h3>
+                  <p style="font-size:13px;color:#657c91;line-height:1.55;margin:0 0 12px" t-esc="'Posted supplier payments in this period total '+compact(d.summary.expense)+'. Compare recorded spending with your approved budgets and payroll records.'"/>
+                  <div style="font-size:12px;font-weight:700;color:#152f48">Suggested action: weekly budget-vs-actual review</div>
+                </div>
+                <div class="ai-insight-card">
+                  <div style="font-size:11px;font-weight:800;letter-spacing:.7px;color:#21806b;text-transform:uppercase;margin-bottom:8px">03 · Monthly cash planning</div>
+                  <h3 style="font-size:14px;margin:0 0 7px">Prepare a 30-day cash outlook</h3>
+                  <p style="font-size:13px;color:#657c91;line-height:1.55;margin:0 0 12px" t-esc="'Current open invoice balances total '+compact(d.summary.dues)+'. Use due dates and authorised expense commitments to prepare a cash outlook; these figures are not a forecast.'"/>
+                  <div style="font-size:12px;font-weight:700;color:#152f48">Suggested action: update forecast at month-end</div>
+                </div>
+              </div>
+              <div class="notice" style="margin-top:14px">
+                <strong>Suggested monthly rhythm:</strong> Week 1 — reconcile receipts and bank/gateway settlements; Week 2 — follow up overdue accounts; Week 3 — review department expenses and pending approvals; Week 4 — compare actuals against budget, prepare next-month cash forecast and close the ledger. AI recommendations should explain the figures they use and never post payments or change student balances automatically.</div>
+            </div>
+            <div class="notice">Data note: Totals use posted college receipts, posted supplier payments and native invoice balances in the active college. Student settlements and bank matching remain separate; no payment or student balance is changed by an insight.</div>
+          </section>
+          <section id="page-heads" class="page" t-if="page === 'heads'">
+            <div class="title-row">
+              <div>
+                <div class="eyebrow">Configuration</div>
+                <h1>Fee heads</h1>
+                <div class="subtitle">Define what the college charges and how each charge is classified.</div>
+              </div>
+              <div class="toolbar">
+                <input class="search" placeholder="Search fee head…" t-model="state.query" aria-label="Search fee head…"/>
+                <button class="btn primary" t-on-click="() =&gt; this.edit('head')" t-att-disabled="!d.can_write">＋ New fee head</button>
+              </div>
+            </div>
+            <div class="grid kpis">
+              <div class="kpi">
+                <div class="kpi-top">Active fee heads <span class="kpi-icon">₹</span>
+                </div>
+                <div class="value" t-esc="stats[0]"/>
+                <div class="foot">Across academic and service charges</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Recurring heads <span class="kpi-icon">↻</span>
+                </div>
+                <div class="value" t-esc="stats[1]"/>
+                <div class="foot">Applied each term or year</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Optional heads <span class="kpi-icon">＋</span>
+                </div>
+                <div class="value" t-esc="stats[2]"/>
+                <div class="foot">Based on eligibility or selection</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Inactive <span class="kpi-icon">Ⅱ</span>
+                </div>
+                <div class="value" t-esc="stats[3]"/>
+                <div class="foot">Kept for historical records</div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>Fee head catalogue</h2>
+                  <div class="panel-desc">Use consistent names and codes so reports and receipts remain clear.</div>
+                </div>
+                <button class="btn" t-on-click="() =&gt; this.source('heads')">Import / Export</button>
+              </div>
+              <div class="table-wrap">
+                <table class="table" id="headsTable">
+                  <thead>
+                    <tr>
+                      <th>Code</th>
+                      <th>Fee head</th>
+                      <th>Category</th>
+                      <th>Frequency</th>
+                      <th>Tax / exemption</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr t-foreach="heads" t-as="row" t-key="row.id" t-on-click="() =&gt; this.editHead(row)" t-att-class="d.can_write &amp;&amp; row.owned ? 'clickable' : ''">
+                      <td t-esc="row.code"/>
+                      <td>
+                        <strong t-esc="row.name"/>
+                      </td>
+                      <td t-esc="label(row.category)"/>
+                      <td t-esc="label(row.frequency)"/>
+                      <td t-esc="row.tax"/>
+                      <td>
+                        <span class="pill" t-att-class="row.active ? row.optional ? 'amber' : 'green' : ''" t-esc="!row.active ? 'Inactive' : row.optional ? 'Optional' : 'Active'"/>
+                      </td>
+                    </tr>
+                    <tr t-if="!heads.length">
+                      <td colspan="6" class="empty">No fee heads match this search.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="notice">Recommended fields: unique code, display name, category, recurrence, default amount (optional), refundability, accounting ledger, tax/exemption treatment, effective dates, and active/inactive status.</div>
+          </section>
+          <section id="page-structures" class="page" t-if="page === 'structures'">
+            <div class="title-row">
+              <div>
+                <div class="eyebrow" t-esc="'Fee planning · Academic year '+(year?.name || 'Not configured')"/>
+                <h1>Fee structures</h1>
+                <div class="subtitle">Browse department-wise Government Quota (GQ) and Management Quota (MQ) fee structures.</div>
+              </div>
+              <div class="toolbar">
+                <select class="select" t-model="state.year" id="feeYear" aria-label="Academic year" t-on-change="changeYear">
+                  <option t-foreach="d.years" t-as="option" t-key="option.id" t-att-value="option.id" t-esc="option.name"/>
+                </select>
+                <button class="btn" t-on-click="() =&gt; this.exportData('structures')">Export summary</button>
+                <button class="btn primary" t-on-click="() =&gt; this.edit('plan')" t-att-disabled="!d.can_write || !year">＋ New structure</button>
+              </div>
+            </div>
+            <div class="grid kpis">
+              <div class="kpi">
+                <div class="kpi-top">Departments <span class="kpi-icon">▦</span>
+                </div>
+                <div class="value" t-esc="stats[0]"/>
+                <div class="foot">Departments in the active college</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">GQ structures <span class="kpi-icon">GQ</span>
+                </div>
+                <div class="value" t-esc="stats[1]"/>
+                <div class="foot">Government Quota structures per department</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">MQ structures <span class="kpi-icon">MQ</span>
+                </div>
+                <div class="value" t-esc="stats[2]"/>
+                <div class="foot">Management Quota structures per department</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Awaiting review <span class="kpi-icon">◷</span>
+                </div>
+                <div class="value" t-esc="stats[3]"/>
+                <div class="foot">Draft or submitted plans awaiting approval</div>
+              </div>
+            </div>
+            <div class="panel" style="margin-bottom:18px">
+              <div class="panel-head">
+                <div>
+                  <h2>Department fee structures</h2>
+                  <div class="panel-desc">Each department card shows GQ and MQ amounts directly. Select a card to review the fee breakdown and approval details.</div>
+                </div>
+                <input class="search" id="deptSearch" placeholder="Search department…" t-model="state.query" aria-label="Search department"/>
+              </div>
+              <div class="filters">
+                <select class="select" id="quotaFilter" t-model="state.quota" aria-label="Admission quota filter">
+                  <option value="all">All quota types</option>
+                  <option value="gq">Government Quota (GQ)</option>
+                  <option value="mq">Management Quota (MQ)</option>
+                </select>
+                <select class="select" id="statusFilter" t-model="state.status" aria-label="Structure status filter">
+                  <option value="all">All statuses</option>
+                  <option value="published">Published</option>
+                  <option value="review">Needs review</option>
+                </select>
+              </div>
+              <div class="grid dept-grid" id="departmentCards">
+                <article class="dept-card" t-foreach="departments" t-as="department" t-key="department.id">
+                  <div class="dept-accent" t-att-class="department.color"/>
+                  <div class="dept-head">
+                    <div class="dept-icon" t-att-class="department.color+'-bg'" t-esc="department.icon"/>
+                    <span class="dept-code" t-esc="department.code"/>
+                  </div>
+                  <h3 t-esc="department.name"/>
+                  <p class="dept-sub" t-esc="departmentDescription(department.id)"/>
+                  <div class="quota-row gq-row" t-if="state.quota !== 'mq'">
+                    <div>
+                      <span class="quota-label">Government Quota · GQ</span>
+                      <div class="quota-amount">
+                        <t t-esc="quotaAmount(department.id,'gq')"/>
+                        <small>/ year</small>
+                      </div>
+                    </div>
+                    <span class="status-dot" t-att-class="quotaState(department.id,'gq') === 'Published' ? 'published' : 'review'" t-esc="quotaState(department.id,'gq')"/>
+                  </div>
+                  <div class="quota-row mq-row" t-if="state.quota !== 'gq'">
+                    <div>
+                      <span class="quota-label">Management Quota · MQ</span>
+                      <div class="quota-amount">
+                        <t t-esc="quotaAmount(department.id,'mq')"/>
+                        <small>/ year</small>
+                      </div>
+                    </div>
+                    <span class="status-dot" t-att-class="quotaState(department.id,'mq') === 'Published' ? 'published' : 'review'" t-esc="quotaState(department.id,'mq')"/>
+                  </div>
+                  <div class="dept-meta">
+                    <span>Academic year <strong t-esc="year?.name || '—'"/>
+                    </span>
+                    <span t-esc="department.count+' structures'"/>
+                  </div>
+                  <button class="dept-link" t-on-click="() =&gt; this.edit('detail',department)">View fee breakdown <span>→</span>
+                  </button>
+                </article>
+              </div>
+              <div id="noDepartments" class="empty" t-if="!departments.length">
+                <strong>No departments match these filters.</strong>Try another department name, quota type or status.</div>
+            </div>
+            <div class="notice">
+              <strong>Sample data:</strong> Department names, fee amounts and statuses are illustrative only. Replace them with approved VCET fee schedules. GQ/MQ amounts should be versioned by academic year and approval date.</div>
+          </section>
+          <section id="page-accounts" class="page" t-if="page === 'accounts'">
+            <div class="title-row">
+              <div>
+                <div class="eyebrow">Student ledger</div>
+                <h1>Student fee accounts</h1>
+                <div class="subtitle">See the full fee position for each student, including charges, concessions, payments and balance.</div>
+              </div>
+              <div class="toolbar">
+                <select class="select" t-model="state.course" aria-label="Student account programme">
+                  <option value="0">All programmes</option>
+                  <option t-foreach="d.courses" t-as="option" t-key="option.id" t-att-value="option.id" t-esc="option.name"/>
+                </select>
+                <button class="btn" t-on-click="() =&gt; this.exportData('accounts')">Download report</button>
+              </div>
+            </div>
+            <div class="grid kpis">
+              <div class="kpi">
+                <div class="kpi-top">Student accounts <span class="kpi-icon">♙</span>
+                </div>
+                <div class="value" t-esc="stats[0]"/>
+                <div class="foot">For academic year 2026–27</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Fully paid <span class="kpi-icon">✓</span>
+                </div>
+                <div class="value positive" t-esc="stats[1]"/>
+                <div class="foot">No outstanding balance</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Partially paid <span class="kpi-icon">◐</span>
+                </div>
+                <div class="value" t-esc="stats[2]"/>
+                <div class="foot">At least one payment received</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">No payment yet <span class="kpi-icon">◷</span>
+                </div>
+                <div class="value negative" t-esc="stats[3]"/>
+                <div class="foot">Prioritise due-date checks</div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>Student ledger</h2>
+                  <div class="panel-desc">Search by student name, register number or receipt reference.</div>
+                </div>
+                <input class="search" placeholder="Search student…" t-model="state.query" aria-label="Search student…"/>
+              </div>
+              <div class="table-wrap">
+                <table class="table" id="accountsTable">
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Register no.</th>
+                      <th>Programme</th>
+                      <th>Total assessed</th>
+                      <th>Concession</th>
+                      <th>Paid</th>
+                      <th>Balance</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr t-foreach="accounts" t-as="row" t-key="row.id" class="clickable" t-on-click="() =&gt; this.openRecord('student',row.id)">
+                      <td>
+                        <strong t-esc="row.name"/>
+                      </td>
+                      <td t-esc="row.register"/>
+                      <td t-esc="row.course"/>
+                      <td t-esc="money(row.assessed)"/>
+                      <td t-esc="money(row.concession)"/>
+                      <td t-esc="money(row.paid)"/>
+                      <td t-esc="money(row.balance)"/>
+                      <td>
+                        <span class="pill" t-att-class="tone(row.status)" t-esc="row.status"/>
+                      </td>
+                    </tr>
+                    <tr t-if="!accounts.length">
+                      <td colspan="8" class="empty">No student accounts match these filters.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="notice">Account balances use native invoice reconciliation and approved concessions. Unbilled fee assessments remain visible; unassigned students have no fee plan yet. Open a student record to review its enrolment and admission quota.</div>
+          </section>
+          <section id="page-assign" class="page" t-if="page === 'assign'">
+            <div class="title-row">
+              <div>
+                <div class="eyebrow">Bulk allocation</div>
+                <h1>Assign fee structure</h1>
+                <div class="subtitle">Assign the approved structure to the correct student cohort without creating duplicate charges.</div>
+              </div>
+              <span class="pill amber">Preview before commit</span>
+            </div>
+            <div class="grid two-col">
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h2>Assignment setup</h2>
+                    <div class="panel-desc">Choose scope and fee plan.</div>
+                  </div>
+                </div>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="assignYear">Academic year</label>
+                    <select class="select" t-model="state.year" t-on-change="changeYear" id="assignYear">
+                      <option t-foreach="d.years" t-as="option" t-key="option.id" t-att-value="option.id" t-esc="option.name"/>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="assign-course_id">Programme</label>
+                    <select class="select" t-model="state.assignment.course_id" id="assign-course_id" t-on-change="() =&gt; { state.preview = null; state.assignment.plan_id = ''; state.assignment.batch_id = '0'; state.assignment.term_id = '0'; }">
+                      <option value="0">Select programme</option>
+                      <option t-foreach="d.courses" t-as="option" t-key="option.id" t-att-value="option.id" t-esc="option.name"/>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="assign-batch_id">Batch / admission year</label>
+                    <select class="select" t-model="state.assignment.batch_id" id="assign-batch_id" t-on-change="() =&gt; { state.preview = null;  }">
+                      <option value="0">All eligible batches</option>
+                      <option t-foreach="assignmentBatches" t-as="option" t-key="option.id" t-att-value="option.id" t-esc="option.name"/>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="assign-term_id">Semester</label>
+                    <select class="select" t-model="state.assignment.term_id" id="assign-term_id" t-on-change="() =&gt; { state.preview = null;  }">
+                      <option value="0">All eligible semesters</option>
+                      <option t-foreach="assignmentTerms" t-as="option" t-key="option.id" t-att-value="option.id" t-esc="option.name"/>
+                    </select>
+                  </div>
+                  <div class="field full">
+                    <label for="assign-plan_id">Approved fee structure</label>
+                    <select class="select" t-model="state.assignment.plan_id" id="assign-plan_id" t-on-change="() =&gt; { state.preview = null;  }">
+                      <option value="0">Select published structure</option>
+                      <option t-foreach="assignmentPlans" t-as="option" t-key="option.id" t-att-value="option.id" t-esc="option.name"/>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="assignDate">Due date</label>
+                    <input type="date" t-model="state.assignment.date" id="assignDate" t-on-change="() =&gt; state.preview = null"/>
+                  </div>
+                  <div class="field">
+                    <label for="assignSchedule">Instalment plan</label>
+                    <select disabled="disabled" id="assignSchedule">
+                      <option t-esc="installmentCount ? installmentCount+' configured instalments' : 'Choose a structure'"/>
+                    </select>
+                  </div>
+                </div>
+                <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:18px">
+                  <button class="btn" t-on-click="clearAssignment">Clear</button>
+                  <button class="btn primary" t-on-click="previewAssignment" t-att-disabled="!d.can_write || !selectedPlan">Preview assignment</button>
+                </div>
+              </div>
+              <div class="panel">
+                <h2>Assignment preview</h2>
+                <div class="panel-desc">Calculated from the selected published plan, admission quota and active enrolments.</div>
+                <div class="mini-list" style="margin-top:12px">
+                  <div class="mini-row">
+                    <span>Eligible students</span>
+                    <strong t-esc="state.preview?.eligible ?? '—'"/>
+                  </div>
+                  <div class="mini-row">
+                    <span>Already assigned</span>
+                    <strong t-esc="state.preview?.assigned ?? '—'"/>
+                  </div>
+                  <div class="mini-row">
+                    <span>New assignments</span>
+                    <strong class="positive" t-esc="state.preview?.new ?? '—'"/>
+                  </div>
+                  <div class="mini-row">
+                    <span>Estimated total assessed</span>
+                    <strong t-esc="state.preview ? money(state.preview.amount) : '—'"/>
+                  </div>
+                  <div class="mini-row">
+                    <span>Existing installments skipped</span>
+                    <strong class="positive" t-esc="state.preview?.duplicates ?? '—'"/>
+                  </div>
+                </div>
+                <div class="notice">Preview → confirm quota and study year → assign draft assessments → create/post invoices → record payment. Configured installment dates take precedence over the base due date. Students without an admission quota are excluded. Repeating assignment does not duplicate the same installments.</div>
+                <div class="toolbar" style="margin-top:18px">
+                  <button class="btn primary" t-if="state.preview" t-att-disabled="!state.preview.installments || state.busy" t-on-click="commitAssignment">Authorise &amp; assign</button>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section id="page-invoices" class="page" t-if="page === 'invoices'">
+            <div class="title-row">
+              <div>
+                <div class="eyebrow">Billing &amp; collection</div>
+                <h1>Invoices &amp; dues</h1>
+                <div class="subtitle">Monitor invoices by due date, balance, payment status and student cohort.</div>
+              </div>
+              <div class="toolbar">
+                <button class="btn" t-on-click="() =&gt; this.exportData('invoices')">Export</button>
+                <button class="btn primary" t-on-click="() =&gt; this.edit('invoice')" t-att-disabled="!d.can_write">＋ Create invoice</button>
+              </div>
+            </div>
+            <div class="grid kpis">
+              <div class="kpi">
+                <div class="kpi-top">Total billed <span class="kpi-icon">▤</span>
+                </div>
+                <div class="value" t-esc="stats[0]"/>
+                <div class="foot">Current academic-year posted invoices</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Collected <span class="kpi-icon">✓</span>
+                </div>
+                <div class="value positive" t-esc="stats[1]"/>
+                <div class="foot">Native reconciled invoice amounts</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Due soon <span class="kpi-icon">◷</span>
+                </div>
+                <div class="value" t-esc="stats[2]"/>
+                <div class="foot">Due within the next 14 days</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Overdue <span class="kpi-icon">!</span>
+                </div>
+                <div class="value negative" t-esc="stats[3]"/>
+                <div class="foot">Outstanding past-due invoices</div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>Invoice register</h2>
+                  <div class="panel-desc">Use invoice status and due date to prioritise follow-up.</div>
+                </div>
+                <input class="search" placeholder="Search invoice or student…" t-model="state.query" aria-label="Search invoice or student…"/>
+              </div>
+              <div class="filters">
+                <select class="select">
+                  <option value="all">All statuses</option>
+                  <option>Paid</option>
+                  <option>Partial</option>
+                  <option>Open</option>
+                  <option>Overdue</option>
+                  <option>Draft</option>
+                  <option>Cancelled</option>
+                </select>
+                <select class="select" aria-label="Due date filter" t-model="state.due">
+                  <option value="all">All due dates</option>
+                  <option value="soon">Due in 7 days</option>
+                  <option value="overdue">Overdue</option>
+                </select>
+                <select class="select" t-model="state.course" aria-label="Invoice programme">
+                  <option value="0">All programmes</option>
+                  <option t-foreach="d.courses" t-as="option" t-key="option.id" t-att-value="option.id" t-esc="option.name"/>
+                </select>
+              </div>
+              <div class="table-wrap">
+                <table class="table" id="invoiceTable">
+                  <thead>
+                    <tr>
+                      <th>Invoice</th>
+                      <th>Student</th>
+                      <th>Fee head / term</th>
+                      <th>Issue date</th>
+                      <th>Due date</th>
+                      <th>Amount</th>
+                      <th>Balance</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr t-foreach="invoices" t-as="row" t-key="row.id" class="clickable" t-on-click="() =&gt; this.openRecord('invoice',row.id)">
+                      <td t-esc="row.name"/>
+                      <td t-esc="row.student"/>
+                      <td t-esc="row.fee"/>
+                      <td t-esc="date(row.date)"/>
+                      <td t-esc="date(row.due)"/>
+                      <td t-esc="money(row.amount)"/>
+                      <td t-esc="money(row.balance)"/>
+                      <td>
+                        <span class="pill" t-att-class="tone(row.status)" t-esc="row.status"/>
+                      </td>
+                    </tr>
+                    <tr t-if="!invoices.length">
+                      <td colspan="8" class="empty">No invoices match these filters.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+          <section id="page-followup" class="page" t-if="page === 'followup'">
+            <div class="title-row">
+              <div>
+                <div class="eyebrow">Collections workflow</div>
+                <h1>Overdue follow-up</h1>
+                <div class="subtitle">Work from a prioritised queue, log contact attempts and keep follow-up respectful and traceable.</div>
+              </div>
+              <div class="toolbar">
+                <button class="btn" t-on-click="() =&gt; this.exportData('followup')">Export queue</button>
+                <button class="btn primary" t-on-click="() =&gt; this.edit('contact')" t-att-disabled="!d.can_write || !d.followups.length">＋ Log contact</button>
+              </div>
+            </div>
+            <div class="grid kpis">
+              <div class="kpi">
+                <div class="kpi-top">Overdue balance <span class="kpi-icon">₹</span>
+                </div>
+                <div class="value negative" t-esc="stats[0]"/>
+                <div class="foot">Posted overdue invoice balances</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Students overdue <span class="kpi-icon">♙</span>
+                </div>
+                <div class="value" t-esc="stats[1]"/>
+                <div class="foot">Needs follow-up</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Contacted this week <span class="kpi-icon">☏</span>
+                </div>
+                <div class="value" t-esc="stats[2]"/>
+                <div class="foot">Logged contact attempts</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Promise to pay <span class="kpi-icon">✓</span>
+                </div>
+                <div class="value" t-esc="stats[3]"/>
+                <div class="foot">Next action date recorded</div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>Follow-up queue</h2>
+                  <div class="panel-desc">Prioritise by overdue age and balance; use approved contact channels.</div>
+                </div>
+                <input class="search" placeholder="Search student…" t-model="state.query" aria-label="Search student…"/>
+              </div>
+              <div class="table-wrap">
+                <table class="table" id="followTable">
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Register no.</th>
+                      <th>Overdue balance</th>
+                      <th>Days overdue</th>
+                      <th>Last contact</th>
+                      <th>Next action</th>
+                      <th>Owner</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr t-foreach="followups" t-as="row" t-key="row.id" class="clickable" t-on-click="() =&gt; d.can_write &amp;&amp; this.edit('contact',null,{invoice_id:row.id})">
+                      <td>
+                        <strong t-esc="row.student"/>
+                      </td>
+                      <td t-esc="row.register"/>
+                      <td t-esc="money(row.balance)"/>
+                      <td>
+                        <span class="pill red">
+                          <t t-esc="row.days"/> days</span>
+                      </td>
+                      <td t-esc="date(row.contact)"/>
+                      <td>
+                        <t t-esc="row.next"/>
+                        <div class="row-sub" t-esc="date(row.next_date)"/>
+                      </td>
+                      <td t-esc="row.owner"/>
+                      <td>
+                        <span class="pill amber" t-esc="row.status"/>
+                      </td>
+                    </tr>
+                    <tr t-if="!followups.length">
+                      <td colspan="8" class="empty">No overdue invoices match this search.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="notice">Record a completed contact, its channel, outcome, staff owner and next-action date. These logs do not send email, SMS or reminders. Prior contact entries are retained for the audit trail.</div>
+          </section>
+          <section id="page-receipts" class="page" t-if="page === 'receipts'">
+            <div class="title-row">
+              <div>
+                <div class="eyebrow">Payment records</div>
+                <h1>Receipts</h1>
+                <div class="subtitle">Search receipts, verify settlement and reprint official acknowledgements.</div>
+              </div>
+              <div class="toolbar">
+                <input class="search" placeholder="Receipt / student / transaction" t-model="state.query" aria-label="Receipt / student / transaction"/>
+                <button class="btn" t-on-click="() =&gt; this.exportData('receipts')">Export register</button>
+                <button class="btn primary" t-on-click="() =&gt; this.edit('payment')" t-att-disabled="!d.can_write">＋ Record payment</button>
+              </div>
+            </div>
+            <div class="grid kpis">
+              <div class="kpi">
+                <div class="kpi-top">Receipts issued <span class="kpi-icon">▤</span>
+                </div>
+                <div class="value" t-esc="stats[0]"/>
+                <div class="foot" t-esc="'Academic year '+(year?.name || '')"/>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Received this month <span class="kpi-icon">₹</span>
+                </div>
+                <div class="value positive" t-esc="stats[1]"/>
+                <div class="foot" t-esc="monthName(snapshot.date)"/>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Awaiting settlement <span class="kpi-icon">◷</span>
+                </div>
+                <div class="value" t-esc="stats[2]"/>
+                <div class="foot">Online transactions to reconcile</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-top">Reversed / refunded <span class="kpi-icon">↶</span>
+                </div>
+                <div class="value" t-esc="stats[3]"/>
+                <div class="foot">Keep reason and approver attached</div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>Receipt register</h2>
+                  <div class="panel-desc">Receipt numbers should be unique and never reused after cancellation.</div>
+                </div>
+                <input class="search" placeholder="Search receipts…" t-model="state.query" aria-label="Search receipts…"/>
+              </div>
+              <div class="table-wrap">
+                <table class="table" id="receiptTable">
+                  <thead>
+                    <tr>
+                      <th>Receipt no.</th>
+                      <th>Date</th>
+                      <th>Student</th>
+                      <th>Payment mode</th>
+                      <th>Transaction reference</th>
+                      <th>Amount</th>
+                      <th>Settlement</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr t-foreach="receipts" t-as="row" t-key="row.id">
+                      <td t-esc="row.name"/>
+                      <td t-esc="date(row.date)"/>
+                      <td t-esc="row.student"/>
+                      <td t-esc="row.method"/>
+                      <td t-esc="row.reference"/>
+                      <td t-esc="money(row.amount)"/>
+                      <td>
+                        <span class="pill" t-att-class="tone(row.status)" t-esc="row.status"/>
+                      </td>
+                      <td>
+                        <button class="btn lightblue" t-on-click="() =&gt; this.openRecord('receipt',row.id)">View</button>
+                      </td>
+                    </tr>
+                    <tr t-if="!receipts.length">
+                      <td colspan="8" class="empty">No receipts match this search.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="notice">Receipt controls: printable receipt, fee breakdown, payment mode/reference, payer identity, cashier/issuer, timestamp, cancellation/reversal history and settlement state. Do not mark an online payment as settled until verified against the gateway/bank feed.</div>
+          </section>
+        </t>
+        <div class="footer" t-if="d">
+          <t t-esc="d.company"/> · College finance workspace · <t t-esc="d.demo ? 'Sample records' : 'Saved ledger records'"/>
+        </div>
+      </div>
+    </main>
+  </t>
+  <t t-name="ideastone_erp.OwnerFeesDialog">
+    <Dialog title="title" size="'lg'" contentClass="'campus_owner_fees_workspace fee-dialog--'+props.kind">
+      <div t-if="state.error" class="finance-error" role="alert" t-esc="state.error"/>
+      <form t-if="props.kind !== 'detail'" id="owner-fee-entry" t-on-submit.prevent="save">
+        <div class="form-grid" t-if="props.kind === 'head'">
+          <div class="field"><label for="headName">Fee head</label><input id="headName" required="required" maxlength="200" t-model="state.values.name"/></div>
+          <div class="field"><label for="headCode">Code</label><input id="headCode" maxlength="50" t-model="state.values.default_code"/></div>
+          <div class="field"><label for="headCategory">Category</label><select id="headCategory" t-model="state.values.campus_fee_category"><option value="academic">Academic</option><option value="facilities">Facilities</option><option value="services">Services</option><option value="student_services">Student services</option></select></div>
+          <div class="field"><label for="headFrequency">Frequency</label><select id="headFrequency" t-model="state.values.campus_fee_frequency"><option value="semester">Semester</option><option value="annual">Annual</option><option value="monthly">Monthly</option><option value="once">One-time</option><option value="exam">Per exam</option><option value="term">Term</option></select></div>
+          <div class="field"><label for="headAccount">Income account</label><select id="headAccount" required="required" t-model="state.values.property_account_income_id"><option value="">Select account</option><option t-foreach="d.income_accounts" t-as="account" t-key="account.id" t-att-value="account.id" t-esc="account.name"/></select></div>
+          <div class="field"><label for="headTax">Tax / exemption</label><select id="headTax" t-model="state.values.tax_id"><option value="">No tax</option><option t-foreach="d.taxes" t-as="tax" t-key="tax.id" t-att-value="tax.id" t-esc="tax.name"/></select></div>
+          <div class="field full"><label class="check-label"><input type="checkbox" t-model="state.values.campus_fee_optional"/>Optional charge</label></div>
+        </div>
+        <t t-elif="props.kind === 'plan'">
+          <div class="form-grid">
+            <div class="field full"><label for="planName">Structure name</label><input id="planName" required="required" maxlength="200" t-model="state.values.name"/></div>
+            <div class="field"><label for="planYear">Academic year</label><select id="planYear" required="required" t-model="state.values.year_id"><option t-foreach="d.years" t-as="year" t-key="year.id" t-att-value="year.id" t-esc="year.name"/></select></div>
+            <div class="field"><label for="planProgramme">Programme</label><select id="planProgramme" required="required" t-model="state.values.course_id" t-on-change="() =&gt; state.values.term_id = ''"><option value="">Select programme</option><option t-foreach="d.courses" t-as="course" t-key="course.id" t-att-value="course.id" t-esc="course.name"/></select></div>
+            <div class="field"><label for="planQuota">Admission quota</label><select id="planQuota" t-model="state.values.quota"><option value="gq">Government Quota (GQ)</option><option value="mq">Management Quota (MQ)</option></select></div>
+            <div class="field"><label for="planStudyYear">Year of study</label><select id="planStudyYear" t-model="state.values.study_year"><option value="1">1st year</option><option value="2">2nd year</option><option value="3">3rd year</option><option value="4">4th year</option></select></div>
+            <div class="field"><label for="planTerm">Semester</label><select id="planTerm" t-model="state.values.term_id"><option value="">Annual / all applicable semesters</option><option t-foreach="terms" t-as="term" t-key="term.id" t-att-value="term.id" t-esc="term.name"/></select></div>
+            <div class="field"><label for="planEffective">Effective from</label><input id="planEffective" type="date" required="required" t-model="state.values.effective"/></div>
+          </div>
+          <div class="panel-head" style="margin-top:20px"><div><h2>Fee breakdown &amp; instalments</h2><div class="panel-desc">One row per fee head and installment. Enter a fixed due date or offset from the assignment date.</div></div><button type="button" class="btn lightblue" t-on-click="addLine">＋ Add line</button></div>
+          <div class="plan-lines">
+            <div class="plan-line" t-foreach="state.values.lines" t-as="line" t-key="line.uid">
+              <div class="field"><label t-att-for="'lineHead'+line.uid">Fee head</label><select t-att-id="'lineHead'+line.uid" required="required" t-model="line.product_id"><option value="">Select fee head</option><option t-foreach="d.heads.filter(h =&gt; h.active)" t-as="head" t-key="head.id" t-att-value="head.id" t-esc="head.name"/></select></div>
+              <div class="field"><label t-att-for="'lineAmount'+line.uid">Amount</label><input t-att-id="'lineAmount'+line.uid" type="number" step="0.01" min="0" required="required" t-model="line.amount"/></div>
+              <div class="field"><label t-att-for="'lineDate'+line.uid">Due date</label><input t-att-id="'lineDate'+line.uid" type="date" t-model="line.date"/></div>
+              <div class="field"><label t-att-for="'lineDays'+line.uid">Due days</label><input t-att-id="'lineDays'+line.uid" type="number" min="0" max="3650" t-model="line.days"/></div>
+              <button type="button" class="btn" aria-label="Remove installment" t-att-disabled="state.values.lines.length === 1" t-on-click="() =&gt; this.removeLine(line)">×</button>
+            </div>
+          </div>
+          <div class="notice">Save as draft → submit for review → owner publishes. Published fee lines remain unchanged; use a new version for future assignments.</div>
+        </t>
+        <t t-elif="props.kind === 'payment'">
+          <div class="panel-desc" style="margin-bottom:18px">Creates a posted receipt through the existing college payment service. Select the exact unpaid invoice.</div>
+          <div class="form-grid">
+            <div class="field full"><label for="paymentInvoice">Student / register no. / invoice</label><select id="paymentInvoice" required="required" t-model="state.values.invoice_id" t-att-disabled="state.prepared"><option value="">Select unpaid invoice</option><option t-foreach="unpaid" t-as="invoice" t-key="invoice.id" t-att-value="invoice.id" t-esc="invoice.student+' · '+invoice.register+' · '+invoice.name+' · '+w.money(invoice.balance)"/></select></div>
+            <div class="field"><label for="paymentAmount">Amount received</label><input id="paymentAmount" type="number" min="0.01" step="0.01" required="required" placeholder="0.00" t-model="state.values.amount" t-att-readonly="state.prepared"/></div>
+            <div class="field"><label for="paymentMethod">Payment mode</label><select id="paymentMethod" t-model="state.values.method" t-att-disabled="state.prepared" t-on-change="() =&gt; state.values.journal_id = ''"><option value="cash">Cash</option><option value="upi">UPI</option><option value="bank">Bank transfer</option><option value="card">Card</option><option value="other">Other</option></select></div>
+            <div class="field"><label for="paymentJournal">Payment account</label><select id="paymentJournal" required="required" t-model="state.values.journal_id" t-att-disabled="state.prepared"><option value="">Select collection journal</option><option t-foreach="journals" t-as="journal" t-key="journal.id" t-att-value="journal.id" t-esc="journal.name"/></select></div>
+            <div class="field"><label for="paymentReference">Transaction reference</label><input id="paymentReference" maxlength="200" placeholder="Reference / UTR" t-model="state.values.reference" t-att-required="state.values.method !== 'cash'" t-att-readonly="state.prepared"/></div>
+            <div class="field full"><label for="paymentNotes">Notes</label><textarea id="paymentNotes" rows="2" maxlength="2000" placeholder="Optional notes" t-model="state.values.note" t-att-readonly="state.prepared"/></div>
+          </div>
+        </t>
+        <div class="form-grid" t-elif="props.kind === 'contact'">
+          <div class="field full"><label for="contactInvoice">Overdue student invoice</label><select id="contactInvoice" required="required" t-model="state.values.invoice_id"><option value="">Select overdue invoice</option><option t-foreach="d.followups" t-as="row" t-key="row.id" t-att-value="row.id" t-esc="row.student+' · '+row.register+' · '+w.money(row.balance)"/></select></div>
+          <div class="field"><label for="contactChannel">Contact channel</label><select id="contactChannel" t-model="state.values.channel"><option value="phone">Phone</option><option value="in_person">In person</option><option value="email">Email already sent</option><option value="other">Other</option></select></div>
+          <div class="field"><label for="contactNextDate">Next-action date</label><input id="contactNextDate" type="date" required="required" t-model="state.values.next_date"/></div>
+          <div class="field full"><label for="contactOutcome">Contact outcome</label><textarea id="contactOutcome" required="required" maxlength="2000" t-model="state.values.outcome"/></div>
+          <div class="field full"><label for="contactNext">Next action</label><input id="contactNext" required="required" maxlength="200" t-model="state.values.next_action"/></div>
+          <div class="field full"><label class="check-label"><input type="checkbox" t-model="state.values.promise"/>Promise to pay recorded</label></div>
+          <div class="notice field full">This records a completed contact. It does not send a message or change the student's balance.</div>
+        </div>
+        <div class="form-grid" t-elif="props.kind === 'invoice'">
+          <div class="field full"><label for="invoiceEnrolment">Student / register no.</label><select id="invoiceEnrolment" required="required" t-model="state.values.enrolment_id"><option value="">Select current-year enrolment</option><option t-foreach="d.enrolments" t-as="enrolment" t-key="enrolment.id" t-att-value="enrolment.id" t-esc="enrolment.name"/></select></div>
+          <div class="field full"><label for="invoiceHead">Fee head</label><select id="invoiceHead" required="required" t-model="state.values.product_id"><option value="">Select fee head</option><option t-foreach="d.heads.filter(h =&gt; h.active)" t-as="head" t-key="head.id" t-att-value="head.id" t-esc="head.name"/></select></div>
+          <div class="field"><label for="invoiceAmount">Amount</label><input id="invoiceAmount" type="number" step="0.01" min="0.01" required="required" t-model="state.values.amount"/></div>
+          <div class="field"><label for="invoiceDue">Due date</label><input id="invoiceDue" type="date" required="required" t-model="state.values.date"/></div>
+          <div class="notice field full">Creates a fee assessment and draft invoice. Review and post it in the existing accounting form before taking a payment. Concessions retain their separate approval workflow.</div>
+        </div>
+      </form>
+      <t t-else="">
+        <div class="panel-desc" style="margin-bottom:18px"><t t-esc="props.record.code"/> · Academic year <t t-esc="w.year?.name || '—'"/></div>
+        <div class="grid quota-summary" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+          <div style="padding:17px;border:1px solid #dce8f8;background:#f5f9ff;border-radius:12px"><div style="font-size:11px;color:#1769e8;font-weight:800">GOVERNMENT QUOTA · GQ</div><div style="font-size:24px;font-weight:800;margin:9px 0;color:#152f48" t-esc="w.quotaAmount(props.record.id,'gq')"/><div style="font-size:11px;color:#657c91">Annual fee plans · range when multiple years apply</div></div>
+          <div style="padding:17px;border:1px solid #e2dafa;background:#faf7ff;border-radius:12px"><div style="font-size:11px;color:#7451d4;font-weight:800">MANAGEMENT QUOTA · MQ</div><div style="font-size:24px;font-weight:800;margin:9px 0;color:#152f48" t-esc="w.quotaAmount(props.record.id,'mq')"/><div style="font-size:11px;color:#657c91">Annual fee plans · range when multiple years apply</div></div>
+        </div>
+        <div class="mini-list" style="margin-top:15px"><div class="mini-row"><span>Academic year</span><strong t-esc="w.year?.name || '—'"/></div><div class="mini-row"><span>Fee frequency</span><strong>Annual / semester schedule as approved</strong></div><div class="mini-row"><span>Saved structures</span><strong t-esc="departmentPlans.length"/></div></div>
+        <div class="plan-detail" t-foreach="departmentPlans" t-as="plan" t-key="plan.id">
+          <div class="panel-head"><div><h3 t-esc="plan.name"/><div class="panel-desc"><t t-esc="plan.course"/> · <t t-esc="w.label(plan.quota)"/> · Year <t t-esc="plan.study_year"/> · Version <t t-esc="plan.version"/></div></div><span class="pill" t-att-class="w.tone(plan.state)" t-esc="w.label(plan.state)"/></div>
+          <div class="table-wrap"><table class="table"><thead><tr><th>Fee head</th><th>Instalment due</th><th>Amount</th></tr></thead><tbody><tr t-foreach="plan.lines" t-as="line" t-key="line.id"><td t-esc="line.name"/><td t-esc="line.date ? w.date(line.date) : line.days+' days from base date'"/><td t-esc="w.money(line.amount)"/></tr><tr><td colspan="2"><strong>Annual total</strong></td><td><strong t-esc="w.money(plan.total)"/></td></tr></tbody></table></div>
+          <div class="panel-desc" style="margin-top:12px">Effective <t t-esc="w.date(plan.effective)"/> · Approved by <t t-esc="plan.approver"/> · <t t-esc="w.date(plan.approved)"/></div>
+          <div class="toolbar" t-if="d.can_write">
+            <button t-if="plan.state === 'draft'" class="btn lightblue" t-att-disabled="state.busy" t-on-click="() =&gt; this.planAction(plan,'review')">Submit for review</button>
+            <button t-if="plan.state === 'review' &amp;&amp; d.can_publish" class="btn primary" t-att-disabled="state.busy" t-on-click="() =&gt; this.planAction(plan,'publish')">Publish structure</button>
+            <button class="btn" t-att-disabled="state.busy" t-on-click="() =&gt; this.copyPlan(plan)">New version</button>
+          </div>
+        </div>
+        <div class="empty" t-if="!departmentPlans.length">No structures are configured for this department and academic year.</div>
+        <div class="notice">Fee lines, due dates and approval details come from saved structures. Published values and already-assigned student charges are retained unchanged.</div>
+      </t>
+      <t t-set-slot="footer">
+        <button t-if="props.kind !== 'detail'" class="btn primary" type="submit" form="owner-fee-entry" t-att-disabled="state.busy" t-esc="props.kind === 'payment' ? state.prepared ? 'Retry payment request' : 'Record payment' : props.kind === 'plan' ? 'Save draft structure' : props.kind === 'contact' ? 'Save contact log' : props.kind === 'invoice' ? 'Create draft invoice' : 'Save fee head'"/>
+        <button class="btn" type="button" t-on-click="props.close" t-esc="props.kind === 'detail' ? 'Close' : 'Cancel'"/>
+      </t>
+    </Dialog>
+  </t>
+</templates>
