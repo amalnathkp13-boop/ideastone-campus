@@ -1,0 +1,18 @@
+<odoo>
+  <record id="group_exam_paper_hod" model="res.groups"><field name="name">Question papers: department HOD</field><field name="category_id" ref="category_campus"/><field name="implied_ids" eval="[(4,ref('openeducat_core.group_op_faculty'))]"/></record>
+  <record id="group_exam_paper_coe" model="res.groups"><field name="name">Question papers: exam control recipient</field><field name="category_id" ref="category_campus"/><field name="implied_ids" eval="[(4,ref('base.group_user'))]"/></record>
+  <record id="acl_question_paper_faculty" model="ir.model.access"><field name="name">Question paper reader</field><field name="model_id" ref="model_campus_question_paper"/><field name="group_id" ref="openeducat_core.group_op_faculty"/><field name="perm_read" eval="True"/></record>
+  <record id="acl_question_paper_coe" model="ir.model.access"><field name="name">Official paper recipient</field><field name="model_id" ref="model_campus_question_paper"/><field name="group_id" ref="group_exam_paper_coe"/><field name="perm_read" eval="True"/></record>
+  <record id="acl_question_set_faculty" model="ir.model.access"><field name="name">Assigned question-paper PDFs</field><field name="model_id" ref="model_campus_question_paper_set"/><field name="group_id" ref="openeducat_core.group_op_faculty"/><field name="perm_read" eval="True"/></record>
+  <record id="acl_question_set_coe" model="ir.model.access"><field name="name">Official PDF recipient</field><field name="model_id" ref="model_campus_question_paper_set"/><field name="group_id" ref="group_exam_paper_coe"/><field name="perm_read" eval="True"/></record>
+  <record id="acl_question_routing_admin" model="ir.model.access"><field name="name">Configure paper reviewers</field><field name="model_id" ref="model_campus_question_paper_routing"/><field name="group_id" ref="group_college_admin"/><field name="perm_read" eval="True"/><field name="perm_write" eval="True"/><field name="perm_create" eval="True"/><field name="perm_unlink" eval="True"/></record>
+  <record id="rule_question_paper_scope" model="ir.rule">
+    <field name="name">Confidential paper: author, assigned department HOD or official recipient</field><field name="model_id" ref="model_campus_question_paper"/>
+    <field name="domain_force">[('company_id','in',company_ids),'|','|',('faculty_id.user_id','=',user.id),'&amp;','&amp;',('hod_id','=',user.id),('department_id','=',user.dept_id.id if user.has_group('ideastone_erp.group_exam_paper_hod') else 0),('state','!=','draft'),'&amp;',('coe_id','=',user.id if user.has_group('ideastone_erp.group_exam_paper_coe') else 0),('state','=','forwarded')]</field>
+  </record>
+  <record id="rule_question_set_scope" model="ir.rule">
+    <field name="name">Confidential PDF: author, assigned HOD, selected COE set only</field><field name="model_id" ref="model_campus_question_paper_set"/>
+    <field name="domain_force">[('company_id','in',company_ids),'|','|',('paper_id.faculty_id.user_id','=',user.id),'&amp;','&amp;',('paper_id.hod_id','=',user.id),('paper_id.department_id','=',user.dept_id.id if user.has_group('ideastone_erp.group_exam_paper_hod') else 0),('paper_id.state','!=','draft'),'&amp;','&amp;',('paper_id.coe_id','=',user.id if user.has_group('ideastone_erp.group_exam_paper_coe') else 0),('paper_id.state','=','forwarded'),('is_official','=',True)]</field>
+  </record>
+  <record id="rule_question_routing_company" model="ir.rule"><field name="name">Question-paper routing college</field><field name="model_id" ref="model_campus_question_paper_routing"/><field name="domain_force">[('company_id','in',company_ids)]</field></record>
+</odoo>

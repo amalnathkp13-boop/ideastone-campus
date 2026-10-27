@@ -1,0 +1,6 @@
+<odoo>
+  <record id="action_faculty_question_papers" model="ir.actions.client"><field name="name">Examinations</field><field name="tag">ideastone_erp.faculty_question_papers</field><field name="context">{'campus_module': 'teaching'}</field></record>
+  <record id="view_question_paper_routing_tree" model="ir.ui.view"><field name="name">Question paper reviewers</field><field name="model">campus.question.paper.routing</field><field name="arch" type="xml"><tree editable="bottom"><field name="company_id"/><field name="department_id"/><field name="hod_id"/><field name="coe_id"/></tree></field></record>
+  <record id="action_question_paper_routing" model="ir.actions.act_window"><field name="name">Question-paper review routing</field><field name="res_model">campus.question.paper.routing</field><field name="view_mode">tree,form</field></record>
+  <menuitem id="menu_question_paper_routing" name="Question-paper review routing" action="action_question_paper_routing" groups="group_college_admin" sequence="99"/>
+</odoo>

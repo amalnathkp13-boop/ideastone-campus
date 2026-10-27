@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { Component, onWillStart, onWillUnmount, useExternalListener, useRef, useState, markup } from "@odoo/owl";
+import { Component, onWillStart, onWillUnmount, useEffect, useExternalListener, useRef, useState, markup } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -287,6 +287,11 @@ export class CampusNavigation extends CampusBase {
     setup() {
         super.setup();
         useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", () => this.syncFacultyRoute());
+        useEffect(() => {
+            if (this.action.currentController?.action.tag?.includes("question_papers")) {
+                this.subnavRef.el?.querySelector("button.active")?.scrollIntoView({block: "nearest", inline: "nearest"});
+            }
+        }, () => [this.state.activeAction, this.state.module, this.state.faculty_modules.length]);
         onWillUnmount(() => document.body.classList.remove("campus_faculty_workspace"));
     }
     async load() {
