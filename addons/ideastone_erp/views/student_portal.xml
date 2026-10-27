@@ -10,10 +10,11 @@
       <t t-set="d" t-value="portal_data"/>
       <div id="campus_student_workspace" class="student_workspace">
         <a class="student_skip" href="#student_main">Skip to content</a>
-        <aside id="student_sidebar" class="student_sidebar" aria-label="Student navigation">
+        <aside id="student_sidebar" class="student_sidebar" aria-label="Student navigation" data-navigation-scope="student">
           <a class="student_brand" href="/my/campus"><img src="/ideastone_campus/static/src/img/vcet-tab-icon.png" alt="VCET shield"/><span>Campus Management ERP</span></a>
           <span class="student_nav_heading">STUDENT WORKSPACE</span>
-          <nav t-if="d"><a t-foreach="d['navigation']" t-as="item" t-att-href="student_url_for(item[0])" t-att-class="'student_nav_link active' if section == item[0] else 'student_nav_link'" t-att-aria-current="'page' if section == item[0] else None"><i t-att-class="'fa fa-' + item[2]" aria-hidden="true"/><span t-esc="item[1]"/></a></nav>
+          <nav t-if="d"><a t-foreach="d['navigation']" t-as="item" t-att-data-navigation-key="item[0]" t-att-href="student_url_for(item[0])" t-att-class="'student_nav_link active' if section == item[0] else 'student_nav_link'" t-att-aria-current="'page' if section == item[0] else None"><i t-att-class="'fa fa-' + item[2]" aria-hidden="true"/><span t-esc="item[1]"/></a></nav>
+          <button t-if="d" type="button" class="campus_customize_navigation"><i class="fa fa-sliders" aria-hidden="true"/>Customize Navigation</button>
           <div class="student_sidebar_bottom"><strong t-if="d" t-esc="d['company']"/><span>Student self-service</span><a href="/web/session/logout?redirect=/web/login">Sign out <i class="fa fa-sign-out" aria-hidden="true"/></a></div>
         </aside>
         <button type="button" class="student_backdrop" aria-label="Close navigation" hidden="hidden"/>
