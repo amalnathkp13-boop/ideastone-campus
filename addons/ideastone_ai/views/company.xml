@@ -12,7 +12,7 @@
           <field name="campus_ai_model" placeholder="gpt-4o-mini, llama3.1, ..."/>
           <field name="campus_ai_api_key" password="True" groups="base.group_system,ideastone_erp.group_mvp_owner"/>
           <field name="campus_ai_monthly_limit"/>
-          <div class="text-muted" colspan="2">The assistant sends only aggregate figures and the text typed by the administrator. Student, staff and guardian records never leave this server. Every call is recorded under AI insights &#8594; Assistant log.</div>
+          <div class="text-muted" colspan="2">The assistant sends aggregate figures, fixed feedback category counts, and the question or notice brief you type. Stored feedback comments remain local. Do not paste personal records. Every provider attempt, including failures, is recorded under AI insights &#8594; Assistant log and counts toward the UTC monthly limit.</div>
         </group>
       </xpath>
     </field>
