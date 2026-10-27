@@ -42,13 +42,19 @@ async function markup(page) {
         if(studentCard.value!==3) throw Error('Owner demo does not reconcile with its saved students');
         await page.screenshot({path:path.join(out,'owner-dashboard-1440.png'),fullPage:true});
         await page.locator('.collection-panel').evaluate(element=>element.scrollIntoView({block:'start'}));
-        const collectionBars=await page.locator('.collection-panel .bar-fill').evaluateAll(nodes=>nodes.map(node=>parseFloat(node.style.width)));
-        // The seeded fee is due a week ahead, so in a month's last week receipts and dues fall in
-        // different months. Check every bar against one shared scale instead of assuming one month.
-        const amounts=firstMetrics.collection.flatMap(row=>[row.collected,row.dues]);
-        const scale=Math.max(...amounts);
-        if(scale!==300 || amounts.reduce((a,b)=>a+b,0)!==500 || collectionBars.length!==amounts.length
-            || collectionBars.some((width,index)=>Math.abs(width-amounts[index]/scale*100)>0.1)) throw Error('Collection and dues chart does not use a common amount scale');
+        const feeMonths=firstMetrics.overview_ui.fee_months;
+        const collectionBars=await page.locator('.collection-panel .fee-bar-fill').evaluateAll(nodes=>nodes.map(node=>parseFloat(node.style.height)));
+        // Each vertical bar compares the amount collected with the billed fees for
+        // that same due-month invoice cohort; empty months must remain at zero.
+        if(feeMonths.length!==6 || collectionBars.length!==6
+            || feeMonths.reduce((sum,row)=>sum+row.target,0)!==500
+            || feeMonths.reduce((sum,row)=>sum+row.collected,0)!==300
+            || firstMetrics.overview_ui.fee_percent!==60
+            || collectionBars.some((height,index)=>Math.abs(height-(feeMonths[index].target ? feeMonths[index].collected/feeMonths[index].target*100 : 0))>0.1)) throw Error('Monthly fee bars do not reconcile with the billed and collected amounts');
+        const panelHeights=await page.locator('.collection-panel,.ai-panel').evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().height));
+        if(Math.abs(panelHeights[0]-panelHeights[1])>1) throw Error('Fee and insights cards are not balanced on desktop');
+        await page.getByRole('heading',{name:'Decision Overview',exact:true}).waitFor();
+        if(await page.locator('.decision-grid .deadlines-panel').evaluate(el=>getComputedStyle(el).gridColumn)!=='1 / -1') throw Error('Dashboard deadlines do not span the full row');
         await page.screenshot({path:path.join(out,'owner-charts-1440.png')});
         if(await page.locator('.admin_overview .kpi').count()!==8) throw Error('Admin overview does not show eight indicators');
         if(await page.locator('.event-card').count()!==3) throw Error('Admin event cards do not reflect the four saved events');

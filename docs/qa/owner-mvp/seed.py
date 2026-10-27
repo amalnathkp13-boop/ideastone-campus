@@ -56,7 +56,9 @@ retry.action_campus_submit()
 retry.action_campus_review()
 retry.action_campus_approve()
 structure = env["op.fees.terms"].create({"name": "CSE first installment", "campus_managed": True, "campus_course_id": course.id, "campus_year_id": year.id,
-    "line_ids": [(0, 0, {"campus_product_id": product.id, "campus_amount": 500, "due_date": today + timedelta(days=7)})]})
+    # Keep the bill in the current due month so the six-month fee chart always
+    # exercises a non-zero bar, including when CI runs near the month's end.
+    "line_ids": [(0, 0, {"campus_product_id": product.id, "campus_amount": 500, "due_date": min(today + timedelta(days=7), fields.Date.end_of(today, "month"))})]})
 env["campus.fee.assignment.wizard"].with_user(owner).create({"enrolment_id": students[0].course_detail_ids.id, "structure_id": structure.id}).action_assign()
 fee = env["op.student.fees.details"].search([("student_id", "=", students[0].id), ("campus_managed", "=", True)])
 students[0].partner_id.property_account_receivable_id = receivable

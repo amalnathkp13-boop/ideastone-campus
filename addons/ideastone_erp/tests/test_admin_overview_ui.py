@@ -10,6 +10,54 @@ from .test_owner_mvp import OwnerMVPFixture
 
 @tagged("post_install", "-at_install")
 class TestAdminOverviewUI(OwnerMVPFixture, TransactionCase):
+    def test_decisions_use_submitted_budget_requests_and_active_college(self):
+        user = new_test_user(self.env, login="overview_budget_owner", groups="ideastone_erp.group_mvp_owner,ideastone_erp.group_manager")
+        source = self.env["campus.service.request"]
+        request = source.create({"name": "Cultural budget approval", "kind": "work", "amount": 1200000,
+            "date_to": self.today + timedelta(days=2), "description": "Increase student participation"})
+        request.action_submit()
+        source.create({"name": "Unsubmitted budget", "kind": "work", "amount": 700, "description": "Draft only"})
+        zero = source.create({"name": "Non-budget request", "kind": "room", "description": "Room only"})
+        zero.action_submit()
+        other = self.env["res.company"].create({"name": "Foreign budget college"})
+        user.company_ids += other
+        foreign = request.copy({"name": "Foreign proposal", "company_id": other.id})
+        foreign.action_submit()
+        dashboard = self.env["campus.dashboard"].with_user(user)
+        ui = dashboard.get_owner_metrics()["overview_ui"]
+        self.assertEqual([row["id"] for row in ui["decisions"]], request.ids)
+        self.assertEqual(ui["decision_count"], 1)
+        self.assertEqual(ui["decision_budget"], 1200000)
+        self.assertEqual(ui["decisions"][0]["days"], 2)
+        self.assertEqual(ui["decisions"][0]["impact"], request.description)
+        self.assertEqual(dashboard.get_owner_overview_action("decisions", event_id=request.id)["res_id"], request.id)
+        with self.assertRaises(AccessError):
+            dashboard.get_owner_overview_action("decisions", event_id=foreign.id)
+        limited = self.env["campus.dashboard"].with_user(self.admissions)
+        self.assertEqual(limited.get_owner_metrics()["overview_ui"]["decisions"], [])
+        with self.assertRaises(AccessError):
+            limited.get_owner_overview_action("decisions")
+
+    def test_fee_bars_reconcile_billed_collected_and_reversed_amounts(self):
+        fee = self.fee(self.enrolled().student_id)
+        fee.action_campus_post()
+        payment = self.payment(fee.invoice_id, 300).payment_id
+        dashboard = self.env["campus.dashboard"].with_user(self.owner)
+        filters = {"date_to": str(self.today), "year_id": self.year.id}
+        ui = dashboard.get_owner_metrics(filters)["overview_ui"]
+        self.assertEqual(len(ui["fee_months"]), 6)
+        self.assertEqual(ui["fee_months"][-1], {"label": self.today.strftime("%Y-%m"), "target": 500, "collected": 300, "percent": 60.0})
+        self.assertEqual(ui["fee_percent"], 60)
+        self.assertTrue(all(row["target"] == 0 and row["percent"] is None for row in ui["fee_months"][:-1]))
+        payment.campus_reversal_reason = "Preview correction"
+        payment.action_campus_reverse()
+        ui = dashboard.get_owner_metrics(filters)["overview_ui"]
+        self.assertEqual(ui["fee_months"][-1]["collected"], 0)
+        self.assertEqual(ui["fee_percent"], 0)
+        limited = self.env["campus.dashboard"].with_user(self.admissions).get_owner_metrics(filters)["overview_ui"]
+        self.assertFalse(limited["fee_allowed"])
+        self.assertTrue(all(row["target"] == 0 for row in limited["fee_months"]))
+
     def test_event_projection_and_actions_stay_in_active_college(self):
         user = new_test_user(self.env, login="overview_event_owner", groups="ideastone_erp.group_mvp_owner,event.group_event_manager")
         dashboard = self.env["campus.dashboard"].with_user(user)
