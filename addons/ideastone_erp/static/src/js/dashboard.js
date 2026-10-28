@@ -184,7 +184,7 @@ class CampusBase extends Component {
     async ownerSource(card) {
         if (!card.allowed) return;
         try {
-            if (["services", "attendance_pending", "overdue_services", "overdue_dues"].includes(card.kind)) return this.ownerOverviewAction(card.kind);
+            if (["services", "attendance_pending", "overdue_services", "overdue_dues", "staff_present", "staff_delayed", "fleet"].includes(card.kind)) return this.ownerOverviewAction(card.kind);
             const action = await this.orm.call("campus.dashboard", "get_owner_source_action", [card.kind, this.state.ownerAppliedFilters]);
             if (!action.views) action.views = (action.view_mode || "tree,form").split(",").map(mode => [false, mode]);
             if (action.help) action.help = markup(action.help);
