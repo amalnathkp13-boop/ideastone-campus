@@ -2,7 +2,7 @@
 .owner-communication {
   --oc-navy:#0b2e4b; --oc-blue:#1769e8; --oc-ink:#152f48; --oc-muted:#657c91;
   --oc-bg:#f4f7fb; --oc-line:#dce6f0; --oc-green:#13835b; --oc-amber:#9c6b08;
-  min-width:0; min-height:100%; background:var(--oc-bg); color:var(--oc-ink);
+  min-width:0; height:100%; overflow-y:auto; background:var(--oc-bg); color:var(--oc-ink);
   font:400 14px/1.45 Roboto,"Segoe UI",Arial,sans-serif;
   * { box-sizing:border-box; }
   button, input, select, textarea { font:inherit; }
