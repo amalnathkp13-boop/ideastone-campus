@@ -1,0 +1,17 @@
+<odoo>
+  <record id="view_service_request_campus_services_fields" model="ir.ui.view">
+    <field name="name">campus.service.request.campus.services.fields</field>
+    <field name="model">campus.service.request</field>
+    <field name="inherit_id" ref="ideastone_erp.view_service_request_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='description']" position="after">
+        <field name="service_area" invisible="kind != 'work'"/>
+        <field name="service_category" invisible="kind != 'work'"/>
+        <field name="service_priority" invisible="kind != 'work'"/>
+        <field name="service_location" invisible="kind != 'work'"/>
+        <field name="service_contact" invisible="kind != 'work'"/>
+        <field name="service_team" groups="ideastone_erp.group_services,ideastone_erp.group_manager"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>

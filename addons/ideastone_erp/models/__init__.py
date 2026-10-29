@@ -15,6 +15,7 @@ from . import counseling
 from . import circular
 from . import feedback
 from . import service_request
+from . import faculty_campus_services
 from . import placement_drive
 from . import placement_candidate
 from . import alumni

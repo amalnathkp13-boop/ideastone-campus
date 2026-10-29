@@ -12,7 +12,7 @@
     ],
     "data": [
         "security/groups.xml", "security/directory.xml", "security/ir.model.access.csv", "security/rules.xml",
-        "views/operations.xml", "views/faculty.xml", "views/faculty_leave.xml", "views/faculty_attendance.xml", "views/student_attendance_workspace.xml", "views/subject_attendance_workspace.xml", "views/payroll_history.xml", "views/menus.xml", "views/portal.xml", "views/website_icon.xml", "views/reports.xml",
+        "views/operations.xml", "views/faculty_campus_services.xml", "views/faculty.xml", "views/faculty_leave.xml", "views/faculty_attendance.xml", "views/student_attendance_workspace.xml", "views/subject_attendance_workspace.xml", "views/payroll_history.xml", "views/menus.xml", "views/portal.xml", "views/website_icon.xml", "views/reports.xml",
         "security/workspace.xml", "views/workspace.xml", "views/faculty_workspace.xml",
         "security/faculty_tools.xml", "views/faculty_tools.xml", "views/student_leave.xml", "views/faculty_reports.xml",
         "security/mvp.xml", "security/hod_od.xml", "data/mvp.xml", "data/hod_od.xml", "views/mvp.xml", "views/mvp_search.xml", "views/mvp_reports.xml",
@@ -51,6 +51,9 @@
             "ideastone_erp/static/src/js/student_od.js",
         ],
         "web.assets_backend": [
+            "ideastone_erp/static/src/js/faculty_campus_services.js",
+            "ideastone_erp/static/src/xml/faculty_campus_services.xml",
+            ("before", "ideastone_campus/static/src/scss/design_system.scss", "ideastone_erp/static/src/scss/faculty_campus_services.scss"),
             "ideastone_erp/static/src/xml/faculty_home.xml",
             "ideastone_erp/static/src/scss/faculty_home.scss",
             "ideastone_erp/static/src/xml/academics.xml",

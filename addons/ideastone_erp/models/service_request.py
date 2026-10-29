@@ -29,6 +29,15 @@ class ServiceRequest(models.Model):
     description = fields.Text(required=True)
     resolution = fields.Text()
     complaint_category = fields.Char()
+    service_area = fields.Selection([("service", "Service request"), ("maintenance", "Maintenance")], default="service")
+    service_category = fields.Selection([
+        ("it", "IT & network"), ("facilities", "Facilities"), ("transport", "Transport"),
+        ("housekeeping", "Housekeeping"), ("electrical", "Electrical"),
+    ])
+    service_priority = fields.Selection([("low", "Low"), ("normal", "Normal"), ("high", "High"), ("urgent", "Urgent")], default="normal")
+    service_location = fields.Char()
+    service_contact = fields.Char()
+    service_team = fields.Char()
     document = fields.Binary(attachment=True)
     filename = fields.Char()
 
@@ -47,6 +56,13 @@ class ServiceRequest(models.Model):
     def write(self, vals):
         if "requester_id" in vals and self._faculty_self_service():
             raise AccessError(_("A service operator must reassign a faculty service request."))
+        if "service_team" in vals and self._faculty_self_service():
+            raise AccessError(_("Only a service operator can assign a campus team."))
+        if set(vals) == {"resolution"} and self and all(rec.state == "approved" for rec in self):
+            if not self.env.user.has_group("ideastone_erp.group_manager"):
+                raise AccessError(_("Campus manager approval is required to record a resolution."))
+            self._lock()
+            return self._set_system_values(vals)
         return super().write(vals)
 
     @api.constrains("date_from", "date_to", "amount", "kind", "requested_course_id", "student_id", "complaint_category", "company_id")
