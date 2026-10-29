@@ -48,7 +48,7 @@ MODULES = [
     ("exams", "Examinations", "file-text-o", [("Exam sessions", "mvp_exam_sessions"), ("Schedule & marks entry", "mvp_exams"), ("Grade rules", "mvp_grades"), ("Results & missing entries", "mvp_results")]),
     ("communication", "Communication", "bullhorn", [("Notices & audiences", "mvp_notices"), ("Student requests & support", "mvp_student_requests")]),
     ("reports", "Reports", "bar-chart", [("Admissions", "mvp_report_admissions"), ("Students", "mvp_report_students"), ("Attendance", "mvp_report_attendance"), ("Fee collection", "mvp_report_collection"), ("Outstanding dues", "mvp_report_dues"), ("Results", "mvp_report_results"), ("Faculty workload", "mvp_report_faculty")]),
-    ("settings", "Settings", "cog", [("College profile & attendance policy", "mvp_college"), ("Document requirements", "mvp_requirements"), ("Student request catalogue", "mvp_student_request_types"), ("Audit log", "mvp_audit"), ("Users & roles", "base.action_res_users"), ("ID & receipt numbering", "base.ir_sequence_form"), ("Import students", "mvp_import_students")]),
+    ("settings", "Settings", "cog", [("College profile & policy", "mvp_college"), ("Document requirements", "mvp_requirements"), ("Request catalogue", "mvp_student_request_types"), ("Audit log", "mvp_audit"), ("Users & roles", "base.action_res_users"), ("ID & numbering", "base.ir_sequence_form"), ("Import students", "mvp_import_students")]),
 ]
 
 
@@ -75,6 +75,8 @@ class OwnerDashboard(models.AbstractModel):
         client_models = self._client_action_models()
         for key, label, icon, entries in self._owner_modules():
             items = []
+            if key == "settings" and self.env.user.has_group("ideastone_erp.group_mvp_owner"):
+                items.append({"label": "Overview", "page": "settings-overview"})
             for title, action in entries:
                 if action == "owner-overview":
                     items.append({"label": title, "page": action})
@@ -96,6 +98,8 @@ class OwnerDashboard(models.AbstractModel):
                 if not self.env[target_model].check_access_rights("read", raise_exception=False):
                     continue
                 item = {"label": title, "action": ref.get_external_id()[ref.id], "action_id": ref.id, "model": target_model, "group": label, "allowed": True}
+                if key == "settings":
+                    item["page"] = "settings-" + {"mvp_college": "college", "mvp_requirements": "documents", "mvp_student_request_types": "catalogue", "mvp_audit": "audit", "base.action_res_users": "users", "base.ir_sequence_form": "numbering", "mvp_import_students": "import"}[action]
                 items.append(item)
                 navigation.append(item)
             if items:
@@ -339,6 +343,99 @@ class OwnerDashboard(models.AbstractModel):
         context = safe_eval(action.get("context") or "{}", {"uid": self.env.uid, "active_id": False}) if isinstance(action.get("context"), str) else action.get("context") or {}
         action["context"] = dict(context, default_company_id=self.env.company.id, campus_module=self._mvp_module_for(xmlid))
         return action
+
+    @api.model
+    def get_owner_settings(self):
+        """Current-college data for the owner Settings workspace; never expose secrets."""
+        if not self.env.user.has_group("ideastone_erp.group_mvp_owner"):
+            raise AccessError(_("Owner access is required for college settings."))
+        company = self.env.company
+        domain = [("company_id", "=", company.id)]
+        requirements = self.env["campus.admission.requirement"].with_context(active_test=False).search(domain, order="name", limit=200)
+        request_types = self.env["campus.student.request.type"].with_context(active_test=False).search(
+            ["|", ("company_id", "=", False), ("company_id", "=", company.id)], order="sequence, name", limit=200)
+        requests = self.env["campus.service.request"].search(
+            domain + [("portal_type_id", "!=", False), ("state", "in", ["submitted", "information"])],
+            order="date desc, id desc", limit=50)
+        audits = self.env["campus.mvp.audit"].search(domain, order="create_date desc, id desc", limit=100)
+        users = self.env["res.users"].search(
+            [("company_ids", "in", company.id), ("share", "=", False)], order="name", limit=200)
+        sequences = self.env["ir.sequence"].search(["|", ("company_id", "=", False), ("company_id", "=", company.id)], order="name", limit=100)
+        owner = self.env.ref("ideastone_erp.group_mvp_owner")
+        registrar = self.env.ref("ideastone_erp.group_mvp_registrar")
+        hod = self.env.ref("ideastone_erp.group_mvp_hod")
+        hod_papers = self.env.ref("ideastone_erp.group_exam_paper_hod")
+        coe = self.env.ref("ideastone_erp.group_coe_admin")
+        back_office = self.env.ref("openeducat_core.group_op_back_office")
+        back_office_admin = self.env.ref("openeducat_core.group_op_back_office_admin")
+        librarian = self.env.ref("openeducat_library.group_op_library")
+        faculty = self.env.ref("openeducat_core.group_op_faculty")
+        def user_role(user):
+            if owner in user.groups_id:
+                return "Owner / Admin"
+            if registrar in user.groups_id:
+                return "College administration"
+            if coe in user.groups_id:
+                return "Exam control"
+            if hod in user.groups_id or hod_papers in user.groups_id:
+                return "HOD"
+            if back_office in user.groups_id or back_office_admin in user.groups_id:
+                return "Back-office staff"
+            if librarian in user.groups_id:
+                return "Librarian"
+            if faculty in user.groups_id:
+                return "Faculty"
+            return "Staff / User"
+        company_fields = ["name", "street", "city", "phone", "email", "currency_id",
+                          "campus_attendance_threshold", "campus_excused_policy", "campus_od_default_tokens",
+                          "campus_od_token_rule", "campus_student_portal_enabled", "campus_student_contact_edit"]
+        company.check_access_rights("read")
+        company.check_access_rule("read")
+        configuration = [bool(company.name), bool(company.street), bool(company.email), bool(company.phone),
+                         bool(company.currency_id), bool(requirements), bool(request_types),
+                         bool(self.env["op.academic.year"].search_count(domain)),
+                         bool(self.env["op.batch"].search_count(domain))]
+        return {
+            "company": {"id": company.id, **{key: (company[key].id if key == "currency_id" else company[key]) for key in company_fields}},
+            "currency_name": company.currency_id.display_name,
+            "configuration_done": sum(configuration), "configuration_total": len(configuration),
+            "import_ready": configuration[-1] and configuration[-2],
+            "requirements": [{"id": row.id, "name": row.name, "applies_to": row.course_id.name or "All programmes",
+                              "required": row.required, "active": row.active} for row in requirements],
+            "request_types": [{"id": row.id, "name": row.name, "code": row.code,
+                               "kind": dict(row._fields["kind"].selection).get(row.kind, row.kind),
+                               "active": row.active, "template": not bool(row.company_id)} for row in request_types],
+            "requests": [{"id": row.id, "reference": row.portal_reference or row.name,
+                          "student": row.student_id.name, "number": row.student_id.gr_no or "",
+                          "type": row.portal_type_id.name, "submitted": row.date.strftime("%d %b %Y") if row.date else "",
+                          "status": dict(row._fields["state"].selection).get(row.state, row.state)} for row in requests],
+            "audit_total": self.env["campus.mvp.audit"].search_count(domain),
+            "audits": [{"id": row.id, "when": fields.Datetime.context_timestamp(self, row.create_date).strftime("%d %b %Y %H:%M") if row.create_date else "", "actor": row.actor_id.name,
+                        "action": row.name, "area": row.model_name, "record": row.record_id,
+                        "reason": row.reason or ""} for row in audits],
+            "users": [{"id": row.id, "name": row.name, "login": row.login, "role": user_role(row),
+                       "confirmed": bool(row.login_date), "active": row.active} for row in users],
+            "sequences": [{"id": row.id, "name": row.name, "prefix": row.prefix or "", "digits": row.padding,
+                           "next": row.number_next_actual, "step": row.number_increment,
+                           "company": row.company_id.name or "All companies"} for row in sequences],
+        }
+
+    @api.model
+    def save_owner_settings(self, values):
+        if not self.env.user.has_group("ideastone_erp.group_mvp_owner"):
+            raise AccessError(_("Owner access is required for college settings."))
+        allowed = {"name", "street", "city", "phone", "email", "campus_attendance_threshold",
+                   "campus_excused_policy", "campus_od_default_tokens", "campus_od_token_rule",
+                   "campus_student_portal_enabled", "campus_student_contact_edit"}
+        if not isinstance(values, dict) or not values or set(values) - allowed:
+            raise ValidationError(_("Select valid college settings to save."))
+        company = self.env.company
+        company.check_access_rights("write")
+        company.check_access_rule("write")
+        changed = {key: value for key, value in values.items() if (company[key] or "") != (value or "")}
+        if changed:
+            company.write(changed)
+        return True
 
     def _mvp_module_for(self, xmlid):
         return next((key for key, _label, _icon, items in self._owner_modules() if any((action if "." in action else "ideastone_erp." + action) == xmlid for _title, action in items)), "home")
