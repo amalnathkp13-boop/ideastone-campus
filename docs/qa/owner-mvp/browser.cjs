@@ -202,7 +202,7 @@ async function markup(page) {
         await Promise.all([page.waitForResponse(r=>r.url().includes('/campus.dashboard/save_owner_settings')), page.getByRole('button',{name:'Save changes',exact:true}).click()]);
         savedPolicy=await rpc(page,'res.company','read',[[collegeAction.res_id]],{fields:['campus_attendance_threshold']});
         if(savedPolicy[0].campus_attendance_threshold!==75) throw Error('College policy was not restored');
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'ID & receipt numbering',exact:true}).click();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'ID & numbering',exact:true}).click();
         await page.getByRole('heading',{name:'Sequence register',exact:true}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Dashboard',exact:true}).click();
         await page.getByRole('button',{name:'Filters',exact:true}).click();
