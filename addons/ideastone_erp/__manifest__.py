@@ -1,7 +1,7 @@
 {
     "name": "Ideastone Campus Operations",
     "summary": "Teaching, campus services, staff administration and institutional engagement",
-    "version": "17.0.1.0.27",
+    "version": "17.0.1.0.28",
     "category": "Education",
     "author": "Ideastone Technologies Pvt Ltd",
     "license": "OPL-1",
@@ -24,7 +24,7 @@
         "data/student_library.xml", "views/student_library.xml",
         "views/student_requests.xml", "security/question_paper.xml", "views/question_paper.xml", "views/hod_question_paper.xml",
         "security/coe_workspace.xml", "views/coe_workspace.xml",
-        "views/academics_ui.xml",
+        "views/academics_ui.xml", "views/owner_communication.xml", "data/owner_communication.xml",
     ],
     "assets": {
         "web.assets_frontend": [
@@ -104,6 +104,9 @@
             "ideastone_erp/static/src/js/hod_question_papers.js",
             "ideastone_erp/static/src/xml/hod_question_papers.xml",
             "ideastone_erp/static/src/scss/hod_question_papers.scss",
+            "ideastone_erp/static/src/js/owner_communication.js",
+            "ideastone_erp/static/src/xml/owner_communication.xml",
+            "ideastone_erp/static/src/scss/owner_communication.scss",
             "ideastone_erp/static/src/js/coe_workspace.js",
             "ideastone_erp/static/src/xml/coe_workspace.xml",
             "ideastone_erp/static/src/scss/coe_workspace.scss",

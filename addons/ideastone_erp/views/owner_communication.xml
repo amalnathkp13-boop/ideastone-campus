@@ -1,0 +1,5 @@
+<odoo>
+  <record id="action_owner_communication_overview" model="ir.actions.client"><field name="name">Communication overview</field><field name="tag">ideastone_erp.owner_communication</field><field name="params">{'view': 'overview'}</field><field name="context">{'campus_module': 'communication'}</field></record>
+  <record id="action_owner_communication_notices" model="ir.actions.client"><field name="name">Notices &amp; audiences</field><field name="tag">ideastone_erp.owner_communication</field><field name="params">{'view': 'notices'}</field><field name="context">{'campus_module': 'communication'}</field></record>
+  <record id="action_owner_communication_requests" model="ir.actions.client"><field name="name">Student requests &amp; support</field><field name="tag">ideastone_erp.owner_communication</field><field name="params">{'view': 'requests'}</field><field name="context">{'campus_module': 'communication'}</field></record>
+</odoo>
