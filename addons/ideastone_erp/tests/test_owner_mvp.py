@@ -290,8 +290,9 @@ class TestOwnerMVP(OwnerMVPFixture, TransactionCase):
 
     def test_owner_registers_show_existing_requests_and_shared_fee_heads(self):
         dash = self.env["campus.dashboard"].with_user(self.owner)
-        requests = dash.get_owner_action("ideastone_erp.mvp_student_requests")
-        self.assertEqual(requests["views"][0], (self.env.ref("ideastone_erp.student_requests_tree").id, "tree"))
+        requests = dash.get_owner_action("ideastone_erp.action_owner_communication_requests")
+        self.assertEqual(requests["tag"], "ideastone_erp.owner_communication")
+        self.assertEqual(requests["context"]["campus_module"], "communication")
         heads = dash.get_owner_action("ideastone_erp.mvp_fee_heads")
         visible = self.env[heads["res_model"]].with_user(self.owner).search(heads["domain"])
         self.assertIn(self.product.product_tmpl_id, visible)
