@@ -20,13 +20,14 @@
     </div>
   </t>
   <t t-name="ideastone_erp.Dashboard">
-    <main class="campus_dashboard" id="campus_main">
-      <div class="campus_crumb"><span>VCET Campus / <t t-esc="pageTitle"/></span><span><t t-esc="state.today"/> · <strong t-esc="state.workspace_role"/></span></div>
-      <header class="campus_page_heading"><div><h1 t-esc="pageTitle"/><p t-esc="state.company"/></div><button class="btn btn-outline-primary" t-on-click="load" t-att-disabled="state.loading"><i class="fa fa-refresh me-2"/>Refresh</button></header>
+    <main class="campus_dashboard" id="campus_main" t-att-class="{campus_communication_dashboard: state.page.startsWith('communication-') &amp;&amp; state.module === 'engagement'}">
+      <div t-if="!state.page.startsWith('communication-')" class="campus_crumb"><span>VCET Campus / <t t-esc="pageTitle"/></span><span><t t-esc="state.today"/> · <strong t-esc="state.workspace_role"/></span></div>
+      <header t-if="!state.page.startsWith('communication-')" class="campus_page_heading"><div><h1 t-esc="pageTitle"/><p t-esc="state.company"/></div><button class="btn btn-outline-primary" t-on-click="load" t-att-disabled="state.loading"><i class="fa fa-refresh me-2"/>Refresh</button></header>
       <div t-if="state.error" class="alert alert-danger" role="alert"><span t-esc="state.error"/><button class="btn btn-outline-danger ms-2" t-on-click="load">Retry</button></div>
       <p t-if="state.loading" role="status"><i class="fa fa-spinner fa-spin me-2"/>Loading your campus…</p>
       <t t-elif="!state.error">
-        <t t-if="state.page === 'owner-overview' &amp;&amp; state.is_owner_workspace"><t t-call="ideastone_erp.OwnerOverview"/></t>
+        <t t-if="state.page.startsWith('communication-') &amp;&amp; state.module === 'engagement' &amp;&amp; state.faculty_modules.length"><FacultyCommunication page="state.page"/></t>
+        <t t-elif="state.page === 'owner-overview' &amp;&amp; state.is_owner_workspace"><t t-call="ideastone_erp.OwnerOverview"/></t>
         <t t-elif="state.faculty_home_enabled &amp;&amp; state.page === 'overview'"><FacultyHome/></t>
         <t t-elif="state.faculty_home_enabled &amp;&amp; state.page === 'faculty-departments'"><FacultyDepartments/></t>
         <t t-elif="state.page === 'overview'">

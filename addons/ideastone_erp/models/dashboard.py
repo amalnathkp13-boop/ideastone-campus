@@ -201,6 +201,10 @@ class Dashboard(models.AbstractModel):
                 items.insert(0, {"label": "OPAC & digital library", "url": "/my/campus/library"})
                 if any(p["key"] == "library" for p in pages):
                     items.insert(0, {"label": "Circulation desk", "page": "library"})
+            elif key == "engagement":
+                items = [{"label": "Surveys", "page": "communication-surveys"},
+                         {"label": "Events and clubs", "page": "communication-events"},
+                         {"label": "Alumni forums", "page": "communication-alumni"}]
             elif key == "reports":
                 items = [{"label": "Reports & exports", "page": "reports"}]
                 report_tools = [

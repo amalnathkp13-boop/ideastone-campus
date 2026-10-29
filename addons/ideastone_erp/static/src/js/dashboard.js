@@ -4,6 +4,7 @@ import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
 import { FacultyHome, FacultyDepartments } from "./faculty_home";
+import { FacultyCommunication } from "./faculty_communication";
 import { NavigationCustomizer } from "@ideastone_campus/js/navigation_customizer";
 import { navigationItems } from "@ideastone_campus/js/navigation_state";
 
@@ -102,7 +103,7 @@ class CampusBase extends Component {
             return this.open(module.items[0]);
         }
         await this.action.doAction("ideastone_erp.action_dashboard", {
-            additionalContext: { campus_page: module.key === "home" ? (this.state.is_owner_workspace ? "owner-overview" : "overview") : "faculty-module", campus_module: module.key },
+            additionalContext: { campus_page: module.key === "home" ? (this.state.is_owner_workspace ? "owner-overview" : "overview") : module.key === "engagement" ? "communication-surveys" : "faculty-module", campus_module: module.key },
         });
         this.state.module = module.key;
         this.state.open = false;
@@ -289,7 +290,7 @@ class CampusBase extends Component {
 export class CampusDashboard extends CampusBase {
     static template = "ideastone_erp.Dashboard";
     static props = ["*"];
-    static components = { FacultyHome, FacultyDepartments };
+    static components = { FacultyHome, FacultyDepartments, FacultyCommunication };
 }
 export class CampusNavigation extends CampusBase {
     static template = "ideastone_erp.Navigation";
