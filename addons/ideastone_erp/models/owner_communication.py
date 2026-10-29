@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
 
 import pytz
-from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tools import html_escape
+
+from odoo import _, api, fields, models
 
 
 class OwnerCommunicationNavigation(models.AbstractModel):
