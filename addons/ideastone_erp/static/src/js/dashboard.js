@@ -4,10 +4,11 @@ import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
 import { FacultyHome, FacultyDepartments } from "./faculty_home";
-import { FacultyCampusServices } from "./faculty_campus_services";
 import { FacultyCommunication } from "./faculty_communication";
+import { FacultyCampusServices } from "./faculty_campus_services";
 import { NavigationCustomizer } from "@ideastone_campus/js/navigation_customizer";
 import { navigationItems } from "@ideastone_campus/js/navigation_state";
+import { OwnerSettings } from "./owner_settings";
 
 class OwnerReportFilters extends Component {
     static template = "ideastone_erp.OwnerReportFilters";
@@ -83,6 +84,7 @@ class CampusBase extends Component {
     }
     get facultyModule() { return this.state.faculty_modules.find(item => item.key === this.state.module) || this.state.faculty_modules[0]; }
     get pageTitle() {
+        if (this.state.page.startsWith("settings-")) return "Settings";
         if (this.state.faculty_home_enabled && this.state.page === "overview") return "Faculty overview";
         if (this.state.page === "faculty-departments") return "My departments";
         if (this.state.page === "owner-overview") return "Admin overview";
@@ -95,6 +97,10 @@ class CampusBase extends Component {
         return this.state.page === "library" ? "Library circulation desk" : "Reports & exports";
     }
     async chooseModule(module) {
+        if (this.state.is_owner_workspace && module.key === "settings") {
+            this.state.module = "settings";
+            return this.settingsPage("overview");
+        }
         if (this.state.is_coe_workspace && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
@@ -104,14 +110,24 @@ class CampusBase extends Component {
             return this.open(module.items[0]);
         }
         await this.action.doAction("ideastone_erp.action_dashboard", {
-            additionalContext: { campus_page: module.key === "home" ? (this.state.is_owner_workspace ? "owner-overview" : "overview") : module.key === "services" ? "campus-services-service" : module.key === "engagement" ? "communication-surveys" : "faculty-module", campus_module: module.key },
+            additionalContext: { campus_page: module.key === "home" ? (this.state.is_owner_workspace ? "owner-overview" : "overview") : module.key === "engagement" ? "communication-surveys" : module.key === "services" ? "campus-services-service" : "faculty-module", campus_module: module.key },
         });
         this.state.module = module.key;
         this.state.open = false;
     }
     async facultyGo(item) {
+        if (this.state.is_owner_workspace && this.state.module === "settings" && item.page?.startsWith("settings-")) {
+            return this.settingsPage(item.page.slice(9));
+        }
         if (item.action || item.profile_id || item.tool || item.url) return this.open(item);
         await this.go({ key: item.page });
+    }
+    async settingsPage(screen) {
+        this.state.module = "settings";
+        this.state.open = false;
+        await this.action.doAction("ideastone_erp.action_dashboard", {
+            additionalContext: {campus_page: `settings-${screen}`, campus_module: "settings"},
+        });
     }
     async open(item) {
         if (item.allowed === false) return;
@@ -291,7 +307,7 @@ class CampusBase extends Component {
 export class CampusDashboard extends CampusBase {
     static template = "ideastone_erp.Dashboard";
     static props = ["*"];
-    static components = { FacultyHome, FacultyDepartments, FacultyCommunication, FacultyCampusServices };
+    static components = { FacultyHome, FacultyDepartments, FacultyCommunication, FacultyCampusServices, OwnerSettings };
 }
 export class CampusNavigation extends CampusBase {
     static template = "ideastone_erp.Navigation";
@@ -341,7 +357,7 @@ export class CampusNavigation extends CampusBase {
         return navigationItems(catalog, this.navPreferences.items).filter(row => row.visible && !row.removed).map(row => {
             const target = catalog.find(item => item.id === row.target);
             const active = target.kind === "module" ? this.state.module === target.data.key : target.kind === "page" ? this.state.page === target.data.key :
-                this.state.module === target.module && (target.data.action_id ? this.state.activeAction === target.data.action_id : target.data.tool ? this.state.activeTool === target.data.tool : this.state.page === target.data.page);
+                this.state.module === target.module && (target.data.page?.startsWith("settings-") ? this.state.page === target.data.page : target.data.action_id ? this.state.activeAction === target.data.action_id : target.data.tool ? this.state.activeTool === target.data.tool : this.state.page === target.data.page);
             return {...row, icon: target.icon, active};
         });
     }

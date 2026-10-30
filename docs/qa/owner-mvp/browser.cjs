@@ -211,8 +211,11 @@ async function markup(page) {
         await page.locator('.o_form_button_save:visible').click();
         const detailResult=await(await detailSave).json();
         if(detailResult.error) throw Error(detailResult.error.data?.message || detailResult.error.message);
+        // A hash-only goto keeps the same document, and the router may still be writing the form URL
+        // when a reload fires; leave the page first so the profile loads fresh from the server.
+        await page.goto('about:blank');
         await page.goto(`${base}/web#action=${profileAction}&campus_module=staff`);
-        await page.reload();
+        await page.locator('#staff_profile_select').waitFor();
         await page.getByRole('cell',{name:'Owner QA qualification',exact:true}).waitFor();
         if(await page.locator('.staff_profile_alert').count()) throw Error('Owner profile displays a record access error');
         await assertCampusTheme(page);
@@ -231,23 +234,21 @@ async function markup(page) {
         await page.locator('.leave_loading').waitFor({state:'hidden'});
         if(await page.locator('.leave_error').count()) throw Error('Owner leave page failed to load');
         await page.locator('.campus_sidebar').getByRole('button',{name:'Settings',exact:true}).click();
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'College profile & attendance policy',exact:true}).click();
-        const threshold=page.locator('.o_field_widget[name=campus_attendance_threshold] input');
-        await threshold.fill('76');
-        // Saving a company reloads Odoo; wait before issuing the next RPC.
-        await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}), page.locator('.o_form_button_save:visible').click()]);
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'College profile & policy',exact:true}).click();
+        const threshold=page.getByLabel('Attendance shortage threshold (%)',{exact:true});
         await threshold.waitFor();
+        await threshold.fill('76');
+        await Promise.all([page.waitForResponse(r=>r.url().includes('/campus.dashboard/save_owner_settings')), page.getByRole('button',{name:'Save changes',exact:true}).click()]);
         const collegeAction=await rpc(page,'campus.dashboard','get_owner_action',['ideastone_erp.mvp_college']);
         let savedPolicy=await rpc(page,'res.company','read',[[collegeAction.res_id]],{fields:['campus_attendance_threshold']});
         if(savedPolicy[0].campus_attendance_threshold!==76) throw Error('College policy did not persist');
+        await page.waitForFunction(() => { const button=document.querySelector('.owner_settings .os_btn.os_primary'); return button && !button.disabled; });
         await threshold.fill('75');
-        await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}), page.locator('.o_form_button_save:visible').click()]);
-        await threshold.waitFor();
+        await Promise.all([page.waitForResponse(r=>r.url().includes('/campus.dashboard/save_owner_settings')), page.getByRole('button',{name:'Save changes',exact:true}).click()]);
         savedPolicy=await rpc(page,'res.company','read',[[collegeAction.res_id]],{fields:['campus_attendance_threshold']});
         if(savedPolicy[0].campus_attendance_threshold!==75) throw Error('College policy was not restored');
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'ID & receipt numbering',exact:true}).click();
-        await page.waitForURL(url=>url.hash.includes('model=ir.sequence'));
-        await page.locator('.o_list_view').waitFor();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'ID & numbering',exact:true}).click();
+        await page.getByRole('heading',{name:'Sequence register',exact:true}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Dashboard',exact:true}).click();
         await page.getByRole('button',{name:'Filters',exact:true}).click();
         await page.getByLabel('From',{exact:true}).fill('9999-12-01');
