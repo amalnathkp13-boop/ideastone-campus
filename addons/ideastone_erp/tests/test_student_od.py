@@ -1,6 +1,7 @@
 import base64
 import uuid
-from datetime import timedelta
+from datetime import date, timedelta
+from unittest.mock import patch
 
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import TransactionCase, new_test_user, tagged
@@ -55,6 +56,23 @@ class TestStudentOD(OwnerMVPFixture, TransactionCase):
     def actions(self, record):
         return record.event_ids.sorted("id").mapped("action")
 
+    def test_mentor_activity_uses_local_submission_day(self):
+        record = self.submit()
+        # Sunday in UTC is already Monday for the mentor in India.
+        self.env.cr.execute("UPDATE campus_student_od SET create_date = %s WHERE id = %s",
+                            ("2026-10-25 19:00:00", record.id))
+        record.invalidate_recordset(["create_date"])
+        with patch.object(fields.Date, "context_today", return_value=date(2026, 10, 26)):
+            data = self.mentor_ui.with_context(tz="Asia/Kolkata").get_page_data()
+        self.assertEqual(data["rows"][0]["submitted_date"], "2026-10-26")
+        self.assertEqual(data["week_activity"][0]["count"], 1)
+        self.assertEqual(data["month_activity"][-1]["count"], 1)
+
+    def test_mentor_incomplete_class_mapping_has_empty_state(self):
+        self.student.course_detail_ids.batch_id = False
+        data = self.mentor_ui.get_page_data()
+        self.assertFalse(data["classes"])
+        self.assertEqual(data["total_students"], 0)
     def test_hod_navigation_opens_hod_workspace_and_keeps_mentor_separate(self):
         for user in (self.hod, self.mentor):
             self.env["op.faculty"].create({"first_name": user.name, "last_name": "OD",

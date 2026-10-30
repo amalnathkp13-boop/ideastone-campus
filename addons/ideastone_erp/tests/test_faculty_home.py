@@ -1,6 +1,6 @@
 from datetime import datetime, time, timedelta
+from unittest.mock import patch
 
-from freezegun import freeze_time
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
@@ -70,8 +70,11 @@ class TestFacultyHome(OwnerMVPFixture, TransactionCase):
         self.teacher.tz = "Asia/Kolkata"
         app = self.enrolled()
         session = self.session(hour=4)
-        # Freeze both clocks: the faculty's local date may already be tomorrow in CI.
-        with freeze_time(datetime.combine(self.today, time(12))):
+        # Freeze both clocks: the teacher's local date can differ from the UTC fixture date.
+        with (
+            patch("odoo.fields.Datetime.now", return_value=datetime.combine(self.today, time(12))),
+            patch("odoo.fields.Date.context_today", return_value=self.today),
+        ):
             self.assertEqual(self.ui.get_home()["counts"]["pending"], 1)
             sheet = self.sheet(session)
             sheet.action_campus_roster()
