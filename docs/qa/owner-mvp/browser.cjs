@@ -117,7 +117,7 @@ async function markup(page) {
         }
         for (const module of overview.faculty_modules.filter(module=>module.key!=='home')) {
             await page.locator('.campus_sidebar').getByRole('button',{name:module.label,exact:true}).click();
-            await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory'})[module.key]||module.label,exact:true,level:1}).waitFor();
+            await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory',staff:'Staff Directory',calendar:'College Calendar'})[module.key]||module.label,exact:true,level:1}).waitFor();
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Admissions',exact:true}).click();
         await page.getByRole('heading',{name:'Admissions',exact:true}).waitFor();
@@ -144,13 +144,38 @@ async function markup(page) {
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Enrolments & transfers',exact:true}).click();
         await page.getByRole('heading',{name:'Enrolments & Transfers',exact:true,level:1}).waitFor();
         if(await page.locator('.campus_students_workspace .alert-danger').count()) throw Error('Enrolments workspace failed to load');
-        await page.locator('.campus_sidebar').getByRole('button',{name:'Timetable',exact:true}).click();
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Class timetable',exact:true}).click();
-        await page.locator('.o_control_panel').getByText('Class timetable',{exact:true}).last().waitFor();
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Faculty timetable',exact:true}).waitFor();
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Rooms',exact:true}).click();
-        await page.locator('.o_view_nocontent_smiling_face').waitFor();
-        if((await page.locator('.o_content').innerText()).includes('<p class=')) throw Error('Empty module renders raw action help HTML');
+        await page.locator('.campus_sidebar').getByRole('button',{name:'Calendar',exact:true}).click();
+        await page.getByRole('heading',{name:'College Calendar',exact:true,level:1}).waitFor();
+        if(await page.locator('.campus_sidebar').getByRole('button',{name:'Timetable',exact:true}).count()) throw Error('Owner timetable module was not replaced');
+        const filterFonts=await page.locator('.campus_college_calendar .filters select,.campus_college_calendar .filters input,.campus_college_calendar .viewtoggle button').evaluateAll(nodes=>nodes.map(node=>getComputedStyle(node).fontSize));
+        if(filterFonts.length!==5 || filterFonts.some(size=>size!=='14px')) throw Error('Calendar filters differ from the original document typography');
+        if(await page.getByRole('button',{name:'Month',exact:true}).getAttribute('aria-pressed')!=='true'
+            || await page.getByRole('button',{name:'Agenda',exact:true}).getAttribute('aria-pressed')!=='false') throw Error('Calendar initial view state is not accessible');
+        await page.getByRole('button',{name:'Agenda',exact:true}).click();
+        await page.locator('.campus_college_calendar .agenda').waitFor();
+        if(await page.getByRole('button',{name:'Agenda',exact:true}).getAttribute('aria-pressed')!=='true') throw Error('Calendar agenda did not open');
+        await page.getByRole('button',{name:'Month',exact:true}).click();
+        await page.locator('.campus_college_calendar .calendar').waitFor();
+        if(await page.getByRole('button',{name:'Month',exact:true}).getAttribute('aria-pressed')!=='true'
+            || await page.getByRole('button',{name:'Agenda',exact:true}).getAttribute('aria-pressed')!=='false') throw Error('Calendar month did not reopen');
+        await page.getByRole('button',{name:'＋ Add event',exact:true}).click();
+        await page.getByLabel('Event title *',{exact:true}).fill('Owner CI calendar activity');
+        await page.getByLabel('Venue',{exact:true}).fill('CI seminar hall');
+        await page.getByRole('button',{name:'＋ Add activity',exact:true}).click();
+        await page.getByRole('textbox',{name:'Activity time',exact:true}).fill('10:00 AM');
+        await page.getByRole('textbox',{name:'Activity title',exact:true}).fill('Project demonstrations');
+        await page.getByRole('button',{name:'Save event',exact:true}).click();
+        await page.getByRole('heading',{name:'Owner CI calendar activity',exact:true}).waitFor();
+        await page.getByRole('button',{name:'Edit details',exact:true}).click();
+        await page.getByLabel('Venue',{exact:true}).fill('CI main auditorium');
+        await page.getByRole('button',{name:'Save event',exact:true}).click();
+        await page.getByRole('heading',{name:'Edit campus event',exact:true}).waitFor({state:'hidden'});
+        const savedCalendar=await rpc(page,'campus.calendar.event','get_workspace');
+        const savedEvent=savedCalendar.events.find(event=>event.name==='Owner CI calendar activity');
+        if(!savedEvent || savedEvent.venue!=='CI main auditorium' || savedEvent.schedule[0]?.title!=='Project demonstrations') throw Error('Calendar activity edits did not persist');
+        await page.getByRole('button',{name:'Set reminder',exact:true}).click();
+        await page.getByText('Personal reminder saved. Find it in your Activities menu.',{exact:true}).waitFor();
+        await page.screenshot({path:path.join(out,'owner-calendar-1440.png')});
         await page.locator('.campus_sidebar').getByRole('button',{name:'Fees & Payments',exact:true}).click();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Fee heads',exact:true}).click();
         await page.getByRole('cell',{name:'Tuition installment',exact:true}).waitFor();
@@ -160,7 +185,21 @@ async function markup(page) {
         await page.locator('.owner-communication .oc-table').waitFor();
         await page.locator('.owner-communication').getByRole('button',{name:'Log request',exact:true}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Faculty & Staff',exact:true}).click();
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Staff Profile',exact:true}).click();
+        await page.locator('.campus_owner_staff h1').getByText('Staff Directory',{exact:true}).waitFor();
+        await page.locator('.campus_owner_staff .dept').first().waitFor();
+        await assertCampusTheme(page);
+        const staffTabs=await page.locator('.campus_faculty_subnav button:not(.campus_subnav_scroll)').allTextContents();
+        const staffTabNames=staffTabs.map(t=>t.trim()).filter(t=>!['','',''].includes(t));
+        if(staffTabNames.slice(0,3).join('|')!=='Staff directory|Leave Management|Payroll History') throw Error('Owner staff tabs do not lead with the approved three-page design');
+        if(!staffTabNames.includes('Teaching allocation')) throw Error('Existing owner staff tools are no longer reachable');
+        await page.locator('.campus_owner_staff .dept-actions').first().click();
+        await page.getByRole('button',{name:'View teaching staff',exact:true}).click();
+        await page.locator('.campus_owner_staff .view').first().click();
+        await page.getByRole('heading',{name:'Personal details',exact:true}).waitFor();
+        // Hidden owner tabs keep their original records and workflows; exercise them directly.
+        const profileAction=(await rpc(page,'ir.actions.client','search_read',[[['tag','=','ideastone_erp.faculty_profile']]],{fields:['id'],limit:1}))[0].id;
+        const appraisalAction=(await rpc(page,'ir.actions.client','search_read',[[['tag','=','ideastone_erp.faculty_appraisal']]],{fields:['id'],limit:1}))[0].id;
+        await page.goto(`${base}/web#action=${profileAction}&campus_module=staff`);
         await page.locator('#staff_profile_select').waitFor();
         await page.locator('.staff_profile_alert').waitFor({state:'hidden'});
         if(await page.locator('#staff_profile_select option').count()!==1) throw Error('Owner staff profile includes staff outside the active college');
@@ -172,18 +211,21 @@ async function markup(page) {
         await page.locator('.o_form_button_save:visible').click();
         const detailResult=await(await detailSave).json();
         if(detailResult.error) throw Error(detailResult.error.data?.message || detailResult.error.message);
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Staff Profile',exact:true}).click();
+        await page.goto(`${base}/web#action=${profileAction}&campus_module=staff`);
+        await page.reload();
         await page.getByRole('cell',{name:'Owner QA qualification',exact:true}).waitFor();
         if(await page.locator('.staff_profile_alert').count()) throw Error('Owner profile displays a record access error');
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-staff-profile.png'),fullPage:true});
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Faculty development and appraisal',exact:true}).click();
+        await page.goto(`${base}/web#action=${appraisalAction}&campus_module=staff`);
         await page.getByRole('heading',{name:'Professional Development and Appraisal',exact:true}).waitFor();
         await page.locator('.appraisal_loading').waitFor({state:'hidden'});
         if(await page.locator('.appraisal_error').count()) throw Error('Owner appraisal failed to load');
         await page.getByLabel('Name of the student',{exact:true}).fill('Owner QA portfolio entry');
         await page.locator('.appraisal_entry button[type=submit]').click();
         await page.getByRole('cell',{name:'Owner QA portfolio entry',exact:true}).waitFor();
+        await page.locator('.campus_sidebar').getByRole('button',{name:'Faculty & Staff',exact:true}).click();
+        await page.locator('.campus_owner_staff').waitFor({state:'visible'});
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Leave Management',exact:true}).click();
         await page.getByRole('heading',{name:'Online Leave Apply & Status',exact:true}).waitFor();
         await page.locator('.leave_loading').waitFor({state:'hidden'});
@@ -285,7 +327,7 @@ async function markup(page) {
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-mobile-390.png')});
         if(errors.length) throw Error(errors.join('\n'));
-        await fs.writeFile(path.join(out,'verification.json'),JSON.stringify({passed:true,checkedViews,checks:['13 owner modules','all permitted submodule views','7 real CSV exports','owner staff qualification save and reload','owner appraisal save','owner leave page','numbering settings','native empty-state help renders as HTML','shared timetable action retains selected module','shared fee heads visible','student request register opens as a list','college attendance policy save and restore','invalid reporting period recovery','faculty shell reused','live KPI reconciliation','real subject form save and reload','concurrent admission conversion','concurrent payment posting','receipt PDF','1024 desktop','390 mobile drawer and overflow','browser console'],metrics,errors},null,2));
+        await fs.writeFile(path.join(out,'verification.json'),JSON.stringify({passed:true,checkedViews,checks:['13 owner modules','all permitted submodule views','7 real CSV exports','owner staff qualification save and reload','owner appraisal save','owner leave page','numbering settings','college calendar replaces owner timetable','calendar filters use document typography','calendar activity creation and edit persist','personal event reminder','shared fee heads visible','student request register opens as a list','college attendance policy save and restore','invalid reporting period recovery','faculty shell reused','live KPI reconciliation','real subject form save and reload','concurrent admission conversion','concurrent payment posting','receipt PDF','1024 desktop','390 mobile drawer and overflow','browser console'],metrics,errors},null,2));
     } catch(error) {
         await page.screenshot({path:path.join(out,'failure.png'),fullPage:true}).catch(()=>{});
         await fs.writeFile(path.join(out,'failure-dom.html'),await markup(page));

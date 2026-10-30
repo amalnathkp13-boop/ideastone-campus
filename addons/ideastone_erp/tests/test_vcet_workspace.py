@@ -337,6 +337,23 @@ class TestVcetWorkspace(TransactionCase):
         with self.assertRaises(ValidationError), self.cr.savepoint():
             requests.create(dict(vals, complaint_category=False))
 
+    def test_faculty_grievance_submission_and_own_history(self):
+        requests = self.env["campus.service.request"].with_user(self.teacher)
+        record_id = requests.faculty_grievance_submit({
+            "subject": "Projector repair", "description": "Seminar hall projector loses its connection.",
+            "category": "it", "priority": "high", "contact": "Ext 42",
+        })
+        record = requests.browse(record_id)
+        self.assertEqual(record.state, "submitted")
+        self.assertEqual(record.requester_id, self.teacher)
+        self.assertEqual(record.kind, "grievance")
+        row = next(row for row in requests.faculty_grievance_snapshot()["rows"] if row["id"] == record_id)
+        self.assertEqual((row["category"], row["priority"], row["status"]), ("IT Support", "High", "Open"))
+        with self.assertRaises(AccessError):
+            self.env["campus.service.request"].with_user(self.other_teacher).faculty_grievance_snapshot()
+        with self.assertRaises(ValidationError):
+            requests.faculty_grievance_submit({"subject": "Invalid", "description": "Invalid", "category": "other", "priority": "high"})
+
     def test_previous_academic_records_scope_and_scores(self):
         self.faculty_class_fixture()
         model = self.env["campus.student.education"].with_user(self.teacher)

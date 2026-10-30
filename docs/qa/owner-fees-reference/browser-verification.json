@@ -1,0 +1,1179 @@
+{
+  "verifiedAt": "2026-10-27T20:20:27.503Z",
+  "layoutChecks": [
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "overview",
+      "width": 1440
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "heads",
+      "width": 1440
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "structures",
+      "width": 1440
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "accounts",
+      "width": 1440
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "assign",
+      "width": 1440
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "invoices",
+      "width": 1440
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "followup",
+      "width": 1440
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "receipts",
+      "width": 1440
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "overview",
+      "width": 768
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "heads",
+      "width": 768
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "structures",
+      "width": 768
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "accounts",
+      "width": 768
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "assign",
+      "width": 768
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "invoices",
+      "width": 768
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "followup",
+      "width": 768
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "receipts",
+      "width": 768
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "overview",
+      "width": 390
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "heads",
+      "width": 390
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "structures",
+      "width": 390
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "accounts",
+      "width": 390
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "assign",
+      "width": 390
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "invoices",
+      "width": 390
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "followup",
+      "width": 390
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "receipts",
+      "width": 390
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "overview",
+      "width": 320
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "heads",
+      "width": 320
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "structures",
+      "width": 320
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "accounts",
+      "width": 320
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "assign",
+      "width": 320
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "invoices",
+      "width": 320
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "followup",
+      "width": 320
+    },
+    {
+      "contentOverflow": false,
+      "documentOverflow": false,
+      "overlaps": [],
+      "page": "receipts",
+      "width": 320
+    }
+  ],
+  "scrollChecks": [
+    {
+      "phase": "bottom",
+      "scrollTop": 3226.39990234375
+    },
+    {
+      "phase": "top",
+      "scrollTop": 0
+    }
+  ],
+  "referenceStyles": {
+    "structures": [
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "28px",
+        "fontWeight": "700",
+        "letterSpacing": "-0.45px",
+        "lineHeight": "33.6px",
+        "padding": "0px",
+        "selector": "h1"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "21px",
+        "padding": "0px",
+        "selector": ".subtitle"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "borderRadius": "10px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Arial",
+        "fontSize": "13.3333px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "normal",
+        "padding": "10px 14px",
+        "selector": ".btn"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "borderRadius": "10px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Arial",
+        "fontSize": "13.3333px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "normal",
+        "padding": "10px 12px",
+        "selector": ".select"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "24px",
+        "fontWeight": "700",
+        "letterSpacing": "-0.35px",
+        "lineHeight": "28.8px",
+        "padding": "0px",
+        "selector": ".kpi .value"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "17.4px",
+        "padding": "0px",
+        "selector": ".kpi-top"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "17.4px",
+        "padding": "0px",
+        "selector": ".kpi .foot"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "21.6px",
+        "padding": "0px",
+        "selector": ".panel h2"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "17.4px",
+        "padding": "0px",
+        "selector": ".panel-desc"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(11, 46, 75)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "17px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "22.95px",
+        "padding": "0px",
+        "selector": ".dept-card h3"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "17.4px",
+        "padding": "0px",
+        "selector": ".dept-sub"
+      },
+      {
+        "background": "rgb(241, 235, 255)",
+        "borderRadius": "8px",
+        "color": "rgb(109, 40, 217)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "800",
+        "letterSpacing": "normal",
+        "lineHeight": "15.95px",
+        "padding": "6px 10px",
+        "selector": ".dept-code"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "600",
+        "letterSpacing": "normal",
+        "lineHeight": "15.95px",
+        "padding": "0px",
+        "selector": ".quota-label"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "20px",
+        "fontWeight": "750",
+        "letterSpacing": "-0.3px",
+        "lineHeight": "24px",
+        "padding": "0px",
+        "selector": ".quota-amount"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(124, 145, 165)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "13.2px",
+        "padding": "0px",
+        "selector": ".quota-amount small"
+      },
+      {
+        "background": "rgb(232, 247, 239)",
+        "borderRadius": "20px",
+        "color": "rgb(19, 131, 91)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "10px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "14.5px",
+        "padding": "5px 8px",
+        "selector": ".status-dot"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(122, 145, 167)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "15.95px",
+        "padding": "13px 0px",
+        "selector": ".dept-meta"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(66, 95, 119)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "15.95px",
+        "padding": "0px",
+        "selector": ".dept-meta strong"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(23, 105, 232)",
+        "fontFamily": "Arial",
+        "fontSize": "13px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "normal",
+        "padding": "14px 0px 0px",
+        "selector": ".dept-link"
+      }
+    ],
+    "overview": [
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "28px",
+        "fontWeight": "700",
+        "letterSpacing": "-0.45px",
+        "lineHeight": "33.6px",
+        "padding": "0px",
+        "selector": "h1"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "21px",
+        "padding": "0px",
+        "selector": ".subtitle"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "borderRadius": "10px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Arial",
+        "fontSize": "13.3333px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "normal",
+        "padding": "10px 14px",
+        "selector": ".btn"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "borderRadius": "10px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Arial",
+        "fontSize": "13.3333px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "normal",
+        "padding": "10px 12px",
+        "selector": ".select"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "24px",
+        "fontWeight": "700",
+        "letterSpacing": "-0.35px",
+        "lineHeight": "28.8px",
+        "padding": "0px",
+        "selector": ".kpi .value"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "17.4px",
+        "padding": "0px",
+        "selector": ".kpi-top"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "17.4px",
+        "padding": "0px",
+        "selector": ".kpi .foot"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "21.6px",
+        "padding": "0px",
+        "selector": ".panel h2"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "17.4px",
+        "padding": "0px",
+        "selector": ".panel-desc"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(217, 232, 255)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "15.95px",
+        "padding": "0px",
+        "selector": ".balance-box .small"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "27px",
+        "fontWeight": "800",
+        "letterSpacing": "normal",
+        "lineHeight": "39.15px",
+        "padding": "0px",
+        "selector": ".balance-box .big"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "15.95px",
+        "padding": "12px 0px 0px",
+        "selector": ".balance-box .split"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "600",
+        "letterSpacing": "normal",
+        "lineHeight": "18.85px",
+        "padding": "0px",
+        "selector": ".mini-row .row-title"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "17.4px",
+        "padding": "0px",
+        "selector": ".mini-row .row-sub"
+      },
+      {
+        "background": "rgb(247, 249, 252)",
+        "borderRadius": "0px",
+        "color": "rgb(113, 135, 155)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "700",
+        "letterSpacing": "0.35px",
+        "lineHeight": "15.95px",
+        "padding": "12px 13px",
+        "selector": ".table th"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "18.2px",
+        "padding": "13px",
+        "selector": ".table td"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "21.6px",
+        "padding": "0px",
+        "selector": ".ai-panel h2"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "20.3px",
+        "padding": "0px",
+        "selector": ".ai-insight-card h3"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "20.15px",
+        "padding": "0px",
+        "selector": ".ai-insight-card p"
+      }
+    ]
+  },
+  "actualStyles": {
+    "structures": [
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "28px",
+        "fontWeight": "700",
+        "letterSpacing": "-0.45px",
+        "lineHeight": "33.6px",
+        "padding": "0px",
+        "selector": "h1"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "21px",
+        "padding": "0px",
+        "selector": ".subtitle"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "borderRadius": "10px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Arial",
+        "fontSize": "13.3333px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "normal",
+        "padding": "10px 14px",
+        "selector": ".btn"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "borderRadius": "10px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Arial",
+        "fontSize": "13.3333px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "normal",
+        "padding": "10px 12px",
+        "selector": ".select"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "24px",
+        "fontWeight": "700",
+        "letterSpacing": "-0.35px",
+        "lineHeight": "28.8px",
+        "padding": "0px",
+        "selector": ".kpi .value"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "17.4px",
+        "padding": "0px",
+        "selector": ".kpi-top"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "17.4px",
+        "padding": "0px",
+        "selector": ".kpi .foot"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "21.6px",
+        "padding": "0px",
+        "selector": ".panel h2"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "17.4px",
+        "padding": "0px",
+        "selector": ".panel-desc"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(11, 46, 75)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "17px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "22.95px",
+        "padding": "0px",
+        "selector": ".dept-card h3"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "17.4px",
+        "padding": "0px",
+        "selector": ".dept-sub"
+      },
+      {
+        "background": "rgb(241, 235, 255)",
+        "borderRadius": "8px",
+        "color": "rgb(109, 40, 217)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "800",
+        "letterSpacing": "normal",
+        "lineHeight": "15.95px",
+        "padding": "6px 10px",
+        "selector": ".dept-code"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "600",
+        "letterSpacing": "normal",
+        "lineHeight": "15.95px",
+        "padding": "0px",
+        "selector": ".quota-label"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "20px",
+        "fontWeight": "750",
+        "letterSpacing": "-0.3px",
+        "lineHeight": "24px",
+        "padding": "0px",
+        "selector": ".quota-amount"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(124, 145, 165)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "13.2px",
+        "padding": "0px",
+        "selector": ".quota-amount small"
+      },
+      {
+        "background": "rgb(232, 247, 239)",
+        "borderRadius": "20px",
+        "color": "rgb(19, 131, 91)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "10px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "14.5px",
+        "padding": "5px 8px",
+        "selector": ".status-dot"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(122, 145, 167)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "15.95px",
+        "padding": "13px 0px",
+        "selector": ".dept-meta"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(66, 95, 119)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "15.95px",
+        "padding": "0px",
+        "selector": ".dept-meta strong"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(23, 105, 232)",
+        "fontFamily": "Arial",
+        "fontSize": "13px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "normal",
+        "padding": "14px 0px 0px",
+        "selector": ".dept-link"
+      }
+    ],
+    "overview": [
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "28px",
+        "fontWeight": "700",
+        "letterSpacing": "-0.45px",
+        "lineHeight": "33.6px",
+        "padding": "0px",
+        "selector": "h1"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "21px",
+        "padding": "0px",
+        "selector": ".subtitle"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "borderRadius": "10px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Arial",
+        "fontSize": "13.3333px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "normal",
+        "padding": "10px 14px",
+        "selector": ".btn"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "borderRadius": "10px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Arial",
+        "fontSize": "13.3333px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "normal",
+        "padding": "10px 12px",
+        "selector": ".select"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "24px",
+        "fontWeight": "700",
+        "letterSpacing": "-0.35px",
+        "lineHeight": "28.8px",
+        "padding": "0px",
+        "selector": ".kpi .value"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "17.4px",
+        "padding": "0px",
+        "selector": ".kpi-top"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "17.4px",
+        "padding": "0px",
+        "selector": ".kpi .foot"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "21.6px",
+        "padding": "0px",
+        "selector": ".panel h2"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "17.4px",
+        "padding": "0px",
+        "selector": ".panel-desc"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(217, 232, 255)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "15.95px",
+        "padding": "0px",
+        "selector": ".balance-box .small"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "27px",
+        "fontWeight": "800",
+        "letterSpacing": "normal",
+        "lineHeight": "39.15px",
+        "padding": "0px",
+        "selector": ".balance-box .big"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(255, 255, 255)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "15.95px",
+        "padding": "12px 0px 0px",
+        "selector": ".balance-box .split"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "600",
+        "letterSpacing": "normal",
+        "lineHeight": "18.85px",
+        "padding": "0px",
+        "selector": ".mini-row .row-title"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "17.4px",
+        "padding": "0px",
+        "selector": ".mini-row .row-sub"
+      },
+      {
+        "background": "rgb(247, 249, 252)",
+        "borderRadius": "0px",
+        "color": "rgb(113, 135, 155)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "700",
+        "letterSpacing": "0.35px",
+        "lineHeight": "15.95px",
+        "padding": "12px 13px",
+        "selector": ".table th"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "18.2px",
+        "padding": "13px",
+        "selector": ".table td"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "21.6px",
+        "padding": "0px",
+        "selector": ".ai-panel h2"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(21, 47, 72)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "700",
+        "letterSpacing": "normal",
+        "lineHeight": "20.3px",
+        "padding": "0px",
+        "selector": ".ai-insight-card h3"
+      },
+      {
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "color": "rgb(101, 124, 145)",
+        "fontFamily": "Roboto, \"Segoe UI\", Arial, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "letterSpacing": "normal",
+        "lineHeight": "20.15px",
+        "padding": "0px",
+        "selector": ".ai-insight-card p"
+      }
+    ]
+  },
+  "newBrowserErrors": [],
+  "scenarios": [
+    "fee head saved and retained after reload",
+    "contact log saved and retained after reload",
+    "sample cash payment created receipt 40 and updated October income to 18100",
+    "sample draft invoice created and posted through native Confirm",
+    "EEE MQ plan published and eligible for assignment",
+    "six EEE MQ installments assigned, reload shows zero new charges",
+    "new plan version saved as draft and submitted for review",
+    "payment and installment dialogs fit 320 px"
+  ],
+  "regression": {
+    "tests": 183,
+    "failed": 0,
+    "errors": 0
+  }
+}
