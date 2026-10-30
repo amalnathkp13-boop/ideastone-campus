@@ -12,7 +12,7 @@
     ],
     "data": [
         "security/groups.xml", "security/directory.xml", "security/ir.model.access.csv", "security/rules.xml",
-        "views/operations.xml", "views/faculty.xml", "views/faculty_leave.xml", "views/faculty_attendance.xml", "views/student_attendance_workspace.xml", "views/subject_attendance_workspace.xml", "views/payroll_history.xml", "views/menus.xml", "views/portal.xml", "views/website_icon.xml", "views/reports.xml",
+        "views/operations.xml", "views/faculty.xml", "views/faculty_leave.xml", "views/faculty_attendance.xml", "views/student_attendance_workspace.xml", "views/subject_attendance_workspace.xml", "views/payroll_history.xml", "views/menus.xml", "views/portal.xml", "views/website_icon.xml", "views/reports.xml", "views/faculty_profile_workspace.xml",
         "security/workspace.xml", "views/workspace.xml", "views/faculty_workspace.xml",
         "security/faculty_tools.xml", "views/faculty_tools.xml", "views/student_leave.xml", "views/faculty_reports.xml",
         "security/mvp.xml", "security/hod_od.xml", "data/mvp.xml", "data/hod_od.xml", "views/mvp.xml", "views/mvp_search.xml", "views/mvp_reports.xml",
@@ -104,6 +104,9 @@
             "ideastone_erp/static/src/xml/staff_od_management.xml",
             "ideastone_erp/static/src/xml/hod_od_management.xml",
             "ideastone_erp/static/src/scss/staff_od_management.scss",
+            "ideastone_erp/static/src/js/faculty_profile_workspace.js",
+            "ideastone_erp/static/src/xml/faculty_profile_workspace.xml",
+            "ideastone_erp/static/src/scss/faculty_profile_workspace.scss",
             "ideastone_erp/static/src/js/payroll_history.js",
             "ideastone_erp/static/src/xml/payroll_history.xml",
             "ideastone_erp/static/src/scss/payroll_history.scss",
