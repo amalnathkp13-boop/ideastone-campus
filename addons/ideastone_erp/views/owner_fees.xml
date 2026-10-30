@@ -1,0 +1,83 @@
+<odoo>
+  <record id="owner_fee_contact_accountant" model="ir.model.access">
+    <field name="name">Fee contact accountant</field>
+    <field name="model_id" ref="model_campus_fee_contact"/>
+    <field name="group_id" ref="group_mvp_accountant"/>
+    <field name="perm_read" eval="True"/>
+    <field name="perm_create" eval="True"/>
+    <field name="perm_write" eval="False"/>
+    <field name="perm_unlink" eval="False"/>
+  </record>
+  <record id="owner_fee_contact_reporting" model="ir.model.access">
+    <field name="name">Fee contact management reporting</field>
+    <field name="model_id" ref="model_campus_fee_contact"/>
+    <field name="group_id" ref="group_mvp_readonly"/>
+    <field name="perm_read" eval="True"/>
+    <field name="perm_create" eval="False"/>
+    <field name="perm_write" eval="False"/>
+    <field name="perm_unlink" eval="False"/>
+  </record>
+  <record id="owner_fee_contact_company" model="ir.rule">
+    <field name="name">Fee contact college isolation</field>
+    <field name="model_id" ref="model_campus_fee_contact"/>
+    <field name="domain_force">[('company_id','in',company_ids)]</field>
+  </record>
+  <record id="owner_fee_enrolment_quota" model="ir.ui.view">
+    <field name="name">Enrolment admission fee quota</field>
+    <field name="model">op.student.course</field>
+    <field name="inherit_id" ref="mvp_enrolments_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='course_id']" position="after">
+        <field name="campus_fee_quota"/>
+      </xpath>
+    </field>
+  </record>
+  <record id="action_owner_fees_overview" model="ir.actions.client">
+    <field name="name">Financial overview</field>
+    <field name="tag">ideastone_erp.owner_fees</field>
+    <field name="context">{'campus_module':'fees'}</field>
+    <field name="params" eval="{'page': 'overview'}"/>
+  </record>
+  <record id="action_owner_fees_heads" model="ir.actions.client">
+    <field name="name">Fee heads</field>
+    <field name="tag">ideastone_erp.owner_fees</field>
+    <field name="context">{'campus_module':'fees'}</field>
+    <field name="params" eval="{'page': 'heads'}"/>
+  </record>
+  <record id="action_owner_fees_structures" model="ir.actions.client">
+    <field name="name">Fee structures</field>
+    <field name="tag">ideastone_erp.owner_fees</field>
+    <field name="context">{'campus_module':'fees'}</field>
+    <field name="params" eval="{'page': 'structures'}"/>
+  </record>
+  <record id="action_owner_fees_accounts" model="ir.actions.client">
+    <field name="name">Student fee accounts</field>
+    <field name="tag">ideastone_erp.owner_fees</field>
+    <field name="context">{'campus_module':'fees'}</field>
+    <field name="params" eval="{'page': 'accounts'}"/>
+  </record>
+  <record id="action_owner_fees_assign" model="ir.actions.client">
+    <field name="name">Assign fee structure</field>
+    <field name="tag">ideastone_erp.owner_fees</field>
+    <field name="context">{'campus_module':'fees'}</field>
+    <field name="params" eval="{'page': 'assign'}"/>
+  </record>
+  <record id="action_owner_fees_invoices" model="ir.actions.client">
+    <field name="name">Invoices &amp; dues</field>
+    <field name="tag">ideastone_erp.owner_fees</field>
+    <field name="context">{'campus_module':'fees'}</field>
+    <field name="params" eval="{'page': 'invoices'}"/>
+  </record>
+  <record id="action_owner_fees_followup" model="ir.actions.client">
+    <field name="name">Overdue follow-up</field>
+    <field name="tag">ideastone_erp.owner_fees</field>
+    <field name="context">{'campus_module':'fees'}</field>
+    <field name="params" eval="{'page': 'followup'}"/>
+  </record>
+  <record id="action_owner_fees_receipts" model="ir.actions.client">
+    <field name="name">Receipts</field>
+    <field name="tag">ideastone_erp.owner_fees</field>
+    <field name="context">{'campus_module':'fees'}</field>
+    <field name="params" eval="{'page': 'receipts'}"/>
+  </record>
+</odoo>
