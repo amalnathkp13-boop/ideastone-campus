@@ -237,6 +237,15 @@ jobs:
           docker logs faculty-ui-ci > "$RUNNER_TEMP/faculty-ui-proof/odoo.log" 2>&1 || true
           docker rm -f faculty-ui-ci || true
           docker volume rm faculty-ci-data || true
+      - name: Summarise browser QA failures
+        if: failure()
+        shell: bash
+        run: |
+          for f in "$RUNNER_TEMP"/*-proof/failure.txt "$RUNNER_TEMP"/*-proof/*/failure.txt; do
+            [ -f "$f" ] || continue
+            msg=$(head -c 1200 "$f" | tr '\n' ' ' | tr -d '\r' | sed 's/%/%25/g')
+            echo "::error title=Browser QA failure ($(basename "$(dirname "$f")"))::$msg"
+          done
       - name: Preserve faculty UI evidence
         if: always()
         uses: actions/upload-artifact@v4
