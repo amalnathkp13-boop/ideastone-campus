@@ -1,0 +1,40 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.FacultyCommunication">
+    <div class="faculty-communication">
+      <div class="crumb"><span>VCET Campus / Communication / <t t-esc="meta.title"/></span><span><t t-esc="date(state.data?.today)"/> · <strong>Faculty</strong></span></div>
+      <div t-if="state.loading" class="panel" role="status">Loading communication records…</div>
+      <div t-elif="state.error" class="panel" role="alert"><span t-esc="state.error"/><button class="btn" t-on-click="load">Retry</button></div>
+      <t t-else="">
+        <div class="title-row"><div><h1 t-esc="meta.title"/><div class="subtitle" t-esc="meta.sub"/></div><button class="btn primary" type="button" t-on-click="openForm">＋ New</button></div>
+        <div class="stats"><article t-foreach="stats" t-as="stat" t-key="stat.label" class="stat"><div class="stat-top"><span t-att-class="'stat-icon ' + stat.tone" t-esc="stat.icon"/><span class="pill blue">College data</span></div><div class="stat-label" t-esc="stat.label"/><div class="stat-value" t-esc="stat.value"/><div class="stat-note" t-esc="stat.note"/></article></div>
+        <div class="layout"><div>
+          <section t-if="!state.form" class="panel"><div class="panel-head"><h2 t-esc="meta.table"/><span class="pill blue"><t t-esc="filtered.length"/> <t t-esc="filtered.length === 1 ? 'record' : 'records'"/></span></div><p class="panel-desc" t-esc="meta.desc"/>
+            <div class="filters"><input type="search" t-model="state.query" placeholder="Search records by title, owner, venue, or status…" aria-label="Search communication records"/><select t-model="state.status" aria-label="Filter by status"><option value="all">All statuses</option><option t-foreach="meta.statuses" t-as="option" t-key="option" t-att-value="option" t-esc="option"/></select></div>
+            <div class="table-wrap"><table><thead><tr><th t-foreach="meta.columns" t-as="column" t-key="column" t-esc="column"/></tr></thead><tbody>
+              <tr t-foreach="filtered" t-as="row" t-key="row.id">
+                <td><span class="record-id" t-esc="row.name"/></td>
+                <t t-if="kind === 'surveys'"><td t-esc="row.owner"/><td t-esc="row.duration"/><td t-esc="row.registered"/><td><t t-esc="row.success"/>%</td><td t-esc="score(row.score)"/></t>
+                <t t-elif="kind === 'events'"><td><t t-esc="row.venue"/></td><td t-esc="row.owner"/><td><t t-esc="date(row.date)"/> <t t-esc="row.start_time"/></td><td><t t-esc="date(row.end)"/> <t t-esc="row.end_time"/></td><td t-esc="row.registered"/><td t-esc="row.attended"/></t>
+                <t t-else=""><td t-esc="row.website"/><td t-esc="row.posts"/><td t-esc="row.views"/></t>
+                <td><span t-att-class="'pill ' + statusClass(row.status)" t-esc="row.status"/></td>
+              </tr>
+              <tr t-if="!filtered.length"><td t-att-colspan="meta.columns.length" class="empty">No records match your search and filters.</td></tr>
+            </tbody></table></div><div class="notice" t-esc="meta.notice"/>
+          </section>
+          <section t-else="" class="panel"><div class="panel-head"><h2 t-esc="newTitle"/><button class="btn" type="button" t-on-click="cancel">Cancel</button></div><p class="panel-desc">Save a record to the college communication register.</p>
+            <form t-on-submit.prevent="save"><div class="form-grid">
+              <label class="field"><span t-esc="meta.nameLabel"/><input type="text" t-model="state.values.name" required="required" maxlength="120" placeholder="Enter a title"/></label>
+              <label class="field"><span t-esc="meta.ownerLabel"/><input type="text" t-model="state.values.owner" required="required" maxlength="100" placeholder="Enter responsible person"/></label>
+              <label class="field"><span t-esc="meta.dateLabel"/><input type="date" t-model="state.values.date" required="required"/></label>
+              <label class="field"><span>Status</span><select t-model="state.values.status"><option t-foreach="meta.statuses" t-as="option" t-key="option" t-att-value="option" t-esc="option"/></select></label>
+              <label class="field full"><span>Description</span><textarea t-model="state.values.description" maxlength="4000" placeholder="Add context, purpose, or details"/></label>
+            </div><div class="form-actions"><button class="btn" type="button" t-on-click="cancel">Cancel</button><button class="btn primary" type="submit" t-att-disabled="state.busy">Save record</button></div></form>
+          </section>
+        </div><div>
+          <section class="panel insights"><span class="ai-badge">✦ COMMUNICATION INSIGHTS</span><h3 t-esc="meta.insightTitle"/><p t-esc="meta.insightIntro"/><div t-foreach="meta.guidance" t-as="tip" t-key="tip[0]" class="insight-row"><strong t-esc="tip[0]"/><span t-esc="tip[1]"/></div><p class="insight-foot">Guidance is based on the current communication register.</p></section>
+          <section class="panel"><div class="panel-head"><h2>Quick access</h2><span class="pill">Shortcuts</span></div><div class="quick-actions"><button type="button" t-on-click="openForm">＋ Create new<span>Add a communication record</span></button><button type="button" t-on-click="resetFilters">⟳ Refresh list<span>Clear search and filters</span></button></div></section>
+        </div></div>
+      </t>
+    </div>
+  </t>
+</templates>

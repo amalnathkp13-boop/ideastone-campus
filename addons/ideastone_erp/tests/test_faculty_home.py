@@ -70,7 +70,11 @@ class TestFacultyHome(OwnerMVPFixture, TransactionCase):
         self.teacher.tz = "Asia/Kolkata"
         app = self.enrolled()
         session = self.session(hour=4)
-        with patch("odoo.fields.Datetime.now", return_value=datetime.combine(self.today, time(12))):
+        # Freeze both clocks: the teacher's local date can differ from the UTC fixture date.
+        with (
+            patch("odoo.fields.Datetime.now", return_value=datetime.combine(self.today, time(12))),
+            patch("odoo.fields.Date.context_today", return_value=self.today),
+        ):
             self.assertEqual(self.ui.get_home()["counts"]["pending"], 1)
             sheet = self.sheet(session)
             sheet.action_campus_roster()

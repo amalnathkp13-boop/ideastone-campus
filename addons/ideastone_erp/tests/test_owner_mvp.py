@@ -2,6 +2,7 @@ import base64
 import json
 from datetime import datetime, time, timedelta
 
+from freezegun import freeze_time
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
@@ -9,6 +10,15 @@ from odoo import fields
 
 
 class OwnerMVPFixture:
+    def setUp(self):
+        super().setUp()
+        # Freeze the Python clock at noon UTC on the fixture date so the fixture's ``today`` and every
+        # user's local date agree, whatever time the suite runs: the nightly CI starts at 23:54 UTC
+        # (05:24 IST) and crosses UTC midnight while it runs.
+        freezer = freeze_time(datetime.combine(self.today, time(12)))
+        freezer.start()
+        self.addCleanup(freezer.stop)
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -277,6 +287,7 @@ class TestOwnerMVP(OwnerMVPFixture, TransactionCase):
         self.assertEqual(detail.reviewer_id, self.owner)
         overview = self.env["campus.dashboard"].with_user(self.owner).get_overview()
         actions = {item.get("action") for module in overview["faculty_modules"] for item in module["items"]}
+        self.assertIn("ideastone_erp.action_owner_staff_directory", actions)
         self.assertIn("ideastone_erp.action_faculty_appraisal_dashboard", actions)
         self.assertIn("base.ir_sequence_form", actions)
         action = self.env["campus.dashboard"].with_user(self.owner).get_owner_action("base.ir_sequence_form")
@@ -290,8 +301,9 @@ class TestOwnerMVP(OwnerMVPFixture, TransactionCase):
 
     def test_owner_registers_show_existing_requests_and_shared_fee_heads(self):
         dash = self.env["campus.dashboard"].with_user(self.owner)
-        requests = dash.get_owner_action("ideastone_erp.mvp_student_requests")
-        self.assertEqual(requests["views"][0], (self.env.ref("ideastone_erp.student_requests_tree").id, "tree"))
+        requests = dash.get_owner_action("ideastone_erp.action_owner_communication_requests")
+        self.assertEqual(requests["tag"], "ideastone_erp.owner_communication")
+        self.assertEqual(requests["context"]["campus_module"], "communication")
         heads = dash.get_owner_action("ideastone_erp.mvp_fee_heads")
         visible = self.env[heads["res_model"]].with_user(self.owner).search(heads["domain"])
         self.assertIn(self.product.product_tmpl_id, visible)
