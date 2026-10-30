@@ -287,6 +287,7 @@ class TestOwnerMVP(OwnerMVPFixture, TransactionCase):
         self.assertEqual(detail.reviewer_id, self.owner)
         overview = self.env["campus.dashboard"].with_user(self.owner).get_overview()
         actions = {item.get("action") for module in overview["faculty_modules"] for item in module["items"]}
+        self.assertIn("ideastone_erp.action_owner_staff_directory", actions)
         self.assertIn("ideastone_erp.action_faculty_appraisal_dashboard", actions)
         self.assertIn("base.ir_sequence_form", actions)
         action = self.env["campus.dashboard"].with_user(self.owner).get_owner_action("base.ir_sequence_form")

@@ -17,7 +17,7 @@ timetable, attendance, exams, library, parents portal) and layers on:
 * Single sign-on: Keycloak OpenID Connect provider pre-configured ("Log in with Ideastone SSO")
 * Menu "Ideastone Campus" that groups the daily-use screens for college office staff
 """,
-    "version": "17.0.1.0.5",
+    "version": "17.0.1.0.6",
     "category": "Education",
     "author": "Ideastone Technologies Pvt Ltd",
     "website": "https://github.com/ideastone",

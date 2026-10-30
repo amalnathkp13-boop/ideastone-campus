@@ -97,7 +97,7 @@ class CampusBase extends Component {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
-        if (((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics", "fees", "calendar"].includes(module.key))) && module.items?.[0]?.action) {
+        if (((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics", "fees", "calendar", "staff"].includes(module.key))) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
@@ -248,7 +248,7 @@ class CampusBase extends Component {
             {label: "Track attendance", detail: "Completed class registers", icon: "check", action: "ideastone_erp.mvp_attendance"},
             {label: "College calendar", detail: "Plan campus activities", icon: "calendar", action: "ideastone_erp.action_college_calendar"},
             {label: "Plan examinations", detail: "Schedules & marks", icon: "file-text-o", action: "ideastone_erp.mvp_exams"},
-            {label: "Manage staff", detail: "Faculty directory", icon: "users", action: "ideastone_erp.mvp_faculty"},
+            {label: "Manage staff", detail: "Faculty directory", icon: "users", action: "ideastone_erp.action_owner_staff_directory"},
             {label: "Service desk", detail: "Open campus requests", icon: "flag-o", kind: "services", allowed: this.ownerUI.kpis.some(card => card.kind === "services" && card.allowed)},
             {label: "Build a report", detail: "Reports & analytics", icon: "bar-chart", module: "reports"}]
             .filter(item => item.action ? this.ownerCanOpen(item.action) : item.module ? this.state.faculty_modules.some(module => module.key === item.module) : item.allowed);
