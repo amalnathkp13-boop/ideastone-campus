@@ -1,8 +1,6 @@
 from datetime import datetime, time, timedelta
-
 from unittest.mock import patch
 
-from freezegun import freeze_time
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
