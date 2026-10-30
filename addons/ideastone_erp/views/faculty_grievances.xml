@@ -1,0 +1,15 @@
+<odoo>
+  <record id="view_faculty_grievance_fields" model="ir.ui.view">
+    <field name="name">campus.service.request.grievance.fields</field>
+    <field name="model">campus.service.request</field>
+    <field name="inherit_id" ref="ideastone_erp.view_service_request_form"/>
+    <field name="arch" type="xml">
+      <field name="description" position="after">
+        <field name="grievance_category" invisible="kind != 'grievance'" readonly="state in ('approved', 'done')"/>
+        <field name="grievance_priority" invisible="kind != 'grievance'" readonly="state in ('approved', 'done')"/>
+        <field name="grievance_incident_date" invisible="kind != 'grievance'" readonly="state in ('approved', 'done')"/>
+        <field name="grievance_contact" invisible="kind != 'grievance'" readonly="state in ('approved', 'done')"/>
+      </field>
+    </field>
+  </record>
+</odoo>

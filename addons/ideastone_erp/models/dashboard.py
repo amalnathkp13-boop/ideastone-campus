@@ -232,7 +232,8 @@ class Dashboard(models.AbstractModel):
             elif key == "analytics":
                 items = [{"label": "Faculty analytics", "page": "analytics"}]
             elif key == "grievances":
-                items = [{"label": "My grievances", "tool": "grievance"}] if self.env["campus.service.request"].check_access_rights("read", raise_exception=False) else []
+                items = [{"label": "My grievances", "action": "ideastone_erp.action_faculty_grievances",
+                          "action_id": self.env.ref("ideastone_erp.action_faculty_grievances").id}] if self.env["campus.service.request"].check_access_rights("read", raise_exception=False) else []
             elif key == "hostel":
                 items = [item for item in items if item["label"].startswith("Hostel")]
             elif key == "services":

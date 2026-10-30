@@ -98,7 +98,7 @@ class CampusBase extends Component {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
-        if (((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics", "fees", "calendar", "staff"].includes(module.key))) && module.items?.[0]?.action) {
+        if (((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library", "grievances"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics", "fees", "calendar", "staff"].includes(module.key))) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
@@ -118,7 +118,7 @@ class CampusBase extends Component {
             if (["ideastone_erp.action_students_directory", "ideastone_erp.action_students_enrolments"].includes(item.action)) {
                 this.router.pushState({students_screen: item.action.endsWith("enrolments") ? "enrolments" : "directory", students_department_id: "", students_batch_id: ""});
             }
-            if (["ideastone_erp.action_faculty_appraisal_dashboard", "ideastone_erp.action_staff_profile", "ideastone_erp.action_staff_od_management", "ideastone_erp.action_hod_od_management"].includes(item.action) && item.action_id) {
+            if (["ideastone_erp.action_faculty_appraisal_dashboard", "ideastone_erp.action_staff_profile", "ideastone_erp.action_staff_od_management", "ideastone_erp.action_hod_od_management", "ideastone_erp.action_faculty_grievances"].includes(item.action) && item.action_id) {
                 window.location.assign(`/web#action=${item.action_id}`);
                 return;
             }
