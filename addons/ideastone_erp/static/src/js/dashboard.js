@@ -97,7 +97,7 @@ class CampusBase extends Component {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
-        if ((["od", "attendance", "library"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics"].includes(module.key))) && module.items?.[0]?.action) {
+        if (((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics", "staff", "calendar", "fees"].includes(module.key))) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
@@ -117,7 +117,7 @@ class CampusBase extends Component {
             if (["ideastone_erp.action_students_directory", "ideastone_erp.action_students_enrolments"].includes(item.action)) {
                 this.router.pushState({students_screen: item.action.endsWith("enrolments") ? "enrolments" : "directory", students_department_id: "", students_batch_id: ""});
             }
-            if (["ideastone_erp.action_faculty_appraisal_dashboard", "ideastone_erp.action_staff_profile", "ideastone_erp.action_staff_od_management"].includes(item.action) && item.action_id) {
+            if (["ideastone_erp.action_faculty_appraisal_dashboard", "ideastone_erp.action_staff_profile", "ideastone_erp.action_staff_od_management", "ideastone_erp.action_hod_od_management"].includes(item.action) && item.action_id) {
                 window.location.assign(`/web#action=${item.action_id}`);
                 return;
             }
@@ -129,7 +129,7 @@ class CampusBase extends Component {
                 await this.action.doAction({ type: "ir.actions.act_window", res_model: "op.faculty", res_id: item.profile_id, views: [[false, "form"]], target: "current" });
             } else {
                 const action = this.state.is_owner_workspace && ![
-                    "ideastone_erp.action_faculty_leave_page", "ideastone_erp.action_faculty_appraisal_dashboard", "ideastone_erp.action_staff_profile", "ideastone_erp.action_staff_od_management", "ideastone_erp.action_faculty_attendance_page", "ideastone_erp.action_student_attendance_workspace",
+                    "ideastone_erp.action_faculty_leave_page", "ideastone_erp.action_faculty_appraisal_dashboard", "ideastone_erp.action_staff_profile", "ideastone_erp.action_staff_od_management", "ideastone_erp.action_hod_od_management", "ideastone_erp.action_faculty_attendance_page", "ideastone_erp.action_student_attendance_workspace",
                 ].includes(item.action) ?
                     await this.orm.call("campus.dashboard", "get_owner_action", [item.action]) : item.action;
                 if (this.state.is_owner_workspace && action.context) action.context.campus_module = this.state.module;
@@ -184,7 +184,7 @@ class CampusBase extends Component {
     async ownerSource(card) {
         if (!card.allowed) return;
         try {
-            if (["services", "attendance_pending", "overdue_services", "overdue_dues"].includes(card.kind)) return this.ownerOverviewAction(card.kind);
+            if (["services", "attendance_pending", "overdue_services", "overdue_dues", "staff_present", "staff_delayed", "fleet"].includes(card.kind)) return this.ownerOverviewAction(card.kind);
             const action = await this.orm.call("campus.dashboard", "get_owner_source_action", [card.kind, this.state.ownerAppliedFilters]);
             if (!action.views) action.views = (action.view_mode || "tree,form").split(",").map(mode => [false, mode]);
             if (action.help) action.help = markup(action.help);
@@ -244,11 +244,11 @@ class CampusBase extends Component {
     }
     get ownerQuickActions() {
         return [{label: "Review admissions", detail: "Applications & decisions", icon: "envelope-o", action: "ideastone_erp.mvp_applications"},
-            {label: "Record a payment", detail: "Student fee accounts", icon: "inr", action: "ideastone_erp.mvp_fees"},
+            {label: "Record a payment", detail: "Student fee accounts", icon: "inr", action: "ideastone_erp.action_owner_fees_overview"},
             {label: "Track attendance", detail: "Completed class registers", icon: "check", action: "ideastone_erp.mvp_attendance"},
-            {label: "Manage timetable", detail: "Review schedules", icon: "calendar", action: "ideastone_erp.mvp_timetable"},
+            {label: "College calendar", detail: "Plan campus activities", icon: "calendar", action: "ideastone_erp.action_college_calendar"},
             {label: "Plan examinations", detail: "Schedules & marks", icon: "file-text-o", action: "ideastone_erp.mvp_exams"},
-            {label: "Manage staff", detail: "Faculty directory", icon: "users", action: "ideastone_erp.mvp_faculty"},
+            {label: "Manage staff", detail: "Faculty directory", icon: "users", action: "ideastone_erp.action_owner_staff_directory"},
             {label: "Service desk", detail: "Open campus requests", icon: "flag-o", kind: "services", allowed: this.ownerUI.kpis.some(card => card.kind === "services" && card.allowed)},
             {label: "Build a report", detail: "Reports & analytics", icon: "bar-chart", module: "reports"}]
             .filter(item => item.action ? this.ownerCanOpen(item.action) : item.module ? this.state.faculty_modules.some(module => module.key === item.module) : item.allowed);
