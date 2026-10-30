@@ -1,0 +1,110 @@
+{
+  "departments": [
+    {
+      "name": "Computer Science & Engineering",
+      "code": "CSE",
+      "gq": 55000,
+      "gq_state": "published",
+      "mq": 110000,
+      "mq_state": "published"
+    },
+    {
+      "name": "Electronics & Communication Engineering",
+      "code": "ECE",
+      "gq": 52000,
+      "gq_state": "published",
+      "mq": 105000,
+      "mq_state": "published"
+    },
+    {
+      "name": "Electrical & Electronics Engineering",
+      "code": "EEE",
+      "gq": 50000,
+      "gq_state": "published",
+      "mq": 98000,
+      "mq_state": "review"
+    },
+    {
+      "name": "Mechanical Engineering",
+      "code": "MECH",
+      "gq": 48000,
+      "gq_state": "published",
+      "mq": 92000,
+      "mq_state": "published"
+    },
+    {
+      "name": "Civil Engineering",
+      "code": "CIVIL",
+      "gq": 46000,
+      "gq_state": "published",
+      "mq": 88000,
+      "mq_state": "review"
+    },
+    {
+      "name": "Information Technology",
+      "code": "IT",
+      "gq": 53000,
+      "gq_state": "published",
+      "mq": 102000,
+      "mq_state": "published"
+    }
+  ],
+  "heads": [
+    {
+      "code": "ACD-001",
+      "name": "Tuition fee",
+      "category": "Academic",
+      "frequency": "Semester",
+      "optional": false
+    },
+    {
+      "code": "ACD-002",
+      "name": "Admission fee",
+      "category": "Academic",
+      "frequency": "One-time",
+      "optional": false
+    },
+    {
+      "code": "EXM-001",
+      "name": "Examination fee",
+      "category": "Academic",
+      "frequency": "Per exam",
+      "optional": false
+    },
+    {
+      "code": "LIB-001",
+      "name": "Library fee",
+      "category": "Facilities",
+      "frequency": "Annual",
+      "optional": false
+    },
+    {
+      "code": "TRN-001",
+      "name": "Transport fee",
+      "category": "Services",
+      "frequency": "Term",
+      "optional": false
+    },
+    {
+      "code": "HST-001",
+      "name": "Hostel fee",
+      "category": "Services",
+      "frequency": "Monthly",
+      "optional": true
+    },
+    {
+      "code": "LAB-001",
+      "name": "Laboratory fee",
+      "category": "Facilities",
+      "frequency": "Semester",
+      "optional": false
+    },
+    {
+      "code": "ACT-001",
+      "name": "Student activity fee",
+      "category": "Student services",
+      "frequency": "Annual",
+      "optional": false
+    }
+  ]
+}

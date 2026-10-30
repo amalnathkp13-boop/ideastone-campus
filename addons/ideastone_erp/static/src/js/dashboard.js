@@ -97,7 +97,7 @@ class CampusBase extends Component {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
-        if (((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics"].includes(module.key))) && module.items?.[0]?.action) {
+        if (((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics", "fees"].includes(module.key))) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
@@ -244,7 +244,7 @@ class CampusBase extends Component {
     }
     get ownerQuickActions() {
         return [{label: "Review admissions", detail: "Applications & decisions", icon: "envelope-o", action: "ideastone_erp.mvp_applications"},
-            {label: "Record a payment", detail: "Student fee accounts", icon: "inr", action: "ideastone_erp.mvp_fees"},
+            {label: "Record a payment", detail: "Student fee accounts", icon: "inr", action: "ideastone_erp.action_owner_fees_overview"},
             {label: "Track attendance", detail: "Completed class registers", icon: "check", action: "ideastone_erp.mvp_attendance"},
             {label: "Manage timetable", detail: "Review schedules", icon: "calendar", action: "ideastone_erp.mvp_timetable"},
             {label: "Plan examinations", detail: "Schedules & marks", icon: "file-text-o", action: "ideastone_erp.mvp_exams"},
