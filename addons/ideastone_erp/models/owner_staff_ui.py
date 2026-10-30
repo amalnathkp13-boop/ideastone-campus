@@ -15,7 +15,9 @@ class OwnerStaffNavigation(models.AbstractModel):
     _inherit = "campus.dashboard"
 
     def _owner_modules(self):
-        return [(key, title, icon, [(label, action) for label, action, _model in STAFF_VIEWS]
+        # The redesigned pages lead the module; the existing staff tools stay reachable after them.
+        redesigned = [(label, action) for label, action, _model in STAFF_VIEWS]
+        return [(key, title, icon, redesigned + [entry for entry in entries if entry[0] not in dict(redesigned)]
                  if key == "staff" else entries)
                 for key, title, icon, entries in super()._owner_modules()]
 

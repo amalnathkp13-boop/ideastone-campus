@@ -165,7 +165,8 @@ async function markup(page) {
         await assertCampusTheme(page);
         const staffTabs=await page.locator('.campus_faculty_subnav button:not(.campus_subnav_scroll)').allTextContents();
         const staffTabNames=staffTabs.map(t=>t.trim()).filter(t=>!['','',''].includes(t));
-        if(staffTabNames.join('|')!=='Staff directory|Leave Management|Payroll History') throw Error('Owner staff tabs differ from the approved three-page design');
+        if(staffTabNames.slice(0,3).join('|')!=='Staff directory|Leave Management|Payroll History') throw Error('Owner staff tabs do not lead with the approved three-page design');
+        if(!staffTabNames.includes('Teaching allocation')) throw Error('Existing owner staff tools are no longer reachable');
         await page.locator('.campus_owner_staff .dept-actions').first().click();
         await page.getByRole('button',{name:'View teaching staff',exact:true}).click();
         await page.locator('.campus_owner_staff .view').first().click();
