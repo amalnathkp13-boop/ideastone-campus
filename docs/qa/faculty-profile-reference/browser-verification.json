@@ -1,0 +1,690 @@
+{
+  "verifiedAt": "2026-10-27T17:51:08.938Z",
+  "validationStartedAt": "2026-10-27T17:49:01.085Z",
+  "landingPage": "My staff profile",
+  "moduleReentryReturnsToProfile": true,
+  "submodules": "My profile & payroll\nMy staff profile\nStaff qualifications and documents\nFaculty development and appraisal\nSalary agreements\nMonthly payroll\nPayroll History\nLeave requests",
+  "typography": [
+    {
+      "selector": ".ai-title",
+      "reference": {
+        "color": "rgb(18, 49, 79)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "18px",
+        "size": "12px",
+        "weight": "750"
+      },
+      "actual": {
+        "color": "rgb(18, 49, 79)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "18px",
+        "size": "12px",
+        "weight": "750"
+      },
+      "match": true
+    },
+    {
+      "selector": ".btn",
+      "reference": {
+        "color": "rgb(54, 85, 114)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "16.5px",
+        "size": "11px",
+        "weight": "700"
+      },
+      "actual": {
+        "color": "rgb(54, 85, 114)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "16.5px",
+        "size": "11px",
+        "weight": "700"
+      },
+      "match": true
+    },
+    {
+      "selector": ".detail-label",
+      "reference": {
+        "color": "rgb(101, 127, 156)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "15px",
+        "size": "10px",
+        "weight": "400"
+      },
+      "actual": {
+        "color": "rgb(101, 127, 156)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "15px",
+        "size": "10px",
+        "weight": "400"
+      },
+      "match": true
+    },
+    {
+      "selector": ".detail-value",
+      "reference": {
+        "color": "rgb(18, 49, 79)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "18px",
+        "size": "12px",
+        "weight": "650"
+      },
+      "actual": {
+        "color": "rgb(18, 49, 79)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "18px",
+        "size": "12px",
+        "weight": "650"
+      },
+      "match": true
+    },
+    {
+      "selector": ".page-heading h1",
+      "reference": {
+        "color": "rgb(16, 47, 77)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "28.8px",
+        "size": "24px",
+        "weight": "720"
+      },
+      "actual": {
+        "color": "rgb(16, 47, 77)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "28.8px",
+        "size": "24px",
+        "weight": "720"
+      },
+      "match": true
+    },
+    {
+      "selector": ".page-heading p",
+      "reference": {
+        "color": "rgb(101, 127, 156)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "18px",
+        "size": "12px",
+        "weight": "400"
+      },
+      "actual": {
+        "color": "rgb(101, 127, 156)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "18px",
+        "size": "12px",
+        "weight": "400"
+      },
+      "match": true
+    },
+    {
+      "selector": ".panel-title",
+      "reference": {
+        "color": "rgb(18, 49, 79)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "22.5px",
+        "size": "15px",
+        "weight": "720"
+      },
+      "actual": {
+        "color": "rgb(18, 49, 79)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "22.5px",
+        "size": "15px",
+        "weight": "720"
+      },
+      "match": true
+    },
+    {
+      "selector": ".profile-summary h2",
+      "reference": {
+        "color": "rgb(18, 49, 79)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "25.5px",
+        "size": "17px",
+        "weight": "730"
+      },
+      "actual": {
+        "color": "rgb(18, 49, 79)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "25.5px",
+        "size": "17px",
+        "weight": "730"
+      },
+      "match": true
+    },
+    {
+      "selector": ".stat-top",
+      "reference": {
+        "color": "rgb(101, 127, 156)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "16.5px",
+        "size": "11px",
+        "weight": "400"
+      },
+      "actual": {
+        "color": "rgb(101, 127, 156)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "16.5px",
+        "size": "11px",
+        "weight": "400"
+      },
+      "match": true
+    },
+    {
+      "selector": ".stat-value",
+      "reference": {
+        "color": "rgb(18, 49, 79)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "26.4px",
+        "size": "24px",
+        "weight": "750"
+      },
+      "actual": {
+        "color": "rgb(18, 49, 79)",
+        "font": "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+        "lineHeight": "26.4px",
+        "size": "24px",
+        "weight": "750"
+      },
+      "match": true
+    }
+  ],
+  "responsive": [
+    {
+      "page": "myprofile",
+      "width": 1440,
+      "documentWidth": 1440,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 1190,
+      "rootWidth": 1190,
+      "tables": [],
+      "viewport": 1440
+    },
+    {
+      "page": "myprofile",
+      "width": 768,
+      "documentWidth": 768,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 768,
+      "rootWidth": 768,
+      "tables": [],
+      "viewport": 768
+    },
+    {
+      "page": "myprofile",
+      "width": 390,
+      "documentWidth": 390,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 390,
+      "rootWidth": 390,
+      "tables": [],
+      "viewport": 390
+    },
+    {
+      "page": "myprofile",
+      "width": 320,
+      "documentWidth": 320,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 320,
+      "rootWidth": 320,
+      "tables": [],
+      "viewport": 320
+    },
+    {
+      "page": "qualifications",
+      "width": 1440,
+      "documentWidth": 1440,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 1190,
+      "rootWidth": 1190,
+      "tables": [
+        {
+          "scroll": 666,
+          "width": 654
+        }
+      ],
+      "viewport": 1440
+    },
+    {
+      "page": "qualifications",
+      "width": 768,
+      "documentWidth": 768,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 768,
+      "rootWidth": 768,
+      "tables": [
+        {
+          "scroll": 702,
+          "width": 702
+        }
+      ],
+      "viewport": 768
+    },
+    {
+      "page": "qualifications",
+      "width": 390,
+      "documentWidth": 390,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 390,
+      "rootWidth": 390,
+      "tables": [
+        {
+          "scroll": 666,
+          "width": 333
+        }
+      ],
+      "viewport": 390
+    },
+    {
+      "page": "qualifications",
+      "width": 320,
+      "documentWidth": 320,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 320,
+      "rootWidth": 320,
+      "tables": [
+        {
+          "scroll": 666,
+          "width": 262
+        }
+      ],
+      "viewport": 320
+    },
+    {
+      "page": "development",
+      "width": 1440,
+      "documentWidth": 1440,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 1190,
+      "rootWidth": 1190,
+      "tables": [
+        {
+          "scroll": 888,
+          "width": 654
+        },
+        {
+          "scroll": 1104,
+          "width": 1104
+        }
+      ],
+      "viewport": 1440
+    },
+    {
+      "page": "development",
+      "width": 768,
+      "documentWidth": 768,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 768,
+      "rootWidth": 768,
+      "tables": [
+        {
+          "scroll": 888,
+          "width": 702
+        },
+        {
+          "scroll": 702,
+          "width": 702
+        }
+      ],
+      "viewport": 768
+    },
+    {
+      "page": "development",
+      "width": 390,
+      "documentWidth": 390,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 390,
+      "rootWidth": 390,
+      "tables": [
+        {
+          "scroll": 888,
+          "width": 333
+        },
+        {
+          "scroll": 420,
+          "width": 333
+        }
+      ],
+      "viewport": 390
+    },
+    {
+      "page": "development",
+      "width": 320,
+      "documentWidth": 320,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 320,
+      "rootWidth": 320,
+      "tables": [
+        {
+          "scroll": 888,
+          "width": 262
+        },
+        {
+          "scroll": 420,
+          "width": 262
+        }
+      ],
+      "viewport": 320
+    },
+    {
+      "page": "agreements",
+      "width": 1440,
+      "documentWidth": 1440,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 1190,
+      "rootWidth": 1190,
+      "tables": [
+        {
+          "scroll": 1104,
+          "width": 1104
+        }
+      ],
+      "viewport": 1440
+    },
+    {
+      "page": "agreements",
+      "width": 768,
+      "documentWidth": 768,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 768,
+      "rootWidth": 768,
+      "tables": [
+        {
+          "scroll": 702,
+          "width": 702
+        }
+      ],
+      "viewport": 768
+    },
+    {
+      "page": "agreements",
+      "width": 390,
+      "documentWidth": 390,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 390,
+      "rootWidth": 390,
+      "tables": [
+        {
+          "scroll": 588,
+          "width": 333
+        }
+      ],
+      "viewport": 390
+    },
+    {
+      "page": "agreements",
+      "width": 320,
+      "documentWidth": 320,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 320,
+      "rootWidth": 320,
+      "tables": [
+        {
+          "scroll": 588,
+          "width": 262
+        }
+      ],
+      "viewport": 320
+    },
+    {
+      "page": "monthly",
+      "width": 1440,
+      "documentWidth": 1440,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 1190,
+      "rootWidth": 1190,
+      "tables": [
+        {
+          "scroll": 654,
+          "width": 654
+        },
+        {
+          "scroll": 1104,
+          "width": 1104
+        }
+      ],
+      "viewport": 1440
+    },
+    {
+      "page": "monthly",
+      "width": 768,
+      "documentWidth": 768,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 768,
+      "rootWidth": 768,
+      "tables": [
+        {
+          "scroll": 702,
+          "width": 702
+        },
+        {
+          "scroll": 702,
+          "width": 702
+        }
+      ],
+      "viewport": 768
+    },
+    {
+      "page": "monthly",
+      "width": 390,
+      "documentWidth": 390,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 390,
+      "rootWidth": 390,
+      "tables": [
+        {
+          "scroll": 333,
+          "width": 333
+        },
+        {
+          "scroll": 563,
+          "width": 333
+        }
+      ],
+      "viewport": 390
+    },
+    {
+      "page": "monthly",
+      "width": 320,
+      "documentWidth": 320,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 320,
+      "rootWidth": 320,
+      "tables": [
+        {
+          "scroll": 316,
+          "width": 262
+        },
+        {
+          "scroll": 563,
+          "width": 262
+        }
+      ],
+      "viewport": 320
+    },
+    {
+      "page": "history",
+      "width": 1440,
+      "documentWidth": 1440,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 1190,
+      "rootWidth": 1190,
+      "tables": [
+        {
+          "scroll": 669,
+          "width": 654
+        }
+      ],
+      "viewport": 1440
+    },
+    {
+      "page": "history",
+      "width": 768,
+      "documentWidth": 768,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 768,
+      "rootWidth": 768,
+      "tables": [
+        {
+          "scroll": 702,
+          "width": 702
+        }
+      ],
+      "viewport": 768
+    },
+    {
+      "page": "history",
+      "width": 390,
+      "documentWidth": 390,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 390,
+      "rootWidth": 390,
+      "tables": [
+        {
+          "scroll": 669,
+          "width": 333
+        }
+      ],
+      "viewport": 390
+    },
+    {
+      "page": "history",
+      "width": 320,
+      "documentWidth": 320,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 320,
+      "rootWidth": 320,
+      "tables": [
+        {
+          "scroll": 669,
+          "width": 262
+        }
+      ],
+      "viewport": 320
+    },
+    {
+      "page": "leave",
+      "width": 1440,
+      "documentWidth": 1440,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 1190,
+      "rootWidth": 1190,
+      "tables": [
+        {
+          "scroll": 707,
+          "width": 662
+        },
+        {
+          "scroll": 662,
+          "width": 662
+        }
+      ],
+      "viewport": 1440
+    },
+    {
+      "page": "leave",
+      "width": 768,
+      "documentWidth": 768,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 768,
+      "rootWidth": 768,
+      "tables": [
+        {
+          "scroll": 707,
+          "width": 706
+        },
+        {
+          "scroll": 706,
+          "width": 706
+        }
+      ],
+      "viewport": 768
+    },
+    {
+      "page": "leave",
+      "width": 390,
+      "documentWidth": 390,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 390,
+      "rootWidth": 390,
+      "tables": [
+        {
+          "scroll": 707,
+          "width": 329
+        },
+        {
+          "scroll": 329,
+          "width": 329
+        }
+      ],
+      "viewport": 390
+    },
+    {
+      "page": "leave",
+      "width": 320,
+      "documentWidth": 320,
+      "narrowPanels": 0,
+      "overlaps": [],
+      "rootScrollWidth": 320,
+      "rootWidth": 320,
+      "tables": [
+        {
+          "scroll": 707,
+          "width": 258
+        },
+        {
+          "scroll": 258,
+          "width": 258
+        }
+      ],
+      "viewport": 320
+    }
+  ],
+  "documentForm320": {
+    "scroll": 320,
+    "viewport": 320,
+    "width": 320
+  },
+  "entryChecks": {
+    "contactSaveAndReload": true,
+    "documentFileSaveAndReload": true,
+    "activityEvidenceSaveAndReload": true,
+    "mphilSaveAndReload": true,
+    "leaveSubmitAndReload": true,
+    "approvalStatusViewIsReadOnly": true,
+    "monthlySelection": true,
+    "approvedPayslipPdfHeader": "%PDF-",
+    "agreementIsReadOnly": true,
+    "filteredSalaryCsv": "﻿\"Period\",\"Net\"\r\n\"September 2026\",\"62750\""
+  },
+  "finalBrowserErrors": [],
+  "correctedDevelopmentIssues": [
+    "Owl template global conversion moved into a component helper",
+    "Component methods in arrow event handlers explicitly bound with this",
+    "Bootstrap grid default reset within the scoped reference styles"
+  ]
+}

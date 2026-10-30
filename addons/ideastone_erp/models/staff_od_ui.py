@@ -23,6 +23,7 @@ class StaffODUI(models.AbstractModel):
         for route in routes:
             placements = route.student_id.course_detail_ids.filtered(
                 lambda row: row.company_id == self.env.company and row.state == "running"
+                and row.batch_id and row.academic_term_id
             )
             placement = placements[:1]
             if not placement:
@@ -61,6 +62,7 @@ class StaffODUI(models.AbstractModel):
                         for item in classes.values()],
             "total_students": len(selected["student_ids"]) if selected else 0,
             "today": fields.Date.to_string(today),
+            "timezone": self.env.context.get("tz") or self.env.user.tz or "UTC",
             "rows": [], "actions": [], "week_activity": [], "month_activity": [],
             "pending": 0, "approved": 0, "students_on_od": 0,
             "repeated_students": 0, "overlapping_students": 0, "urgent_reviews": 0,
@@ -87,6 +89,7 @@ class StaffODUI(models.AbstractModel):
                 "date_to": fields.Date.to_string(record.date_to),
                 "session_from": record.session_from, "session_to": record.session_to,
                 "created": fields.Datetime.to_string(record.create_date),
+                "submitted_date": fields.Date.to_string(fields.Datetime.context_timestamp(self, record.create_date).date()),
                 "status": state_labels[record.state], "state": record.state,
                 "category": dict(record._fields["category"].selection)[record.category],
                 "can_review": record.state == "pending_mentor",
@@ -116,12 +119,12 @@ class StaffODUI(models.AbstractModel):
         week_start = today - timedelta(days=today.weekday())
         for offset in range(7):
             day = week_start + timedelta(days=offset)
-            count = sum(row["created"][:10] == fields.Date.to_string(day) for row in rows)
+            count = sum(row["submitted_date"] == fields.Date.to_string(day) for row in rows)
             result["week_activity"].append({"label": day.strftime("%a"), "sub": day.strftime("%d %b"), "count": count})
         for offset in range(3, -1, -1):
             start = week_start - timedelta(days=offset * 7)
             end = start + timedelta(days=6)
-            count = sum(fields.Date.to_string(start) <= row["created"][:10] <= fields.Date.to_string(end) for row in rows)
+            count = sum(fields.Date.to_string(start) <= row["submitted_date"] <= fields.Date.to_string(end) for row in rows)
             result["month_activity"].append({"label": _("Week %s") % (4 - offset), "sub": start.strftime("%d %b"), "count": count})
         return result
 

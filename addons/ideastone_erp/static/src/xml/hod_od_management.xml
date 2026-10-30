@@ -1,6 +1,7 @@
 <templates xml:space="preserve">
   <t t-name="ideastone_erp.HodODManagement">
     <div class="hod_od">
+      <section class="hod_page_title" aria-labelledby="hod_od_title"><div><p>HOD Workspace / OD Management</p><h1 id="hod_od_title">On Duty (OD) Management</h1><span>Review department requests, approve official duty and verify participation evidence.</span></div><i class="fa fa-clipboard" aria-hidden="true"/></section>
       <header class="mentor_hero"><div><small>YOUR CAMPUS, CONNECTED</small><h1>Welcome back, <t t-esc="state.data.hod_name"/></h1><p>Oversee and manage student OD requests across all classes under your administration.</p><span class="mentor_term" t-esc="state.data.company_name"/></div><i class="fa fa-university" aria-hidden="true"/></header>
 
       <section class="mentor_kpis" aria-label="HOD OD summary">
