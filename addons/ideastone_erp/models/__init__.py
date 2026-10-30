@@ -65,6 +65,7 @@ from . import owner_staff_ui
 from . import faculty_home
 from . import faculty_communication
 from . import academics_ui
+from . import owner_communication
 from . import college_calendar
 from . import owner_fees
 from . import faculty_profile_workspace

@@ -52,7 +52,10 @@ class CollegeNotice(models.Model):
     @api.model
     def _cron_publish_notices(self):
         today = fields.Date.context_today(self)
+        now = fields.Datetime.now()
         for rec in self.search([("campus_managed", "=", True), ("campus_status", "=", "scheduled"), ("date_from", "<=", today)]):
+            if rec.communication_publish_at and rec.communication_publish_at > now:
+                continue
             expired = rec.date_to and rec.date_to < today
             rec._set_system_values({"campus_status": "archived" if expired else "published", "state": "done" if expired else "approved"})
         expired = self.search([("campus_managed", "=", True), ("campus_status", "=", "published"), ("date_to", "<", today)])

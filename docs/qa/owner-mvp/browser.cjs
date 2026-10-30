@@ -181,9 +181,9 @@ async function markup(page) {
         await page.getByRole('cell',{name:'Tuition installment',exact:true}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Communication',exact:true}).click();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Student requests & support',exact:true}).click();
-        await page.locator('.o_list_view').waitFor();
-        await page.locator('.o_control_panel').getByText('Student requests & support',{exact:true}).last().waitFor();
-        if(await page.locator('.o_list_button_add:visible').count()) throw Error('Request review register offers a blank request creation form');
+        await page.locator('.owner-communication').getByRole('heading',{name:'Student requests & support',exact:true,level:1}).waitFor();
+        await page.locator('.owner-communication .oc-table').waitFor();
+        await page.locator('.owner-communication').getByRole('button',{name:'Log request',exact:true}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Faculty & Staff',exact:true}).click();
         await page.locator('.campus_owner_staff h1').getByText('Staff Directory',{exact:true}).waitFor();
         await page.locator('.campus_owner_staff .dept').first().waitFor();
