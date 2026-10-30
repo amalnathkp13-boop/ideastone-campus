@@ -29,6 +29,24 @@ class ServiceRequest(models.Model):
     description = fields.Text(required=True)
     resolution = fields.Text()
     complaint_category = fields.Char()
+    grievance_category = fields.Selection([
+        ("facilities", "Facilities"), ("it", "IT Support"),
+        ("payroll", "Payroll"), ("academic", "Academic Administration"),
+    ], string="Grievance category")
+    grievance_priority = fields.Selection([
+        ("low", "Low"), ("medium", "Medium"), ("high", "High"),
+    ], default="medium", string="Grievance priority")
+    grievance_incident_date = fields.Date(string="Date of incident")
+    grievance_contact = fields.Char(string="Preferred contact / extension")
+    service_area = fields.Selection([("service", "Service request"), ("maintenance", "Maintenance")], default="service")
+    service_category = fields.Selection([
+        ("it", "IT & network"), ("facilities", "Facilities"), ("transport", "Transport"),
+        ("housekeeping", "Housekeeping"), ("electrical", "Electrical"),
+    ])
+    service_priority = fields.Selection([("low", "Low"), ("normal", "Normal"), ("high", "High"), ("urgent", "Urgent")], default="normal")
+    service_location = fields.Char()
+    service_contact = fields.Char()
+    service_team = fields.Char()
     document = fields.Binary(attachment=True)
     filename = fields.Char()
 
@@ -47,6 +65,13 @@ class ServiceRequest(models.Model):
     def write(self, vals):
         if "requester_id" in vals and self._faculty_self_service():
             raise AccessError(_("A service operator must reassign a faculty service request."))
+        if "service_team" in vals and self._faculty_self_service():
+            raise AccessError(_("Only a service operator can assign a campus team."))
+        if set(vals) == {"resolution"} and self and all(rec.state == "approved" for rec in self):
+            if not self.env.user.has_group("ideastone_erp.group_manager"):
+                raise AccessError(_("Campus manager approval is required to record a resolution."))
+            self._lock()
+            return self._set_system_values(vals)
         return super().write(vals)
 
     @api.constrains("date_from", "date_to", "amount", "kind", "requested_course_id", "student_id", "complaint_category", "company_id")
@@ -64,3 +89,60 @@ class ServiceRequest(models.Model):
     def _validate_transition(self, target):
         if target == "done" and not self.resolution:
             raise ValidationError(_("Record the resolution before completing a service request."))
+
+    def _check_grievance_faculty(self):
+        if not self.env.user.has_group("openeducat_core.group_op_faculty") or not self.env["op.faculty"].search_count([
+            ("user_id", "=", self.env.uid), "|", ("company_id", "=", False),
+            ("company_id", "=", self.env.company.id),
+        ]):
+            raise AccessError(_("A linked faculty account is required."))
+
+    @api.model
+    def faculty_grievance_snapshot(self):
+        self._check_grievance_faculty()
+        self.check_access_rights("read")
+        records = self.search([("kind", "=", "grievance"), ("requester_id", "=", self.env.uid),
+                               ("company_id", "=", self.env.company.id)], order="create_date desc, id desc")
+        categories = dict(self._fields["grievance_category"].selection)
+        priorities = dict(self._fields["grievance_priority"].selection)
+        states = {"draft": ("Open", "open"), "submitted": ("Open", "open"),
+                  "approved": ("In progress", "progress"), "done": ("Resolved", "resolved"),
+                  "cancelled": ("Closed", "closed")}
+        rows = []
+        for record in records:
+            status, tone = states[record.state]
+            rows.append({"id": record.id, "reference": f"GRV-{record.date.year}-{record.id:03d}",
+                         "subject": record.name, "category": categories.get(record.grievance_category, "General"),
+                         "date": fields.Date.to_string(record.date),
+                         "incident_date": fields.Date.to_string(record.grievance_incident_date) if record.grievance_incident_date else "",
+                         "priority": priorities.get(record.grievance_priority, "Medium"),
+                         "status": status, "tone": tone, "description": record.description,
+                         "resolution": record.resolution or "", "contact": record.grievance_contact or ""})
+        return {"rows": rows, "today": fields.Date.to_string(fields.Date.context_today(self)),
+                "company": self.env.company.name}
+
+    @api.model
+    def faculty_grievance_submit(self, values):
+        self._check_grievance_faculty()
+        self.check_access_rights("create")
+        if not isinstance(values, dict):
+            raise ValidationError(_("Enter the grievance details."))
+        subject = str(values.get("subject") or "").strip()
+        description = str(values.get("description") or "").strip()
+        category = values.get("category")
+        priority = values.get("priority")
+        contact = str(values.get("contact") or "").strip()
+        if not subject or len(subject) > 200 or not description or len(description) > 5000 or len(contact) > 200:
+            raise ValidationError(_("Enter a subject and description within the allowed lengths."))
+        if category not in dict(self._fields["grievance_category"].selection) or priority not in dict(self._fields["grievance_priority"].selection):
+            raise ValidationError(_("Choose a valid category and priority."))
+        incident = values.get("incident_date")
+        incident_date = fields.Date.to_date(incident) if incident else False
+        if incident_date and incident_date > fields.Date.context_today(self):
+            raise ValidationError(_("The incident date cannot be in the future."))
+        record = self.create({"name": subject, "description": description, "kind": "grievance",
+                              "requester_id": self.env.uid, "date": fields.Date.context_today(self),
+                              "grievance_category": category, "grievance_priority": priority,
+                              "grievance_incident_date": incident_date, "grievance_contact": contact})
+        record.action_submit()
+        return record.id

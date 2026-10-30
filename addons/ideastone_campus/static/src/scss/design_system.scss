@@ -251,7 +251,8 @@ $ui-pages: ".campus_dashboard, .admin_overview, .student_main, .parent_main, .st
 /* The two reference banners share a navy/blue gradient and white headings. */
 :is(#{$ui-roots}) :is(.student_welcome, .academic_hero, .profile_hero, .timetable_hero, .campus_faculty_welcome,
     .mentor_hero, .parent_welcome, .admin_overview .hero, .campus_admissions_workspace .hero,
-    .campus_students_workspace .hero, .campus_students_workspace .detailhero, .fee_view .balance-card) {
+    .campus_students_workspace .hero, .campus_students_workspace .detailhero, .fee_view .balance-card,
+    .campus_faculty_home .welcome) {
     background: var(--ui-hero) !important; color: white !important; border-radius: var(--ui-radius) !important;
     :is(h1, h2, h3) { color: white !important; }
     h2 { font-size: 21px !important; font-weight: 760 !important; }

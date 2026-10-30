@@ -12,6 +12,7 @@ from odoo import _, api, fields, models
 ROLES = ("owner", "registrar", "admissions", "accountant", "exams", "readonly", "hod")
 # Client (OWL) actions have no res_model; access is checked against the model they edit.
 CLIENT_ACTION_MODELS = {
+    "action_college_calendar": "campus.calendar.event",
     "action_examinations_overview": "op.exam",
     "action_examinations_sessions": "op.exam.session",
     "action_examinations_marks": "op.exam",
@@ -41,7 +42,7 @@ MODULES = [
     ("students", "Students", "graduation-cap", [("Student directory", "mvp_students"), ("Enrolments & transfers", "mvp_enrolments")]),
     ("academics", "Academics", "university", [("Academic years", "mvp_years"), ("Departments", "mvp_departments"), ("Programmes", "mvp_programmes"), ("Semesters", "mvp_terms"), ("Sections", "mvp_sections"), ("Subjects & curriculum", "mvp_subjects")]),
     ("staff", "Faculty & Staff", "users", [("Staff directory", "mvp_faculty"), ("Teaching allocation", "mvp_timetable"), ("Staff Profile", "action_staff_profile"), ("Faculty development and appraisal", "action_faculty_appraisal_dashboard"), ("OD Management", "action_staff_od_management"), ("Leave Management", "action_faculty_leave_page"), ("Payroll History", "action_payroll_history_page")]),
-    ("timetable", "Timetable", "calendar", [("Class timetable", "mvp_timetable"), ("Faculty timetable", "mvp_faculty_timetable"), ("Rooms", "mvp_rooms")]),
+    ("calendar", "Calendar", "calendar", [("College calendar", "action_college_calendar")]),
     ("attendance", "Attendance", "calendar-check-o", [("Staff attendance", "action_faculty_attendance_page"), ("Student Attendance", "action_student_attendance_workspace"), ("Take attendance", "mvp_attendance"), ("Attendance register", "mvp_attendance_registers"), ("Student summary & shortage", "mvp_report_attendance")]),
     ("fees", "Fees & Payments", "inr", [("Fee heads", "mvp_fee_heads"), ("Fee structures", "mvp_structures"), ("Student fee accounts", "mvp_fees"), ("Assign fee structure", "mvp_assign_fees"), ("Invoices & dues", "mvp_invoices"), ("Overdue follow-up", "mvp_overdue_invoices"), ("Receipts", "mvp_receipts")]),
     ("learning", "Learning & LMS", "book", [("Assignments", "mvp_learning_assignments"), ("Review submissions", "mvp_learning_submissions"), ("LMS accounts & retries", "mvp_lms_accounts")]),

@@ -61,6 +61,8 @@ class Dashboard(models.AbstractModel):
         ]
         visible = []
         for item in navigation:
+            if item["action"] == "ideastone_erp.action_staff_od_management" and self.env.user.has_group("ideastone_erp.group_od_hod_approver"):
+                item["action"] = "ideastone_erp.action_hod_od_management"
             if not self.env.ref(item["action"], raise_if_not_found=False):
                 continue
             item["allowed"] = bool(item["model"] in self.env and self.env[item["model"]].check_access_rights("read", raise_exception=False))
@@ -201,6 +203,10 @@ class Dashboard(models.AbstractModel):
                 items.insert(0, {"label": "OPAC & digital library", "url": "/my/campus/library"})
                 if any(p["key"] == "library" for p in pages):
                     items.insert(0, {"label": "Circulation desk", "page": "library"})
+            elif key == "engagement":
+                items = [{"label": "Surveys", "page": "communication-surveys"},
+                         {"label": "Events and clubs", "page": "communication-events"},
+                         {"label": "Alumni forums", "page": "communication-alumni"}]
             elif key == "reports":
                 items = [{"label": "Reports & exports", "page": "reports"}]
                 report_tools = [
@@ -226,13 +232,15 @@ class Dashboard(models.AbstractModel):
             elif key == "analytics":
                 items = [{"label": "Faculty analytics", "page": "analytics"}]
             elif key == "grievances":
-                items = [{"label": "My grievances", "tool": "grievance"}] if self.env["campus.service.request"].check_access_rights("read", raise_exception=False) else []
+                items = [{"label": "My grievances", "action": "ideastone_erp.action_faculty_grievances",
+                          "action_id": self.env.ref("ideastone_erp.action_faculty_grievances").id}] if self.env["campus.service.request"].check_access_rights("read", raise_exception=False) else []
             elif key == "hostel":
                 items = [item for item in items if item["label"].startswith("Hostel")]
             elif key == "services":
-                items = [item for item in items if not item["label"].startswith("Hostel")]
-                if self.env["campus.service.request"].check_access_rights("read", raise_exception=False):
-                    items.append({"label": "Register complaint on student", "tool": "student_complaint"})
+                items = [{"label": label, "page": "campus-services-" + page} for page, label in [
+                    ("service", "Service requests"), ("leave", "Student leave approvals"),
+                    ("maintenance", "Maintenance"), ("complaint", "Register complaint on student"),
+                ]]
             elif key == "help":
                 items = [{"label": "Faculty guide", "page": "help"}]
             if key == "teaching":

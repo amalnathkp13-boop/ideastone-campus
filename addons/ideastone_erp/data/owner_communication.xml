@@ -1,0 +1,9 @@
+<odoo noupdate="1">
+  <record id="owner_communication_sequence" model="ir.sequence">
+    <field name="name">College communication references</field>
+    <field name="code">campus.owner.communication</field>
+    <field name="prefix">COM-</field>
+    <field name="padding">5</field>
+    <field name="company_id" eval="False"/>
+  </record>
+</odoo>
