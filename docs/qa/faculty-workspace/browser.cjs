@@ -33,11 +33,13 @@ async function diagnosticMarkup(page) {
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'faculty-overview-1440.png')});
         await page.locator('.campus_sidebar').getByRole('button',{name:'My task list',exact:true}).click();
-        await page.getByRole('heading',{name:'My task list',exact:true,level:1}).waitFor();
+        await page.getByRole('heading',{name:'My Mentorship Class',exact:true,level:1}).waitFor();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My Teaching Subjects',exact:true}).waitFor();
+        if(await page.locator('.campus_sidebar').getByRole('button',{name:'Subject-wise Attendance',exact:true}).count()) throw Error('Faculty attendance must stay under My Task List');
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'faculty-module-1440.png')});
         await page.reload();
-        await page.getByRole('heading',{name:'My task list',exact:true,level:1}).waitFor();
+        await page.getByRole('heading',{name:'My Mentorship Class',exact:true,level:1}).waitFor();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My tasks & e-diary',exact:true}).click();
         const createButton = page.locator('.o_list_button_add:visible');
         await createButton.waitFor();

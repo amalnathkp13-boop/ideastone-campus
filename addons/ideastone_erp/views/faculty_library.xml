@@ -1,0 +1,16 @@
+<odoo>
+  <record id="action_faculty_library_opac" model="ir.actions.client"><field name="name">OPAC &amp; digital library</field><field name="tag">ideastone_erp.faculty_library</field><field name="params">{'view': 'opac'}</field><field name="context">{'campus_module': 'library'}</field></record>
+  <record id="action_faculty_library_catalogue" model="ir.actions.client"><field name="name">Library catalogue</field><field name="tag">ideastone_erp.faculty_library</field><field name="params">{'view': 'catalogue'}</field><field name="context">{'campus_module': 'library'}</field></record>
+  <record id="action_faculty_library_circulation" model="ir.actions.client"><field name="name">Library circulation</field><field name="tag">ideastone_erp.faculty_library</field><field name="params">{'view': 'circulation'}</field><field name="context">{'campus_module': 'library'}</field></record>
+  <record id="action_faculty_library_learning" model="ir.actions.client"><field name="name">Learning platform</field><field name="tag">ideastone_erp.faculty_library</field><field name="params">{'view': 'learning'}</field><field name="context">{'campus_module': 'library'}</field></record>
+  <record id="view_media_faculty_library_metadata" model="ir.ui.view">
+    <field name="name">op.media.faculty.library.metadata</field><field name="model">op.media</field>
+    <field name="inherit_id" ref="openeducat_library.view_op_media_form"/>
+    <field name="arch" type="xml"><field name="isbn" position="after"><field name="campus_publication_year"/><field name="campus_department"/><field name="campus_call_number"/></field></field>
+  </record>
+  <record id="view_copy_faculty_library_metadata" model="ir.ui.view">
+    <field name="name">op.media.unit.faculty.library.metadata</field><field name="model">op.media.unit</field>
+    <field name="inherit_id" ref="openeducat_library.view_media_unit_form"/>
+    <field name="arch" type="xml"><field name="barcode" position="after"><field name="campus_accession_number"/><field name="campus_location"/><field name="campus_rack"/></field></field>
+  </record>
+</odoo>

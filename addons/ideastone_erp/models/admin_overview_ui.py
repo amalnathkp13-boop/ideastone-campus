@@ -1,10 +1,14 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
+from textwrap import shorten
 
+import pytz
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tools import html2plaintext
 
 from odoo import _, api, fields, models
+
+from .late_punch import late_punch_dates, local_bounds
 
 
 class AdminOverviewUI(models.AbstractModel):
@@ -14,9 +18,41 @@ class AdminOverviewUI(models.AbstractModel):
         return all(self.env[model].check_access_rights("read", raise_exception=False)
                    for model in ("event.event", "event.stage", "event.type", "res.partner"))
 
+    def _admin_staff_punches(self):
+        source = self.env["hr.attendance"]
+        allowed = self.env["campus.faculty.attendance.ui"]._manager() and all(
+            self.env[model].check_access_rights("read", raise_exception=False)
+            for model in ("hr.attendance", "hr.employee", "hr.leave", "resource.calendar.leaves"))
+        if not allowed:
+            return source.browse(), source.browse(), False
+        today = fields.Date.context_today(self)
+        employees = self._mvp_records("hr.employee", [("company_id", "=", self.env.company.id), ("active", "=", True)])
+        punches = self._mvp_records("hr.attendance", [("employee_id", "in", employees.ids),
+            ("check_in", ">=", today - timedelta(days=1)), ("check_in", "<", today + timedelta(days=2))])
+        present, delayed = source.browse(), source.browse()
+        for employee in employees:
+            zone = pytz.timezone(employee.resource_calendar_id.tz or "UTC")
+            start, end = local_bounds(today, zone)
+            entries = punches.filtered(lambda row, employee=employee, start=start, end=end:
+                row.employee_id == employee and start <= row.check_in < end)
+            present |= entries
+            # Reuse the payroll policy, including first punch, holidays and approved leave.
+            if entries and today in late_punch_dates(self.env, employee, today.replace(day=1)):
+                delayed |= entries
+        return present, delayed, True
+
     def _admin_source(self, kind, filters):
         company = [("company_id", "=", self.env.company.id)]
         today, now = fields.Date.context_today(self), fields.Datetime.now()
+        if kind in {"staff_present", "staff_delayed"}:
+            present, delayed, allowed = self._admin_staff_punches()
+            if not allowed:
+                raise AccessError(_("Staff attendance reporting access is required."))
+            return "hr.attendance", [("employee_id.company_id", "=", self.env.company.id),
+                ("id", "in", (present if kind == "staff_present" else delayed).ids)]
+        if kind == "fleet":
+            return "campus.transport.route", company + ([("year_id", "=", filters["year_id"])] if filters["year_id"] else
+                [("year_id.start_date", "<=", today), ("year_id.end_date", ">=", today)])
         if kind == "decisions":
             return "campus.service.request", company + [("state", "=", "submitted"), ("amount", ">", 0)]
         if kind in {"services", "overdue_services"}:
@@ -57,7 +93,8 @@ class AdminOverviewUI(models.AbstractModel):
         source = self.env[model]
         source.check_access_rights("read")
         context = {"default_company_id": self.env.company.id, "campus_module": "home"}
-        action = {"type": "ir.actions.act_window", "name": _("Campus events") if model == "event.event" else _("Overview follow-up"),
+        names = {"staff_present": _("Present staff"), "staff_delayed": _("Delayed arrivals"), "fleet": _("Fleet (buses)")}
+        action = {"type": "ir.actions.act_window", "name": names.get(kind, _("Event Management") if model == "event.event" else _("Overview follow-up")),
                   "res_model": model, "view_mode": "calendar,tree,form" if model == "event.event" else "tree,form",
                   "views": [(False, mode) for mode in (["calendar", "tree", "form"] if model == "event.event" else ["tree", "form"])],
                   "domain": domain, "context": context}
@@ -136,16 +173,28 @@ class AdminOverviewUI(models.AbstractModel):
             event_rows.append({"id": event.id, "name": event.name, "day": start.strftime("%d"), "month": start.strftime("%b").upper(),
                 "date": start.strftime("%d %b %Y"), "time": start.strftime("%H:%M") + " – " + end.strftime("%d %b %H:%M"),
                 "venue": event.address_id.name or _("Venue not assigned"), "organizer": event.organizer_id.name or _("Organizer not assigned"),
-                "category": event.event_type_id.name or _("Campus event"), "description": html2plaintext(event.description or "").strip()[:450]})
+                "category": event.event_type_id.name or _("Campus event"),
+                "description": shorten(html2plaintext(event.description or ""), width=120, placeholder="…")})
         current_terms = self._mvp_records("op.academic.term", [("company_id", "=", self.env.company.id),
             ("term_start_date", "<=", today), ("term_end_date", ">=", today)] + ([("academic_year_id", "=", f["year_id"])] if f["year_id"] else []))
         term_ranges = {(term.term_start_date, term.term_end_date) for term in current_terms}
         semester = next(iter(term_ranges)) if len(term_ranges) == 1 else None
         stats = {card["kind"]: card for card in data["stats"]}
+        present, delayed, staff_allowed = self._admin_staff_punches()
+        routes = self._mvp_records(*self._admin_source("fleet", f))
+        fleet_allowed = self.env["campus.transport.route"].check_access_rights("read", raise_exception=False)
+        registrations = {"".join(char for char in route.vehicle_registration.upper() if char.isalnum()) for route in routes}
+        registrations.discard("")
+        for kind, value, detail in [("staff_present", len(present.employee_id), _("Today · recorded check-ins")),
+                                    ("staff_delayed", len(delayed.employee_id), _("Today · included in present")),
+                                    ("fleet", len(registrations), _("Registered college buses"))]:
+            allowed = fleet_allowed if kind == "fleet" else staff_allowed
+            stats[kind] = {"kind": kind, "value": value if allowed else "—", "allowed": allowed,
+                "detail": detail if allowed else _("Reporting access required")}
         specs = [("active_students", "Active students", "users", "blue"), ("admissions", "Admissions pipeline", "envelope-o", "blue"),
-                 ("attendance", "Attendance rate", "check", "blue"), ("collection", "Fee collection", "inr", "blue"),
-                 ("dues", "Outstanding fees", "inr", "amber"), ("faculty", "Faculty & staff", "user-o", "green"),
-                 ("upcoming", "Exams next 30 days", "file-text-o", "purple")]
+                 ("staff_delayed", "Delayed arrivals", "clock-o", "blue"), ("collection", "Fee collection", "inr", "blue"),
+                 ("dues", "Outstanding fees", "inr", "amber"), ("staff_present", "Present staff", "users", "green"),
+                 ("fleet", "Fleet (buses)", "bus", "blue")]
         kpis = [dict(stats[kind], label=label, icon=icon, tone=tone) for kind, label, icon, tone in specs]
         # The requested overview uses rupee labels; retain the recorded amounts.
         for card in kpis:
