@@ -1,0 +1,24 @@
+{
+  "activity": {
+    "name": "Sample reference widget workshop",
+    "hours": 3.5,
+    "evidence": "faculty-profile-upload.pdf",
+    "savedAndReloaded": true
+  },
+  "supervision": {
+    "name": "Sample reference supervision entry",
+    "savedAndReloaded": true,
+    "separateFormAndRegister": true
+  },
+  "appraisalMissingEvidenceFilter": true,
+  "leaveHistoryReadonlyView": true,
+  "payrollHistory": {
+    "lateDays": 3,
+    "graceDays": 2,
+    "deductedDays": 1,
+    "lateDeduction": 3684.21,
+    "filteredSeptemberNet": 62750
+  },
+  "mainModuleLanding": "My staff profile",
+  "browserErrors": []
+}
