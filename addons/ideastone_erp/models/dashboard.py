@@ -237,9 +237,10 @@ class Dashboard(models.AbstractModel):
             elif key == "hostel":
                 items = [item for item in items if item["label"].startswith("Hostel")]
             elif key == "services":
-                items = [item for item in items if not item["label"].startswith("Hostel")]
-                if self.env["campus.service.request"].check_access_rights("read", raise_exception=False):
-                    items.append({"label": "Register complaint on student", "tool": "student_complaint"})
+                items = [{"label": label, "page": "campus-services-" + page} for page, label in [
+                    ("service", "Service requests"), ("leave", "Student leave approvals"),
+                    ("maintenance", "Maintenance"), ("complaint", "Register complaint on student"),
+                ]]
             elif key == "help":
                 items = [{"label": "Faculty guide", "page": "help"}]
             if key == "teaching":
