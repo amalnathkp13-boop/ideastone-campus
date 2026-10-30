@@ -61,6 +61,8 @@ class Dashboard(models.AbstractModel):
         ]
         visible = []
         for item in navigation:
+            if item["action"] == "ideastone_erp.action_staff_od_management" and self.env.user.has_group("ideastone_erp.group_od_hod_approver"):
+                item["action"] = "ideastone_erp.action_hod_od_management"
             if not self.env.ref(item["action"], raise_if_not_found=False):
                 continue
             item["allowed"] = bool(item["model"] in self.env and self.env[item["model"]].check_access_rights("read", raise_exception=False))

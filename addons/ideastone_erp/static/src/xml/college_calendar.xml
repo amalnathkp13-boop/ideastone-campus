@@ -1,0 +1,92 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.CalendarEventRow">
+    <button class="eventrow" t-on-click="() => this.selectEvent(event)">
+      <span class="eventdate"><b t-esc="day(event.date_start)"/><small t-esc="month(event.date_start)"/></span>
+      <span><span class="eventrow-title" t-esc="event.name"/><span class="eventrow-meta"><t t-esc="event.time || 'Time to be confirmed'"/> · <t t-esc="event.venue || 'Venue to be confirmed'"/></span><span class="eventrow-meta" t-esc="event.organizer || 'Organizer to be confirmed'"/><span class="tag" t-att-class="event.status" t-esc="statusName(event.status)"/></span>
+    </button>
+  </t>
+
+  <t t-name="ideastone_erp.CollegeCalendar">
+    <main id="college-calendar-page" class="campus_college_calendar">
+      <div class="content">
+        <div t-if="state.loading" class="notice" role="status">Loading college calendar…</div>
+        <div t-if="state.error" class="notice error" role="alert"><span t-esc="state.error"/> <button class="btn" t-on-click="load">Retry</button></div>
+        <t t-if="state.data &amp;&amp; !state.error">
+          <div class="crumb"><span>VCET Campus / <b>Calendar</b></span><span><t t-esc="state.data.today"/> · <b>Owner / Admin</b></span></div>
+          <div class="heading"><div><h1>College Calendar</h1><p>One place for campus events, academic milestones, celebrations, examinations and event planning.</p></div><div class="actions"><button class="btn refresh" t-on-click="load" t-att-disabled="state.loading" aria-label="Refresh calendar"><i class="fa fa-refresh"/></button><button t-if="state.data.can_create" class="btn" t-on-click="() => this.edit()" t-att-disabled="state.loading">＋ Add event</button></div></div>
+          <div class="hero"><div><div class="eyebrow">ONE CAMPUS · EVERY IMPORTANT DATE</div><h2>Plan the month. See the whole campus.</h2><p>Explore current events, past activities and upcoming plans. Open any event to view its organizer, venue, audience, schedule and related activities.</p></div><div class="hero-stat"><strong t-esc="monthEvents.length"/><span>events in this view</span></div></div>
+          <div class="stats"><article t-foreach="stats" t-as="stat" t-key="stat.label" class="stat"><div class="stathead"><t t-esc="stat.label"/><span class="staticon" t-att-class="stat.tone" aria-hidden="true" t-esc="stat.icon"/></div><strong t-esc="stat.value"/><small t-esc="stat.help"/></article></div>
+          <div class="toolbar">
+            <div class="filters">
+              <select aria-label="Event category" t-model="state.category"><option value="all">All event categories</option><option t-foreach="categories" t-as="cat" t-key="cat[0]" t-att-value="cat[0]" t-esc="cat[1]"/></select>
+              <select aria-label="Event status" t-model="state.status"><option value="all">All statuses</option><option t-foreach="statuses" t-as="status" t-key="status[0]" t-att-value="status[0]" t-esc="status[1]"/></select>
+              <input type="search" aria-label="Search events" placeholder="Search events..." t-model="state.query"/>
+            </div>
+            <div class="viewtoggle" role="group" aria-label="Calendar view"><button t-att-class="{active: state.view === 'month'}" t-att-aria-pressed="state.view === 'month' ? 'true' : 'false'" t-on-click="() => state.view = 'month'">Month</button><button t-att-class="{active: state.view === 'agenda'}" t-att-aria-pressed="state.view === 'agenda' ? 'true' : 'false'" t-on-click="() => state.view = 'agenda'">Agenda</button></div>
+          </div>
+          <div class="workspace">
+            <section class="panel calendarpanel" aria-label="College activities calendar">
+              <div class="panelhead"><h2 t-esc="monthLabel"/><div class="monthnav"><button class="square" t-on-click="() => this.moveMonth(-1)" aria-label="Previous month">‹</button><strong t-esc="monthLabel"/><button class="square" t-on-click="() => this.moveMonth(1)" aria-label="Next month">›</button><button class="btn soft" t-on-click="today">Today</button></div></div>
+              <div t-if="state.view === 'month'" class="calendar">
+                <div t-foreach="weekdays" t-as="weekday" t-key="weekday" class="weekday" t-esc="weekday"/>
+                <div t-foreach="days" t-as="cell" t-key="cell.key" class="day" t-att-class="{outside: cell.outside, today: cell.today, selected: cell.selected}">
+                  <button class="day-select" t-on-click="() => this.selectDate(cell.key)" t-att-aria-label="formatDate(cell.key) + ', ' + cell.events.length + ' events'" t-att-aria-pressed="cell.selected ? 'true' : 'false'"><span class="daynum" t-esc="cell.day"/></button>
+                  <button t-foreach="cell.events.slice(0,2)" t-as="event" t-key="event.id" class="eventdot" t-att-class="event.category" t-att-title="event.name" t-on-click="() => this.selectEvent(event)" t-esc="event.name"/>
+                  <button t-if="cell.events.length &gt; 2" class="more" t-on-click="() => { this.selectDate(cell.key); state.view = 'agenda'; }">+<t t-esc="cell.events.length - 2"/> more</button>
+                </div>
+              </div>
+              <div t-else="" class="eventlist agenda"><t t-foreach="monthEvents" t-as="event" t-key="event.id"><t t-call="ideastone_erp.CalendarEventRow"/></t><div t-if="!monthEvents.length" class="empty">No events match this month and the selected filters.</div></div>
+              <div class="legend"><span t-foreach="categories" t-as="cat" t-key="cat[0]"><i t-att-class="cat[0]"/><t t-esc="cat[1]"/></span></div>
+            </section>
+            <div class="rightcol">
+              <section class="panel"><div class="panelhead"><h2>Upcoming &amp; recent events</h2><span class="tag" t-esc="events.length &amp;&amp; events.every(e => e.is_sample) ? 'Sample calendar' : 'College activities'"/></div><div class="eventlist"><t t-foreach="recentEvents" t-as="event" t-key="event.id"><t t-call="ideastone_erp.CalendarEventRow"/></t><div t-if="!recentEvents.length" class="empty">No events match your filters.</div></div></section>
+              <section class="panel detailpanel"><div class="panelhead"><h2>Event details</h2><button class="btn" t-on-click="clearSelection">Clear</button></div>
+                <t t-if="selected"><t t-set="event" t-value="selected"/>
+                  <span class="tag" t-att-class="event.status" t-esc="statusName(event.status)"/><span t-if="event.is_sample" class="tag sample">Sample event</span>
+                  <div class="eyebrow detailcategory" t-esc="categoryName(event.category)"/><h3 class="detailtitle" t-esc="event.name"/><p class="description" t-esc="event.description || 'No description added.'"/>
+                  <div class="detailmeta">
+                    <div class="meta"><span class="mi" aria-hidden="true">▦</span><div><b>Date &amp; time</b><t t-esc="formatDate(event.date_start)"/><t t-if="event.date_end !== event.date_start"> – <t t-esc="formatDate(event.date_end)"/></t><br/><t t-esc="event.time || 'Time to be confirmed'"/></div></div>
+                    <div class="meta"><span class="mi" aria-hidden="true">⌖</span><div><b>Venue</b><t t-esc="event.venue || 'Not specified'"/></div></div>
+                    <div class="meta"><span class="mi" aria-hidden="true">♟</span><div><b>Organizing department / club</b><t t-esc="event.organizer || 'Not assigned'"/></div></div>
+                    <div class="meta"><span class="mi" aria-hidden="true">☏</span><div><b>Coordinator / contact</b><t t-esc="event.contact || 'Not assigned'"/></div></div>
+                    <div class="meta"><span class="mi" aria-hidden="true">◎</span><div><b>Audience</b><t t-esc="event.audience || 'All campus'"/></div></div>
+                  </div>
+                  <div class="statusline"><span>Planning status</span><b t-esc="statusName(event.status)"/></div>
+                  <div class="subevents"><h4>Schedule &amp; sub-events</h4><div t-foreach="event.schedule || []" t-as="row" t-key="row_index" class="subevent"><b t-esc="row.time"/><span t-esc="row.title"/></div><div t-if="!event.schedule?.length" class="empty">No sub-events added.</div></div>
+                  <div t-if="state.data.can_write" class="actions detailactions"><button class="btn soft" t-on-click="() => this.edit(event)">Edit details</button><button class="btn" t-on-click="remind" t-att-disabled="state.reminderBusy">Set reminder</button></div>
+                </t>
+                <div t-else="" class="detailempty"><t t-if="state.selectedDate">No matching event selected on <t t-esc="formatDate(state.selectedDate)"/>. </t>Select a calendar event to see the organizer, venue, audience, schedule and sub-events.</div>
+              </section>
+            </div>
+          </div>
+          <div class="footer"><t t-esc="state.data.company"/> · College Calendar<t t-if="events.some(e => e.is_sample)"> · Sample events are illustrative, not confirmed official college announcements.</t></div>
+        </t>
+      </div>
+    </main>
+  </t>
+
+  <t t-name="ideastone_erp.CollegeCalendarForm">
+    <Dialog title="props.event ? 'Edit campus event' : 'Add a campus event'" size="'md'">
+      <form id="college-calendar-form" class="campus_calendar_form" t-on-submit="save">
+        <div t-if="state.error" class="notice error" role="alert" t-esc="state.error"/>
+        <fieldset t-att-disabled="state.busy"><div class="formgrid">
+          <div class="field full"><label for="cal-title">Event title *</label><input id="cal-title" required="required" maxlength="250" placeholder="e.g. Department project expo" t-model="state.form.name"/></div>
+          <div class="field"><label for="cal-category">Category</label><select id="cal-category" t-model="state.form.category"><option t-foreach="categories" t-as="cat" t-key="cat[0]" t-att-value="cat[0]" t-esc="cat[1]"/></select></div>
+          <div class="field"><label for="cal-status">Status</label><select id="cal-status" t-model="state.form.status"><option t-foreach="statuses" t-as="status" t-key="status[0]" t-att-value="status[0]" t-esc="status[1]"/></select></div>
+          <div class="field"><label for="cal-date">Date *</label><input id="cal-date" type="date" required="required" t-model="state.form.date_start"/></div>
+          <div class="field"><label for="cal-end">End date</label><input id="cal-end" type="date" t-att-min="state.form.date_start" t-model="state.form.date_end"/></div>
+          <div class="field"><label for="cal-time">Time</label><input id="cal-time" placeholder="e.g. 10:00 AM – 1:00 PM" t-model="state.form.time"/></div>
+          <div class="field"><label for="cal-venue">Venue</label><input id="cal-venue" placeholder="Auditorium / Seminar Hall" t-model="state.form.venue"/></div>
+          <div class="field"><label for="cal-organizer">Organizing department / club</label><input id="cal-organizer" placeholder="Department / Student club" t-model="state.form.organizer"/></div>
+          <div class="field"><label for="cal-contact">Coordinator / contact</label><input id="cal-contact" placeholder="Coordinator name or office" t-model="state.form.contact"/></div>
+          <div class="field full"><label for="cal-audience">Audience</label><input id="cal-audience" placeholder="All campus / Students / Faculty and staff" t-model="state.form.audience"/></div>
+          <div class="field full"><label for="cal-description">Description / key notes</label><textarea id="cal-description" placeholder="Purpose, registration deadline, preparation notes..." t-model="state.form.description"/></div>
+          <div class="field full"><div class="schedulehead"><h3>Schedule &amp; sub-events</h3><button type="button" class="btn soft" t-on-click="addSchedule" t-att-disabled="state.schedule.length &gt;= 100">＋ Add activity</button></div>
+            <div class="schedule-row" t-foreach="state.schedule" t-as="row" t-key="row.key"><input aria-label="Activity time" placeholder="e.g. 10:00 AM" required="required" maxlength="500" t-model="row.time"/><input aria-label="Activity title" placeholder="Activity" required="required" maxlength="500" t-model="row.title"/><button type="button" class="square" aria-label="Remove activity" t-on-click="() => this.removeSchedule(row.key)">×</button></div>
+          </div>
+        </div></fieldset>
+      </form>
+      <t t-set-slot="footer"><button type="submit" form="college-calendar-form" class="btn btn-primary" t-att-disabled="state.busy" t-esc="state.busy ? 'Saving…' : 'Save event'"/><button class="btn btn-secondary" t-on-click="props.close" t-att-disabled="state.busy">Cancel</button></t>
+    </Dialog>
+  </t>
+</templates>

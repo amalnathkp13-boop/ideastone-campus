@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="action_faculty_profile_myprofile" model="ir.actions.client">
+    <field name="name">My staff profile</field>
+    <field name="tag">ideastone_erp.faculty_profile_workspace</field>
+    <field name="params">{'page': 'myprofile'}</field>
+    <field name="context">{'campus_module': 'staff'}</field>
+  </record>
+  <record id="action_faculty_profile_qualifications" model="ir.actions.client">
+    <field name="name">Staff qualifications and documents</field>
+    <field name="tag">ideastone_erp.faculty_profile_workspace</field>
+    <field name="params">{'page': 'qualifications'}</field>
+    <field name="context">{'campus_module': 'staff'}</field>
+  </record>
+  <record id="action_faculty_profile_development" model="ir.actions.client">
+    <field name="name">Faculty development and appraisal</field>
+    <field name="tag">ideastone_erp.faculty_profile_workspace</field>
+    <field name="params">{'page': 'development'}</field>
+    <field name="context">{'campus_module': 'staff'}</field>
+  </record>
+  <record id="action_faculty_profile_agreements" model="ir.actions.client">
+    <field name="name">Salary agreements</field>
+    <field name="tag">ideastone_erp.faculty_profile_workspace</field>
+    <field name="params">{'page': 'agreements'}</field>
+    <field name="context">{'campus_module': 'staff'}</field>
+  </record>
+  <record id="action_faculty_profile_monthly" model="ir.actions.client">
+    <field name="name">Monthly payroll</field>
+    <field name="tag">ideastone_erp.faculty_profile_workspace</field>
+    <field name="params">{'page': 'monthly'}</field>
+    <field name="context">{'campus_module': 'staff'}</field>
+  </record>
+  <record id="action_faculty_profile_history" model="ir.actions.client">
+    <field name="name">Payroll History</field>
+    <field name="tag">ideastone_erp.faculty_profile_workspace</field>
+    <field name="params">{'page': 'history'}</field>
+    <field name="context">{'campus_module': 'staff'}</field>
+  </record>
+  <record id="action_faculty_profile_leave" model="ir.actions.client">
+    <field name="name">Leave requests</field>
+    <field name="tag">ideastone_erp.faculty_profile_workspace</field>
+    <field name="params">{'page': 'leave'}</field>
+    <field name="context">{'campus_module': 'staff'}</field>
+  </record>
+</odoo>

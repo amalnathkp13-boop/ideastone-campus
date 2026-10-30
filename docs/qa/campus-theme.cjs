@@ -5,7 +5,7 @@ const assert = require('node:assert/strict');
 async function assertCampusTheme(page) {
     const result = await page.evaluate(() => {
         const visible = el => el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden';
-        const hero = '.student_welcome,.academic_hero,.profile_hero,.timetable_hero,.campus_faculty_welcome,.mentor_hero,.parent_welcome,.admin_overview .hero,.campus_admissions_workspace .hero,.campus_students_workspace .hero,.campus_students_workspace .detailhero,.fee_view .balance-card';
+        const hero = '.student_welcome,.academic_hero,.profile_hero,.timetable_hero,.campus_faculty_welcome,.mentor_hero,.parent_welcome,.admin_overview .hero,.campus_admissions_workspace .hero,.campus_students_workspace .hero,.campus_students_workspace .detailhero,.fee_view .balance-card,.campus_owner_staff .hero,.campus_faculty_home .welcome';
         const headings = [...document.querySelectorAll('h1,h2,h3')].filter(visible).map(el => {
             const style = getComputedStyle(el);
             const banner = !!el.closest(hero);
