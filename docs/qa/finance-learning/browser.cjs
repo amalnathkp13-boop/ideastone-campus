@@ -54,7 +54,8 @@ async function savePortal(page,button) {
         await owner.goto(base+'/web#action=ideastone_erp.action_dashboard');
         await owner.locator('.campus_sidebar').getByRole('button',{name:'Fees & Payments',exact:true}).click();
         await owner.locator('.campus_faculty_subnav').getByRole('button',{name:'Overdue follow-up',exact:true}).click();
-        await owner.locator('.o_list_view').waitFor();
+        await owner.getByRole('heading',{name:'Overdue follow-up',exact:true,level:1}).waitFor();
+        await owner.locator('#followTable').waitFor();
         await owner.screenshot({path:path.join(out,'fee-followup-1440.png')});
         await owner.locator('.campus_sidebar').getByRole('button',{name:'Learning & LMS',exact:true}).click();
         await owner.getByRole('heading',{name:'Learning & LMS',exact:true,level:1}).waitFor();
