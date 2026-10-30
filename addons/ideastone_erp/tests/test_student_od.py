@@ -55,6 +55,26 @@ class TestStudentOD(OwnerMVPFixture, TransactionCase):
     def actions(self, record):
         return record.event_ids.sorted("id").mapped("action")
 
+    def test_hod_navigation_opens_hod_workspace_and_keeps_mentor_separate(self):
+        for user in (self.hod, self.mentor):
+            self.env["op.faculty"].create({"first_name": user.name, "last_name": "OD",
+                "birth_date": "1980-01-01", "gender": "male", "partner_id": user.partner_id.id,
+                "user_id": user.id, "company_id": self.env.company.id, "main_department_id": self.department.id})
+        dashboard = self.env["campus.dashboard"]
+        hod_data = dashboard.with_user(self.hod).get_overview()
+        mentor_data = dashboard.with_user(self.mentor).get_overview()
+        for data, action in [(hod_data, "ideastone_erp.action_hod_od_management"),
+                             (mentor_data, "ideastone_erp.action_staff_od_management")]:
+            od = next((module for module in data["faculty_modules"] if module["key"] == "od"), None)
+            self.assertTrue(od, (action, data["faculty_modules"]))
+            self.assertEqual([item["action"] for item in od["items"]], [action])
+            self.assertEqual(od["items"][0]["action_id"], self.env.ref(action).id)
+        self.assertEqual(self.env.ref("ideastone_erp.action_hod_od_management").tag, "ideastone_erp.hod_od_management")
+        self.assertEqual(self.env["campus.staff.od.ui"].with_user(self.hod).get_page_data()["role"], "hod")
+        self.assertNotEqual(self.mentor_ui.get_page_data().get("role"), "hod")
+        with self.assertRaises(AccessError):
+            self.env["campus.hod.od.ui"].with_user(self.mentor).get_page_data()
+
     def test_general_od_flows_from_student_to_mentor_to_hod(self):
         # Colleges run several semesters at once; a later-starting one must not hide this term's requests.
         self.env["op.academic.term"].create({"name": "OD QA concurrent semester", "academic_year_id": self.year.id,
