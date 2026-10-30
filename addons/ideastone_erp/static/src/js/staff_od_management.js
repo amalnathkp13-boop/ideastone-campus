@@ -15,6 +15,7 @@ export class MentorODReview extends Component {
 export class StaffODManagement extends Component {
     static template = "ideastone_erp.StaffODManagement";
     static props = ["*"];
+    static dataModel = "campus.staff.od.ui";
 
     setup() {
         this.orm = useService("orm");
@@ -34,7 +35,7 @@ export class StaffODManagement extends Component {
         this.state.loading = true;
         this.state.error = "";
         try {
-            const data = await this.orm.call("campus.staff.od.ui", "get_page_data", [this.state.classKey || null]);
+            const data = await this.orm.call(this.constructor.dataModel, "get_page_data", [this.state.classKey || null]);
             if (request !== this.loadRequest) return;
             this.state.data = data;
             this.state.classKey = data.class_key;
@@ -49,7 +50,7 @@ export class StaffODManagement extends Component {
             this.state.page = Math.min(this.state.page, Math.max(1, Math.ceil(this.filteredRows.length / PAGE_SIZE)));
         } catch (error) {
             if (request === this.loadRequest) {
-                this.state.error = error.data?.message || "Mentor OD requests could not be loaded. Please try again.";
+                this.state.error = error.data?.message || "OD requests could not be loaded. Please try again.";
             }
         } finally {
             if (request === this.loadRequest) this.state.loading = false;
@@ -300,3 +301,9 @@ export class StaffODManagement extends Component {
 }
 
 registry.category("actions").add("ideastone_erp.staff_od_management", StaffODManagement);
+
+export class HodODManagement extends StaffODManagement {
+    static dataModel = "campus.hod.od.ui";
+}
+
+registry.category("actions").add("ideastone_erp.hod_od_management", HodODManagement);
