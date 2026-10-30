@@ -2,6 +2,7 @@ import base64
 import json
 from datetime import datetime, time, timedelta
 
+from freezegun import freeze_time
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
@@ -9,6 +10,15 @@ from odoo import fields
 
 
 class OwnerMVPFixture:
+    def setUp(self):
+        super().setUp()
+        # Freeze the Python clock at noon UTC on the fixture date so the fixture's ``today`` and every
+        # user's local date agree, whatever time the suite runs: the nightly CI starts at 23:54 UTC
+        # (05:24 IST) and crosses UTC midnight while it runs.
+        freezer = freeze_time(datetime.combine(self.today, time(12)))
+        freezer.start()
+        self.addCleanup(freezer.stop)
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
