@@ -123,8 +123,10 @@ async function markup(page) {
         const attendance=page.locator('.owner_attendance');
         await attendance.getByRole('heading',{name:'Attendance Overview',exact:true,level:1}).waitFor();
         for(const mode of ['staff','student']) {
-            const tab=attendance.getByRole('tab',{name:mode==='staff'?'Staff Attendance':'Student Attendance',exact:true});
+            const tabName=mode==='staff'?'Staff Attendance':'Student Attendance';
+            const tab=attendance.getByRole('tab',{name:tabName,exact:true});
             await tab.click();
+            await attendance.getByRole('tab',{name:tabName,exact:true,selected:true}).waitFor();
             await attendance.getByRole('status').waitFor({state:'hidden'});
             if(await attendance.locator('.alert-danger').count()) throw Error(`Owner ${mode} attendance failed to load`);
             if(await tab.getAttribute('aria-selected')!=='true') throw Error(`Owner ${mode} attendance tab is not selected`);
