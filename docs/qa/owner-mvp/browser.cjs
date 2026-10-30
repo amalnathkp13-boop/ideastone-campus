@@ -211,8 +211,11 @@ async function markup(page) {
         await page.locator('.o_form_button_save:visible').click();
         const detailResult=await(await detailSave).json();
         if(detailResult.error) throw Error(detailResult.error.data?.message || detailResult.error.message);
+        // A hash-only goto keeps the same document, and the router may still be writing the form URL
+        // when a reload fires; leave the page first so the profile loads fresh from the server.
+        await page.goto('about:blank');
         await page.goto(`${base}/web#action=${profileAction}&campus_module=staff`);
-        await page.reload();
+        await page.locator('#staff_profile_select').waitFor();
         await page.getByRole('cell',{name:'Owner QA qualification',exact:true}).waitFor();
         if(await page.locator('.staff_profile_alert').count()) throw Error('Owner profile displays a record access error');
         await assertCampusTheme(page);
