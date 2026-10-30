@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+  <record id="calendar_sample_1" model="campus.calendar.event">
+    <field name="name">Faculty Development Workshop</field>
+    <field name="date_start">2026-10-06</field>
+    <field name="date_end">2026-10-06</field>
+    <field name="time">10:00 AM – 1:00 PM</field>
+    <field name="category">workshop</field>
+    <field name="status">completed</field>
+    <field name="venue">Seminar Hall 1</field>
+    <field name="organizer">Faculty Development Cell</field>
+    <field name="contact">Staff Development Coordinator</field>
+    <field name="audience">Faculty &amp; staff</field>
+    <field name="description">Illustrative workshop entry for professional learning.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;10:00 AM&quot;,&quot;title&quot;:&quot;Opening and objectives&quot;},{&quot;time&quot;:&quot;10:30 AM&quot;,&quot;title&quot;:&quot;Technical session&quot;},{&quot;time&quot;:&quot;12:15 PM&quot;,&quot;title&quot;:&quot;Discussion and feedback&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+  <record id="calendar_sample_2" model="campus.calendar.event">
+    <field name="name">Internal Assessment – CAT</field>
+    <field name="date_start">2026-10-08</field>
+    <field name="date_end">2026-10-12</field>
+    <field name="time">9:30 AM – 12:30 PM</field>
+    <field name="category">exam</field>
+    <field name="status">completed</field>
+    <field name="venue">Respective classrooms</field>
+    <field name="organizer">Office of the Controller of Examinations</field>
+    <field name="contact">Exam Cell</field>
+    <field name="audience">Students</field>
+    <field name="description">Sample assessment window. Check the official examination timetable before publishing.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;Before exam&quot;,&quot;title&quot;:&quot;Hall allocation and seating plan&quot;},{&quot;time&quot;:&quot;Exam day&quot;,&quot;title&quot;:&quot;Attendance and question-paper distribution&quot;},{&quot;time&quot;:&quot;After exam&quot;,&quot;title&quot;:&quot;Marks entry and review&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+  <record id="calendar_sample_3" model="campus.calendar.event">
+    <field name="name">Innovation &amp; Project Review</field>
+    <field name="date_start">2026-10-14</field>
+    <field name="date_end">2026-10-14</field>
+    <field name="time">10:00 AM – 3:00 PM</field>
+    <field name="category">academic</field>
+    <field name="status">completed</field>
+    <field name="venue">Department laboratories</field>
+    <field name="organizer">Department Project Coordinators</field>
+    <field name="contact">Department office</field>
+    <field name="audience">Selected departments</field>
+    <field name="description">Student project progress review and mentor feedback.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;10:00 AM&quot;,&quot;title&quot;:&quot;Project demonstrations&quot;},{&quot;time&quot;:&quot;1:00 PM&quot;,&quot;title&quot;:&quot;Panel review&quot;},{&quot;time&quot;:&quot;2:30 PM&quot;,&quot;title&quot;:&quot;Action points&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+  <record id="calendar_sample_4" model="campus.calendar.event">
+    <field name="name">Campus Wellness &amp; Sports Day</field>
+    <field name="date_start">2026-10-17</field>
+    <field name="date_end">2026-10-17</field>
+    <field name="time">8:30 AM – 4:00 PM</field>
+    <field name="category">cultural</field>
+    <field name="status">completed</field>
+    <field name="venue">College grounds</field>
+    <field name="organizer">Physical Education Department</field>
+    <field name="contact">Sports Coordinator</field>
+    <field name="audience">All campus</field>
+    <field name="description">Illustrative campus community event.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;8:30 AM&quot;,&quot;title&quot;:&quot;Registration and warm-up&quot;},{&quot;time&quot;:&quot;9:00 AM&quot;,&quot;title&quot;:&quot;Opening events&quot;},{&quot;time&quot;:&quot;1:00 PM&quot;,&quot;title&quot;:&quot;Team activities&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+  <record id="calendar_sample_5" model="campus.calendar.event">
+    <field name="name">Library Book Return Reminder</field>
+    <field name="date_start">2026-10-20</field>
+    <field name="date_end">2026-10-20</field>
+    <field name="time">All day</field>
+    <field name="category">academic</field>
+    <field name="status">completed</field>
+    <field name="venue">Central Library</field>
+    <field name="organizer">Library &amp; Learning Centre</field>
+    <field name="contact">Librarian</field>
+    <field name="audience">Students</field>
+    <field name="description">Sample academic reminder to demonstrate deadlines in the campus calendar.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;All day&quot;,&quot;title&quot;:&quot;Return or renew due library books&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+  <record id="calendar_sample_6" model="campus.calendar.event">
+    <field name="name">Research Seminar: Emerging Technologies</field>
+    <field name="date_start">2026-10-28</field>
+    <field name="date_end">2026-10-28</field>
+    <field name="time">11:00 AM – 12:30 PM</field>
+    <field name="category">workshop</field>
+    <field name="status">upcoming</field>
+    <field name="venue">Main Seminar Hall</field>
+    <field name="organizer">Research &amp; Development Cell</field>
+    <field name="contact">R&amp;D Coordinator</field>
+    <field name="audience">Students and faculty</field>
+    <field name="description">Illustrative seminar listing. Confirm speaker and venue before official publication.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;10:30 AM&quot;,&quot;title&quot;:&quot;Participant check-in&quot;},{&quot;time&quot;:&quot;11:00 AM&quot;,&quot;title&quot;:&quot;Guest talk&quot;},{&quot;time&quot;:&quot;12:00 PM&quot;,&quot;title&quot;:&quot;Q&amp;A and closing&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+  <record id="calendar_sample_7" model="campus.calendar.event">
+    <field name="name">Department Club Coordination Meeting</field>
+    <field name="date_start">2026-10-29</field>
+    <field name="date_end">2026-10-29</field>
+    <field name="time">3:00 PM – 4:00 PM</field>
+    <field name="category">academic</field>
+    <field name="status">planning</field>
+    <field name="venue">Conference Room</field>
+    <field name="organizer">Student Affairs Office</field>
+    <field name="contact">Student Activities Coordinator</field>
+    <field name="audience">Selected departments</field>
+    <field name="description">Review the next month’s student activities, budgets, room bookings and clashes.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;3:00 PM&quot;,&quot;title&quot;:&quot;Review event proposals&quot;},{&quot;time&quot;:&quot;3:20 PM&quot;,&quot;title&quot;:&quot;Check venue and resource needs&quot;},{&quot;time&quot;:&quot;3:45 PM&quot;,&quot;title&quot;:&quot;Confirm owners and due dates&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+  <record id="calendar_sample_8" model="campus.calendar.event">
+    <field name="name">Monthly Academic Planning Review</field>
+    <field name="date_start">2026-10-30</field>
+    <field name="date_end">2026-10-30</field>
+    <field name="time">2:00 PM – 3:30 PM</field>
+    <field name="category">academic</field>
+    <field name="status">upcoming</field>
+    <field name="venue">Principal’s Conference Room</field>
+    <field name="organizer">Academic Office</field>
+    <field name="contact">Academic Coordinator</field>
+    <field name="audience">Faculty &amp; staff</field>
+    <field name="description">Illustrative monthly review of academic milestones and upcoming events.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;2:00 PM&quot;,&quot;title&quot;:&quot;Review academic calendar&quot;},{&quot;time&quot;:&quot;2:30 PM&quot;,&quot;title&quot;:&quot;Identify schedule conflicts&quot;},{&quot;time&quot;:&quot;3:00 PM&quot;,&quot;title&quot;:&quot;Publish next steps&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+  <record id="calendar_sample_9" model="campus.calendar.event">
+    <field name="name">Campus Clean-up &amp; Green Drive</field>
+    <field name="date_start">2026-11-03</field>
+    <field name="date_end">2026-11-03</field>
+    <field name="time">9:00 AM – 11:00 AM</field>
+    <field name="category">cultural</field>
+    <field name="status">planning</field>
+    <field name="venue">Campus common areas</field>
+    <field name="organizer">NSS / Eco Club</field>
+    <field name="contact">Club Faculty Advisor</field>
+    <field name="audience">Students and faculty</field>
+    <field name="description">Sample proposal; confirm permissions, volunteer list, materials and safety arrangements.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;Before event&quot;,&quot;title&quot;:&quot;Volunteer registration&quot;},{&quot;time&quot;:&quot;9:00 AM&quot;,&quot;title&quot;:&quot;Briefing and area allocation&quot;},{&quot;time&quot;:&quot;10:45 AM&quot;,&quot;title&quot;:&quot;Collection and wrap-up&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+  <record id="calendar_sample_10" model="campus.calendar.event">
+    <field name="name">Technical Symposium – Project Expo</field>
+    <field name="date_start">2026-11-07</field>
+    <field name="date_end">2026-11-07</field>
+    <field name="time">9:30 AM – 4:00 PM</field>
+    <field name="category">workshop</field>
+    <field name="status">planning</field>
+    <field name="venue">Auditorium and department blocks</field>
+    <field name="organizer">Department Associations</field>
+    <field name="contact">Faculty Convenor</field>
+    <field name="audience">All campus and invited colleges</field>
+    <field name="description">Major event planning placeholder. Track approvals, registrations, equipment, judges and certificates.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;Before event&quot;,&quot;title&quot;:&quot;Approvals, registrations and sponsor coordination&quot;},{&quot;time&quot;:&quot;9:30 AM&quot;,&quot;title&quot;:&quot;Inauguration&quot;},{&quot;time&quot;:&quot;10:30 AM&quot;,&quot;title&quot;:&quot;Paper presentations and project expo&quot;},{&quot;time&quot;:&quot;2:00 PM&quot;,&quot;title&quot;:&quot;Competitions and evaluation&quot;},{&quot;time&quot;:&quot;3:30 PM&quot;,&quot;title&quot;:&quot;Awards and closing&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+  <record id="calendar_sample_11" model="campus.calendar.event">
+    <field name="name">CAT / Internal Assessment Planning Deadline</field>
+    <field name="date_start">2026-11-12</field>
+    <field name="date_end">2026-11-12</field>
+    <field name="time">5:00 PM deadline</field>
+    <field name="category">exam</field>
+    <field name="status">upcoming</field>
+    <field name="venue">Academic Office</field>
+    <field name="organizer">Controller of Examinations</field>
+    <field name="contact">Exam Cell</field>
+    <field name="audience">Faculty &amp; staff</field>
+    <field name="description">Sample internal deadline for submitting assessment schedules. Verify the approved academic calendar.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;By deadline&quot;,&quot;title&quot;:&quot;Submit subject-wise assessment plan&quot;},{&quot;time&quot;:&quot;After deadline&quot;,&quot;title&quot;:&quot;Resolve timetable conflicts&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+  <record id="calendar_sample_12" model="campus.calendar.event">
+    <field name="name">Inter-department Cultural Meet</field>
+    <field name="date_start">2026-11-20</field>
+    <field name="date_end">2026-11-20</field>
+    <field name="time">10:00 AM – 5:00 PM</field>
+    <field name="category">cultural</field>
+    <field name="status">planning</field>
+    <field name="venue">Open-air stage</field>
+    <field name="organizer">Student Cultural Committee</field>
+    <field name="contact">Cultural Coordinator</field>
+    <field name="audience">All campus</field>
+    <field name="description">Sample major campus event with multiple sub-events.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;10:00 AM&quot;,&quot;title&quot;:&quot;Inauguration&quot;},{&quot;time&quot;:&quot;11:00 AM&quot;,&quot;title&quot;:&quot;Music and dance events&quot;},{&quot;time&quot;:&quot;1:30 PM&quot;,&quot;title&quot;:&quot;Literary and creative competitions&quot;},{&quot;time&quot;:&quot;4:00 PM&quot;,&quot;title&quot;:&quot;Prize distribution&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+  <record id="calendar_sample_13" model="campus.calendar.event">
+    <field name="name">Semester Examination Readiness Check</field>
+    <field name="date_start">2026-11-24</field>
+    <field name="date_end">2026-11-24</field>
+    <field name="time">2:00 PM – 3:00 PM</field>
+    <field name="category">exam</field>
+    <field name="status">planning</field>
+    <field name="venue">Exam Cell</field>
+    <field name="organizer">Controller of Examinations</field>
+    <field name="contact">Exam Cell</field>
+    <field name="audience">Faculty &amp; staff</field>
+    <field name="description">Placeholder planning milestone for room readiness, invigilation, access arrangements and communications.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;2:00 PM&quot;,&quot;title&quot;:&quot;Review exam-room allocation&quot;},{&quot;time&quot;:&quot;2:20 PM&quot;,&quot;title&quot;:&quot;Check invigilation coverage&quot;},{&quot;time&quot;:&quot;2:45 PM&quot;,&quot;title&quot;:&quot;Confirm communication plan&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+  <record id="calendar_sample_14" model="campus.calendar.event">
+    <field name="name">December Event Proposals Due</field>
+    <field name="date_start">2026-11-27</field>
+    <field name="date_end">2026-11-27</field>
+    <field name="time">5:00 PM deadline</field>
+    <field name="category">academic</field>
+    <field name="status">upcoming</field>
+    <field name="venue">Online submission / Academic Office</field>
+    <field name="organizer">Campus Events Coordinator</field>
+    <field name="contact">Academic Office</field>
+    <field name="audience">Faculty &amp; staff and clubs</field>
+    <field name="description">Planning deadline for submitting title, objective, audience, date, venue, budget and responsible coordinator.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;By deadline&quot;,&quot;title&quot;:&quot;Submit event proposal&quot;},{&quot;time&quot;:&quot;Following week&quot;,&quot;title&quot;:&quot;Review clashes and approvals&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+  <record id="calendar_sample_15" model="campus.calendar.event">
+    <field name="name">December Calendar Review</field>
+    <field name="date_start">2026-12-02</field>
+    <field name="date_end">2026-12-02</field>
+    <field name="time">11:00 AM – 12:00 PM</field>
+    <field name="category">academic</field>
+    <field name="status">planning</field>
+    <field name="venue">Conference Room</field>
+    <field name="organizer">Academic Office</field>
+    <field name="contact">Academic Coordinator</field>
+    <field name="audience">Faculty &amp; staff</field>
+    <field name="description">Sample future planning milestone.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;11:00 AM&quot;,&quot;title&quot;:&quot;Review submitted events&quot;},{&quot;time&quot;:&quot;11:30 AM&quot;,&quot;title&quot;:&quot;Confirm venues and event owners&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+  <record id="calendar_sample_16" model="campus.calendar.event">
+    <field name="name">University Semester Examination Window</field>
+    <field name="date_start">2026-12-07</field>
+    <field name="date_end">2026-12-19</field>
+    <field name="time">As per approved timetable</field>
+    <field name="category">exam</field>
+    <field name="status">planning</field>
+    <field name="venue">Allocated examination halls</field>
+    <field name="organizer">Controller of Examinations</field>
+    <field name="contact">Exam Cell</field>
+    <field name="audience">Students and faculty</field>
+    <field name="description">Illustrative planning placeholder only. Replace dates with the official university examination schedule.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;Before window&quot;,&quot;title&quot;:&quot;Publish approved timetable&quot;},{&quot;time&quot;:&quot;During window&quot;,&quot;title&quot;:&quot;Run examinations and attendance&quot;},{&quot;time&quot;:&quot;After window&quot;,&quot;title&quot;:&quot;Collect scripts and complete records&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+  <record id="calendar_sample_17" model="campus.calendar.event">
+    <field name="name">Campus Holiday / Observance</field>
+    <field name="date_start">2026-11-08</field>
+    <field name="date_end">2026-11-08</field>
+    <field name="time">All day</field>
+    <field name="category">holiday</field>
+    <field name="status">planning</field>
+    <field name="venue">Campus-wide</field>
+    <field name="organizer">College Administration</field>
+    <field name="contact">Administration Office</field>
+    <field name="audience">All campus</field>
+    <field name="description">Placeholder category example. Use the official college holiday list; this is not a confirmed holiday notice.</field>
+    <field name="schedule" eval="[{&quot;time&quot;:&quot;Before publication&quot;,&quot;title&quot;:&quot;Verify official holiday circular&quot;}]"/>
+    <field name="is_sample" eval="True"/>
+  </record>
+</odoo>
