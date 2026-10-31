@@ -1,7 +1,7 @@
 {
     "name": "Ideastone Campus Operations",
     "summary": "Teaching, campus services, staff administration and institutional engagement",
-    "version": "17.0.1.0.34",
+    "version": "17.0.1.0.35",
     "category": "Education",
     "author": "Ideastone Technologies Pvt Ltd",
     "license": "OPL-1",
@@ -25,7 +25,7 @@
         "views/student_requests.xml", "security/question_paper.xml", "views/question_paper.xml", "views/hod_question_paper.xml",
         "security/coe_workspace.xml", "views/coe_workspace.xml",
         "views/academics_ui.xml", "views/owner_communication.xml", "data/owner_communication.xml",
-        "views/owner_staff_ui.xml",
+        "views/owner_staff_ui.xml", "views/owner_attendance.xml",
         "views/academics_ui.xml",
         "security/college_calendar.xml", "views/college_calendar.xml", "views/owner_fees.xml", "views/faculty_library.xml",
     ],
@@ -57,6 +57,9 @@
         "web.assets_backend": [
             "ideastone_erp/static/src/xml/faculty_campus_services.xml",
             ("before", "ideastone_campus/static/src/scss/design_system.scss", "ideastone_erp/static/src/scss/faculty_campus_services.scss"),
+            "ideastone_erp/static/src/js/owner_attendance.js",
+            "ideastone_erp/static/src/xml/owner_attendance.xml",
+            "ideastone_erp/static/src/scss/owner_attendance.scss",
             "ideastone_erp/static/src/xml/owner_fees.xml",
             ("before", "ideastone_campus/static/src/scss/design_system.scss", "ideastone_erp/static/src/scss/owner_fees.scss"),
             "ideastone_erp/static/src/xml/faculty_library.xml",
