@@ -169,6 +169,8 @@
         const link = event.target.closest("a[href]");
         if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || link.target || link.hasAttribute("download")) return;
         const url = new URL(link.href, location.href);
+        // The Green Card OWL app owns its form and lifecycle; mount it on a full navigation.
+        if (location.pathname.endsWith('/green-card') || url.pathname.endsWith('/green-card')) return;
         if (url.origin !== location.origin || !url.pathname.startsWith(workspace.dataset.portalPrefix || "/my/campus/student/") || url.pathname.includes("/download/") || url.hash) return;
         event.preventDefault();
         navigate(url.href);
