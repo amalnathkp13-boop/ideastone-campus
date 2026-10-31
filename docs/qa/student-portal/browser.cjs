@@ -22,7 +22,14 @@ async function login(page, name) {
     await Promise.all([page.waitForURL(url=>!url.pathname.startsWith('/web/login')), page.locator('button[type=submit]').click()]);
 }
 async function visit(page, section) {
-    await page.locator(`.student_sidebar a[href*="/student/${section}"]`).click();
+    // Submodules such as Green Card live in a module's top navigation, not the sidebar.
+    const sidebarLink=page.locator(`.student_sidebar a[href*="/student/${section}"]`);
+    if(await sidebarLink.count()) await sidebarLink.click();
+    else {
+        const parent=section==='green-card'?'attendance':null;
+        if(parent) await visit(page,parent);
+        await page.locator(`.student_subnav a[href*="/student/${section}"]`).first().click();
+    }
     await page.waitForURL(new RegExp(`/student/${section}`));
     await page.locator('#student_main h1:visible').waitFor();
     assert.equal(await page.locator('.student_network_error:visible').count(),0);
@@ -139,7 +146,8 @@ async function save(page, control) {
         assert.equal(await page.locator('.attendance_register_row').count(),initial.attendance.rows.length);
         assert.equal(await page.locator('.attendance_status.present').first().evaluate(element=>getComputedStyle(element).color),'rgb(22, 131, 93)');
         assert.equal(await page.locator('.attendance_tabs').count(),0);
-        assert.equal(await page.locator('.student_subnav a').count(),5);
+        assert.equal(await page.locator('.student_subnav a').count(),6);
+        assert.equal(await page.locator('.student_subnav').getByRole('link',{name:'Green Card',exact:true}).count(),1);
         await page.locator('.student_subnav').getByRole('link',{name:'Summary',exact:true}).click();
         assert(await page.locator('#student_attendance_summary').isVisible());
         await page.locator('.student_subnav').getByRole('link',{name:'Session register',exact:true}).click();
