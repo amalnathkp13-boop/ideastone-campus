@@ -29,8 +29,11 @@ class TestFacultyTaskList(OwnerMVPFixture, TransactionCase):
             self.assertEqual([row["label"] for row in task["items"][:len(expected)]], expected)
             if user == self.hod:
                 self.assertNotIn("My Mentorship Class", [row["label"] for row in task["items"]])
+                attendance = next(module for module in data["faculty_modules"] if module["key"] == "attendance")
+                self.assertIn("ideastone_erp.action_green_card_hod", [row.get("action") for row in attendance["items"]])
             else:
-                self.assertNotIn("attendance", [module["key"] for module in data["faculty_modules"]])
+                attendance = next(module for module in data["faculty_modules"] if module["key"] == "attendance")
+                self.assertEqual([row["action"] for row in attendance["items"]], ["ideastone_erp.action_green_card_mentor"])
                 self.assertFalse(any(item.get("action") == "ideastone_erp.action_subject_attendance_workspace" for item in data["navigation"]))
         with self.assertRaises(AccessError):
             self.env["campus.faculty.task.list"].with_user(self.hod).get_mentor_data()

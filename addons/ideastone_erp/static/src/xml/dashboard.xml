@@ -11,7 +11,7 @@
         <button type="button" class="campus_customize_navigation" t-on-click="customizeNavigation"><i class="fa fa-sliders" aria-hidden="true"/>Customize Navigation</button>
         <div class="campus_side_bottom"><strong t-esc="state.company"/><span t-esc="state.workspace_role"/><a href="/my/campus">My campus self-service <i class="fa fa-external-link"/></a></div>
       </aside>
-      <nav t-if="facultyModule &amp;&amp; state.module !== 'od' &amp;&amp; state.module !== 'attendance'" class="campus_faculty_subnav" t-att-aria-label="state.is_coe_workspace ? 'COE submodules' : 'Faculty submodules'">
+      <nav t-if="facultyModule &amp;&amp; state.module !== 'od' &amp;&amp; (state.module !== 'attendance' || !state.is_owner_workspace)" class="campus_faculty_subnav" t-att-aria-label="state.is_coe_workspace ? 'COE submodules' : 'Faculty submodules'">
         <strong t-esc="facultyModule.label"/>
         <button t-if="state.module !== 'admissions'" class="campus_subnav_scroll" t-on-click="() => this.scrollSubmodules(-1)" aria-label="Previous submodules"><i class="fa fa-angle-left"/></button>
         <div t-ref="subnavStrip"><t t-foreach="facultyModule.items" t-as="item" t-key="item.label"><button t-att-class="{active: item.page &amp;&amp; item.page.startsWith('settings-') ? state.page === item.page : item.tool ? state.activeTool === item.tool : item.action_id ? state.activeAction === item.action_id : state.page === item.page}" t-on-click="() => this.facultyGo(item)" t-esc="item.label"/></t></div>

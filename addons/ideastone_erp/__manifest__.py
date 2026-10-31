@@ -22,7 +22,7 @@
         "security/learning.xml", "views/mvp_learning.xml", "views/student_notices.xml", "views/student_fees.xml",
         "views/student_help.xml", "views/student_od.xml", "views/student_od_policy.xml",
         "data/student_library.xml", "views/student_library.xml",
-        "views/student_requests.xml", "security/question_paper.xml", "views/question_paper.xml", "views/hod_question_paper.xml",
+        "views/student_requests.xml", "views/green_card.xml", "security/question_paper.xml", "views/question_paper.xml", "views/hod_question_paper.xml",
         "security/coe_workspace.xml", "views/coe_workspace.xml",
         "views/academics_ui.xml", "views/owner_communication.xml", "data/owner_communication.xml",
         "views/owner_staff_ui.xml", "views/owner_attendance.xml",
@@ -32,6 +32,9 @@
     "demo": ["demo/college_calendar.xml"],
     "assets": {
         "web.assets_frontend": [
+            "ideastone_erp/static/src/js/green_card.js",
+            "ideastone_erp/static/src/xml/green_card.xml",
+            "ideastone_erp/static/src/scss/green_card.scss",
             "ideastone_erp/static/src/js/session_sync.js",
             "ideastone_erp/static/src/scss/student_portal.scss",
             "ideastone_erp/static/src/scss/student_profile.scss",
@@ -55,6 +58,9 @@
             "ideastone_erp/static/src/js/student_od.js",
         ],
         "web.assets_backend": [
+            "ideastone_erp/static/src/js/green_card.js",
+            "ideastone_erp/static/src/xml/green_card.xml",
+            "ideastone_erp/static/src/scss/green_card.scss",
             "ideastone_erp/static/src/xml/faculty_campus_services.xml",
             ("before", "ideastone_campus/static/src/scss/design_system.scss", "ideastone_erp/static/src/scss/faculty_campus_services.scss"),
             "ideastone_erp/static/src/js/owner_attendance.js",
