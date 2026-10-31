@@ -117,7 +117,26 @@ async function markup(page) {
         }
         for (const module of overview.faculty_modules.filter(module=>module.key!=='home')) {
             await page.locator('.campus_sidebar').getByRole('button',{name:module.label,exact:true}).click();
-            await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory',staff:'Staff Directory',calendar:'College Calendar'})[module.key]||module.label,exact:true,level:1}).waitFor();
+            await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory',staff:'Staff Directory',calendar:'College Calendar',attendance:'Attendance Overview'})[module.key]||module.label,exact:true,level:1}).waitFor();
+        }
+        await page.locator('.campus_sidebar').getByRole('button',{name:'Attendance',exact:true}).click();
+        const attendance=page.locator('.owner_attendance');
+        await attendance.getByRole('heading',{name:'Attendance Overview',exact:true,level:1}).waitFor();
+        for(const mode of ['staff','student']) {
+            const tabName=mode==='staff'?'Staff Attendance':'Student Attendance';
+            const tab=attendance.getByRole('tab',{name:tabName,exact:true});
+            await tab.click();
+            await attendance.getByRole('tab',{name:tabName,exact:true,selected:true}).waitFor();
+            await attendance.getByRole('status').waitFor({state:'hidden'});
+            if(await attendance.locator('.alert-danger').count()) throw Error(`Owner ${mode} attendance failed to load`);
+            if(await tab.getAttribute('aria-selected')!=='true') throw Error(`Owner ${mode} attendance tab is not selected`);
+            const snapshot=await rpc(page,'campus.owner.attendance.ui','get_dashboard',[mode]);
+            if(await attendance.locator('.metric').count()!==(mode==='staff'?6:5)
+                || await attendance.locator('.data-table tbody tr:has(button)').count()!==snapshot.departments.length
+                || Number(await attendance.locator('.metric-val').nth(1).innerText())!==snapshot.totals[mode==='staff'?'present':'students']) {
+                throw Error(`Owner ${mode} attendance does not reconcile with saved records`);
+            }
+            await page.screenshot({path:path.join(out,`owner-attendance-${mode}-1440.png`),fullPage:true});
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Admissions',exact:true}).click();
         await page.getByRole('heading',{name:'Admissions',exact:true}).waitFor();

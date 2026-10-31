@@ -4,11 +4,11 @@ from . import test_vcet_workspace
 from . import test_owner_mvp
 from . import test_admin_overview_ui
 from . import test_green_card
+from . import test_owner_attendance_ui
 from . import test_admissions_ui
 from . import test_students_directory_ui
 from . import test_examinations_ui
 from . import test_student_portal
-
 from . import test_parent_portal
 from . import test_finance_learning
 from . import test_faculty_leave_ui
