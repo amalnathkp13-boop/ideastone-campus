@@ -18,7 +18,7 @@ class StudentsNavigation(models.AbstractModel):
     def get_overview(self):
         data = super().get_overview()
         module = next((m for m in data.get("faculty_modules", []) if m["key"] == "students"), None)
-        if module and data.get("is_owner_workspace"):
+        if module and data.get("is_owner_workspace") and not data.get("is_accountant_workspace"):
             module["items"] = [{"label": label, "action": "ideastone_erp.action_students_" + view,
                 "action_id": self.env.ref("ideastone_erp.action_students_" + view).id,
                 "source_action": "ideastone_erp." + original, "model": model, "group": "Students", "allowed": True}

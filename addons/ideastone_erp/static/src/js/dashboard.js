@@ -42,7 +42,9 @@ class CampusBase extends Component {
         const route = dashboardRoute(this.props.action);
         this.state = useState({ loading: true, error: "", navigation: [], stats: [], pages: [], queues: [], quick: [], appointments: [],
             company: "", user: "", filter: "", open: false, page: route.page,
-            is_owner_workspace: false, is_demo: false, ownerMetrics: {stats: [], years: [], setup: [], funnel: [], programmes: [], collection: [], trend: [], recent: [], notices: [], upcoming: [], due_dates: []},
+            is_owner_workspace: false, is_accountant_workspace: false, is_demo: false, ownerMetrics: {stats: [], years: [], setup: [], funnel: [], programmes: [], collection: [], trend: [], recent: [], notices: [], upcoming: [], due_dates: []},
+            accountantMetrics: {cards: [], pending: [], transport: [], spending: [], recent_bills: [], notices: []},
+            accountantFilters: {date_from: "", date_to: "", year_id: ""}, accountantError: "", accountantLoading: false,
             ownerFilters: {date_from: "", date_to: "", year_id: ""}, ownerAppliedFilters: {}, ownerError: "", ownerLoading: false,
             faculty_modules: [], faculty_tasks: [], faculty_schedule: [], faculty_surveys: [], module: route.module, activeAction: 0, activeTool: "",
             busy: false, query: "", cardQuery: "", unit: "", card: "", loanPage: 0, desk: { units: [], cards: [], loans: [], next: false } });
@@ -59,13 +61,17 @@ class CampusBase extends Component {
         try {
             Object.assign(this.state, await this.orm.call("campus.dashboard", "get_overview", []));
             if (this.state.is_owner_workspace) {
-                if (this.state.page === "overview") this.state.page = "owner-overview";
+                if (this.state.is_accountant_workspace && !["overview", "accountant-overview", "faculty-module", "modules"].includes(this.state.page)) {
+                    this.state.page = "accountant-overview";
+                }
+                if (this.state.page === "overview") this.state.page = this.state.is_accountant_workspace ? "accountant-overview" : "owner-overview";
                 const hash = this.router.current.hash;
                 if (!this.state.ownerFilters.date_from) Object.assign(this.state.ownerFilters, {
                     date_from: hash.owner_from || `${this.state.today.slice(0, 8)}01`,
                     date_to: hash.owner_to || this.state.today, year_id: hash.owner_year || "",
                 });
                 if (this.state.page === "owner-overview") await this.loadOwnerMetrics();
+                if (this.state.page === "accountant-overview") await this.loadAccountantMetrics();
             }
             if (this.state.page === "library") await this.loadDesk();
             if (this.props.action) this.env.bus.trigger("CAMPUS:PAGE", this.state.page);
@@ -88,6 +94,7 @@ class CampusBase extends Component {
         if (this.state.faculty_home_enabled && this.state.page === "overview") return "Faculty overview";
         if (this.state.page === "faculty-departments") return "My departments";
         if (this.state.page === "owner-overview") return "Admin overview";
+        if (this.state.page === "accountant-overview") return "Accounts overview";
         if (this.state.page === "faculty-module") return this.facultyModule?.label || "Faculty workspace";
         if (this.state.page === "help") return "Faculty guide";
         if (this.state.page === "analytics") return "My teaching dashboard";
@@ -110,7 +117,7 @@ class CampusBase extends Component {
             return this.open(module.items[0]);
         }
         await this.action.doAction("ideastone_erp.action_dashboard", {
-            additionalContext: { campus_page: module.key === "home" ? (this.state.is_owner_workspace ? "owner-overview" : "overview") : module.key === "engagement" ? "communication-surveys" : module.key === "services" ? "campus-services-service" : "faculty-module", campus_module: module.key },
+            additionalContext: { campus_page: module.key === "home" ? (this.state.is_accountant_workspace ? "accountant-overview" : this.state.is_owner_workspace ? "owner-overview" : "overview") : module.key === "engagement" ? "communication-surveys" : module.key === "services" ? "campus-services-service" : "faculty-module", campus_module: module.key },
         });
         this.state.module = module.key;
         this.state.open = false;
@@ -198,6 +205,26 @@ class CampusBase extends Component {
         } catch (error) {
             this.state.ownerError = error.data?.message || "The college report could not be loaded. Check the period and retry.";
         } finally { this.state.ownerLoading = false; }
+    }
+    async loadAccountantMetrics() {
+        if (this.state.accountantLoading) return;
+        this.state.accountantLoading = true;
+        this.state.accountantError = "";
+        try {
+            if (!this.state.accountantFilters.date_from) Object.assign(this.state.accountantFilters, {
+                date_from: `${this.state.today.slice(0, 8)}01`, date_to: this.state.today,
+            });
+            this.state.accountantMetrics = await this.orm.call("campus.dashboard", "get_accountant_metrics", [this.state.accountantFilters]);
+        } catch (error) {
+            this.state.accountantError = error.data?.message || "Accounts records could not be loaded. Check the period and retry.";
+        } finally { this.state.accountantLoading = false; }
+    }
+    accountantOpen(xmlid) {
+        const item = this.state.navigation.find(row => row.action === `ideastone_erp.${xmlid}`);
+        if (item) return this.open(item);
+    }
+    accountantMoney(value) {
+        return `${this.state.accountantMetrics.currency || ""} ${this.number(value || 0)}`.trim();
     }
     async ownerSource(card) {
         if (!card.allowed) return;
@@ -331,7 +358,7 @@ export class CampusNavigation extends CampusBase {
         catch { /* Default navigation remains usable if preferences cannot load. */ }
     }
     get navigationScope() {
-        return this.state.is_coe_workspace ? "coe" : this.state.is_owner_workspace ? "owner" : this.state.is_hod ? "hod" : this.state.faculty_modules.length ? "faculty" : "staff";
+        return this.state.is_coe_workspace ? "coe" : this.state.is_accountant_workspace ? "accountant" : this.state.is_owner_workspace ? "owner" : this.state.is_hod ? "hod" : this.state.faculty_modules.length ? "faculty" : "staff";
     }
     get navigationCatalog() {
         const catalog = [];

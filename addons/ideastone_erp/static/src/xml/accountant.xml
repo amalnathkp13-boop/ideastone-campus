@@ -1,0 +1,68 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.AccountantOverview">
+    <div class="campus_accountant_overview">
+      <div class="campus_info mb-4">
+        <strong>Accounts register</strong> · Fee receipts, posted invoices, vendor bills and approved transport allocations in the active college.
+        <span t-if="state.is_demo"> Demonstration college · sample records.</span>
+      </div>
+      <div class="d-flex flex-wrap align-items-end gap-2 mb-3">
+        <label>From <input type="date" class="form-control" t-model="state.accountantFilters.date_from"/></label>
+        <label>To <input type="date" class="form-control" t-model="state.accountantFilters.date_to"/></label>
+        <button class="btn btn-primary" t-on-click="loadAccountantMetrics" t-att-disabled="state.accountantLoading">Apply period</button>
+        <button class="btn btn-outline-primary" t-on-click="ownerPrint" t-att-disabled="state.accountantLoading">Print owner copy</button>
+      </div>
+      <p t-if="state.accountantLoading" role="status">Loading accounts…</p>
+      <div t-if="state.accountantError" class="alert alert-danger" role="alert"><t t-esc="state.accountantError"/><button class="btn btn-outline-danger ms-2" t-on-click="loadAccountantMetrics">Retry</button></div>
+      <t t-if="!state.accountantLoading &amp;&amp; !state.accountantError">
+        <section class="campus_stats" aria-label="Accounts summary">
+          <article t-foreach="state.accountantMetrics.cards" t-as="card" t-key="card.label" class="campus_stat">
+            <div><span t-esc="card.label"/><strong t-esc="accountantMoney(card.value)"/><small t-esc="card.detail"/></div>
+            <i class="fa fa-inr" aria-hidden="true"/>
+          </article>
+        </section>
+        <p class="campus_muted mt-2">Income and outgoing use invoice dates; collections use receipt dates. Pending fees are the balance as of the selected end date. Vendor bills are recorded spend, including unpaid bills.</p>
+        <div class="campus_overview_grid mt-4">
+          <section class="campus_panel">
+            <div class="d-flex justify-content-between align-items-center"><h2>Pending fee students <span class="campus_badge" t-esc="state.accountantMetrics.pending_count"/></h2><button class="btn btn-link" t-on-click="() => this.accountantOpen('accountant_pending')">View all</button></div>
+            <div class="table-responsive"><table class="table"><thead><tr><th>Student</th><th>Department / semester</th><th>Pending</th><th>Status</th></tr></thead><tbody>
+              <tr t-foreach="state.accountantMetrics.pending" t-as="row" t-key="row.id"><td><strong t-esc="row.name"/><br/><small t-esc="row.number"/></td><td><t t-esc="row.department"/><br/><small t-esc="row.semester"/></td><td t-esc="accountantMoney(row.pending)"/><td t-esc="row.overdue ? 'Overdue' : 'Pending'"/></tr>
+              <tr t-if="!state.accountantMetrics.pending.length"><td colspan="4">No pending college fee invoices in this scope.</td></tr>
+            </tbody></table></div>
+          </section>
+          <section class="campus_panel">
+            <div class="d-flex justify-content-between align-items-center"><h2>Spending by purpose</h2><button class="btn btn-link" t-on-click="() => this.accountantOpen('accountant_expenses')">Open bills</button></div>
+            <div t-foreach="state.accountantMetrics.spending" t-as="row" t-key="row.label" class="campus_queue"><span><strong t-esc="row.label"/></span><b t-esc="accountantMoney(row.value)"/></div>
+            <h3 class="h6 mt-3">Recent vendor bills</h3>
+            <div class="table-responsive"><table class="table"><thead><tr><th>Bill</th><th>Vendor</th><th>Purpose</th><th>Amount</th></tr></thead><tbody>
+              <tr t-foreach="state.accountantMetrics.recent_bills" t-as="bill" t-key="bill.id"><td t-esc="bill.name"/><td t-esc="bill.vendor"/><td t-esc="bill.category"/><td t-esc="accountantMoney(bill.amount)"/></tr>
+              <tr t-if="!state.accountantMetrics.recent_bills.length"><td colspan="4">No posted vendor bills in this period.</td></tr>
+            </tbody></table></div>
+          </section>
+        </div>
+        <div class="campus_overview_grid mt-4">
+          <section class="campus_panel">
+            <div class="d-flex justify-content-between align-items-center"><h2>Transport fee billing <span class="campus_badge"><t t-esc="state.accountantMetrics.transport_unbilled"/> unbilled</span></h2><button class="btn btn-link" t-on-click="() => this.accountantOpen('accountant_transport')">View allocations</button></div>
+            <div class="table-responsive"><table class="table"><thead><tr><th>Student</th><th>Route</th><th>Fee</th><th>Bill</th><th>Status</th></tr></thead><tbody>
+              <tr t-foreach="state.accountantMetrics.transport" t-as="row" t-key="row.id"><td t-esc="row.student"/><td t-esc="row.route"/><td t-esc="accountantMoney(row.fee)"/><td t-esc="row.invoice || '—'"/><td t-esc="row.status"/></tr>
+              <tr t-if="!state.accountantMetrics.transport.length"><td colspan="5">No approved transport allocations.</td></tr>
+            </tbody></table></div>
+          </section>
+          <section class="campus_panel">
+            <div class="d-flex justify-content-between align-items-center"><h2>Fee circulars</h2><button class="btn btn-link" t-on-click="() => this.accountantOpen('accountant_notices')">View all</button></div>
+            <div t-foreach="state.accountantMetrics.notices" t-as="notice" t-key="notice.id" class="campus_queue"><span><strong t-esc="notice.name"/><small t-esc="notice.date"/></span><span class="campus_badge" t-esc="notice.status"/></div>
+            <p t-if="!state.accountantMetrics.notices.length" class="campus_empty">No fee circulars have been recorded.</p>
+          </section>
+        </div>
+        <section class="campus_panel mt-4">
+          <h2>Owner accounts records</h2>
+          <p class="campus_muted">Open the underlying registers to review invoice numbers, dates, payment status, amounts and receipts. Print this summary for a period snapshot.</p>
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-primary" t-on-click="() => this.accountantOpen('mvp_report_collection')">Collection report</button>
+            <button class="btn btn-outline-primary" t-on-click="() => this.accountantOpen('mvp_report_dues')">Outstanding dues report</button>
+            <button class="btn btn-outline-primary" t-on-click="() => this.accountantOpen('accountant_expenses')">Expense bills</button>
+          </div>
+        </section>
+      </t>
+    </div>
+  </t>
+</templates>
