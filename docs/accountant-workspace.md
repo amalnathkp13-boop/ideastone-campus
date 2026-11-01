@@ -1,5 +1,7 @@
 # Accountant workspace
 
+The local campus is available at **http://localhost/web/login**. From this checkout, restart the Odoo service with `docker compose -p ideastone-campus up -d --build --no-deps odoo`; the existing PostgreSQL volume is retained and the Ideastone modules upgrade on startup.
+
 Upgrade **Ideastone Campus Operations** after deploying these changes. In Odoo, open **Settings → Users**, create an internal user or edit an existing one, and assign the **Accountant** group under Campus Operations. The user signs in through the same campus login page as other roles. SSO credentials and the Odoo role are managed separately; assigning a Keycloak realm role alone does not grant Odoo accounting access.
 
 The Accountant dashboard uses saved, company scoped records:
