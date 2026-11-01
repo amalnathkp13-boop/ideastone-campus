@@ -1,9 +1,9 @@
 from collections import defaultdict
 from datetime import date
 
-from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, ValidationError
 
+from odoo import _, api, fields, models
 
 ACCOUNTANT_MODULES = [
     ("home", "Dashboard", "home", [("Accounts overview", "accountant-overview")]),
@@ -63,8 +63,7 @@ class AccountantDashboard(models.AbstractModel):
         owner_accounts = [("Accounts summary", "accountant-overview"), ("Student fee directory", "accountant_students"),
             ("Pending fee students", "accountant_pending"), ("Transport fee bills", "accountant_transport"),
             ("Event & maintenance bills", "accountant_expenses"), ("Fee circulars", "accountant_notices")]
-        return [(key, label, icon, entries + owner_accounts if key == "fees" else entries)
-                for key, label, icon, entries in modules]
+        return modules + [("accounts", "Accounts", "ledger", owner_accounts)]
 
     @api.model
     def get_overview(self):

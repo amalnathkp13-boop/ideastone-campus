@@ -22,6 +22,10 @@ class TestAccountantWorkspace(OwnerMVPFixture, TransactionCase):
         data = dashboard.get_accountant_metrics({"date_from": str(self.today), "date_to": str(self.today)})
         self.assertTrue(any(row["id"] == student.id and row["pending"] == 375 for row in data["pending"]))
         self.assertGreaterEqual(data["cards"][0]["value"], 125)
+        owner_dashboard = self.env["campus.dashboard"].with_user(self.owner)
+        self.assertIn("accounts", [module["key"] for module in owner_dashboard.get_overview()["faculty_modules"]])
+        self.assertEqual(owner_dashboard.get_accountant_metrics({"date_from": str(self.today),
+            "date_to": str(self.today)})["cards"], data["cards"])
         with self.assertRaises(AccessError):
             dashboard.get_owner_metrics()
 
