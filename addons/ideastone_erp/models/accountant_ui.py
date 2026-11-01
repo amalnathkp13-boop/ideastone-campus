@@ -77,23 +77,42 @@ class AccountantDashboard(models.AbstractModel):
         self._accountant_access()
         f = self._mvp_filters(filters)
         company = [("company_id", "=", self.env.company.id)]
+        departments = self.env["op.department"].search(
+            ["|", ("company_id", "=", False), ("company_id", "=", self.env.company.id)], order="name")
+        department_id = f["department_id"]
+        if department_id and department_id not in departments.ids:
+            raise AccessError(_("Select a department in the active college."))
+        sale_types = {"out_invoice", "out_refund"}
+        vendor_types = {"in_invoice", "in_refund"}
+
+        def in_department(move):
+            if not department_id:
+                return True
+            if move.move_type in sale_types:
+                return move.campus_course_id.department_id.id == department_id
+            return move.campus_spend_department_id.id == department_id
+
+        def receipt_in_department(payment):
+            return not department_id or payment.campus_invoice_id.campus_course_id.department_id.id == department_id
+
         period = [("invoice_date", ">=", f["date_from"]), ("invoice_date", "<=", f["date_to"])]
         moves = self._mvp_records("account.move", company + period + [("state", "=", "posted"),
-            ("move_type", "in", ["out_invoice", "out_refund", "in_invoice", "in_refund"])])
-        paid = self._mvp_records(*self._mvp_source("collection", f))
+            ("move_type", "in", list(sale_types | vendor_types))]).filtered(in_department)
+        paid = self._mvp_records(*self._mvp_source("collection", f)).filtered(receipt_in_department)
         collections = sum(p.amount for p in paid if f["date_from"] <= p.date <= f["date_to"])
         collections -= sum(p.amount for p in paid if p.campus_reversal_id and f["date_from"] <= p.campus_reversal_id.date <= f["date_to"])
         income = sum(m.amount_total * (1 if m.move_type == "out_invoice" else -1)
-                     for m in moves if m.move_type in {"out_invoice", "out_refund"})
+                     for m in moves if m.move_type in sale_types)
         outgoing = sum(m.amount_total * (1 if m.move_type == "in_invoice" else -1)
-                       for m in moves if m.move_type in {"in_invoice", "in_refund"})
-        bills = moves.filtered(lambda m: m.move_type in {"in_invoice", "in_refund"})
+                       for m in moves if m.move_type in vendor_types)
+        bills = moves.filtered(lambda m: m.move_type in vendor_types)
         spend = defaultdict(float)
         for bill in bills:
             spend[bill.campus_spend_category or "unclassified"] += bill.amount_total * (1 if bill.move_type == "in_invoice" else -1)
 
         due_model, due_domain = self._mvp_source("dues", f)
-        due_rows = self._mvp_report_rows("dues", f, self._mvp_records(due_model, due_domain))
+        due_moves = self._mvp_records(due_model, due_domain).filtered(in_department)
+        due_rows = self._mvp_report_rows("dues", f, due_moves)
         pending = defaultdict(lambda: {"amount": 0.0, "overdue": 0, "invoices": 0})
         for row in due_rows:
             # The report row already applies the selected as-of date and reversals.
@@ -113,6 +132,8 @@ class AccountantDashboard(models.AbstractModel):
         student_rows.sort(key=lambda row: (-row["pending"], row["name"]))
 
         allocations = self._mvp_records("campus.transport.allocation", company + [("state", "=", "approved")], limit=50000)
+        if department_id:
+            allocations = allocations.filtered(lambda a: _current_enrolment(a.student_id).course_id.department_id.id == department_id)
         transport = [{"id": a.id, "student": a.student_id.name, "route": a.route_id.name,
                       "fee": a.stop_id.fee, "invoice": a.invoice_id.name or "",
                       "pending": a.invoice_id.amount_residual if a.invoice_id.state == "posted" else 0,
@@ -120,14 +141,83 @@ class AccountantDashboard(models.AbstractModel):
                           else "Paid" if a.invoice_id.amount_residual <= 0 else "Pending"}
                      for a in allocations if not f["year_id"] or a.year_id.id == f["year_id"]]
         notices = self.env["campus.circular"].search(company + [("campus_category", "=", "Fees")], order="date_from desc", limit=6)
+        all_bills = self._mvp_records("account.move", company + period + [
+            ("move_type", "in", list(vendor_types)), ("state", "!=", "cancel")]).filtered(in_department)
+        draft_bills = all_bills.filtered(lambda bill: bill.state == "draft")
+
+        # A fixed 12-month window lets the selector change the chart without a second RPC.
+        trend_start = fields.Date.subtract(f["date_to"].replace(day=1), months=11)
+        trend_filters = dict(f, date_from=trend_start)
+        trend_receipts = self._mvp_records(*self._mvp_source("collection", trend_filters)).filtered(receipt_in_department)
+        trend_invoices = self._mvp_records("account.move", company + [
+            ("invoice_date", ">=", trend_start), ("invoice_date", "<=", f["date_to"]),
+            ("state", "=", "posted"), ("move_type", "in", list(sale_types))]).filtered(in_department)
+        trend = [{"month": fields.Date.add(trend_start, months=i).strftime("%Y-%m"),
+                  "label": fields.Date.add(trend_start, months=i).strftime("%b"),
+                  "collections": 0.0, "income": 0.0} for i in range(12)]
+        by_month = {row["month"]: row for row in trend}
+        for payment in trend_receipts:
+            if trend_start <= payment.date <= f["date_to"]:
+                by_month[payment.date.strftime("%Y-%m")]["collections"] += payment.amount
+            reversal = payment.campus_reversal_id
+            if reversal and trend_start <= reversal.date <= f["date_to"]:
+                by_month[reversal.date.strftime("%Y-%m")]["collections"] -= payment.amount
+        for invoice in trend_invoices:
+            by_month[invoice.invoice_date.strftime("%Y-%m")]["income"] += invoice.amount_total * (
+                1 if invoice.move_type == "out_invoice" else -1)
+
+        pending_total = sum(row["balance"] for row in due_rows)
+        overdue_total = sum(row["balance"] for row in due_rows if row["days_overdue"] > 0)
+        billed_total = sum(move.amount_total for move in due_moves)
+        overdue_30 = len({self.env["account.move"].browse(row["id"]).campus_student_id.id
+                          for row in due_rows if row["days_overdue"] > 30})
+        activity = []
+        for payment in paid:
+            if f["date_from"] <= payment.date <= f["date_to"]:
+                activity.append({"id": f"receipt-{payment.id}", "reference": payment.campus_receipt_number,
+                    "name": "Student fee receipt", "detail": payment.campus_invoice_id.campus_student_id.name or "Fee collection",
+                    "amount": payment.amount, "date": str(payment.date), "status": "Posted"})
+            reversal = payment.campus_reversal_id
+            if reversal and f["date_from"] <= reversal.date <= f["date_to"]:
+                activity.append({"id": f"reversal-{payment.id}", "reference": payment.campus_receipt_number,
+                    "name": "Receipt reversal", "detail": payment.campus_invoice_id.campus_student_id.name or "Fee collection",
+                    "amount": -payment.amount, "date": str(reversal.date), "status": "Reversed"})
+        for bill in all_bills:
+            activity.append({"id": f"bill-{bill.id}", "reference": bill.name if bill.name != "/" else bill.ref or "Draft bill",
+                "name": bill.ref or bill.partner_id.name or "Vendor bill", "detail": bill.partner_id.name or "Vendor invoice",
+                "amount": bill.amount_total * (1 if bill.move_type == "in_invoice" else -1),
+                "date": str(bill.invoice_date or bill.date),
+                "status": "Draft" if bill.state == "draft" else "Paid" if bill.payment_state == "paid" else "Posted"})
+        activity.sort(key=lambda row: (row["date"], row["id"]), reverse=True)
         return {
             "currency": self.env.company.currency_id.symbol,
             "period": {"from": str(f["date_from"]), "to": str(f["date_to"])},
+            "departments": [{"id": department.id, "name": department.name} for department in departments],
+            "selected_department": department_id,
             "cards": [
-                {"label": "Fee collections", "value": collections, "detail": "Receipts less reversals in period"},
-                {"label": "Billed income", "value": income, "detail": "Posted customer invoices less credit notes"},
-                {"label": "Recorded outgoing", "value": outgoing, "detail": "Posted vendor bills less credits"},
-                {"label": "Student fees pending", "value": sum(r["balance"] for r in due_rows), "detail": f"As of {f['date_to']}"},
+                {"key": "collections", "label": "Fee collections", "value": collections, "detail": "Receipts less reversals in period", "pill": "This period"},
+                {"key": "income", "label": "Billed income", "value": income, "detail": "Posted invoices less credits", "pill": "This period"},
+                {"key": "dues", "label": "Outstanding dues", "value": pending_total, "detail": f"{len(student_rows)} student accounts pending", "pill": "Due now" if pending_total else "Clear"},
+                {"key": "spending", "label": "Recorded spending", "value": outgoing, "detail": f"Across {len(bills)} posted vendor bills", "pill": "Recorded"},
+            ],
+            "trend": trend,
+            "collection_status": {"collected": max(0.0, billed_total - pending_total),
+                "pending": max(0.0, pending_total - overdue_total), "overdue": overdue_total,
+                "total": billed_total, "overdue_30": overdue_30},
+            "activity": activity[:6],
+            "queue": [
+                {"key": "dues", "title": "Outstanding student dues", "count": len(student_rows),
+                 "detail": f"{len(student_rows)} student accounts · {self._mvp_money(pending_total)} remaining",
+                 "hint": "Prioritize overdue balances", "action": "accountant_pending"},
+                {"key": "bills", "title": "Draft vendor bills to review", "count": len(draft_bills),
+                 "detail": f"{len(draft_bills)} bills · {self._mvp_money(sum(b.amount_total for b in draft_bills))} total",
+                 "hint": "Check evidence and category", "action": "accountant_expenses"},
+                {"key": "transport", "title": "Transport allocations to bill", "count": sum(1 for row in transport if not row["invoice"]),
+                 "detail": f"{sum(1 for row in transport if not row['invoice'])} approved allocations not billed",
+                 "hint": "Create linked fee invoices", "action": "accountant_transport"},
+                {"key": "circulars", "title": "Fee circulars in draft", "count": self.env["campus.circular"].search_count(
+                    company + [("campus_category", "=", "Fees"), ("campus_status", "=", "draft")]),
+                 "detail": "Review fee notices before publishing", "hint": "Open circular records", "action": "accountant_notices"},
             ],
             "pending_count": len(student_rows),
             "pending": student_rows[:10],
@@ -144,6 +234,7 @@ class AccountantDashboard(models.AbstractModel):
 class AccountantExpense(models.Model):
     _inherit = "account.move"
 
+    campus_spend_department_id = fields.Many2one("op.department", string="Spending department", index=True)
     campus_spend_category = fields.Selection([
         ("event", "College event"), ("maintenance", "Maintenance"), ("other", "Other"),
     ], string="College spending category", index=True)

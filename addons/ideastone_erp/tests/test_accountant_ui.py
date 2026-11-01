@@ -22,6 +22,10 @@ class TestAccountantWorkspace(OwnerMVPFixture, TransactionCase):
         data = dashboard.get_accountant_metrics({"date_from": str(self.today), "date_to": str(self.today)})
         self.assertTrue(any(row["id"] == student.id and row["pending"] == 375 for row in data["pending"]))
         self.assertGreaterEqual(data["cards"][0]["value"], 125)
+        self.assertEqual(len(data["trend"]), 12)
+        self.assertGreaterEqual(data["trend"][-1]["collections"], 125)
+        self.assertTrue(any(row["status"] == "Posted" for row in data["activity"]))
+        self.assertGreaterEqual(data["collection_status"]["pending"] + data["collection_status"]["overdue"], 375)
         owner_dashboard = self.env["campus.dashboard"].with_user(self.owner)
         self.assertIn("accounts", [module["key"] for module in owner_dashboard.get_overview()["faculty_modules"]])
         self.assertEqual(owner_dashboard.get_accountant_metrics({"date_from": str(self.today),
@@ -40,6 +44,7 @@ class TestAccountantWorkspace(OwnerMVPFixture, TransactionCase):
         bill = self.env["account.move"].with_user(self.accountant).create({
             "move_type": "in_invoice", "partner_id": vendor.id, "journal_id": journal.id,
             "invoice_date": self.today, "campus_spend_category": "event",
+            "campus_spend_department_id": self.department.id,
             "invoice_line_ids": [(0, 0, {"name": "Annual day supplies", "quantity": 1,
                 "price_unit": 2400, "account_id": expense.id, "tax_ids": [(5, 0, 0)]})],
         })
@@ -49,6 +54,10 @@ class TestAccountantWorkspace(OwnerMVPFixture, TransactionCase):
             "date_from": str(self.today), "date_to": str(self.today)})
         self.assertTrue(any(row["id"] == bill.id for row in data["recent_bills"]))
         self.assertGreaterEqual(next(row["value"] for row in data["spending"] if row["label"] == "Event"), 2400)
+        filtered = self.env["campus.dashboard"].with_user(self.accountant).get_accountant_metrics({
+            "date_from": str(self.today), "date_to": str(self.today), "department_id": self.department.id})
+        self.assertGreaterEqual(next(row["value"] for row in filtered["cards"] if row["key"] == "spending"), 2400)
+        self.assertTrue(any(row["reference"] == bill.name for row in filtered["activity"]))
 
     def test_fee_circular_and_approved_transport_bill_persist(self):
         notice = self.env["campus.circular"].with_user(self.accountant).create({

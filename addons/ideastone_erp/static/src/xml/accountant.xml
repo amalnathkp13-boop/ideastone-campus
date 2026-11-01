@@ -1,68 +1,101 @@
 <templates xml:space="preserve">
   <t t-name="ideastone_erp.AccountantOverview">
     <div class="campus_accountant_overview">
-      <div class="campus_info mb-4">
-        <strong>Accounts register</strong> · Fee receipts, posted invoices, vendor bills and approved transport allocations in the active college.
-        <span t-if="state.is_demo"> Demonstration college · sample records.</span>
-      </div>
-      <div class="d-flex flex-wrap align-items-end gap-2 mb-3">
-        <label>From <input type="date" class="form-control" t-model="state.accountantFilters.date_from"/></label>
-        <label>To <input type="date" class="form-control" t-model="state.accountantFilters.date_to"/></label>
-        <button class="btn btn-primary" t-on-click="loadAccountantMetrics" t-att-disabled="state.accountantLoading">Apply period</button>
-        <button class="btn btn-outline-primary" t-on-click="ownerPrint" t-att-disabled="state.accountantLoading">Print owner copy</button>
-      </div>
-      <p t-if="state.accountantLoading" role="status">Loading accounts…</p>
-      <div t-if="state.accountantError" class="alert alert-danger" role="alert"><t t-esc="state.accountantError"/><button class="btn btn-outline-danger ms-2" t-on-click="loadAccountantMetrics">Retry</button></div>
-      <t t-if="!state.accountantLoading &amp;&amp; !state.accountantError">
-        <section class="campus_stats" aria-label="Accounts summary">
-          <article t-foreach="state.accountantMetrics.cards" t-as="card" t-key="card.label" class="campus_stat">
-            <div><span t-esc="card.label"/><strong t-esc="accountantMoney(card.value)"/><small t-esc="card.detail"/></div>
-            <i class="fa fa-inr" aria-hidden="true"/>
-          </article>
-        </section>
-        <p class="campus_muted mt-2">Income and outgoing use invoice dates; collections use receipt dates. Pending fees are the balance as of the selected end date. Vendor bills are recorded spend, including unpaid bills.</p>
-        <div class="campus_overview_grid mt-4">
-          <section class="campus_panel">
-            <div class="d-flex justify-content-between align-items-center"><h2>Pending fee students <span class="campus_badge" t-esc="state.accountantMetrics.pending_count"/></h2><button class="btn btn-link" t-on-click="() => this.accountantOpen('accountant_pending')">View all</button></div>
-            <div class="table-responsive"><table class="table"><thead><tr><th>Student</th><th>Department / semester</th><th>Pending</th><th>Status</th></tr></thead><tbody>
-              <tr t-foreach="state.accountantMetrics.pending" t-as="row" t-key="row.id"><td><strong t-esc="row.name"/><br/><small t-esc="row.number"/></td><td><t t-esc="row.department"/><br/><small t-esc="row.semester"/></td><td t-esc="accountantMoney(row.pending)"/><td t-esc="row.overdue ? 'Overdue' : 'Pending'"/></tr>
-              <tr t-if="!state.accountantMetrics.pending.length"><td colspan="4">No pending college fee invoices in this scope.</td></tr>
-            </tbody></table></div>
-          </section>
-          <section class="campus_panel">
-            <div class="d-flex justify-content-between align-items-center"><h2>Spending by purpose</h2><button class="btn btn-link" t-on-click="() => this.accountantOpen('accountant_expenses')">Open bills</button></div>
-            <div t-foreach="state.accountantMetrics.spending" t-as="row" t-key="row.label" class="campus_queue"><span><strong t-esc="row.label"/></span><b t-esc="accountantMoney(row.value)"/></div>
-            <h3 class="h6 mt-3">Recent vendor bills</h3>
-            <div class="table-responsive"><table class="table"><thead><tr><th>Bill</th><th>Vendor</th><th>Purpose</th><th>Amount</th></tr></thead><tbody>
-              <tr t-foreach="state.accountantMetrics.recent_bills" t-as="bill" t-key="bill.id"><td t-esc="bill.name"/><td t-esc="bill.vendor"/><td t-esc="bill.category"/><td t-esc="accountantMoney(bill.amount)"/></tr>
-              <tr t-if="!state.accountantMetrics.recent_bills.length"><td colspan="4">No posted vendor bills in this period.</td></tr>
-            </tbody></table></div>
-          </section>
+      <div class="accountant_topbar">
+        <div class="accountant_crumb">VCET Campus <span>/</span> <strong>Accountant overview</strong></div>
+        <div class="accountant_top_actions">
+          <button type="button" class="accountant_top_icon" aria-label="Refresh accounts" t-on-click="loadAccountantMetrics" t-att-disabled="state.accountantLoading"><i class="fa fa-refresh"/></button>
+          <span class="accountant_top_role">Accountant</span>
+          <span class="accountant_avatar" aria-hidden="true">A</span>
         </div>
-        <div class="campus_overview_grid mt-4">
-          <section class="campus_panel">
-            <div class="d-flex justify-content-between align-items-center"><h2>Transport fee billing <span class="campus_badge"><t t-esc="state.accountantMetrics.transport_unbilled"/> unbilled</span></h2><button class="btn btn-link" t-on-click="() => this.accountantOpen('accountant_transport')">View allocations</button></div>
-            <div class="table-responsive"><table class="table"><thead><tr><th>Student</th><th>Route</th><th>Fee</th><th>Bill</th><th>Status</th></tr></thead><tbody>
-              <tr t-foreach="state.accountantMetrics.transport" t-as="row" t-key="row.id"><td t-esc="row.student"/><td t-esc="row.route"/><td t-esc="accountantMoney(row.fee)"/><td t-esc="row.invoice || '—'"/><td t-esc="row.status"/></tr>
-              <tr t-if="!state.accountantMetrics.transport.length"><td colspan="5">No approved transport allocations.</td></tr>
-            </tbody></table></div>
-          </section>
-          <section class="campus_panel">
-            <div class="d-flex justify-content-between align-items-center"><h2>Fee circulars</h2><button class="btn btn-link" t-on-click="() => this.accountantOpen('accountant_notices')">View all</button></div>
-            <div t-foreach="state.accountantMetrics.notices" t-as="notice" t-key="notice.id" class="campus_queue"><span><strong t-esc="notice.name"/><small t-esc="notice.date"/></span><span class="campus_badge" t-esc="notice.status"/></div>
-            <p t-if="!state.accountantMetrics.notices.length" class="campus_empty">No fee circulars have been recorded.</p>
-          </section>
-        </div>
-        <section class="campus_panel mt-4">
-          <h2>Owner accounts records</h2>
-          <p class="campus_muted">Open the underlying registers to review invoice numbers, dates, payment status, amounts and receipts. Print this summary for a period snapshot.</p>
-          <div class="d-flex flex-wrap gap-2">
-            <button class="btn btn-outline-primary" t-on-click="() => this.accountantOpen('mvp_report_collection')">Collection report</button>
-            <button class="btn btn-outline-primary" t-on-click="() => this.accountantOpen('mvp_report_dues')">Outstanding dues report</button>
-            <button class="btn btn-outline-primary" t-on-click="() => this.accountantOpen('accountant_expenses')">Expense bills</button>
+      </div>
+      <div class="accountant_content">
+        <header class="accountant_head">
+          <div><h1>Accountant overview</h1><p>A clear view of collections, spending and pending action across your campus.</p></div>
+          <div class="accountant_actions">
+            <button type="button" class="accountant_btn" t-on-click="accountantExportSummary" t-att-disabled="state.accountantLoading || !state.accountantMetrics.cards.length"><i class="fa fa-download"/> Export summary</button>
+            <button type="button" class="accountant_btn accountant_btn_primary" t-on-click="ownerPrint"><i class="fa fa-print"/> Print overview</button>
           </div>
-        </section>
-      </t>
+        </header>
+        <div class="accountant_filterbar" role="group" aria-label="Accounts filters">
+          <label class="accountant_filtergroup"><span>From date</span><input type="date" t-model="state.accountantFilters.date_from"/></label>
+          <span class="accountant_range_separator">to</span>
+          <label class="accountant_filtergroup"><span>To date</span><input type="date" t-model="state.accountantFilters.date_to"/></label>
+          <label class="accountant_filtergroup"><span>Department</span><select t-model="state.accountantFilters.department_id"><option value="">All departments</option><option t-foreach="state.accountantMetrics.departments || []" t-as="department" t-key="department.id" t-att-value="department.id" t-esc="department.name"/></select></label>
+          <button type="button" class="accountant_btn accountant_btn_primary" t-on-click="loadAccountantMetrics" t-att-disabled="state.accountantLoading">Apply filters</button>
+          <span class="accountant_filter_meta">Updated <t t-esc="state.accountantUpdatedAt || 'just now'"/><t t-if="state.is_demo"> · Sample data</t><t t-else=""> · Live records</t></span>
+        </div>
+        <div t-if="state.accountantError" class="accountant_error" role="alert"><span t-esc="state.accountantError"/><button type="button" class="accountant_btn" t-on-click="loadAccountantMetrics">Retry</button></div>
+        <p t-if="state.accountantLoading" class="accountant_loading" role="status"><i class="fa fa-spinner fa-spin"/> Loading accounts…</p>
+        <t t-if="!state.accountantLoading &amp;&amp; !state.accountantError">
+          <section class="accountant_stats" aria-label="Accounts summary">
+            <article t-foreach="state.accountantMetrics.cards" t-as="card" t-key="card.key" class="accountant_stat" t-att-class="'accountant_stat_' + card.key">
+              <div class="accountant_stat_top"><span class="accountant_stat_symbol"><i t-att-class="'fa fa-' + (card.key === 'collections' ? 'th' : card.key === 'income' ? 'check-square-o' : card.key === 'dues' ? 'inr' : 'list-alt')"/></span><span class="accountant_pill" t-esc="card.pill"/></div>
+              <div class="accountant_stat_label" t-esc="card.label"/>
+              <div class="accountant_stat_value" t-esc="accountantCompactMoney(card.value)"/>
+              <div class="accountant_stat_detail" t-esc="card.detail"/>
+            </article>
+          </section>
+          <section class="accountant_chart_grid">
+            <article class="accountant_panel accountant_trend_panel">
+              <div class="accountant_panel_head"><div><h2>Collection &amp; billing trend</h2><p>Monthly cash-in against invoices · <t t-esc="accountantChartUnit"/></p></div><select aria-label="Trend period" t-model="state.accountantTrendPeriod"><option value="half">Half-year view</option><option value="year">Year view</option></select></div>
+              <div class="accountant_legend"><span><i class="accountant_dot accountant_dot_collection"/>Collections</span><span><i class="accountant_dot accountant_dot_income"/>Billed income</span></div>
+              <div class="accountant_chartwrap">
+                <svg viewBox="0 0 640 240" role="img" aria-label="Monthly collections and billed income chart">
+                  <g t-foreach="accountantChartTicks" t-as="tick" t-key="tick.y"><line x1="45" x2="620" t-att-y1="tick.y" t-att-y2="tick.y" stroke="#e8eef6" stroke-width="1"/><text x="36" t-att-y="tick.y + 4" text-anchor="end" fill="#7c91a8" font-size="11" t-esc="accountantAxisMoney(tick.value)"/></g>
+                  <g t-foreach="accountantChartBars" t-as="bar" t-key="bar.key">
+                    <rect t-att-x="bar.x" t-att-y="bar.incomeY" t-att-width="bar.width" t-att-height="bar.incomeHeight" rx="4" fill="#9fc4fb"><title t-esc="bar.label + ' billed income: ' + accountantMoney(bar.income)"/></rect>
+                    <rect t-att-x="bar.collectionX" t-att-y="bar.collectionY" t-att-width="bar.width" t-att-height="bar.collectionHeight" rx="4" fill="#1769e8"><title t-esc="bar.label + ' collections: ' + accountantMoney(bar.collections)"/></rect>
+                    <text t-att-x="bar.labelX" y="238" text-anchor="middle" fill="#7c91a8" font-size="11" t-esc="bar.label"/>
+                  </g>
+                </svg>
+              </div>
+              <div class="accountant_chartfoot"><span t-esc="accountantTrendChange === null ? 'Monthly figures update from posted records.' : 'Collections compared with the previous month.'"/><strong t-if="accountantTrendChange !== null" t-esc="(accountantTrendChange &gt;= 0 ? '+' : '') + number(accountantTrendChange) + '%'"/></div>
+            </article>
+            <article class="accountant_panel accountant_status_panel">
+              <div class="accountant_panel_head"><div><h2>Collection status</h2><p>Student fee accounts as of <t t-esc="state.accountantMetrics.period.to"/></p></div><button type="button" class="accountant_btn" t-on-click="() => this.accountantOpen('mvp_invoices')">View register <i class="fa fa-arrow-up"/></button></div>
+              <div class="accountant_ringarea">
+                <svg class="accountant_ring" viewBox="0 0 160 160" role="img" aria-label="Collected, pending and overdue share of student fee invoices">
+                  <circle cx="80" cy="80" r="58" fill="none" stroke="#edf2f8" stroke-width="19"/>
+                  <circle t-foreach="accountantCollectionStatus.segments" t-as="segment" t-key="segment.key" cx="80" cy="80" r="58" fill="none" t-att-stroke="segment.color" stroke-width="19" t-att-stroke-dasharray="segment.length + ' ' + accountantCollectionStatus.circumference" t-att-stroke-dashoffset="segment.offset" transform="rotate(-90 80 80)"/>
+                  <text x="80" y="77" text-anchor="middle" font-size="23" font-weight="800" fill="#102e4d" t-esc="accountantCollectionStatus.percent + '%'"/>
+                  <text x="80" y="96" text-anchor="middle" font-size="10" fill="#6d829b">collected</text>
+                </svg>
+                <div class="accountant_ringkey">
+                  <div><span><i class="accountant_dot accountant_dot_collection"/>Collected</span><strong t-esc="accountantCompactMoney(accountantCollectionStatus.collected)"/></div>
+                  <div><span><i class="accountant_dot accountant_dot_pending"/>Pending</span><strong t-esc="accountantCompactMoney(accountantCollectionStatus.pending)"/></div>
+                  <div><span><i class="accountant_dot accountant_dot_overdue"/>Overdue</span><strong t-esc="accountantCompactMoney(accountantCollectionStatus.overdue)"/></div>
+                  <div><span>Total billed</span><strong t-esc="accountantCompactMoney(accountantCollectionStatus.total)"/></div>
+                </div>
+              </div>
+              <div class="accountant_callout"><div><strong>Follow-up opportunity</strong><p><t t-esc="accountantCollectionStatus.overdue_30"/> student accounts are overdue by more than 30 days.</p></div><button type="button" class="accountant_btn accountant_btn_primary" t-on-click="() => this.accountantOpen('accountant_pending')">Review dues</button></div>
+            </article>
+          </section>
+          <section class="accountant_bottom_grid">
+            <article class="accountant_panel accountant_activity_panel">
+              <div class="accountant_panel_head"><div><h2>Recent financial activity</h2><p>Latest recorded transactions and approvals</p></div><button type="button" class="accountant_btn" t-on-click="() => this.accountantOpen('mvp_report_collection')">Collection report</button></div>
+              <div class="accountant_table_wrap"><table class="accountant_table"><thead><tr><th>Reference</th><th>Details</th><th>Amount</th><th>Status</th></tr></thead><tbody>
+                <tr t-foreach="state.accountantMetrics.activity || []" t-as="activity" t-key="activity.id"><td t-esc="activity.reference"/><td><strong t-esc="activity.name"/><small t-esc="activity.detail"/></td><td t-esc="accountantMoney(activity.amount)"/><td><span class="accountant_status" t-att-class="activity.status === 'Paid' || activity.status === 'Posted' ? 'accountant_status_paid' : activity.status === 'Draft' ? 'accountant_status_pending' : 'accountant_status_review'" t-esc="activity.status"/></td></tr>
+                <tr t-if="!state.accountantMetrics.activity.length"><td colspan="4" class="accountant_empty">No transactions in this period. New receipts and vendor bills appear here after saving.</td></tr>
+              </tbody></table></div>
+            </article>
+            <article class="accountant_panel accountant_queue_panel">
+              <div class="accountant_panel_head"><div><h2>Action queue</h2><p>Items that need accountant attention</p></div><span class="accountant_queue_badge"><t t-esc="accountantQueueCount"/> items</span></div>
+              <div class="accountant_queue_list"><button t-foreach="state.accountantMetrics.queue || []" t-as="row" t-key="row.key" type="button" class="accountant_queue_item" t-on-click="() => this.accountantOpen(row.action)"><span class="accountant_queue_icon"><i t-att-class="'fa fa-' + (row.key === 'dues' ? 'inr' : row.key === 'bills' ? 'check' : row.key === 'transport' ? 'exchange' : 'file-text-o')"/></span><span><strong t-esc="row.title"/><small t-esc="row.detail"/><em t-esc="row.hint"/></span></button></div>
+            </article>
+          </section>
+          <div class="accountant_monthend"><div><strong>Month-end readiness</strong><p>Reconcile bank entries, review pending bills, and confirm receipt batches before closing the period.</p></div><button type="button" class="accountant_btn" t-on-click="() => this.accountantOpen('mvp_report_collection')">Open report <i class="fa fa-arrow-right"/></button></div>
+          <section class="accountant_insights">
+            <div class="accountant_insights_head"><span class="accountant_insights_mark">✦</span><div><span class="accountant_insights_kicker">FINANCE INSIGHTS</span><h2>Recommended checks &amp; next actions</h2><p>Operational prompts to help the accounts team close the period accurately.</p></div><span class="accountant_insights_tag">Decision support · <t t-esc="state.is_demo ? 'Sample data' : 'Live records'"/></span></div>
+            <div class="accountant_insights_grid">
+              <article class="accountant_insight accountant_insight_income"><span>Reconciliation check</span><strong>Match <small>receipts to bank entries</small></strong><p>Compare receipt batches against bank credits and flag unmatched, duplicated, or reversed entries before finalizing the collection report.</p></article>
+              <article class="accountant_insight accountant_insight_spend"><span>Spend review</span><strong>Verify <small>vendor bill evidence</small></strong><p>Check each bill for an invoice, approval, payment status, and expense category. Keep unpaid bills separate from cash actually disbursed.</p></article>
+              <article class="accountant_insight accountant_insight_close"><span>Period-close readiness</span><strong>Prepare <small>the closing checklist</small></strong><p>Review pending fee follow-ups, transport allocations, fee circular records, and unresolved adjustments.</p></article>
+            </div>
+          </section>
+          <footer class="accountant_footer">VCET Campus ERP · Accountant workspace · Figures reflect saved records in the active college</footer>
+        </t>
+      </div>
     </div>
   </t>
 </templates>

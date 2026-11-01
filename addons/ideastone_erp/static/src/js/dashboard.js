@@ -43,8 +43,9 @@ class CampusBase extends Component {
         this.state = useState({ loading: true, error: "", navigation: [], stats: [], pages: [], queues: [], quick: [], appointments: [],
             company: "", user: "", filter: "", open: false, page: route.page,
             is_owner_workspace: false, is_accountant_workspace: false, is_demo: false, ownerMetrics: {stats: [], years: [], setup: [], funnel: [], programmes: [], collection: [], trend: [], recent: [], notices: [], upcoming: [], due_dates: []},
-            accountantMetrics: {cards: [], pending: [], transport: [], spending: [], recent_bills: [], notices: []},
-            accountantFilters: {date_from: "", date_to: "", year_id: ""}, accountantError: "", accountantLoading: false,
+            accountantMetrics: {cards: [], trend: [], collection_status: {}, activity: [], queue: [], departments: []},
+            accountantFilters: {date_from: "", date_to: "", year_id: "", department_id: ""}, accountantError: "", accountantLoading: false,
+            accountantTrendPeriod: "half", accountantUpdatedAt: "",
             ownerFilters: {date_from: "", date_to: "", year_id: ""}, ownerAppliedFilters: {}, ownerError: "", ownerLoading: false,
             faculty_modules: [], faculty_tasks: [], faculty_schedule: [], faculty_surveys: [], module: route.module, activeAction: 0, activeTool: "",
             busy: false, query: "", cardQuery: "", unit: "", card: "", loanPage: 0, desk: { units: [], cards: [], loans: [], next: false } });
@@ -94,7 +95,7 @@ class CampusBase extends Component {
         if (this.state.faculty_home_enabled && this.state.page === "overview") return "Faculty overview";
         if (this.state.page === "faculty-departments") return "My departments";
         if (this.state.page === "owner-overview") return "Admin overview";
-        if (this.state.page === "accountant-overview") return "Accounts overview";
+        if (this.state.page === "accountant-overview") return "Accountant overview";
         if (this.state.page === "faculty-module") return this.facultyModule?.label || "Faculty workspace";
         if (this.state.page === "help") return "Faculty guide";
         if (this.state.page === "analytics") return "My teaching dashboard";
@@ -216,9 +217,11 @@ class CampusBase extends Component {
         this.state.accountantError = "";
         try {
             if (!this.state.accountantFilters.date_from) Object.assign(this.state.accountantFilters, {
-                date_from: `${this.state.today.slice(0, 8)}01`, date_to: this.state.today,
+                date_from: `${this.state.today.slice(0, 8)}01`,
+                date_to: `${this.state.today.slice(0, 8)}${new Date(Number(this.state.today.slice(0, 4)), Number(this.state.today.slice(5, 7)), 0).getDate()}`,
             });
             this.state.accountantMetrics = await this.orm.call("campus.dashboard", "get_accountant_metrics", [this.state.accountantFilters]);
+            this.state.accountantUpdatedAt = new Date().toLocaleTimeString(undefined, {hour: "numeric", minute: "2-digit"});
         } catch (error) {
             this.state.accountantError = error.data?.message || "Accounts records could not be loaded. Check the period and retry.";
         } finally { this.state.accountantLoading = false; }
@@ -228,7 +231,95 @@ class CampusBase extends Component {
         if (item) return this.open(item);
     }
     accountantMoney(value) {
-        return `${this.state.accountantMetrics.currency || ""} ${this.number(value || 0)}`.trim();
+        return `${this.state.accountantMetrics.currency || ""}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(value || 0)}`;
+    }
+    accountantCompactMoney(value) {
+        const amount = Number(value) || 0;
+        const absolute = Math.abs(amount);
+        const indian = this.state.accountantMetrics.currency === "₹";
+        const divisor = indian ? (absolute >= 10000000 ? 10000000 : absolute >= 100000 ? 100000 : 1) :
+            (absolute >= 1000000 ? 1000000 : absolute >= 1000 ? 1000 : 1);
+        const suffix = divisor === 1 ? "" : indian ? (divisor === 10000000 ? "Cr" : "L") : (divisor === 1000000 ? "M" : "K");
+        return `${this.state.accountantMetrics.currency || ""}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(amount / divisor)}${suffix}`;
+    }
+    get accountantTrendRows() {
+        const rows = this.state.accountantMetrics.trend || [];
+        return this.state.accountantTrendPeriod === "year" ? rows : rows.slice(-6);
+    }
+    get accountantChartMax() {
+        const values = this.accountantTrendRows.flatMap(row => [row.collections, row.income]);
+        const peak = Math.max(1, ...values);
+        const raw = peak * 1.15 / 4;
+        const magnitude = 10 ** Math.floor(Math.log10(raw));
+        const step = [1, 2, 5, 10].find(candidate => candidate * magnitude >= raw) * magnitude;
+        return step * 4;
+    }
+    get accountantChartTicks() {
+        return Array.from({length: 5}, (_, index) => ({y: 30 + index * 47.5, value: this.accountantChartMax * (4 - index) / 4}));
+    }
+    get accountantChartBars() {
+        const rows = this.accountantTrendRows;
+        const width = rows.length === 12 ? 13 : 24;
+        const step = 540 / Math.max(rows.length, 1);
+        return rows.map((row, index) => {
+            const x = 70 + index * step + (step - 2 * width - 4) / 2;
+            const incomeHeight = Math.max(0, row.income) / this.accountantChartMax * 190;
+            const collectionHeight = Math.max(0, row.collections) / this.accountantChartMax * 190;
+            return {key: row.month, label: row.label, x, width,
+                incomeY: 220 - incomeHeight, incomeHeight,
+                collectionX: x + width + 4, collectionY: 220 - collectionHeight, collectionHeight,
+                labelX: x + width + 2, income: row.income, collections: row.collections};
+        });
+    }
+    accountantAxisMoney(value) {
+        const indian = this.state.accountantMetrics.currency === "₹";
+        const divisor = indian ? 100000 : Math.max(1, this.accountantChartMax >= 10000 ? 1000 : 1);
+        return this.number(value / divisor);
+    }
+    get accountantChartUnit() {
+        return `${this.state.accountantMetrics.currency || ""} ${this.state.accountantMetrics.currency === "₹" ? "lakh" : this.accountantChartMax >= 10000 ? "thousand" : "units"}`;
+    }
+    get accountantTrendChange() {
+        const rows = this.accountantTrendRows;
+        if (rows.length < 2 || !rows[rows.length - 2].collections) return null;
+        return (rows[rows.length - 1].collections - rows[rows.length - 2].collections) /
+            Math.abs(rows[rows.length - 2].collections) * 100;
+    }
+    get accountantCollectionStatus() {
+        const status = this.state.accountantMetrics.collection_status || {};
+        const total = Math.max(0, status.total || 0);
+        const collected = Math.max(0, status.collected || 0);
+        const pending = Math.max(0, status.pending || 0);
+        const overdue = Math.max(0, status.overdue || 0);
+        const circumference = 364.42;
+        const collectedLength = total ? Math.min(1, collected / total) * circumference : 0;
+        const pendingLength = total ? Math.min(1, pending / total) * circumference : 0;
+        const overdueLength = total ? Math.min(1, overdue / total) * circumference : 0;
+        return {total, collected, pending, overdue, overdue_30: status.overdue_30 || 0,
+            percent: total ? Math.round(collected / total * 100) : 0, circumference,
+            segments: [{key: "collected", color: "#1769e8", length: collectedLength, offset: 0},
+                {key: "pending", color: "#69b8a4", length: pendingLength, offset: -collectedLength},
+                {key: "overdue", color: "#f0b65c", length: overdueLength, offset: -collectedLength - pendingLength}]};
+    }
+    get accountantQueueCount() {
+        return (this.state.accountantMetrics.queue || []).reduce((total, row) => total + row.count, 0);
+    }
+    accountantExportSummary() {
+        const data = this.state.accountantMetrics;
+        const department = data.departments?.find(row => String(row.id) === String(this.state.accountantFilters.department_id))?.name || "All departments";
+        const rows = [["Accountant overview", data.period?.from || "", data.period?.to || "", department],
+            ["Metric", "Amount"], ...(data.cards || []).map(card => [card.label, card.value]),
+            [], ["Month", "Collections", "Billed income"],
+            ...(data.trend || []).map(row => [row.month, row.collections, row.income]),
+            [], ["Recent activity", "Reference", "Amount", "Status"],
+            ...(data.activity || []).map(row => [row.name, row.reference, row.amount, row.status])];
+        const csv = "\uFEFF" + rows.map(row => row.map(value => `"${String(value ?? "").replaceAll('"', '""')}"`).join(",")).join("\r\n");
+        const url = URL.createObjectURL(new Blob([csv], {type: "text/csv;charset=utf-8"}));
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `accountant-overview-${data.period?.to || "report"}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
     }
     async ownerSource(card) {
         if (!card.allowed) return;

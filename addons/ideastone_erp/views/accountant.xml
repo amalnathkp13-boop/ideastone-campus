@@ -92,6 +92,7 @@
     <field name="arch" type="xml">
       <xpath expr="//field[@name='invoice_date']" position="after">
         <field name="campus_spend_category" invisible="move_type not in ('in_invoice','in_refund')"/>
+        <field name="campus_spend_department_id" invisible="move_type not in ('in_invoice','in_refund')"/>
       </xpath>
     </field>
   </record>
@@ -105,6 +106,7 @@
         <field name="invoice_date"/>
         <field name="ref"/>
         <field name="campus_spend_category"/>
+        <field name="campus_spend_department_id"/>
         <field name="amount_total" sum="Recorded outgoing"/>
         <field name="amount_residual"/>
         <field name="payment_state"/>
