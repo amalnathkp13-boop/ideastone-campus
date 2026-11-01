@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="group_principal" model="res.groups">
+    <field name="name">Principal</field>
+    <field name="category_id" ref="ideastone_erp.category_campus"/>
+    <field name="implied_ids" eval="[(4, ref('ideastone_erp.group_mvp_readonly'))]"/>
+  </record>
+  <record id="rule_principal_request_company" model="ir.rule">
+    <field name="name">Principal requests: company</field>
+    <field name="model_id" ref="model_ideastone_principal_request"/>
+    <field name="global" eval="True"/>
+    <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+  </record>
+  <record id="rule_principal_request_own" model="ir.rule">
+    <field name="name">Principal requests: own</field>
+    <field name="model_id" ref="model_ideastone_principal_request"/>
+    <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    <field name="domain_force">[('requester_id', '=', user.id)]</field>
+  </record>
+  <record id="rule_principal_request_all" model="ir.rule">
+    <field name="name">Principal requests: all</field>
+    <field name="model_id" ref="model_ideastone_principal_request"/>
+    <field name="groups" eval="[(4, ref('group_principal'))]"/>
+    <field name="domain_force">[(1, '=', 1)]</field>
+  </record>
+  <record id="rule_principal_notice_company" model="ir.rule">
+    <field name="name">Principal notices: company</field>
+    <field name="model_id" ref="model_ideastone_principal_notice"/>
+    <field name="global" eval="True"/>
+    <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+  </record>
+  <record id="rule_principal_notice_published" model="ir.rule">
+    <field name="name">Principal notices: published</field>
+    <field name="model_id" ref="model_ideastone_principal_notice"/>
+    <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    <field name="domain_force">[('state', '=', 'published')]</field>
+  </record>
+  <record id="rule_principal_notice_all" model="ir.rule">
+    <field name="name">Principal notices: all</field>
+    <field name="model_id" ref="model_ideastone_principal_notice"/>
+    <field name="groups" eval="[(4, ref('group_principal'))]"/>
+    <field name="domain_force">[(1, '=', 1)]</field>
+  </record>
+</odoo>

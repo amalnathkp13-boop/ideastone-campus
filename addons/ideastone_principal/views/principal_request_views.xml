@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_principal_request_tree" model="ir.ui.view">
+    <field name="name">ideastone.principal.request.tree</field>
+    <field name="model">ideastone.principal.request</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name"/>
+        <field name="request_type"/>
+        <field name="requester_id"/>
+        <field name="student_id" optional="hide"/>
+        <field name="faculty_id" optional="hide"/>
+        <field name="due_date"/>
+        <field name="state" widget="badge"/>
+      </tree>
+    </field>
+  </record>
+  <record id="view_principal_request_form" model="ir.ui.view">
+    <field name="name">ideastone.principal.request.form</field>
+    <field name="model">ideastone.principal.request</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <button name="action_submit" type="object" string="Submit" class="oe_highlight" invisible="state != 'draft'"/>
+          <button name="action_approve" type="object" string="Approve" class="oe_highlight" groups="ideastone_principal.group_principal" invisible="state != 'submitted'"/>
+          <button name="action_reject" type="object" string="Reject" groups="ideastone_principal.group_principal" invisible="state != 'submitted'"/>
+          <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,rejected"/>
+        </header>
+        <sheet>
+          <group>
+            <group>
+              <field name="name" readonly="state != 'draft'"/>
+              <field name="request_type" readonly="state != 'draft'"/>
+              <field name="requester_id"/>
+              <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
+            </group>
+            <group>
+              <field name="due_date" readonly="state != 'draft'"/>
+              <field name="date_from" readonly="state != 'draft'"/>
+              <field name="date_to" readonly="state != 'draft'"/>
+              <field name="student_id" readonly="state != 'draft'"/>
+              <field name="faculty_id" readonly="state != 'draft'"/>
+              <field name="admission_id" readonly="state != 'draft'"/>
+            </group>
+          </group>
+          <group>
+            <field name="description" readonly="state != 'draft'"/>
+            <field name="decision_note" groups="ideastone_principal.group_principal" readonly="state in ('approved', 'rejected')"/>
+            <field name="decided_by_id" invisible="not decided_by_id"/>
+            <field name="decided_on" invisible="not decided_on"/>
+          </group>
+        </sheet>
+        <chatter/>
+      </form>
+    </field>
+  </record>
+  <record id="view_principal_request_search" model="ir.ui.view">
+    <field name="name">ideastone.principal.request.search</field>
+    <field name="model">ideastone.principal.request</field>
+    <field name="arch" type="xml">
+      <search>
+        <field name="name"/>
+        <field name="requester_id"/>
+        <field name="student_id"/>
+        <field name="faculty_id"/>
+        <filter name="pending" string="Pending" domain="[('state','=','submitted')]"/>
+        <filter name="approved" string="Approved" domain="[('state','=','approved')]"/>
+        <group expand="0" string="Group By">
+          <filter name="type" string="Type" context="{'group_by':'request_type'}"/>
+          <filter name="status" string="Status" context="{'group_by':'state'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+  <record id="action_principal_requests" model="ir.actions.act_window">
+    <field name="name">All Requests</field>
+    <field name="res_model">ideastone.principal.request</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+  <record id="action_principal_pending" model="ir.actions.act_window">
+    <field name="name">Pending Decisions</field>
+    <field name="res_model">ideastone.principal.request</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[('state','=','submitted')]</field>
+    <field name="context">{'create': False}</field>
+  </record>
+  <record id="action_principal_my_requests" model="ir.actions.act_window">
+    <field name="name">My Requests</field>
+    <field name="res_model">ideastone.principal.request</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[('requester_id','=',uid)]</field>
+  </record>
+</odoo>

@@ -1,0 +1,39 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_principal.Workspace">
+    <main class="campus_faculty_home campus_principal_home" id="campus_main">
+      <div class="content">
+        <p t-if="state.loading" class="home-loading" role="status">Loading principal records…</p>
+        <div t-if="state.error" class="home-error" role="alert"><span t-esc="state.error"/><button type="button" class="directory-back" t-on-click="load">Retry</button></div>
+        <t t-if="state.data">
+          <div class="breadcrumb"><span>VCET Campus / Principal workspace / <t t-esc="title"/></span><span t-esc="state.data.today"/></div>
+          <div class="heading-row"><div><h1 t-esc="title"/><div class="subtitle">Institutional oversight and decisions from saved campus records.</div></div><div class="home-heading-tools"><span class="pill">Saved records · Principal view</span><button class="home-refresh" type="button" aria-label="Refresh principal workspace" t-on-click="load">⟳</button></div></div>
+          <section t-if="view === 'overview'" class="welcome"><div><div class="eyebrow">YOUR CAMPUS, CONNECTED · PRINCIPAL WORKSPACE</div><h2>Welcome back, <t t-esc="state.data.user"/></h2><p>Review campus performance, pending decisions and notices in one place.</p></div><div class="welcome-date" t-esc="state.data.company"/></section>
+          <section class="stats" aria-label="Principal summary">
+            <article class="stat"><div class="stat-top"><span class="stat-icon">♧</span></div><div class="stat-label">Active students</div><div class="stat-value" t-esc="state.data.counts.students"/><div class="stat-foot">Across academic years</div></article>
+            <article class="stat"><div class="stat-top"><span class="stat-icon">♙</span></div><div class="stat-label">Faculty</div><div class="stat-value" t-esc="state.data.counts.faculty"/><div class="stat-foot">Active staff records</div></article>
+            <article class="stat"><div class="stat-top"><span class="stat-icon">▤</span></div><div class="stat-label">All applications</div><div class="stat-value" t-esc="state.data.counts.applications"/><div class="stat-foot">Includes legacy admissions</div></article>
+            <article class="stat"><div class="stat-top"><span class="stat-icon">⚑</span></div><div class="stat-label">Pending decisions</div><div class="stat-value" t-esc="state.data.counts.pending"/><div class="stat-foot">Submitted for principal review</div></article>
+          </section>
+          <div class="dashboard-grid">
+            <div class="left-stack">
+              <section t-if="view !== 'notices'" class="panel"><div class="panel-head"><div class="panel-title" role="heading" aria-level="2"><span class="head-icon">⚑</span>Decision queue</div><button class="text-link" type="button" t-on-click="() => this.openModule('ideastone_principal.action_principal_pending')">View all →</button></div>
+                <div class="table-wrap" tabindex="0"><table><thead><tr><th>Request</th><th>Type</th><th>Requested by</th><th>Due</th><th>Action</th></tr></thead><tbody><tr t-foreach="state.data.requests" t-as="row" t-key="row.id"><td t-esc="row.name"/><td t-esc="row.type"/><td t-esc="row.requester"/><td t-esc="row.due || '—'"/><td><button class="text-link" type="button" t-on-click="() => this.openRequest(row.id)">Review →</button></td></tr><tr t-if="!state.data.requests.length"><td colspan="5" class="home-empty">No submitted requests awaiting a decision.</td></tr></tbody></table></div>
+              </section>
+              <section t-if="view !== 'notices'" class="panel"><div class="panel-head"><div class="panel-title" role="heading" aria-level="2"><span class="head-icon">☑</span>Student leave approvals</div><button class="text-link" type="button" t-on-click="() => this.openModule('ideastone_erp.action_student_leave')">View all →</button></div>
+                <div class="table-wrap" tabindex="0"><table><thead><tr><th>Student</th><th>Reason</th><th>Dates</th><th>Action</th></tr></thead><tbody><tr t-foreach="state.data.student_leave" t-as="row" t-key="row.id"><td t-esc="row.student"/><td t-esc="row.reason"/><td><t t-esc="row.from"/> – <t t-esc="row.to"/></td><td><button class="text-link" type="button" t-on-click="() => this.openStudentLeave(row.id)">Review →</button></td></tr><tr t-if="!state.data.student_leave.length"><td colspan="4" class="home-empty">No student leave requests assigned for principal review.</td></tr></tbody></table></div>
+              </section>
+              <section t-if="view !== 'decisions'" class="panel"><div class="panel-head"><div class="panel-title" role="heading" aria-level="2"><span class="head-icon">▤</span>Principal notices</div><button class="text-link" type="button" t-on-click="() => this.openModule('ideastone_principal.action_principal_notices')">Manage notices →</button></div>
+                <div class="table-wrap" tabindex="0"><table><thead><tr><th>Notice</th><th>Audience</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody><tr t-foreach="state.data.notices" t-as="row" t-key="row.id"><td t-esc="row.name"/><td t-esc="row.audience"/><td><span class="status" t-att-class="row.state === 'published' ? 'done' : 'pending'" t-esc="row.state"/></td><td t-esc="row.date"/><td><button class="text-link" type="button" t-on-click="() => this.openNotice(row.id)">Open →</button></td></tr><tr t-if="!state.data.notices.length"><td colspan="5" class="home-empty">No notices have been saved yet.</td></tr></tbody></table></div>
+              </section>
+            </div>
+            <div class="right-stack">
+              <section class="panel"><div class="panel-head"><div class="panel-title" role="heading" aria-level="2"><span class="head-icon">▦</span>Campus overview</div></div><div class="principal-links"><button type="button" t-on-click="() => this.openModule('ideastone_erp.action_admissions_overview')">Admissions <span>→</span></button><button type="button" t-on-click="() => this.openModule('ideastone_erp.action_students_directory')">Students <span>→</span></button><button type="button" t-on-click="() => this.openModule('ideastone_erp.action_examinations_overview')">Examinations <span>→</span></button></div></section>
+              <section class="panel"><div class="panel-head"><div class="panel-title" role="heading" aria-level="2"><span class="head-icon">✓</span>Next steps</div></div><p class="subtitle">Review submitted requests, inspect college records, and publish notices when ready.</p><button class="home-refresh" type="button" t-on-click="() => this.openModule('ideastone_principal.action_principal_requests')">Open request register</button></section>
+            </div>
+          </div>
+          <footer class="footer"><t t-esc="state.data.company"/> · Principal workspace · Saved college records</footer>
+        </t>
+      </div>
+    </main>
+  </t>
+</templates>
