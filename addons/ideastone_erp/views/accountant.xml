@@ -84,6 +84,12 @@
     <field name="view_mode">form</field>
     <field name="view_id" ref="accountant_transport_form"/>
   </record>
+  <record id="accountant_transport_tree_binding" model="ir.actions.act_window.view">
+    <field name="act_window_id" ref="accountant_transport"/>
+    <field name="sequence" eval="1"/>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="accountant_transport_tree"/>
+  </record>
 
   <record id="accountant_expense_fields" model="ir.ui.view">
     <field name="name">account.move.college.spending</field>

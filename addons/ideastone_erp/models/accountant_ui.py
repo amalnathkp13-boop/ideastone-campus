@@ -21,6 +21,7 @@ ACCOUNTANT_MODULES = [
         ("Dues report", "mvp_report_dues"),
     ]),
     ("transport", "Transport billing", "bus", [
+        ("Transport overview", "accountant_transport_dashboard"),
         ("Transport fee bills", "accountant_transport"),
     ]),
     ("spending", "Spending", "credit-card", [

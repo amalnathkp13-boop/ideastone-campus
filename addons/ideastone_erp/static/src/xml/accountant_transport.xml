@@ -1,0 +1,61 @@
+<templates xml:space="preserve">
+<t t-name="ideastone_erp.AccountantTransport">
+<main class="campus_transport_workspace" t-ref="transportWorkspace">
+  <nav class="subnav" aria-label="Transport billing views"><span class="section">Transport billing</span><button t-foreach="screens" t-as="screen" t-key="screen.key" type="button" t-att-class="state.screen === screen.key ? 'active' : ''" t-att-aria-current="state.screen === screen.key ? 'page' : undefined" t-on-click="() => this.go(screen.key)" t-esc="screen.tab"/></nav>
+  <div class="content">
+    <div class="crumb">VCET Campus <span>/</span> Transport billing <span>/</span> <t t-esc="state.screen === 'overview' ? 'Overview' : config.tab"/></div>
+    <div class="headingrow"><div><h1 t-esc="config.title"/><p t-esc="config.subtitle"/></div>
+      <button t-if="state.screen === 'overview'" type="button" class="primary" t-on-click="() => this.go('routes')">＋ Manage fleet</button>
+      <button t-elif="state.screen === 'routes'" type="button" class="primary" t-on-click="() => this.open('fleet')">＋ Add bus</button>
+      <div t-elif="state.screen === 'revenue'" class="headingactions"><button type="button" t-on-click="() => this.open('allocations')">Student fee bills</button><button type="button" class="primary" t-on-click="() => this.open('bill')">＋ Add transaction</button></div>
+      <button t-else="" type="button" class="primary" t-on-click="() => this.open('payroll')">＋ New payroll run</button>
+    </div>
+    <div t-if="state.error" class="error" role="alert"><span t-esc="state.error"/><button type="button" t-on-click="load">Retry</button></div>
+    <p t-if="state.busy" class="muted" role="status">Loading transport records…</p>
+    <t t-else="">
+      <section class="kpis" aria-label="Transport summary"><article class="kpi" t-foreach="cards" t-as="card" t-key="card[0]"><div class="kpitop"><span t-esc="card[0]"/><span t-att-class="'ic ' + card[4]" t-esc="card[3]"/></div><strong t-esc="card[1]"/><small t-esc="card[2]"/></article></section>
+      <t t-if="state.screen === 'overview'">
+        <div class="split">
+          <article class="panel"><h2>Transport financial snapshot</h2><p class="sub">Current academic year · <t t-esc="data.year"/></p>
+            <div class="detailgrid"><div class="detail"><label>Fee revenue</label><strong class="income" t-esc="money(data.revenue,true)"/></div><div class="detail"><label>Operating expenses</label><strong class="expense" t-esc="money(expense,true)"/></div><div class="detail"><label>Net balance</label><strong t-esc="money(net,true)"/></div></div>
+            <div class="barrow" t-foreach="breakdown" t-as="item" t-key="item.key"><span t-esc="item.label"/><div class="bar"><span t-att-style="item.style"/></div><b t-esc="money(item.amount,true)"/></div>
+          </article>
+          <article class="panel"><h2>Fleet status</h2><p class="sub">Bus availability at a glance</p>
+            <div class="donutnote"><span class="dot"/><span>Operational</span><strong><t t-esc="busCount(operational)"/></strong></div>
+            <div class="donutnote"><span class="dot amber"/><span>Under maintenance</span><strong><t t-esc="busCount(maintenance)"/></strong></div>
+            <div class="donutnote"><span class="dot reserve"/><span>Inactive / reserve</span><strong><t t-esc="busCount(reserveFleet)"/></strong></div>
+            <div class="notice">Maintenance reminder: <t t-esc="busCount(serviceDue)"/> <t t-esc="serviceDue === 1 ? 'has' : 'have'"/> scheduled service due this month.</div>
+            <button type="button" t-on-click="() => this.go('routes')">View fleet &amp; routes →</button>
+          </article>
+        </div>
+        <article class="panel spaced"><div class="tablehead inner"><div><h2>Recent transport activity</h2><p>Latest fee and expense entries</p></div><button type="button" t-on-click="() => this.go('revenue')">View all transactions →</button></div>
+          <div class="tablewrap borderless" tabindex="0" aria-label="Recent transport activity"><table><thead><tr><th>Date</th><th>Transaction</th><th>Route / Bus</th><th>Category</th><th>Amount</th><th>Status</th></tr></thead><tbody>
+            <tr t-foreach="recent" t-as="row" t-key="row.id"><td t-esc="date(row.date)"/><td><button type="button" class="recordlink" t-on-click="() => this.open(row.kind,row.record_id)" t-esc="row.name"/></td><td t-esc="row.route"/><td t-esc="row.category"/><td t-att-class="row.kind === 'receipt' ? 'income' : 'expense'" t-esc="money(row.income || row.expense)"/><td><span t-att-class="'tag ' + tone(row.status)" t-esc="row.status"/></td></tr>
+            <tr t-if="!recent.length"><td colspan="6" class="muted">No transport transactions in this academic year. Saved receipts and bills appear here.</td></tr>
+          </tbody></table></div>
+        </article>
+      </t>
+      <t t-else="">
+        <div class="toolbar">
+          <input type="search" aria-label="Search transport records" t-att-placeholder="state.screen === 'routes' ? 'Search bus number or route…' : state.screen === 'drivers' ? 'Search driver name or employee ID…' : 'Search transaction or bus…'" t-model="state.query"/>
+          <select t-if="state.screen === 'routes'" aria-label="Fleet status" t-model="state.status"><option value="all">All fleet status</option><option value="operational">Operational</option><option value="maintenance">Maintenance</option><option value="reserve">Inactive / reserve</option></select>
+          <t t-if="state.screen === 'revenue'"><select aria-label="Transaction type" t-model="state.type"><option value="all">All transaction types</option><option value="revenue">Revenue</option><option value="expense">Expense</option></select><select aria-label="Academic year" t-model="state.year" t-on-change="changeYear"><option t-foreach="data.years" t-as="year" t-key="year.id" t-att-value="year.id" t-esc="year.name"/></select></t>
+          <t t-if="state.screen === 'drivers'"><select aria-label="Salary month" t-model="state.month"><option t-foreach="months" t-as="month" t-key="month" t-att-value="month" t-esc="monthLabel(month)"/></select><select aria-label="Payment status" t-model="state.status"><option value="all">All payment statuses</option><option value="paid">Paid</option><option value="pending">Pending</option><option value="processing">Processing</option><option value="cancelled">Cancelled</option></select></t>
+          <button type="button" t-on-click="exportRows" t-esc="state.screen === 'routes' ? 'Export fleet' : state.screen === 'revenue' ? 'Export report' : 'Export payroll'"/>
+        </div>
+        <div class="tablewrap" tabindex="0" t-att-aria-label="tableTitle"><div class="tablehead"><div><h2 t-esc="tableTitle"/><p t-esc="tableSubtitle"/></div><span class="tag info"><t t-esc="state.screen === 'drivers' ? monthLabel(state.month) : rows.length + (state.screen === 'routes' ? ' vehicles' : ' entries')"/></span></div>
+          <table><thead><tr><th t-foreach="columns" t-as="column" t-key="column" t-esc="column"/></tr></thead><tbody>
+            <tr t-foreach="rows" t-as="row" t-key="row.id"><td t-foreach="cells(row)" t-as="cell" t-key="cell_index"><button t-if="cell_index === (state.screen === 'revenue' ? 1 : 0)" type="button" class="recordlink" t-on-click="() => this.openRow(row)" t-esc="cell"/><t t-else="" t-esc="cell"/></td><td><span t-att-class="'tag ' + tone(row.status)" t-esc="statusLabel(row.status)"/></td></tr>
+            <tr t-if="!rows.length"><td t-att-colspan="columns.length" class="muted">No matching records. Adjust your filters or add a new record.</td></tr>
+          </tbody></table>
+        </div>
+        <article t-if="state.screen === 'routes'" class="panel spaced"><h2>Route utilization</h2><p class="sub">Assigned students and staff per selected routes</p><div class="barrow" t-foreach="rows" t-as="route" t-key="route.id"><span t-esc="route.name"/><div class="bar"><span t-att-style="'width:' + Math.min(100,(route.students + route.staff) / route.capacity * 100) + '%'"/></div><b><t t-esc="route.students + route.staff"/> / <t t-esc="route.capacity"/></b></div></article>
+        <div t-if="state.screen === 'revenue'" class="notice">Maintenance allowance is a budget allocation. Actual maintenance expenses should be recorded separately to avoid treating the allowance as a second expense.</div>
+        <article t-if="state.screen === 'drivers'" class="panel spaced"><h2>Payroll control</h2><p class="sub">Suggested workflow for the accountant</p><div class="detailgrid"><div class="detail"><label>1 · Prepare</label><strong>Review attendance</strong></div><div class="detail"><label>2 · Approve</label><strong>Verify allowances</strong></div><div class="detail"><label>3 · Pay</label><strong>Record bank reference</strong></div></div></article>
+      </t>
+    </t>
+    <footer class="foot">VCET Campus ERP · Accountant workspace · Powered by Ideastone</footer>
+  </div>
+</main>
+</t>
+</templates>
