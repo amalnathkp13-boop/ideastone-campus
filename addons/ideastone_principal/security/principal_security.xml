@@ -33,7 +33,7 @@
     <field name="name">Principal notices: published</field>
     <field name="model_id" ref="model_ideastone_principal_notice"/>
     <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-    <field name="domain_force">[('state', '=', 'published')]</field>
+    <field name="domain_force">[('state', '=', 'published'), '|', ('publish_at', '=', False), ('publish_at', '&lt;=', time.strftime('%Y-%m-%d %H:%M:%S')), '|', ('expires_at', '=', False), ('expires_at', '&gt;', time.strftime('%Y-%m-%d %H:%M:%S'))]</field>
   </record>
   <record id="rule_principal_notice_all" model="ir.rule">
     <field name="name">Principal notices: all</field>

@@ -11,6 +11,7 @@
         "security/ir.model.access.csv",
         "views/principal_request_views.xml",
         "views/principal_notice_views.xml",
+        "data/notice_publication.xml",
         "views/principal_workspace.xml",
     ],
     "assets": {
@@ -18,6 +19,9 @@
             "ideastone_principal/static/src/js/workspace.js",
             "ideastone_principal/static/src/xml/workspace.xml",
             "ideastone_principal/static/src/scss/workspace.scss",
+            "ideastone_principal/static/src/js/notices.js",
+            "ideastone_principal/static/src/xml/notices.xml",
+            "ideastone_principal/static/src/scss/notices.scss",
         ],
     },
     "application": False,

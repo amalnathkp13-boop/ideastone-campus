@@ -1,5 +1,10 @@
-from odoo.exceptions import AccessError, UserError
+from datetime import timedelta
+from unittest.mock import patch
+
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests.common import TransactionCase
+
+from odoo import fields
 
 
 class TestPrincipalWorkflow(TransactionCase):
@@ -46,6 +51,48 @@ class TestPrincipalWorkflow(TransactionCase):
         self.assertFalse(self.env["ideastone.principal.notice"].with_user(self.staff).search([("id", "=", notice.id)]))
         notice.with_user(self.principal).action_publish()
         self.assertTrue(self.env["ideastone.principal.notice"].with_user(self.staff).search([("id", "=", notice.id)]))
+
+    def test_notice_approval_return_and_scheduling(self):
+        now = fields.Datetime.now()
+        notice = self.env["ideastone.principal.notice"].with_user(self.principal).create({
+            "name": "Upcoming examinations", "body": "<p>Exam instructions</p>",
+            "publish_at": now + timedelta(days=2), "expires_at": now + timedelta(days=5),
+        })
+        notice.action_submit()
+        with self.assertRaises(ValidationError):
+            notice.action_return("")
+        notice.action_return("Confirm the reporting time")
+        self.assertEqual(notice.state, "returned")
+        self.assertEqual(notice.return_note, "Confirm the reporting time")
+        notice.write({"body": "<p>Report at 9 AM.</p>"})
+        notice.action_submit()
+        with self.assertRaises(AccessError):
+            notice.with_user(self.staff).action_approve()
+        notice.action_approve()
+        self.assertEqual(notice.state, "scheduled")
+        self.assertFalse(notice.published_on)
+        self.assertFalse(notice.with_user(self.staff).search([("id", "=", notice.id)]))
+        with self.assertRaises(UserError):
+            notice.action_approve()
+        with self.assertRaises(AccessError):
+            notice.write({"state": "published"})
+        with patch("odoo.addons.ideastone_principal.models.notice_workspace.fields.Datetime.now", return_value=now + timedelta(days=3)):
+            self.env["ideastone.principal.notice"]._cron_publication()
+        self.assertEqual(notice.state, "published")
+        with patch("odoo.addons.ideastone_principal.models.notice_workspace.fields.Datetime.now", return_value=now + timedelta(days=6)):
+            self.env["ideastone.principal.notice"]._cron_publication()
+        self.assertEqual(notice.state, "archived")
+
+    def test_notice_workspace_counts_and_access(self):
+        model = self.env["ideastone.principal.notice"].with_user(self.principal)
+        before = model.get_workspace()["counts"]["pending"]
+        notice = model.create({"name": "Notice queue sample", "body": "<p>Saved content</p>"})
+        notice.action_submit()
+        data = model.get_workspace()
+        self.assertEqual(data["counts"]["pending"], before + 1)
+        self.assertEqual(next(row for row in data["rows"] if row["id"] == notice.id)["summary"], "Saved content")
+        with self.assertRaises(AccessError):
+            model.with_user(self.staff).get_workspace()
 
     def test_overview_is_principal_only(self):
         with self.assertRaises(AccessError):
