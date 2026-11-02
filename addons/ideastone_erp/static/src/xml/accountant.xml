@@ -67,7 +67,7 @@
                   <div><span>Total billed</span><strong t-esc="accountantCompactMoney(accountantCollectionStatus.total)"/></div>
                 </div>
               </div>
-              <div class="accountant_callout"><div><strong>Follow-up opportunity</strong><p><t t-esc="accountantCollectionStatus.overdue_30"/> student accounts are overdue by more than 30 days.</p></div><button type="button" class="accountant_btn accountant_btn_primary" t-on-click="() => this.accountantOpen('accountant_pending')">Review dues</button></div>
+              <div class="accountant_callout"><div><strong>Follow-up opportunity</strong><p><t t-esc="accountantCollectionStatus.overdue_30"/> student accounts are overdue by more than 30 days.</p></div><button type="button" class="accountant_btn accountant_btn_primary" t-on-click="() => this.accountantOpen('accountant_directory_pending')">Review dues</button></div>
             </article>
           </section>
           <section class="accountant_bottom_grid">
