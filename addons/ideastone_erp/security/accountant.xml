@@ -1,0 +1,65 @@
+<odoo>
+  <record id="accountant_student_read" model="ir.model.access">
+    <field name="name">Accountant student fee directory</field>
+    <field name="model_id" ref="openeducat_core.model_op_student"/>
+    <field name="group_id" ref="group_mvp_accountant"/>
+    <field name="perm_read" eval="True"/>
+  </record>
+  <record id="accountant_course_read" model="ir.model.access">
+    <field name="name">Accountant programme reader</field>
+    <field name="model_id" ref="openeducat_core.model_op_course"/>
+    <field name="group_id" ref="group_mvp_accountant"/>
+    <field name="perm_read" eval="True"/>
+  </record>
+  <record id="accountant_batch_read" model="ir.model.access">
+    <field name="name">Accountant section reader</field>
+    <field name="model_id" ref="openeducat_core.model_op_batch"/>
+    <field name="group_id" ref="group_mvp_accountant"/>
+    <field name="perm_read" eval="True"/>
+  </record>
+  <record id="accountant_department_read" model="ir.model.access">
+    <field name="name">Accountant department reader</field>
+    <field name="model_id" ref="openeducat_core.model_op_department"/>
+    <field name="group_id" ref="group_mvp_accountant"/>
+    <field name="perm_read" eval="True"/>
+  </record>
+  <record id="accountant_year_read" model="ir.model.access">
+    <field name="name">Accountant academic year reader</field>
+    <field name="model_id" ref="openeducat_core.model_op_academic_year"/>
+    <field name="group_id" ref="group_mvp_accountant"/>
+    <field name="perm_read" eval="True"/>
+  </record>
+  <record id="accountant_term_read" model="ir.model.access">
+    <field name="name">Accountant semester reader</field>
+    <field name="model_id" ref="openeducat_core.model_op_academic_term"/>
+    <field name="group_id" ref="group_mvp_accountant"/>
+    <field name="perm_read" eval="True"/>
+  </record>
+  <record id="accountant_route_read" model="ir.model.access">
+    <field name="name">Accountant transport route reader</field>
+    <field name="model_id" ref="model_campus_transport_route"/>
+    <field name="group_id" ref="group_mvp_accountant"/>
+    <field name="perm_read" eval="True"/>
+  </record>
+  <record id="accountant_stop_read" model="ir.model.access">
+    <field name="name">Accountant transport stop reader</field>
+    <field name="model_id" ref="model_campus_transport_stop"/>
+    <field name="group_id" ref="group_mvp_accountant"/>
+    <field name="perm_read" eval="True"/>
+  </record>
+  <record id="accountant_allocation_bill" model="ir.model.access">
+    <field name="name">Accountant transport allocation billing</field>
+    <field name="model_id" ref="model_campus_transport_allocation"/>
+    <field name="group_id" ref="group_mvp_accountant"/>
+    <field name="perm_read" eval="True"/>
+    <field name="perm_write" eval="True"/>
+  </record>
+  <record id="accountant_fee_circulars" model="ir.model.access">
+    <field name="name">Accountant fee circulars</field>
+    <field name="model_id" ref="model_campus_circular"/>
+    <field name="group_id" ref="group_mvp_accountant"/>
+    <field name="perm_read" eval="True"/>
+    <field name="perm_write" eval="True"/>
+    <field name="perm_create" eval="True"/>
+  </record>
+</odoo>

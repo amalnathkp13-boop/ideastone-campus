@@ -24,3 +24,5 @@ from . import test_navigation_preferences
 from . import test_faculty_profile_workspace
 from . import test_owner_fees
 from . import test_faculty_task_list
+from . import test_accountant_ui
+from . import test_accountant_transport

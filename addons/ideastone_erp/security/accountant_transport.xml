@@ -1,0 +1,5 @@
+<odoo>
+  <record id="accountant_route_manage" model="ir.model.access"><field name="name">Accountant fleet records</field><field name="model_id" ref="model_campus_transport_route"/><field name="group_id" ref="group_mvp_accountant"/><field name="perm_read" eval="True"/><field name="perm_create" eval="True"/><field name="perm_write" eval="True"/></record>
+  <record id="accountant_payroll_access" model="ir.model.access"><field name="name">Accountant driver salaries</field><field name="model_id" ref="model_campus_transport_payroll"/><field name="group_id" ref="group_mvp_accountant"/><field name="perm_read" eval="True"/><field name="perm_create" eval="True"/><field name="perm_write" eval="True"/></record>
+  <record id="transport_payroll_company" model="ir.rule"><field name="name">Driver salary college boundary</field><field name="model_id" ref="model_campus_transport_payroll"/><field name="domain_force">[('company_id','in',company_ids)]</field><field name="global" eval="True"/></record>
+</odoo>

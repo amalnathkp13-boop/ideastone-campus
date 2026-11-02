@@ -79,7 +79,7 @@ class OwnerDashboard(models.AbstractModel):
             if key == "settings" and self.env.user.has_group("ideastone_erp.group_mvp_owner"):
                 items.append({"label": "Overview", "page": "settings-overview"})
             for title, action in entries:
-                if action == "owner-overview":
+                if action in {"owner-overview", "accountant-overview"}:
                     items.append({"label": title, "page": action})
                     continue
                 ref = self.env.ref(action if "." in action else "ideastone_erp." + action, raise_if_not_found=False)
@@ -224,6 +224,8 @@ class OwnerDashboard(models.AbstractModel):
 
     @api.model
     def get_owner_metrics(self, filters=None):
+        if self._accountant_only():
+            raise AccessError(_("The accountant workspace provides accounts reporting only."))
         f = self._mvp_filters(filters)
         sources = {key: self._mvp_source(key, f) for key in ["admissions", "students", "attendance", "collection", "dues", "results", "faculty"]}
         data = {key: self._mvp_records(*value) for key, value in sources.items()}
@@ -302,6 +304,8 @@ class OwnerDashboard(models.AbstractModel):
 
     @api.model
     def get_owner_source_action(self, kind, filters=None):
+        if self._accountant_only():
+            raise AccessError(_("The accountant workspace provides accounts reporting only."))
         f = self._mvp_filters(filters)
         source_kind = {"active_students": "students", "review": "admissions", "upcoming": "results"}.get(kind, kind)
         model, domain = self._mvp_source(source_kind, f)

@@ -78,9 +78,9 @@ async function markup(page) {
         if(await page.locator('.campus_dashboard').innerText().then(text=>/Â·|â€”|â†/.test(text))) throw Error('Owner template contains incorrectly decoded UTF-8 punctuation');
         await page.locator('.campus_dashboard').evaluate(element=>element.scrollTop=0);
         const modules = await page.locator('.campus_sidebar nav .campus_nav_link').allTextContents();
-        // 13 base modules; the optional AI Pack (ideastone_ai) adds one more.
+        // 13 base modules, plus Accounts and the optional AI Pack.
         const aiPack=modules.some(label=>label.trim()==='AI insights');
-        if(modules.length!==13+(aiPack?1:0)) throw Error('Owner sidebar does not contain the 13 functional MVP modules');
+        if(modules.length!==14+(aiPack?1:0) || !modules.some(label=>label.trim()==='Accounts')) throw Error('Owner sidebar is missing the Accounts module');
         const overview=await rpc(page,'campus.dashboard','get_overview');
         let checkedViews=0;
         for(const module of overview.faculty_modules) {
@@ -117,7 +117,7 @@ async function markup(page) {
         }
         for (const module of overview.faculty_modules.filter(module=>module.key!=='home')) {
             await page.locator('.campus_sidebar').getByRole('button',{name:module.label,exact:true}).click();
-            await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory',staff:'Staff Directory',calendar:'College Calendar',attendance:'Attendance Overview'})[module.key]||module.label,exact:true,level:1}).waitFor();
+            await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory',staff:'Staff Directory',calendar:'College Calendar',attendance:'Attendance Overview',accounts:'Accountant overview'})[module.key]||module.label,exact:true,level:1}).waitFor();
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Attendance',exact:true}).click();
         const attendance=page.locator('.owner_attendance');
@@ -347,7 +347,7 @@ async function markup(page) {
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-mobile-390.png')});
         if(errors.length) throw Error(errors.join('\n'));
-        await fs.writeFile(path.join(out,'verification.json'),JSON.stringify({passed:true,checkedViews,checks:['13 owner modules','all permitted submodule views','7 real CSV exports','owner staff qualification save and reload','owner appraisal save','owner leave page','numbering settings','college calendar replaces owner timetable','calendar filters use document typography','calendar activity creation and edit persist','personal event reminder','shared fee heads visible','student request register opens as a list','college attendance policy save and restore','invalid reporting period recovery','faculty shell reused','live KPI reconciliation','real subject form save and reload','concurrent admission conversion','concurrent payment posting','receipt PDF','1024 desktop','390 mobile drawer and overflow','browser console'],metrics,errors},null,2));
+        await fs.writeFile(path.join(out,'verification.json'),JSON.stringify({passed:true,checkedViews,checks:['owner Accounts module','all permitted submodule views','7 real CSV exports','owner staff qualification save and reload','owner appraisal save','owner leave page','numbering settings','college calendar replaces owner timetable','calendar filters use document typography','calendar activity creation and edit persist','personal event reminder','shared fee heads visible','student request register opens as a list','college attendance policy save and restore','invalid reporting period recovery','faculty shell reused','live KPI reconciliation','real subject form save and reload','concurrent admission conversion','concurrent payment posting','receipt PDF','1024 desktop','390 mobile drawer and overflow','browser console'],metrics,errors},null,2));
     } catch(error) {
         await page.screenshot({path:path.join(out,'failure.png'),fullPage:true}).catch(()=>{});
         await fs.writeFile(path.join(out,'failure-dom.html'),await markup(page));

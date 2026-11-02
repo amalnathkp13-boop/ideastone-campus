@@ -22,7 +22,7 @@ class TransportAllocation(models.Model):
             allocations = self.sudo().search([("state", "=", "approved"), ("year_id", "=", rec.year_id.id)])
             if len(allocations.filtered(lambda a, rec=rec: a.student_id == rec.student_id)) > 1:
                 raise ValidationError(_("A student may have only one active transport allocation per year."))
-            if len(allocations.filtered(lambda a, rec=rec: a.route_id == rec.route_id)) > rec.route_id.capacity:
+            if len(allocations.filtered(lambda a, rec=rec: a.route_id == rec.route_id)) + rec.route_id.staff_riders > rec.route_id.capacity:
                 raise ValidationError(_("Vehicle seating capacity is exceeded."))
 
     def action_invoice(self):
@@ -33,10 +33,19 @@ class TransportAllocation(models.Model):
         if not self.invoice_id:
             if self.stop_id.fee <= 0:
                 raise ValidationError(_("Configure a positive fee on the boarding point."))
+            product = self.stop_id.fee_product_id
+            account = product.property_account_income_id or product.categ_id.property_account_income_categ_id
+            if not product or not account:
+                raise ValidationError(_("Configure a transport fee product with an income account on the boarding point."))
+            enrolment = self.student_id.course_detail_ids.filtered(lambda e: e.state == "running")[:1]
             invoice = self.env["account.move"].create({
                 "move_type": "out_invoice", "partner_id": self.student_id.partner_id.id,
                 "company_id": self.company_id.id, "invoice_date": fields.Date.today(),
-                "invoice_line_ids": [(0, 0, {"name": f"Transport: {self.route_id.name} / {self.stop_id.name}", "quantity": 1, "price_unit": self.stop_id.fee})],
+                "campus_student_id": self.student_id.id, "campus_year_id": self.year_id.id,
+                "campus_course_id": enrolment.course_id.id,
+                "campus_transport_route_id": self.route_id.id, "campus_transport_category": "fee",
+                "invoice_line_ids": [(0, 0, {"name": f"Transport: {self.route_id.name} / {self.stop_id.name}",
+                    "product_id": product.id, "account_id": account.id, "quantity": 1, "price_unit": self.stop_id.fee})],
             })
             # Bypass only business-data lock after the permission-checked invoice creation.
             self._set_system_values({"invoice_id": invoice.id})
