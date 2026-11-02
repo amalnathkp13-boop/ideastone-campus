@@ -163,7 +163,11 @@
 
 .campus_principal_home {
   min-width: 0;
-  min-height: 100%;
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
   .content { width: 100%; min-width: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif !important; }
   .content :not(.fa) { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif !important; }
   .hero h2 { color: #fff !important; }

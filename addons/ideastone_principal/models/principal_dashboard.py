@@ -149,7 +149,7 @@ class PrincipalDashboard(models.AbstractModel):
             "faculty": len(records("op.faculty", [("active", "=", True)])),
             "programmes": len(records("op.course", [("active", "=", True)])),
             "fee_billed": round(billed, 2), "fee_collected": round(collected, 2), "fee_rate": percent(collected, billed),
-            "currency": company.currency_id.symbol, "overdue": overdue,
+            "currency": "₹", "overdue": overdue,
             "trend": trend, "attendance_rate": percent(sum(v["present"] for v in students.values()), sum(v["sessions"] for v in students.values())),
             "departments": department_rows, "threshold": threshold, "shortage": shortage,
             "readiness": [
