@@ -26,7 +26,7 @@ class AccountantDirectory(models.AbstractModel):
             if student.id in seen:
                 continue
             seen.add(student.id)
-            bills = invoices.filtered(lambda m: m.campus_student_id == student)
+            bills = invoices.filtered(lambda m, student=student: m.campus_student_id == student)
             due = bills.filtered(lambda m: m.amount_residual > 0)
             department = enrolment.course_id.department_id
             payments = bills._get_reconciled_payments().filtered(lambda p: p.state == "posted")
