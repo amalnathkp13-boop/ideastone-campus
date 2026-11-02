@@ -54,18 +54,17 @@ body.campus_faculty_workspace:has(.campus_accountant_page) {
     .accountant_btn_primary { background: #0f60dc; border-color: #0f60dc; color: #fff; }
     .accountant_btn_primary:hover { background: #0b55c7; border-color: #0b55c7; color: #fff; }
     .accountant_filterbar {
-        display: grid; grid-template-columns: minmax(150px,1fr) 18px minmax(150px,1fr) minmax(180px,1.15fr) auto auto;
+        display: grid; grid-template-columns: minmax(150px,1fr) 18px minmax(150px,1fr) minmax(180px,1.15fr) auto;
         align-items: end; gap: 10px; width: 100%; margin: 0 0 18px;
     }
     .accountant_filtergroup { min-width: 0; width: 100%; display: grid; gap: 6px; margin: 0; }
-    .accountant_filtergroup > span { color: #7890a8; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+    .accountant_filtergroup > span { color: #7890a8; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
     .accountant_filtergroup input, .accountant_filtergroup select {
         width: 100%; min-width: 0; min-height: 40px; border: 1px solid #d9e5f2; border-radius: 10px;
         background: #f8fbff; color: var(--accountant-ink); padding: 9px 12px; outline: none;
     }
     .accountant_filtergroup input:focus, .accountant_filtergroup select:focus { border-color: var(--accountant-blue); box-shadow: 0 0 0 3px #1769e81a; }
     .accountant_range_separator { align-self: end; padding-bottom: 11px; color: #9aacc0; text-align: center; }
-    .accountant_filter_meta { align-self: center; color: var(--accountant-muted); font-size: 11px; white-space: nowrap; }
     .accountant_error, .accountant_loading { margin-bottom: 16px; padding: 14px; border-radius: 12px; }
     .accountant_error { display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid #f0c9ce; background: #fff4f5; color: #a83444; }
     .accountant_loading { color: var(--accountant-muted); }
@@ -80,7 +79,7 @@ body.campus_faculty_workspace:has(.campus_accountant_page) {
     .accountant_stat_income .accountant_stat_symbol { background: #e6f7ef; color: #168363; }
     .accountant_stat_dues .accountant_stat_symbol { background: #fff3df; color: #b77817; }
     .accountant_stat_spending .accountant_stat_symbol { background: #f1ebff; color: #7650c8; }
-    .accountant_pill { padding: 7px 12px; border-radius: 999px; background: #eaf2ff; color: var(--accountant-blue); font-size: 11px; font-weight: 800; white-space: nowrap; }
+    .accountant_pill { padding: 7px 12px; border-radius: 999px; background: #eaf2ff; color: var(--accountant-blue); font-size: 11px; font-weight: 600; white-space: nowrap; }
     .accountant_stat_label { color: var(--accountant-muted); font-size: 12px; }
     .accountant_stat_value { margin: 5px 0 7px; color: #0a2b47; font-size: 27px; line-height: 1.18; letter-spacing: -.7px; font-weight: 650; overflow-wrap: anywhere; }
     .accountant_stat_detail { color: var(--accountant-muted); font-size: 12px; }
@@ -175,7 +174,6 @@ body.campus_faculty_workspace:has(.campus_accountant_page) {
 @media (max-width: 900px) {
     .campus_accountant_overview .accountant_filterbar { grid-template-columns: repeat(2,minmax(0,1fr)); }
     .campus_accountant_overview .accountant_range_separator { display: none; }
-    .campus_accountant_overview .accountant_filter_meta { grid-column: 1 / -1; }
     .campus_accountant_overview .accountant_insights_grid { grid-template-columns: minmax(0,1fr); }
     .campus_accountant_overview .accountant_insights_tag { display: none; }
 }
@@ -187,7 +185,6 @@ body.campus_faculty_workspace:has(.campus_accountant_page) {
     .campus_accountant_overview .accountant_head h1 { font-size: 25px; }
     .campus_accountant_overview .accountant_actions { margin-top: 14px; }
     .campus_accountant_overview .accountant_filterbar { grid-template-columns: minmax(0,1fr); }
-    .campus_accountant_overview .accountant_filter_meta { grid-column: auto; white-space: normal; }
     .campus_accountant_overview .accountant_filterbar > .accountant_btn { width: 100%; }
     .campus_accountant_overview .accountant_stat { padding: 14px; }
     .campus_accountant_overview .accountant_stat_value { font-size: 23px; }

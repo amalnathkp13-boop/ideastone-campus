@@ -23,7 +23,6 @@
           <label class="accountant_filtergroup"><span>To date</span><input type="date" t-model="state.accountantFilters.date_to"/></label>
           <label class="accountant_filtergroup"><span>Department</span><select t-model="state.accountantFilters.department_id"><option value="">All departments</option><option t-foreach="state.accountantMetrics.departments || []" t-as="department" t-key="department.id" t-att-value="department.id" t-esc="department.name"/></select></label>
           <button type="button" class="accountant_btn accountant_btn_primary" t-on-click="loadAccountantMetrics" t-att-disabled="state.accountantLoading">Apply filters</button>
-          <span class="accountant_filter_meta">Updated <t t-esc="state.accountantUpdatedAt || 'just now'"/><t t-if="state.is_demo"> · Sample data</t><t t-else=""> · Live records</t></span>
         </div>
         <div t-if="state.accountantError" class="accountant_error" role="alert"><span t-esc="state.accountantError"/><button type="button" class="accountant_btn" t-on-click="loadAccountantMetrics">Retry</button></div>
         <p t-if="state.accountantLoading" class="accountant_loading" role="status"><i class="fa fa-spinner fa-spin"/> Loading accounts…</p>

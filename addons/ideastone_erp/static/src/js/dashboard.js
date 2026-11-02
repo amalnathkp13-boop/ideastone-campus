@@ -45,7 +45,7 @@ class CampusBase extends Component {
             is_owner_workspace: false, is_accountant_workspace: false, is_demo: false, ownerMetrics: {stats: [], years: [], setup: [], funnel: [], programmes: [], collection: [], trend: [], recent: [], notices: [], upcoming: [], due_dates: []},
             accountantMetrics: {cards: [], trend: [], collection_status: {}, activity: [], queue: [], departments: []},
             accountantFilters: {date_from: "", date_to: "", year_id: "", department_id: ""}, accountantError: "", accountantLoading: false,
-            accountantTrendPeriod: "half", accountantUpdatedAt: "",
+            accountantTrendPeriod: "half",
             ownerFilters: {date_from: "", date_to: "", year_id: ""}, ownerAppliedFilters: {}, ownerError: "", ownerLoading: false,
             faculty_modules: [], faculty_tasks: [], faculty_schedule: [], faculty_surveys: [], module: route.module, activeAction: 0, activeTool: "",
             busy: false, query: "", cardQuery: "", unit: "", card: "", loanPage: 0, desk: { units: [], cards: [], loans: [], next: false } });
@@ -221,7 +221,6 @@ class CampusBase extends Component {
                 date_to: `${this.state.today.slice(0, 8)}${new Date(Number(this.state.today.slice(0, 4)), Number(this.state.today.slice(5, 7)), 0).getDate()}`,
             });
             this.state.accountantMetrics = await this.orm.call("campus.dashboard", "get_accountant_metrics", [this.state.accountantFilters]);
-            this.state.accountantUpdatedAt = new Date().toLocaleTimeString(undefined, {hour: "numeric", minute: "2-digit"});
         } catch (error) {
             this.state.accountantError = error.data?.message || "Accounts records could not be loaded. Check the period and retry.";
         } finally { this.state.accountantLoading = false; }
