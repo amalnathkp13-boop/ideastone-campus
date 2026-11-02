@@ -131,6 +131,9 @@ class PrincipalDashboard(models.AbstractModel):
         at_risk = {student_id for student_id, row in students.items()
                    if row["present"] * 100 < threshold * row["sessions"]}
         reviewed = at_risk & set(counseling.mapped("student_id").ids)
+        higher_studies = set(counseling.filtered(lambda row: row.future_plan == "studies").mapped("student_id").ids) - selected_ids
+        ineligible_ids = set(candidates.filtered(lambda row: not row.eligible).mapped("student_id").ids) - selected_ids - higher_studies
+        outcome_ids = candidate_ids | higher_studies
         upcoming = exams.filtered(lambda row: row.start_time and row.start_time >= fields.Datetime.now()).sorted("start_time")[:1]
         admissions = records("op.admission", [("campus_managed", "=", True),
                                               ("campus_stage", "in", ["submitted", "documents", "review"])])
@@ -160,7 +163,8 @@ class PrincipalDashboard(models.AbstractModel):
             ],
             "mentoring_rate": percent(len(reviewed), len(at_risk)),
             "placement": {"rate": percent(len(selected_ids), len(candidate_ids)), "placed": len(selected_ids),
-                          "seeking": len(candidate_ids - selected_ids), "total": len(candidate_ids)},
+                          "higher_studies": len(higher_studies), "not_eligible": len(ineligible_ids),
+                          "seeking": len(candidate_ids - selected_ids - higher_studies - ineligible_ids), "total": len(outcome_ids)},
             "operations": [
                 {"name": _("Fee collection"), "value": percent(collected, billed)},
                 {"name": _("Timetable published"), "value": percent(len(sessions.filtered(lambda s: s.state in ("confirm", "done"))), len(sessions))},

@@ -186,16 +186,20 @@
   .chart-bar.fees, .fees-dot { background: #35b98b; }
   .chart-month small { padding-top: 6px; color: #7c95af; }
   .chart-latest { margin-left: auto; }
-  .department-chart { overflow-x: auto; grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); min-width: 0; height: 180px; }
+  .department-chart { display: flex; overflow-x: auto; overflow-y: hidden; min-width: 0; height: 180px; padding-bottom: 8px; scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+  .department-chart .dept-column { flex: 1 0 85px; height: 100%; grid-template-rows: 18px minmax(0, 1fr) 42px; }
   .dept-label { overflow-wrap: anywhere; }
   .action { width: 100%; text-align: left; cursor: pointer; }
-  .action span { display: grid; gap: 4px; }
+  .quick-oversight-compact .action { background: transparent; border: 0; border-radius: 0; color: #6683a3; font-weight: 400; }
+  .quick-oversight-compact .action strong { color: #153a5b; font-size: 10px; font-weight: 700; }
+  .quick-oversight-compact .action span { display: inline; font-size: 9px; font-weight: 400; }
+  .quick-oversight-compact .action b { color: #1769e8; }
   .action small { display: block; }
   .notice { width: 100%; text-align: left; background: transparent; cursor: pointer; }
   .notice > span:last-child { min-width: 0; }
   .notice:hover, .action:hover { background: #f0f6ff; }
   .empty { color: #6683a3; font-size: 11px; line-height: 1.6; margin: 10px 0; }
-  .support-foot { display: flex; gap: 8px; margin-top: 13px; padding: 12px; background: #f5f9ff; border-radius: 10px; color: #6683a3; font-size: 11px; }
+  .support-foot { display: flex; gap: 12px; align-items: flex-start; border-top: 1px solid #eaf0f7; padding: 12px 0 0; margin-top: 14px; background: transparent; border-radius: 0; color: #6683a3; font-size: 11px; line-height: 1.55; }
   .support-foot b { color: #254a6b; }
   .action-plan ol { padding-left: 18px; margin: 8px 0 0; }
   .action-plan button { background: transparent; color: #1769e8; text-align: left; padding: 2px; }

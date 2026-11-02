@@ -28,8 +28,12 @@ export class PrincipalWorkspace extends Component {
     barWidth(value) {
         return `width: ${Math.max(0, Math.min(100, value || 0))}%`;
     }
-    donutStyle(value) {
-        return `background: conic-gradient(#1769e8 0 ${value || 0}%, #36a3f7 ${value || 0}% 100%)`;
+    donutStyle(outcomes) {
+        const total = outcomes.total || 1;
+        const placed = outcomes.placed * 100 / total;
+        const studies = placed + outcomes.higher_studies * 100 / total;
+        const seeking = studies + outcomes.seeking * 100 / total;
+        return `background: conic-gradient(#1769e8 0 ${placed}%, #36a3f7 ${placed}% ${studies}%, #35b98b ${studies}% ${seeking}%, #f2b34b ${seeking}% 100%)`;
     }
     monthLabel(month) {
         return ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][Number(month.slice(5, 7)) - 1];

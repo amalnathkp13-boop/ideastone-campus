@@ -31,3 +31,4 @@ access_principal_teaching_plan,principal.teaching.plan,ideastone_erp.model_campu
 access_principal_counseling,principal.counseling,ideastone_erp.model_campus_counseling,ideastone_principal.group_principal,1,0,0,0
 access_principal_placement,principal.placement,ideastone_erp.model_campus_placement_candidate,ideastone_principal.group_principal,1,0,0,0
 access_principal_placement_drive,principal.placement.drive,ideastone_erp.model_campus_placement_drive,ideastone_principal.group_principal,1,0,0,0
+access_principal_result_line,principal.result.line,openeducat_exam.model_op_result_line,ideastone_principal.group_principal,1,0,0,0
