@@ -49,6 +49,8 @@ class CampusBase extends Component {
             collectionOverview: {departments: [], by_department: [], status: {}, recent: []},
             collectionFilters: {date_from: "", date_to: "", department_id: ""},
             collectionError: "", collectionLoading: false,
+            collectionRecords: {columns: [], rows: [], years: [], metrics: [], money_columns: [], date_columns: []},
+            collectionYearId: "", collectionSearch: "", collectionStatusFilter: "",
             ownerFilters: {date_from: "", date_to: "", year_id: ""}, ownerAppliedFilters: {}, ownerError: "", ownerLoading: false,
             faculty_modules: [], faculty_tasks: [], faculty_schedule: [], faculty_surveys: [], module: route.module, activeAction: 0, activeTool: "",
             busy: false, query: "", cardQuery: "", unit: "", card: "", loanPage: 0, desk: { units: [], cards: [], loans: [], next: false } });
@@ -65,7 +67,7 @@ class CampusBase extends Component {
         try {
             Object.assign(this.state, await this.orm.call("campus.dashboard", "get_overview", []));
             if (this.state.is_owner_workspace) {
-                if (this.state.is_accountant_workspace && !["overview", "accountant-overview", "accountant-collections-overview", "faculty-module", "modules"].includes(this.state.page)) {
+                if (this.state.is_accountant_workspace && !["overview", "accountant-overview", "faculty-module", "modules"].includes(this.state.page) && !this.state.page.startsWith("accountant-collections-")) {
                     this.state.page = "accountant-overview";
                 }
                 if (this.state.page === "overview") this.state.page = this.state.is_accountant_workspace ? "accountant-overview" : "owner-overview";
@@ -77,6 +79,7 @@ class CampusBase extends Component {
                 if (this.state.page === "owner-overview") await this.loadOwnerMetrics();
                 if (this.state.page === "accountant-overview") await this.loadAccountantMetrics();
                 if (this.state.page === "accountant-collections-overview") await this.loadCollectionOverview();
+                if (this.state.page.startsWith("accountant-collections-") && this.state.page !== "accountant-collections-overview") await this.loadCollectionRecords();
             }
             if (this.state.page === "library") await this.loadDesk();
             if (this.props.action) this.env.bus.trigger("CAMPUS:PAGE", this.state.page);
@@ -101,6 +104,7 @@ class CampusBase extends Component {
         if (this.state.page === "owner-overview") return "Admin overview";
         if (this.state.page === "accountant-overview") return "Accountant overview";
         if (this.state.page === "accountant-collections-overview") return "Collections overview";
+        if (this.state.page.startsWith("accountant-collections-")) return this.collectionPage.title;
         if (this.state.page === "faculty-module") return this.facultyModule?.label || "Faculty workspace";
         if (this.state.page === "help") return "Faculty guide";
         if (this.state.page === "analytics") return "My teaching dashboard";
@@ -245,12 +249,103 @@ class CampusBase extends Component {
         try {
             if (!this.state.collectionFilters.date_from) Object.assign(this.state.collectionFilters, {
                 date_from: `${this.state.today.slice(0, 8)}01`,
-                date_to: `${this.state.today.slice(0, 8)}${new Date(Number(this.state.today.slice(0, 4)), Number(this.state.today.slice(5, 7)), 0).getDate()}`,
+                date_to: this.state.today,
             });
             this.state.collectionOverview = await this.orm.call("campus.dashboard", "get_accountant_collections_overview", [this.state.collectionFilters]);
         } catch (error) {
             this.state.collectionError = error.data?.message || "Collections could not be loaded. Check the filters and retry.";
         } finally { this.state.collectionLoading = false; }
+    }
+    get collectionScreen() { return this.state.page.replace("accountant-collections-", ""); }
+    get collectionPage() {
+        return {
+            structures: {title: "Fee structures", description: "Configure fee heads, programme applicability and installment rules.", action: "New fee structure"},
+            assign: {title: "Assign fee structure", description: "Map a fee plan to student cohorts or individual enrolments.", action: "Assign fee structure"},
+            invoices: {title: "Invoices", description: "Issue, track and manage student fee invoices.", action: "New invoice"},
+            receipts: {title: "Receipts", description: "Review payment receipts and reconcile incoming collections.", action: "Record payment"},
+            reports: {title: "Collection report", description: "Compare billed, collected and outstanding balances by department.", action: "Open report"},
+            dues: {title: "Dues report", description: "Identify overdue balances and prioritize follow-up.", action: "Open dues report"},
+            exports: {title: "Export files", description: "Prepare scoped CSV files for finance reconciliation and audit.", action: ""},
+        }[this.collectionScreen] || {title: "Collections", description: "", action: ""};
+    }
+    async loadCollectionRecords() {
+        if (this.state.collectionLoading) return;
+        this.state.collectionLoading = true;
+        this.state.collectionError = "";
+        try {
+            this.state.collectionRecords = await this.orm.call("campus.dashboard", "get_accountant_collection_records", [this.collectionScreen, this.state.collectionYearId]);
+        } catch (error) {
+            this.state.collectionError = error.data?.message || "Collection records could not be loaded. Please retry.";
+        } finally { this.state.collectionLoading = false; }
+    }
+    collectionChangeYear(event) {
+        this.state.collectionYearId = event.target.value;
+        this.loadCollectionRecords();
+    }
+    get collectionRecordRows() {
+        const query = this.state.collectionSearch.trim().toLowerCase();
+        const status = this.state.collectionStatusFilter;
+        return (this.state.collectionRecords.rows || []).filter(row =>
+            (!status || row.status === status) && (!query || row.cells.join(" ").toLowerCase().includes(query)));
+    }
+    get collectionStatuses() {
+        return [...new Set((this.state.collectionRecords.rows || []).map(row => row.status).filter(Boolean))];
+    }
+    collectionFullMoney(value) {
+        const currency = this.state.collectionRecords.currency || "₹";
+        return `${currency}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(Number(value) || 0)}`;
+    }
+    async collectionOpenEditor() {
+        const screen = this.collectionScreen;
+        if (screen === "invoices") return this.collectionCreateInvoice();
+        if (screen === "assign") return this.accountantOpen("mvp_assign_fees");
+        if (screen === "receipts") return this.action.doAction({type: "ir.actions.act_window", name: "Record payment",
+            res_model: "campus.fee.payment.wizard", views: [[false, "form"]], target: "new"});
+        if (screen === "reports" || screen === "dues") return this.accountantOpen(screen === "reports" ? "mvp_report_collection" : "mvp_report_dues");
+        if (screen === "structures") {
+            try {
+                const action = await this.orm.call("campus.dashboard", "get_owner_action", ["ideastone_erp.mvp_structures"]);
+                await this.action.doAction({type: "ir.actions.act_window", name: action.name,
+                    res_model: action.res_model, views: [action.views.find(([, type]) => type === "form")],
+                    view_mode: "form", target: "current", context: action.context, domain: action.domain});
+            } catch {
+                this.notification.add("The fee structure form could not be opened.", {type: "danger"});
+            }
+        }
+    }
+    async collectionOpenRecord(id) {
+        const source = {
+            structures: "mvp_structures", assign: "mvp_fees", invoices: "mvp_invoices",
+            receipts: "mvp_receipts", dues: "mvp_invoices",
+        }[this.collectionScreen];
+        if (!source) return;
+        try {
+            const action = await this.orm.call("campus.dashboard", "get_owner_action", [`ideastone_erp.${source}`]);
+            await this.action.doAction({type: "ir.actions.act_window", name: action.name,
+                res_model: action.res_model, res_id: id,
+                views: [action.views.find(([, type]) => type === "form")],
+                view_mode: "form", target: "current", context: action.context, domain: action.domain});
+        } catch {
+            this.notification.add("This record could not be opened. Check your access and retry.", {type: "danger"});
+        }
+    }
+    async collectionExportCsv(screen = this.collectionScreen) {
+        try {
+            const data = screen === this.collectionScreen ? this.state.collectionRecords :
+                await this.orm.call("campus.dashboard", "get_accountant_collection_records", [screen, this.state.collectionYearId]);
+            const rows = screen === this.collectionScreen ? this.collectionRecordRows : data.rows;
+            const values = [data.columns, ...rows.map(row => row.cells.map((cell, index) =>
+                data.money_columns.includes(index) ? this.collectionFullMoney(cell) : data.date_columns.includes(index) ? this.collectionDate(cell) : cell))];
+            const csv = "\uFEFF" + values.map(row => row.map(cell => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(",")).join("\r\n");
+            const url = URL.createObjectURL(new Blob([csv], {type: "text/csv;charset=utf-8"}));
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `collections-${screen}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+        } catch {
+            this.notification.add("The export could not be prepared. Please retry.", {type: "danger"});
+        }
     }
     collectionMoney(value) {
         const amount = Number(value) || 0;

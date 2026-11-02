@@ -108,5 +108,29 @@ body.campus_faculty_workspace:has(.campus_collections_page) {
     @media (max-width: 1250px) { .collections_filters { grid-template-columns: repeat(3,minmax(0,1fr)); }.collections_filter_title { grid-column: span 1; } }
     @media (max-width: 1050px) { .collections_kpis { grid-template-columns: repeat(2,minmax(0,1fr)); }.collections_grid { grid-template-columns: minmax(0,1fr); }.collections_insight_grid { grid-template-columns: 1fr; } }
     @media (max-width: 700px) { padding: 18px 14px; .collections_head { display: block; }.collections_actions { margin-top: 15px; }.collections_filters { grid-template-columns: repeat(2,minmax(0,1fr)); }.collections_filter_title { grid-column: 1/-1; }.collections_status_body { grid-template-columns: 1fr; }.collections_kpis { gap: 10px; } }
-    @media (max-width: 520px) { .collections_kpis, .collections_filters { grid-template-columns: 1fr; }.collections_status_panel { padding: 17px; }.collections_status_foot, .collections_crumb { flex-direction: column; }.collections_insights_head { flex-wrap: wrap; }.collections_insights_head .collections_pill { margin-left: 0; }.collections_bar_row { grid-template-columns: 78px minmax(0,1fr) 35px; gap: 7px; } }
+    .collections_record_metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; margin-bottom: 18px; }
+    .collections_record_metric { min-width: 0; display: flex; align-items: flex-start; gap: 13px; padding: 18px; background: #fff; border: 1px solid var(--col-line); border-radius: 14px; }
+    .collections_record_metric .collections_kpi_icon { flex-shrink: 0; }.collections_record_metric div { min-width: 0; }
+    .collections_record_metric strong { display: block; font-size: 24px; line-height: 1.2; overflow-wrap: anywhere; }
+    .collections_record_metric div > span { display: block; margin-top: 5px; color: var(--col-muted); font-size: 12px; }
+    .collections_record_metric small { display: block; margin-top: 3px; color: #7d95ac; font-size: 11px; }
+    .collections_records_panel { min-width: 0; overflow: hidden; padding: 16px; background: #fff; border: 1px solid var(--col-line); border-radius: 14px; }
+    .collections_records_toolbar { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; margin-bottom: 15px; }
+    .collections_records_toolbar > button { margin-left: auto; white-space: nowrap; font-size: 12px; }
+    .collections_records_search { min-width: 220px; flex: 1 1 260px; display: flex; align-items: center; gap: 9px; height: 40px; padding: 0 12px; border: 1px solid var(--col-line); border-radius: 9px; color: var(--col-muted); }
+    .collections_records_search input { min-width: 0; width: 100%; border: 0; outline: 0; color: var(--col-ink); background: transparent; font-size: 12px; }
+    .collections_records_filter { display: grid; gap: 4px; min-width: 145px; margin: 0; color: var(--col-muted); font-size: 10px; font-weight: 700; }
+    .collections_records_filter select { height: 40px; padding: 0 10px; border: 1px solid var(--col-line); border-radius: 9px; color: var(--col-ink); background: #fff; font-size: 12px; }
+    .collections_record_count { display: flex; align-items: baseline; gap: 9px; margin-bottom: 12px; font-size: 12px; }.collections_record_count span { color: var(--col-muted); }
+    .collections_records_table { max-width: 100%; }.collections_records_table table { min-width: 690px; }
+    .collections_records_table .collections_record_link { padding: 0; border: 0; background: transparent; color: var(--col-blue); font-weight: 700; text-align: left; }
+    .collections_records_table .collections_record_link:hover { background: transparent; text-decoration: underline; }
+    .collections_export_cards { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+    .collections_export_cards article { min-width: 0; padding: 20px; border: 1px solid var(--col-line); border-radius: 12px; }
+    .collections_export_cards h2 { margin: 12px 0 6px; font-size: 17px; }.collections_export_cards p { min-height: 38px; color: var(--col-muted); font-size: 12px; }.collections_export_cards button { color: var(--col-blue); font-size: 12px; }
+    .collections_status_chip.active, .collections_status_chip.posted, .collections_status_chip.invoiced { color: #39866c; background: #e6f6ef; }
+    .collections_status_chip.draft, .collections_status_chip.assigned { color: #5e7b9a; background: #eef3f9; }
+    .collections_status_chip.cancelled, .collections_status_chip.reversed { color: #b74b4b; background: #fdeaea; }
+    @media (max-width: 850px) { .collections_record_metrics, .collections_export_cards { grid-template-columns: 1fr; } }
+    @media (max-width: 520px) { .collections_kpis, .collections_filters { grid-template-columns: 1fr; }.collections_status_panel { padding: 17px; }.collections_status_foot, .collections_crumb { flex-direction: column; }.collections_insights_head { flex-wrap: wrap; }.collections_insights_head .collections_pill { margin-left: 0; }.collections_bar_row { grid-template-columns: 78px minmax(0,1fr) 35px; gap: 7px; }.collections_records_search, .collections_records_filter, .collections_records_toolbar > button { width: 100%; }.collections_records_toolbar > button { margin-left: 0; } }
 }

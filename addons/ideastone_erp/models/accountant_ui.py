@@ -20,6 +20,7 @@ ACCOUNTANT_MODULES = [
         ("Receipts", "mvp_receipts"),
         ("Collection report", "mvp_report_collection"),
         ("Dues report", "mvp_report_dues"),
+        ("Export files", "accountant-collections-exports"),
     ]),
     ("transport", "Transport billing", "bus", [
         ("Transport overview", "accountant_transport_dashboard"),
@@ -326,6 +327,134 @@ class AccountantDashboard(models.AbstractModel):
                        "pending": max(0.0, open_period - overdue_period), "overdue": overdue_period},
             "by_department": department_rows, "recent": recent[:4], "recent_invoices": recent_invoices,
         }
+
+    @api.model
+    def get_accountant_collection_records(self, screen, year_id=0):
+        """Records for the accountant's Collections tabs; native actions remain the editors."""
+        self._accountant_access()
+        screens = {"structures", "assign", "invoices", "receipts", "reports", "dues", "exports"}
+        if screen not in screens or isinstance(year_id, bool):
+            raise ValidationError(_("Select a valid Collections page."))
+        try:
+            year_id = int(year_id or 0)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise ValidationError(_("Select a valid academic year.")) from exc
+        company = self.env.company
+        years = self.env["op.academic.year"].search([("company_id", "=", company.id)], order="start_date desc")
+        if year_id and year_id not in years.ids:
+            raise AccessError(_("Select an academic year in the active college."))
+        scope = [("company_id", "=", company.id)]
+        rows = []
+
+        def add(record_id, cells, status=""):
+            rows.append({"id": record_id, "cells": cells, "status": status})
+
+        def metric(value, label, detail, color="blue", money=False):
+            return {"value": value, "label": label, "detail": detail, "color": color, "money": money}
+
+        if screen == "structures":
+            domain = scope + [("campus_managed", "=", True)]
+            if year_id:
+                domain.append(("campus_year_id", "=", year_id))
+            plans = self._mvp_records("op.fees.terms", domain).sorted("id", reverse=True)
+            for plan in plans[:200]:
+                status = "Active" if plan.active and plan.line_ids else "Draft"
+                heads = ", ".join(plan.line_ids.campus_product_id.mapped("name")) or "Not configured"
+                add(plan.id, [f"FEE-{plan.id:05d}", plan.name, heads,
+                              plan.campus_course_id.name or "All programmes", plan.campus_year_id.name or "—",
+                              len(plan.line_ids), status], status)
+            columns = ["Structure ID", "Fee structure", "Fee head", "Applies to", "Academic year", "Installments", "Status"]
+            metrics = [metric(sum(sum(line.campus_amount for line in plan.line_ids) for plan in plans), "Scheduled fee value", "Across saved structures", money=True),
+                       metric(len(plans.filtered(lambda plan: plan.active and plan.line_ids)), "Active structures", "Ready for assignment", "green"),
+                       metric(len(plans.filtered(lambda plan: not plan.line_ids)), "Draft plans", "Add fee installments before assignment", "amber")]
+        elif screen == "assign":
+            domain = scope + [("campus_managed", "=", True)]
+            if year_id:
+                domain.append(("campus_year_id", "=", year_id))
+            fees = self._mvp_records("op.student.fees.details", domain).sorted("id", reverse=True)
+            for fee in fees[:200]:
+                plan = fee.fees_line_id.fees_id
+                status = "Invoiced" if fee.invoice_id else "Assigned"
+                add(fee.id, [f"ASG-{fee.id:05d}", fee.student_id.name,
+                             fee.course_id.department_id.name or fee.course_id.name or "—",
+                             plan.name or "—", str(fee.date or ""), status], status)
+            columns = ["Assignment ID", "Student", "Department", "Fee structure", "Effective date", "Status"]
+            metrics = [metric(len(fees), "Fee installments assigned", "Saved student fee records"),
+                       metric(len(fees.student_id), "Students covered", "With a fee assignment", "green"),
+                       metric(sum(fee.amount for fee in fees), "Assigned amount", "Before concessions", "amber", True)]
+        elif screen in {"invoices", "reports", "dues"}:
+            domain = scope + [("campus_student_id", "!=", False), ("move_type", "=", "out_invoice")]
+            if year_id:
+                domain.append(("campus_year_id", "=", year_id))
+            invoices = self._mvp_records("account.move", domain).sorted(key=lambda invoice: (invoice.invoice_date or date.min, invoice.id), reverse=True)
+            today = fields.Date.context_today(self)
+            posted = invoices.filtered(lambda invoice: invoice.state == "posted")
+            if screen == "invoices":
+                for invoice in invoices[:200]:
+                    due = invoice.invoice_date_due or invoice.invoice_date
+                    status = "Draft" if invoice.state == "draft" else "Cancelled" if invoice.state == "cancel" else "Paid" if invoice.amount_residual <= 0 else "Overdue" if due and due < today else "Pending"
+                    add(invoice.id, [invoice.name if invoice.name != "/" else "Draft", invoice.campus_student_id.name,
+                                     invoice.campus_course_id.department_id.name or "—", invoice.amount_total,
+                                     str(due or ""), status], status)
+                columns = ["Invoice ID", "Student", "Department", "Amount", "Due date", "Status"]
+                metrics = [metric(len(invoices), "Invoices issued", "Saved student invoices"),
+                           metric(sum(invoice.amount_total for invoice in posted), "Total billed", "Posted invoices", "green", True),
+                           metric(sum(invoice.amount_residual for invoice in posted), "Open balance", "Pending and overdue", "amber", True)]
+            elif screen == "dues":
+                due_invoices = posted.filtered(lambda invoice: invoice.amount_residual > 0)
+                for invoice in due_invoices[:200]:
+                    due = invoice.invoice_date_due or invoice.invoice_date
+                    days = max(0, (today - due).days) if due else 0
+                    status = "Overdue" if days else "Pending"
+                    add(invoice.id, [invoice.name, invoice.campus_student_id.name,
+                                     invoice.campus_course_id.department_id.name or "—", invoice.amount_residual,
+                                     str(due or ""), f"{days} days" if days else "Not overdue", status], status)
+                columns = ["Invoice ID", "Student", "Department", "Balance", "Due date", "Aging", "Follow-up"]
+                metrics = [metric(sum(invoice.amount_residual for invoice in due_invoices), "Open balance", "Across unpaid invoices", money=True),
+                           metric(len(due_invoices.filtered(lambda invoice: bool(invoice.invoice_date_due or invoice.invoice_date) and (invoice.invoice_date_due or invoice.invoice_date) < today)), "Overdue invoices", "Past due date", "amber"),
+                           metric(len(due_invoices), "Accounts to review", "Reconcile before follow-up", "green")]
+            else:
+                departments = defaultdict(lambda: {"billed": 0.0, "collected": 0.0, "outstanding": 0.0})
+                for invoice in posted:
+                    name = invoice.campus_course_id.department_id.name or "Unassigned"
+                    departments[name]["billed"] += invoice.amount_total
+                    departments[name]["collected"] += invoice.amount_total - invoice.amount_residual
+                    departments[name]["outstanding"] += invoice.amount_residual
+                for index, (name, values) in enumerate(sorted(departments.items())):
+                    rate = round(values["collected"] / values["billed"] * 100) if values["billed"] else 0
+                    add(index, [name, values["billed"], values["collected"], values["outstanding"], f"{rate}%"])
+                columns = ["Department", "Billed", "Collected", "Outstanding", "Collection rate"]
+                metrics = [metric(sum(invoice.amount_total for invoice in posted), "Total billed", "Posted student invoices", money=True),
+                           metric(sum(invoice.amount_total - invoice.amount_residual for invoice in posted), "Collected", "Against posted invoices", "green", True),
+                           metric(sum(invoice.amount_residual for invoice in posted), "Open balance", "Reconcile with receipts", "amber", True)]
+        elif screen == "receipts":
+            domain = scope + [("campus_receipt_number", "!=", False)]
+            if year_id:
+                domain.append(("campus_invoice_id.campus_year_id", "=", year_id))
+            receipts = self._mvp_records("account.payment", domain).sorted(key=lambda payment: (payment.date or date.min, payment.id), reverse=True)
+            for payment in receipts[:200]:
+                status = "Reversed" if payment.campus_reversal_id else "Posted"
+                add(payment.id, [payment.campus_receipt_number, str(payment.date or ""),
+                                 payment.campus_invoice_id.campus_student_id.name or payment.partner_id.name,
+                                 payment.campus_invoice_id.name or "—", payment.amount,
+                                 dict(payment._fields["campus_method"].selection).get(payment.campus_method, "—"),
+                                 payment.campus_cashier_id.name or "—", status], status)
+            columns = ["Receipt ID", "Date", "Payer", "Invoice ref", "Amount", "Method", "Cashier", "Status"]
+            metrics = [metric(sum(payment.amount * (-1 if payment.campus_reversal_id else 1) for payment in receipts), "Net receipts", "After reversals", money=True),
+                       metric(len(receipts), "Receipts recorded", "Saved collection records", "green"),
+                       metric(len(receipts.filtered("campus_reversal_id")), "Reversed receipts", "Check reconciliation", "amber")]
+        else:
+            columns = []
+            metrics = [metric(3, "Export datasets", "Invoices, receipts and dues"),
+                       metric("CSV", "File format", "Spreadsheet ready", "green"),
+                       metric("Scoped", "Academic year", "Uses the selected college", "amber")]
+
+        money_columns = {"invoices": [3], "receipts": [4], "reports": [1, 2, 3], "dues": [3]}
+        date_columns = {"assign": [4], "invoices": [4], "receipts": [1], "dues": [4]}
+        return {"screen": screen, "columns": columns, "rows": rows,
+                "years": [{"id": year.id, "name": year.name} for year in years],
+                "metrics": metrics, "total": len(rows), "currency": company.currency_id.symbol,
+                "money_columns": money_columns.get(screen, []), "date_columns": date_columns.get(screen, [])}
 
 
 class AccountantExpense(models.Model):

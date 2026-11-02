@@ -79,7 +79,10 @@ class OwnerDashboard(models.AbstractModel):
             if key == "settings" and self.env.user.has_group("ideastone_erp.group_mvp_owner"):
                 items.append({"label": "Overview", "page": "settings-overview"})
             for title, action in entries:
-                if action in {"owner-overview", "accountant-overview", "accountant-collections-overview"}:
+                collection_pages = {"mvp_structures": "structures", "mvp_assign_fees": "assign",
+                    "mvp_invoices": "invoices", "mvp_receipts": "receipts",
+                    "mvp_report_collection": "reports", "mvp_report_dues": "dues"}
+                if action in {"owner-overview", "accountant-overview", "accountant-collections-overview", "accountant-collections-exports"}:
                     items.append({"label": title, "page": action})
                     continue
                 ref = self.env.ref(action if "." in action else "ideastone_erp." + action, raise_if_not_found=False)
@@ -101,7 +104,11 @@ class OwnerDashboard(models.AbstractModel):
                 item = {"label": title, "action": ref.get_external_id()[ref.id], "action_id": ref.id, "model": target_model, "group": label, "allowed": True}
                 if key == "settings":
                     item["page"] = "settings-" + {"mvp_college": "college", "mvp_requirements": "documents", "mvp_student_request_types": "catalogue", "mvp_audit": "audit", "base.action_res_users": "users", "base.ir_sequence_form": "numbering", "mvp_import_students": "import"}[action]
-                items.append(item)
+                if key == "collections" and action in collection_pages and self.env.user.has_group("ideastone_erp.group_mvp_accountant"):
+                    items.append({"label": title, "page": "accountant-collections-" + collection_pages[action],
+                                  "source_action": item["action"]})
+                else:
+                    items.append(item)
                 navigation.append(item)
             if items:
                 modules.append({"key": key, "label": label, "icon": icon, "items": items})
