@@ -18,7 +18,9 @@
     "assets": {
         "web.assets_backend": [
             "ideastone_principal/static/src/js/workspace.js",
+            "ideastone_principal/static/src/js/headings.js",
             "ideastone_principal/static/src/xml/workspace.xml",
+            "ideastone_principal/static/src/xml/headings.xml",
             "ideastone_principal/static/src/scss/workspace.scss",
         ],
     },
