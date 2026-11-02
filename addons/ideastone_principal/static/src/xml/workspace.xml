@@ -1,10 +1,12 @@
 <templates xml:space="preserve">
   <t t-name="ideastone_principal.Workspace">
     <main class="campus_faculty_home campus_principal_home" id="campus_main">
-      <div class="content">
+      <div class="content" t-att-style="view === 'overview' ? 'font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Arial, sans-serif !important' : ''">
         <p t-if="state.loading" class="home-loading" role="status">Loading principal records…</p>
         <div t-if="state.error" class="home-error" role="alert"><span t-esc="state.error"/><button type="button" class="directory-back" t-on-click="load">Retry</button></div>
         <t t-if="state.data">
+          <t t-if="view === 'overview'"><t t-call="ideastone_principal.Overview"/></t>
+          <t t-else="">
           <div class="breadcrumb"><span>VCET Campus / Principal workspace / <t t-esc="title"/></span><span t-esc="state.data.today"/></div>
           <div class="heading-row"><div><h1 t-esc="title"/><div class="subtitle">Institutional oversight and decisions from saved campus records.</div></div><div class="home-heading-tools"><span class="pill">Saved records · Principal view</span><button class="home-refresh" type="button" aria-label="Refresh principal workspace" t-on-click="load">⟳</button></div></div>
           <section t-if="view === 'overview'" class="welcome"><div><div class="eyebrow">YOUR CAMPUS, CONNECTED · PRINCIPAL WORKSPACE</div><h2>Welcome back, <t t-esc="state.data.user"/></h2><p>Review campus performance, pending decisions and notices in one place.</p></div><div class="welcome-date" t-esc="state.data.company"/></section>
@@ -32,6 +34,7 @@
             </div>
           </div>
           <footer class="footer"><t t-esc="state.data.company"/> · Principal workspace · Saved college records</footer>
+          </t>
         </t>
       </div>
     </main>

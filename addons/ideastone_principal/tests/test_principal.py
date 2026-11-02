@@ -53,6 +53,14 @@ class TestPrincipalWorkflow(TransactionCase):
         overview = self.env["ideastone.principal.dashboard"].with_user(self.principal).get_overview()
         self.assertIn("students", overview["counts"])
         self.assertIn("pending", overview["counts"])
+        self.assertEqual(len(overview["dashboard"]["trend"]), 6)
+        self.assertEqual(len(overview["dashboard"]["readiness"]), 4)
+        request = self.env["ideastone.principal.request"].with_user(self.staff).create({
+            "name": "Dashboard refresh check", "request_type": "academic", "description": "Saved request",
+        })
+        request.with_user(self.staff).action_submit()
+        refreshed = self.env["ideastone.principal.dashboard"].with_user(self.principal).get_overview()
+        self.assertEqual(refreshed["counts"]["pending"], overview["counts"]["pending"] + 1)
         self.assertFalse(self.env["op.student"].with_user(self.principal).check_access_rights("write", raise_exception=False))
 
     def test_shared_navigation_uses_existing_workspaces(self):

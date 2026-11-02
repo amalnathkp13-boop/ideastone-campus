@@ -10,11 +10,35 @@ export class PrincipalWorkspace extends Component {
         this.orm = useService("orm");
         this.action = useService("action");
         this.view = this.props.action.params?.view || "overview";
-        this.state = useState({loading: true, error: "", data: null});
+        this.state = useState({loading: true, error: "", data: null, period: 6, showPlan: false});
         onWillStart(() => this.load());
     }
     get title() {
         return {overview: "Principal overview", decisions: "Decisions", notices: "Notices & circulars"}[this.view];
+    }
+    get trendRows() {
+        return (this.state.data?.dashboard?.trend || []).slice(-this.state.period);
+    }
+    percent(value) {
+        return value === null || value === undefined ? "—" : `${value}%`;
+    }
+    barHeight(value) {
+        return `height: ${Math.max(0, Math.min(100, value || 0))}%`;
+    }
+    barWidth(value) {
+        return `width: ${Math.max(0, Math.min(100, value || 0))}%`;
+    }
+    donutStyle(value) {
+        return `background: conic-gradient(#1769e8 0 ${value || 0}%, #36a3f7 ${value || 0}% 100%)`;
+    }
+    monthLabel(month) {
+        return ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][Number(month.slice(5, 7)) - 1];
+    }
+    choosePeriod(event) {
+        this.state.period = Number(event.target.value);
+    }
+    togglePlan() {
+        this.state.showPlan = !this.state.showPlan;
     }
     async load() {
         this.state.loading = true;

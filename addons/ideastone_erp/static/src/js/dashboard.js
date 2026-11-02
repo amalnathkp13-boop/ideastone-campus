@@ -114,6 +114,9 @@ class CampusBase extends Component {
         return this.state.page === "library" ? "Library circulation desk" : "Reports & exports";
     }
     async chooseModule(module) {
+        if (this.state.is_principal_workspace && module.key === "home" && module.items?.[0]?.action) {
+            return this.open(module.items[0]);
+        }
         if (module.key === "collections" && this.state.is_accountant_workspace) {
             this.state.module = "collections";
             return this.go({key: "accountant-collections-overview"});
