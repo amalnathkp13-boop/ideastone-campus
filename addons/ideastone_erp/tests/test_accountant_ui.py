@@ -6,6 +6,49 @@ from .test_owner_mvp import OwnerMVPFixture
 
 @tagged("post_install", "-at_install")
 class TestAccountantWorkspace(OwnerMVPFixture, TransactionCase):
+    def test_collection_tabs_use_saved_college_records(self):
+        student = self.enrolled().student_id
+        fee = self.fee(student, 500)
+        fee.action_campus_post()
+        self.payment(fee.invoice_id, 125)
+        plan = self.env["op.fees.terms"].create({
+            "name": "QA semester plan", "campus_managed": True,
+            "campus_course_id": self.course.id, "campus_year_id": self.year.id,
+            "line_ids": [(0, 0, {"campus_product_id": self.product.id, "campus_amount": 500,
+                                   "due_date": self.today, "value": 100})],
+        })
+        dashboard = self.env["campus.dashboard"].with_user(self.accountant)
+        tabs = next(module for module in dashboard.get_overview()["faculty_modules"]
+                    if module["key"] == "collections")["items"]
+        self.assertEqual(tabs[1]["page"], "accountant-collections-structures")
+        self.assertEqual(tabs[-1]["page"], "accountant-collections-exports")
+        for screen in ("structures", "assign", "invoices", "receipts", "reports", "dues", "exports"):
+            result = dashboard.get_accountant_collection_records(screen, self.year.id)
+            self.assertEqual(result["screen"], screen)
+            self.assertTrue(result["metrics"])
+            if screen != "exports":
+                self.assertTrue(result["rows"], screen)
+        self.assertEqual(dashboard.get_accountant_collection_records("structures", self.year.id)["rows"][0]["id"], plan.id)
+        self.assertEqual(dashboard.get_accountant_collection_records("dues", self.year.id)["rows"][0]["cells"][3], 375)
+
+    def test_collections_overview_uses_saved_invoices_and_receipts(self):
+        student = self.enrolled().student_id
+        fee = self.fee(student, 500)
+        fee.action_campus_post()
+        self.payment(fee.invoice_id, 125)
+        dashboard = self.env["campus.dashboard"].with_user(self.accountant)
+        modules = dashboard.get_overview()["faculty_modules"]
+        collections = next(module for module in modules if module["key"] == "collections")
+        self.assertEqual(collections["items"][0]["page"], "accountant-collections-overview")
+        data = dashboard.get_accountant_collections_overview({
+            "date_from": str(self.today), "date_to": str(self.today), "department_id": self.department.id})
+        self.assertEqual(data["invoice_count"], 1)
+        self.assertEqual(data["collected_month"], 125)
+        self.assertEqual(data["status"]["billed"], 500)
+        self.assertEqual(data["status"]["pending"] + data["status"]["overdue"], 375)
+        self.assertEqual(data["recent_invoices"][0]["status"], "Pending")
+        self.assertEqual(data["by_department"][0]["id"], self.department.id)
+
     def test_accountant_sees_saved_fee_balances_without_other_admin_modules(self):
         student = self.enrolled().student_id
         fee = self.fee(student, 500)
