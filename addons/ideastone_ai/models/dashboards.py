@@ -12,6 +12,8 @@ class CampusDashboardAI(models.AbstractModel):
     # Owner workspace: one "AI" module with both screens.
     def _owner_modules(self):
         modules = super()._owner_modules()
+        if self._accountant_only():
+            return modules
         modules.insert(1, ("ai", "AI insights", "magic", [("Student Success Radar", RADAR_ACTION), ("Campus Assistant", ASSISTANT_ACTION)]))
         return modules
 

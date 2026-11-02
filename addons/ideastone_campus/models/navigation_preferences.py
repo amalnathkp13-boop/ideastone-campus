@@ -4,7 +4,7 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 
 from odoo import _, api, fields, models
 
-SCOPES = {"student", "parent", "owner", "faculty", "hod", "coe", "staff"}
+SCOPES = {"student", "parent", "owner", "accountant", "faculty", "hod", "coe", "staff"}
 KEY = re.compile(r"[a-zA-Z0-9_.:/-]{1,200}\Z")
 
 

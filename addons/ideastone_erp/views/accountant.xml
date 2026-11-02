@@ -1,0 +1,169 @@
+<odoo>
+  <record id="accountant_student_tree" model="ir.ui.view">
+    <field name="name">accountant.student.directory.tree</field>
+    <field name="model">op.student</field>
+    <field name="arch" type="xml">
+      <tree string="Student fee directory" create="false" edit="false" delete="false">
+        <field name="gr_no"/>
+        <field name="name"/>
+        <field name="campus_current_department"/>
+        <field name="campus_current_semester"/>
+        <field name="campus_fee_currency_id" column_invisible="True"/>
+        <field name="campus_fee_pending"/>
+        <field name="campus_fee_status"/>
+        <field name="campus_status"/>
+      </tree>
+    </field>
+  </record>
+  <record id="accountant_students" model="ir.actions.act_window">
+    <field name="name">Student fee directory</field>
+    <field name="res_model">op.student</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="accountant_student_tree"/>
+    <field name="domain">[('active','=',True)]</field>
+  </record>
+
+  <record id="accountant_pending" model="ir.actions.act_window">
+    <field name="name">Pending fee students</field>
+    <field name="res_model">op.student</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="accountant_student_tree"/>
+    <field name="domain">[('active','=',True),('campus_fee_pending','&gt;',0)]</field>
+  </record>
+
+  <record id="accountant_transport_tree" model="ir.ui.view">
+    <field name="name">accountant.transport.billing.tree</field>
+    <field name="model">campus.transport.allocation</field>
+    <field name="arch" type="xml">
+      <tree string="Transport fee bills" create="false" edit="false" delete="false">
+        <field name="student_id"/>
+        <field name="route_id"/>
+        <field name="stop_id"/>
+        <field name="year_id"/>
+        <field name="invoice_id"/>
+        <field name="state"/>
+      </tree>
+    </field>
+  </record>
+  <record id="accountant_transport_stop_product" model="ir.ui.view">
+    <field name="name">transport.stop.fee.product</field>
+    <field name="model">campus.transport.stop</field>
+    <field name="inherit_id" ref="view_transport_stop_form"/>
+    <field name="arch" type="xml">
+      <field name="fee" position="after"><field name="fee_product_id" options="{'no_create': True}"/></field>
+    </field>
+  </record>
+  <record id="accountant_transport_form" model="ir.ui.view">
+    <field name="name">accountant.transport.billing.form</field>
+    <field name="model">campus.transport.allocation</field>
+    <field name="arch" type="xml">
+      <form string="Transport billing" create="false" edit="false" delete="false">
+        <header><button name="action_invoice" type="object" string="Create or open fee bill" class="oe_highlight"/></header>
+        <sheet><group>
+          <field name="company_id" invisible="True"/>
+          <field name="student_id"/>
+          <field name="route_id"/>
+          <field name="stop_id"/>
+          <field name="year_id"/>
+          <field name="invoice_id"/>
+          <field name="state"/>
+        </group></sheet>
+      </form>
+    </field>
+  </record>
+  <record id="accountant_transport" model="ir.actions.act_window">
+    <field name="name">Transport fee bills</field>
+    <field name="res_model">campus.transport.allocation</field>
+    <field name="view_mode">tree,form</field>
+    <field name="view_id" ref="accountant_transport_tree"/>
+    <field name="domain">[('state','=','approved')]</field>
+  </record>
+  <record id="accountant_transport_form_binding" model="ir.actions.act_window.view">
+    <field name="act_window_id" ref="accountant_transport"/>
+    <field name="sequence" eval="2"/>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="accountant_transport_form"/>
+  </record>
+
+  <record id="accountant_expense_fields" model="ir.ui.view">
+    <field name="name">account.move.college.spending</field>
+    <field name="model">account.move</field>
+    <field name="inherit_id" ref="account.view_move_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='invoice_date']" position="after">
+        <field name="campus_spend_category" invisible="move_type not in ('in_invoice','in_refund')"/>
+        <field name="campus_spend_department_id" invisible="move_type not in ('in_invoice','in_refund')"/>
+      </xpath>
+    </field>
+  </record>
+  <record id="accountant_expenses_tree" model="ir.ui.view">
+    <field name="name">accountant.expenses.tree</field>
+    <field name="model">account.move</field>
+    <field name="arch" type="xml">
+      <tree string="College event and maintenance bills" delete="false">
+        <field name="name"/>
+        <field name="partner_id"/>
+        <field name="invoice_date"/>
+        <field name="ref"/>
+        <field name="campus_spend_category"/>
+        <field name="campus_spend_department_id"/>
+        <field name="amount_total" sum="Recorded outgoing"/>
+        <field name="amount_residual"/>
+        <field name="payment_state"/>
+      </tree>
+    </field>
+  </record>
+  <record id="accountant_expenses" model="ir.actions.act_window">
+    <field name="name">Event &amp; maintenance bills</field>
+    <field name="res_model">account.move</field>
+    <field name="view_mode">tree,form</field>
+    <field name="view_id" ref="accountant_expenses_tree"/>
+    <field name="domain">[('move_type','in',['in_invoice','in_refund'])]</field>
+    <field name="context">{'default_move_type':'in_invoice'}</field>
+  </record>
+
+  <record id="accountant_notices_tree" model="ir.ui.view">
+    <field name="name">accountant.fee.notices.tree</field>
+    <field name="model">campus.circular</field>
+    <field name="arch" type="xml">
+      <tree string="Fee circulars" delete="false">
+        <field name="reference"/><field name="name"/><field name="audience"/>
+        <field name="date_from"/><field name="date_to"/><field name="campus_status"/>
+      </tree>
+    </field>
+  </record>
+  <record id="accountant_notices_form" model="ir.ui.view">
+    <field name="name">accountant.fee.notices.form</field>
+    <field name="model">campus.circular</field>
+    <field name="arch" type="xml">
+      <form string="Fee circular" delete="false">
+        <header>
+          <button name="action_campus_publish" type="object" string="Publish / schedule" class="oe_highlight" invisible="campus_status != 'draft'"/>
+          <button name="action_campus_archive" type="object" string="Archive" invisible="campus_status == 'archived'"/>
+          <field name="campus_status" widget="statusbar"/>
+        </header>
+        <sheet><group>
+          <field name="name"/><field name="reference"/>
+          <field name="audience"/><field name="date_from"/><field name="date_to"/>
+          <field name="campus_category" readonly="True"/>
+          <field name="campus_managed" invisible="True"/>
+          <field name="company_id" invisible="True"/>
+        </group><field name="body" widget="html"/></sheet>
+      </form>
+    </field>
+  </record>
+  <record id="accountant_notices" model="ir.actions.act_window">
+    <field name="name">Fee related circulars</field>
+    <field name="res_model">campus.circular</field>
+    <field name="view_mode">tree,form</field>
+    <field name="view_id" ref="accountant_notices_tree"/>
+    <field name="domain">[('campus_managed','=',True),('campus_category','=','Fees')]</field>
+    <field name="context">{'default_campus_managed':True,'default_campus_category':'Fees','default_audience':'student'}</field>
+  </record>
+  <record id="accountant_notices_form_binding" model="ir.actions.act_window.view">
+    <field name="act_window_id" ref="accountant_notices"/>
+    <field name="sequence" eval="2"/>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="accountant_notices_form"/>
+  </record>
+</odoo>

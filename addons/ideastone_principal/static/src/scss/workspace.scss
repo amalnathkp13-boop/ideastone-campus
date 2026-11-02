@@ -1,0 +1,5 @@
+.campus_principal_home {
+  .principal-links { display: grid; gap: 8px; }
+  .principal-links button { display: flex; justify-content: space-between; width: 100%; padding: 13px 15px; border: 1px solid #dfe8f2; border-radius: 10px; background: #f7faff; color: #103958; font-weight: 650; text-align: left; }
+  .principal-links button:hover, .principal-links button:focus-visible { border-color: #1769d2; color: #1769d2; }
+}
