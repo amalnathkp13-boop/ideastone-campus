@@ -128,7 +128,8 @@ class ParentPortal(models.AbstractModel):
         placements = student.course_detail_ids.filtered(lambda e: e.state == "running")
         return self._records("campus.circular", [
             ("company_id", "=", student.company_id.id), ("state", "=", "approved"), ("active", "=", True),
-            ("audience", "in", ["all", "parent"]), ("date_from", "<=", today), "|", ("date_to", "=", False), ("date_to", ">=", today),
+            ("audience", "in", ["all", "parent", "student_parent"]), ("date_from", "<=", today), "|", ("date_to", "=", False), ("date_to", ">=", today),
+            "|", ("fee_department_id", "=", False), ("fee_department_id", "in", placements.course_id.department_id.ids),
             "|", ("campus_managed", "=", False), ("campus_status", "=", "published"),
             "|", ("campus_course_id", "=", False), ("campus_course_id", "in", placements.course_id.ids),
             "|", ("campus_batch_id", "=", False), ("campus_batch_id", "in", placements.batch_id.ids),
