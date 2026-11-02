@@ -1,0 +1,20 @@
+<odoo>
+  <record id="accountant_transport_dashboard" model="ir.actions.client"><field name="name">Transport billing</field><field name="tag">ideastone_erp.accountant_transport</field><field name="context">{'campus_module':'transport'}</field></record>
+  <record id="transport_fleet_form" model="ir.ui.view"><field name="name">Accountant fleet record</field><field name="model">campus.transport.route</field><field name="arch" type="xml">
+    <form string="Bus / Route" delete="false"><sheet><group><field name="company_id" invisible="True"/><field name="currency_id" invisible="True"/>
+      <field name="name" placeholder="R-04 · Perundurai"/><field name="year_id" options="{'no_create':True}"/><field name="vehicle_registration"/><field name="fleet_status"/><field name="capacity"/><field name="staff_riders"/><field name="service_due"/><field name="maintenance_reserve"/>
+    </group><group string="Driver"><field name="driver"/><field name="driver_code"/><field name="driver_phone"/><field name="driver_partner_id" options="{'no_create':True}"/></group>
+    <group string="Boarding points"><field name="stop_ids" readonly="True"><tree create="false" edit="false"><field name="name"/><field name="fee"/><field name="fee_product_id"/></tree></field><label for="stop_ids" string="Boarding points and rider allocations are approved by Campus Services."/></group>
+    </sheet></form>
+  </field></record>
+  <record id="transport_payroll_form" model="ir.ui.view"><field name="name">Driver monthly salary</field><field name="model">campus.transport.payroll</field><field name="arch" type="xml">
+    <form string="Driver salary record" delete="false"><header><button name="action_bill" type="object" string="Create or open salary bill" class="oe_highlight"/><field name="payment_status" widget="statusbar"/></header><sheet>
+      <field name="company_id" invisible="True"/><field name="currency_id" invisible="True"/><group>
+      <field name="name"/><field name="route_id" readonly="invoice_id" options="{'no_create':True}"/><field name="partner_id" readonly="invoice_id" options="{'no_create':True}"/><field name="month" readonly="invoice_id"/><field name="base" readonly="invoice_id"/><field name="allowance" readonly="invoice_id"/><field name="deductions" readonly="invoice_id"/><field name="net"/><field name="expense_account_id" readonly="invoice_id" options="{'no_create':True}"/><field name="invoice_id"/>
+      </group><p>Salary records enter operating expenses only after their linked vendor bill is posted. Record payments against that bill.</p>
+    </sheet></form>
+  </field></record>
+  <record id="transport_bill_fields" model="ir.ui.view"><field name="name">Transport bill classification</field><field name="model">account.move</field><field name="inherit_id" ref="account.view_move_form"/><field name="arch" type="xml">
+    <field name="campus_spend_category" position="after"><field name="campus_transport_route_id" readonly="state == 'posted'" invisible="move_type not in ('in_invoice','in_refund','out_invoice','out_refund')"/><field name="campus_transport_category" readonly="state == 'posted'" required="campus_transport_route_id" invisible="not campus_transport_route_id"/></field>
+  </field></record>
+</odoo>
