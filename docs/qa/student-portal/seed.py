@@ -25,7 +25,9 @@ student = students[0]
 placement = student.course_detail_ids
 subject = placement.course_id.subject_ids[:1]
 faculty = env["op.faculty"].search([("campus_staff_code", "=", "OWNERQA"), ("company_id", "=", company.id)])
-today = fields.Date.today()
+# Use the college's local date, as the owner seed does: the exam session it creates spans that
+# day, and in the nightly window (after 00:00 IST, before 00:00 UTC) the UTC date is a day behind.
+today = fields.Date.context_today(owner)
 # A future class on the current day makes the dashboard's drilldown reproducible.
 start = datetime.combine(today, time(12, 0))
 env["op.session"].create({"course_id": placement.course_id.id, "batch_id": placement.batch_id.id,
