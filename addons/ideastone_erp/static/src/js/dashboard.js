@@ -126,7 +126,7 @@ class CampusBase extends Component {
             this.state.module = "settings";
             return this.settingsPage("overview");
         }
-        if (this.state.is_coe_workspace && module.items?.[0]?.action) {
+        if ((this.state.is_coe_workspace || (this.state.is_accountant_workspace && module.key === "spending")) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }

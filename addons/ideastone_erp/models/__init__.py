@@ -77,3 +77,4 @@ from . import owner_attendance_ui
 from . import accountant_ui
 from . import accountant_transport
 from . import accountant_directory
+from . import accountant_spending
