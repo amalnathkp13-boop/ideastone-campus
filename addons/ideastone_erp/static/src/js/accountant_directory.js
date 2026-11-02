@@ -15,7 +15,7 @@ class AccountantDirectory extends Component {
     get years() { return [...new Set(this.state.rows.map(r => r.year))].sort(); }
     get departments() { return [...new Set(this.state.rows.map(r => r.department))].sort(); }
     get semesters() { return [...new Set(this.state.rows.map(r => r.semester))].sort(); }
-    get filterBarVisible() { return !this.state.student && (this.state.mode === "accounts" || this.state.mode === "pending" && this.state.level === "students"); }
+    get filterBarVisible() { return !this.state.student && (this.state.mode === "accounts" || this.state.level === "students"); }
     resetFilters() {
         Object.assign(this.state, {search: "", year: "", semester: "", status: ""});
         if (this.state.mode === "accounts") this.state.department = "";
