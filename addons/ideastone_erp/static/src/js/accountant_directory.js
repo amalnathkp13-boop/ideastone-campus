@@ -15,6 +15,11 @@ class AccountantDirectory extends Component {
     get years() { return [...new Set(this.state.rows.map(r => r.year))].sort(); }
     get departments() { return [...new Set(this.state.rows.map(r => r.department))].sort(); }
     get semesters() { return [...new Set(this.state.rows.map(r => r.semester))].sort(); }
+    get filterBarVisible() { return !this.state.student && (this.state.mode === "accounts" || this.state.mode === "pending" && this.state.level === "students"); }
+    resetFilters() {
+        Object.assign(this.state, {search: "", year: "", semester: "", status: ""});
+        if (this.state.mode === "accounts") this.state.department = "";
+    }
     get rows() {
         const s = this.state;
         return s.rows.filter(r => (!s.department || r.department === s.department) && (!s.year || r.year === s.year) && (!s.section || r.section === s.section) && (!s.semester || r.semester === s.semester) && (s.mode !== "pending" || r.pending > 0) && (!s.status || (s.status === "Overdue" ? r.overdue : s.status === "Cleared" ? !r.pending : s.status === "Due soon" ? r.pending && !r.overdue : r.pending > 0)));
