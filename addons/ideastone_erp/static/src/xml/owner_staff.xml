@@ -1,7 +1,7 @@
 <templates xml:space="preserve">
   <t t-name="ideastone_erp.OwnerStaffDirectory">
     <main class="campus_owner_staff"><div class="content">
-      <div class="crumbrow"><span>VCET Campus / Faculty &amp; Staff / <strong t-esc="state.screen === 'overview' ? 'Staff directory' : (department?.code || 'Staff directory')"/></span><span><t t-esc="date(state.data?.today)"/> · Owner / Admin</span></div>
+      <div class="crumbrow"><span>VCET Campus / Faculty &amp; Staff / <strong t-esc="state.screen === 'overview' ? 'Staff directory' : (department?.code || 'Staff directory')"/></span><span><t t-esc="date(state.data?.today)"/> · <t t-esc="props.action.context?.campus_workspace_role || 'Owner / Admin'"/></span></div>
       <div t-if="state.error" class="staff_error" role="alert"><span t-esc="state.error"/><button type="button" class="btn" t-on-click="load">Retry</button></div>
       <p t-if="state.loading" role="status">Loading staff records…</p>
       <t t-elif="state.data">
