@@ -1,4 +1,4 @@
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
 from .test_owner_mvp import OwnerMVPFixture
@@ -19,6 +19,11 @@ class TestAccountantWorkspace(OwnerMVPFixture, TransactionCase):
         student_module = next(module for module in overview["faculty_modules"] if module["key"] == "students")
         self.assertEqual([item["label"] for item in student_module["items"]],
                          ["Student fee directory", "Pending fee students", "Student fee accounts"])
+        spending_module = next(module for module in overview["faculty_modules"] if module["key"] == "spending")
+        self.assertEqual([item["label"] for item in spending_module["items"]], ["Event bills", "Maintenance bills"])
+        for mode in ("events", "maintenance"):
+            self.assertEqual(dashboard.get_owner_action("ideastone_erp.accountant_spending_" + mode)["tag"],
+                             "ideastone_erp.accountant_spending")
         directory = dashboard.get_accountant_directory()
         row = next(r for r in directory["rows"] if r["id"] == student.id)
         self.assertEqual((row["total"], row["paid"], row["pending"]), (500, 125, 375))
@@ -64,6 +69,36 @@ class TestAccountantWorkspace(OwnerMVPFixture, TransactionCase):
             "date_from": str(self.today), "date_to": str(self.today), "department_id": self.department.id})
         self.assertGreaterEqual(next(row["value"] for row in filtered["cards"] if row["key"] == "spending"), 2400)
         self.assertTrue(any(row["reference"] == bill.name for row in filtered["activity"]))
+
+        dashboard = self.env["campus.dashboard"].with_user(self.accountant)
+        values = {"vendor_id": vendor.id, "department_id": self.department.id, "category": "maintenance",
+            "amount": 1250.50, "date": str(self.today), "reference": "QA maintenance draft"}
+        draft = self.env["account.move"].browse(dashboard.create_accountant_spending(values))
+        self.assertEqual((draft.state, draft.amount_total, draft.currency_id),
+                         ("draft", 1250.50, self.env.company.currency_id))
+        spending = dashboard.get_accountant_spending()
+        row = next(r for r in spending["rows"] if r["id"] == draft.id)
+        self.assertEqual((row["total"], row["due"], row["status"], row["category"]),
+                         (1250.50, 1250.50, "Not Paid", "maintenance"))
+        self.assertTrue(any(r["id"] == bill.id and r["total"] == 2400 for r in spending["rows"]))
+        draft.button_cancel()
+        self.assertNotIn(draft.id, [r["id"] for r in dashboard.get_accountant_spending()["rows"]])
+        for amount in (0, -1, float("nan"), float("inf"), True, "100"):
+            with self.assertRaises(ValidationError):
+                dashboard.create_accountant_spending(dict(values, amount=amount))
+        with self.assertRaises(ValidationError):
+            dashboard.create_accountant_spending(dict(values, state="posted"))
+        other = self.env["res.company"].create({"name": "QA other spending college"})
+        other_department = self.env["op.department"].create({"name": "Other college", "code": "QA-SPEND",
+            "company_id": other.id})
+        with self.assertRaises(AccessError):
+            dashboard.create_accountant_spending(dict(values, department_id=other_department.id))
+        self.assertNotIn(other_department.id, [d["id"] for d in dashboard.get_accountant_spending()["departments"]])
+        outsider = self.env["campus.dashboard"].with_user(self.outsider)
+        with self.assertRaises(AccessError):
+            outsider.get_accountant_spending()
+        with self.assertRaises(AccessError):
+            outsider.create_accountant_spending(values)
 
     def test_fee_circular_and_approved_transport_bill_persist(self):
         notice = self.env["campus.circular"].with_user(self.accountant).create({
