@@ -85,7 +85,10 @@
 .pn-return-confirm:hover { background: #ffecd0; color: #70420b; }
 .pn-return-cancel, .pn-notice-form button[name="action_archive"] { background: #f8fafc; border: 1px solid #cbd5e1; color: #475569; }
 .pn-return-cancel:hover { background: #eef2f6; color: #334155; }
-.pn-notice-form button[name="action_approve"] { background: #e8f5ee !important; border: 1px solid #bedfcd !important; color: #166044 !important; }
+@layer campus-theme {
+    .pn-notice-form button[name="action_approve"] { background: #e8f5ee !important; border: 1px solid #bedfcd !important; color: #166044 !important; }
+    .pn-notice-form button[name="action_approve"]:hover { background: #d8eddf !important; border-color: #91bea4 !important; color: #114c36 !important; }
+}
 @media (max-width: 470px) {
     .pn-notices .rowactions { justify-content: flex-start; }
 }
