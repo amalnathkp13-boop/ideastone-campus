@@ -5,7 +5,7 @@
         <p t-if="state.loading" class="academic-loading" role="status">Refreshing academic records…</p>
         <div t-if="state.error" class="academic-error" role="alert"><span t-esc="state.error"/><button type="button" class="refresh" t-on-click="load">Retry</button></div>
         <t t-if="d">
-          <div class="breadcrumb-row"><div class="breadcrumb">VCET Campus / <strong>Academics</strong><t t-if="view !== 'overview'"> / <strong t-esc="title"/></t></div><div class="owner"><t t-esc="d.today"/> · <strong>Owner / Admin</strong></div></div>
+          <div class="breadcrumb-row"><div class="breadcrumb">VCET Campus / <strong>Academics</strong><t t-if="view !== 'overview'"> / <strong t-esc="title"/></t></div><div class="owner"><t t-esc="d.today"/> · <strong t-esc="props.action.context?.campus_workspace_role || 'Owner / Admin'"/></div></div>
           <div class="page-head"><div><h1 t-esc="title"/><p class="subtitle" t-esc="subtitle"/></div>
             <button t-if="view === 'overview'" type="button" class="refresh" t-on-click="load" t-att-disabled="state.loading">⟳ &#160;Refresh</button>
             <div t-else="" class="years-actions"><button type="button" class="filter-icon" aria-label="Show filters" title="Filters" t-att-aria-expanded="state.filtersOpen ? 'true' : 'false'" t-on-click="() => state.filtersOpen = !state.filtersOpen"><t t-call="ideastone_erp.AcademicFilterIcon"/></button><button t-if="d.can_edit &amp;&amp; d.create[view]" type="button" class="primary-btn" t-on-click="() => this.open()">＋ <t t-esc="addLabel"/></button><button type="button" class="academic-reload" aria-label="Refresh academic records" title="Refresh records" t-on-click="load" t-att-disabled="state.loading">⟳</button></div>
@@ -22,7 +22,7 @@
             <t t-elif="view === 'sections'"><t t-call="ideastone_erp.AcademicSections"/></t>
             <t t-elif="view === 'curriculum'"><t t-call="ideastone_erp.AcademicCurriculum"/></t>
           </t>
-          <div class="footer-note">VCET Campus ERP · Owner / Admin workspace · Powered by Ideastone</div>
+          <div class="footer-note">VCET Campus ERP · <t t-esc="props.action.context?.campus_workspace_role || 'Owner / Admin'"/> workspace · Powered by Ideastone</div>
         </t>
       </div>
     </main>

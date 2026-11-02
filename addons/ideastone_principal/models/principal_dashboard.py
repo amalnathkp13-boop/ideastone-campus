@@ -2,6 +2,19 @@ from odoo.exceptions import AccessError
 
 from odoo import _, api, fields, models
 
+PRINCIPAL_FOCUS = {
+    "admissions": ("Admissions oversight", {"Overview", "Applications & review", "Admission register"}),
+    "students": ("Student affairs", {"Student directory", "Enrolments & transfers"}),
+    "academics": ("Academic planning", {"Overview", "Departments", "Programmes", "Subjects & curriculum"}),
+    "staff": ("Faculty oversight", {"Staff directory", "Teaching allocation", "Faculty development and appraisal", "Leave Management"}),
+    "attendance": ("Attendance oversight", {"Staff attendance", "Attendance register", "Student summary & shortage"}),
+    "exams": ("Examination oversight", {"Overview", "Exam sessions", "Results & missing entries", "Question papers"}),
+    "fees": ("Finance oversight", {"Financial overview", "Invoices & dues", "Overdue follow-up"}),
+    "learning": ("Learning oversight", {"Assignments", "Review submissions"}),
+    "calendar": ("Calendar", {"College calendar"}),
+    "reports": ("Institutional reports", {"Admissions", "Students", "Attendance", "Fee collection", "Outstanding dues", "Results", "Faculty workload"}),
+}
+
 
 class PrincipalDashboard(models.AbstractModel):
     _name = "ideastone.principal.dashboard"
@@ -70,9 +83,12 @@ class PrincipalNavigation(models.AbstractModel):
         modules = super()._owner_modules()
         if not self.env.user.has_group("ideastone_principal.group_principal"):
             return modules
-        selected = {"admissions", "students", "academics", "staff", "attendance",
-                    "exams", "fees", "learning", "calendar", "communication", "reports"}
-        modules = [(key, label, icon, entries) for key, label, icon, entries in modules if key in selected]
+        modules = [
+            (key, PRINCIPAL_FOCUS[key][0], icon,
+             ([("Overview", "action_admissions_overview")] if key == "admissions" else [])
+             + [(title, action) for title, action in entries if title in PRINCIPAL_FOCUS[key][1]])
+            for key, _label, icon, entries in modules if key in PRINCIPAL_FOCUS
+        ]
         return [
             ("home", "Principal overview", "home", [("Overview", "ideastone_principal.action_principal_overview")]),
             ("decisions", "Decisions", "check-square-o", [
@@ -86,5 +102,14 @@ class PrincipalNavigation(models.AbstractModel):
     def get_overview(self):
         data = super().get_overview()
         if self.env.user.has_group("ideastone_principal.group_principal"):
+            for module in data["faculty_modules"]:
+                if module["key"] in PRINCIPAL_FOCUS:
+                    module["items"] = [item for item in module["items"]
+                                       if item["label"] in PRINCIPAL_FOCUS[module["key"]][1]]
+                for item in module["items"]:
+                    item["group"] = module["label"]
+            data["faculty_modules"] = [module for module in data["faculty_modules"]
+                                       if module["items"] and module["key"] in {*PRINCIPAL_FOCUS, "home", "decisions", "principal_notices"}]
+            data["navigation"] = [item for module in data["faculty_modules"] for item in module["items"]]
             data.update(is_principal_workspace=True, workspace_role="Principal", is_admin=False)
         return data
