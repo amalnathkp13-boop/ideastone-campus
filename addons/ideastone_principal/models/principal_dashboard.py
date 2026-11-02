@@ -16,6 +16,17 @@ PRINCIPAL_FOCUS = {
 }
 
 
+class PrincipalFinance(models.AbstractModel):
+    _inherit = "campus.owner.fees"
+
+    @api.model
+    def get_workspace(self, year_id=0):
+        data = super().get_workspace(year_id)
+        if self.env.user.has_group("ideastone_principal.group_principal"):
+            data.update(currency="INR", symbol="₹")
+        return data
+
+
 class PrincipalDashboard(models.AbstractModel):
     _name = "ideastone.principal.dashboard"
     _description = "Principal Dashboard Data"

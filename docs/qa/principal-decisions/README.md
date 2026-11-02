@@ -89,3 +89,11 @@ Final validation on 2 November 2026:
 
 Screenshots are in `proof/`. The preview uses synthetic data in its own database;
 the existing ERP database was not upgraded or reseeded. No PR was created.
+
+Finance currency follow-up: Principal Finance oversight now returns `INR` / `₹`
+display metadata for its shared amount formatter. Stored amounts and company
+currency are retained. A regression test using a USD college verifies the
+Principal override, unchanged Owner currency and equal financial totals; it
+passed with zero failures/errors. Browser checks confirmed no dollar symbols on
+Financial overview, Invoices & dues or Overdue follow-up after reloading.
+`proof/principal-finance-rupees.jpg` records the local preview.

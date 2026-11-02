@@ -56,6 +56,23 @@ class TestPrincipalWorkflow(TransactionCase):
         self.assertIn("pending", overview["counts"])
         self.assertFalse(self.env["op.student"].with_user(self.principal).check_access_rights("write", raise_exception=False))
 
+    def test_finance_rupee_display_is_principal_only(self):
+        usd = self.env.ref("base.USD")
+        college = self.env["res.company"].create({"name": "Finance display test", "currency_id": usd.id})
+        self.principal.write({"company_ids": [(4, college.id)]})
+        owner = self.env["res.users"].create({
+            "name": "Finance owner", "login": "finance.owner@principal.test",
+            "company_id": college.id, "company_ids": [(6, 0, college.ids)],
+            "groups_id": [(6, 0, [self.env.ref("ideastone_erp.group_mvp_owner").id])],
+        })
+        finance = self.env["campus.owner.fees"].with_company(college)
+        principal_data = finance.with_user(self.principal).get_workspace()
+        owner_data = finance.with_user(owner).get_workspace()
+        self.assertEqual((principal_data["currency"], principal_data["symbol"]), ("INR", "₹"))
+        self.assertEqual((owner_data["currency"], owner_data["symbol"]), (usd.name, usd.symbol))
+        self.assertEqual(principal_data["summary"], owner_data["summary"])
+        self.assertEqual(college.currency_id, usd)
+
     def test_shared_navigation_uses_existing_workspaces(self):
         overview = self.env["campus.dashboard"].with_user(self.principal).get_overview()
         self.assertEqual(overview["workspace_role"], "Principal")
