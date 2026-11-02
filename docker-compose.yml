@@ -90,6 +90,7 @@ services:
     depends_on: [odoo, openolat, keycloak]
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/demo-logins.html:/usr/share/nginx/html/demo-logins.html:ro
     ports:
       - "${CAMPUS_PORT:-80}:80"
     restart: unless-stopped
