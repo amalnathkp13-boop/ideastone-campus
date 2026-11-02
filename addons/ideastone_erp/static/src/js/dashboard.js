@@ -264,6 +264,11 @@ class CampusBase extends Component {
     collectionRate(value, total) {
         return total ? Math.max(0, Math.min(100, Math.round(value / total * 100))) : 0;
     }
+    collectionDate(value) {
+        if (!value) return "";
+        const [year, month, day] = value.split("-").map(Number);
+        return new Intl.DateTimeFormat("en-GB", {day: "numeric", month: "short", year: "numeric"}).format(new Date(year, month - 1, day));
+    }
     get collectionInsights() {
         const data = this.state.collectionOverview;
         const weakest = [...(data.by_department || [])].filter(row => row.billed).sort((a, b) => a.rate - b.rate)[0];
