@@ -50,7 +50,7 @@ class PrincipalNotices extends Component {
     get pageCount() { return Math.ceil(this.filtered.length / 6); }
     previous() { this.state.page = Math.max(0, this.state.page - 1); }
     next() { if (this.state.page + 1 < this.pageCount) this.state.page++; }
-    statusClass(row) { return {published: 'statusgreen', returned: 'statusred', scheduled: 'statusblue'}[row.state] || ''; }
+    statusClass(row) { return {pending: 'statuspending', published: 'statusgreen', returned: 'statusred', scheduled: 'statusviolet'}[row.state] || ''; }
     date(value, part = 'full') {
         if (!value) return '—';
         const date = new Date(value.includes(' ') ? value.replace(' ', 'T') + 'Z' : value + 'T12:00:00');

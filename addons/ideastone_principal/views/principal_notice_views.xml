@@ -18,7 +18,7 @@
     <field name="name">ideastone.principal.notice.form</field>
     <field name="model">ideastone.principal.notice</field>
     <field name="arch" type="xml">
-      <form>
+      <form class="pn-notice-form">
         <header>
           <button name="action_submit" type="object" string="Submit for approval" class="oe_highlight" invisible="state not in ('draft', 'returned')"/>
           <button name="action_approve" type="object" string="Approve" class="oe_highlight" invisible="state != 'pending'"/>
