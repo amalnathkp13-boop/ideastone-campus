@@ -8,9 +8,9 @@ from odoo import _, api, fields, models
 ACCOUNTANT_MODULES = [
     ("home", "Dashboard", "home", [("Accounts overview", "accountant-overview")]),
     ("students", "Students & dues", "graduation-cap", [
-        ("Student fee directory", "accountant_students"),
-        ("Pending fee students", "accountant_pending"),
-        ("Student fee accounts", "mvp_fees"),
+        ("Student fee directory", "accountant_directory_students"),
+        ("Pending fee students", "accountant_directory_pending"),
+        ("Student fee accounts", "accountant_directory_accounts"),
     ]),
     ("collections", "Collections", "inr", [
         ("Fee structures", "mvp_structures"),
@@ -60,8 +60,8 @@ class AccountantDashboard(models.AbstractModel):
             return ACCOUNTANT_MODULES
         if not self.env.user.has_group("ideastone_erp.group_mvp_accountant"):
             return modules
-        owner_accounts = [("Accounts summary", "accountant-overview"), ("Student fee directory", "accountant_students"),
-            ("Pending fee students", "accountant_pending"), ("Transport fee bills", "accountant_transport"),
+        owner_accounts = [("Accounts summary", "accountant-overview"), ("Student fee directory", "accountant_directory_students"),
+            ("Pending fee students", "accountant_directory_pending"), ("Transport fee bills", "accountant_transport"),
             ("Event & maintenance bills", "accountant_expenses"), ("Fee circulars", "accountant_notices")]
         return modules + [("accounts", "Accounts", "ledger", owner_accounts)]
 
@@ -208,7 +208,7 @@ class AccountantDashboard(models.AbstractModel):
             "queue": [
                 {"key": "dues", "title": "Outstanding student dues", "count": len(student_rows),
                  "detail": f"{len(student_rows)} student accounts · {self._mvp_money(pending_total)} remaining",
-                 "hint": "Prioritize overdue balances", "action": "accountant_pending"},
+                 "hint": "Prioritize overdue balances", "action": "accountant_directory_pending"},
                 {"key": "bills", "title": "Draft vendor bills to review", "count": len(draft_bills),
                  "detail": f"{len(draft_bills)} bills · {self._mvp_money(sum(b.amount_total for b in draft_bills))} total",
                  "hint": "Check evidence and category", "action": "accountant_expenses"},
