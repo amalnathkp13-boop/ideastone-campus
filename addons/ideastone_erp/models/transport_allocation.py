@@ -22,7 +22,7 @@ class TransportAllocation(models.Model):
             allocations = self.sudo().search([("state", "=", "approved"), ("year_id", "=", rec.year_id.id)])
             if len(allocations.filtered(lambda a, rec=rec: a.student_id == rec.student_id)) > 1:
                 raise ValidationError(_("A student may have only one active transport allocation per year."))
-            if len(allocations.filtered(lambda a, rec=rec: a.route_id == rec.route_id)) > rec.route_id.capacity:
+            if len(allocations.filtered(lambda a, rec=rec: a.route_id == rec.route_id)) + rec.route_id.staff_riders > rec.route_id.capacity:
                 raise ValidationError(_("Vehicle seating capacity is exceeded."))
 
     def action_invoice(self):
@@ -43,6 +43,7 @@ class TransportAllocation(models.Model):
                 "company_id": self.company_id.id, "invoice_date": fields.Date.today(),
                 "campus_student_id": self.student_id.id, "campus_year_id": self.year_id.id,
                 "campus_course_id": enrolment.course_id.id,
+                "campus_transport_route_id": self.route_id.id, "campus_transport_category": "fee",
                 "invoice_line_ids": [(0, 0, {"name": f"Transport: {self.route_id.name} / {self.stop_id.name}",
                     "product_id": product.id, "account_id": account.id, "quantity": 1, "price_unit": self.stop_id.fee})],
             })
