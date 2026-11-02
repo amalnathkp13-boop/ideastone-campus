@@ -229,11 +229,22 @@ h1{font-size:30px;line-height:1.2;letter-spacing:-.7px;margin:0 0 7px;font-weigh
 
 .campus_academics_workspace.principal-academic {
   .metric::after { content:none; }
-  .curriculum-departments { display:grid;gap:16px;padding:0 20px 20px; }
-  .curriculum-department { min-width:0;border:1px solid #e0eaf6;border-radius:12px;overflow:hidden;background:#fff; }
-  .curriculum-department>.dept-card-head { padding:16px;margin:0;align-items:center; }
-  .curriculum-department .dept-name { margin:0 0 4px;font-size:14px; }
+  .curriculum-departments { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding:0 20px 20px; }
+  .curriculum-department { min-width:0;border:1px solid #e0eaf6;border-top:4px solid var(--department-accent);border-radius:16px;padding:20px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column; }
+  .curriculum-card-top { display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px; }
+  .curriculum-card-top .dept-icon { width:44px;height:44px;border-radius:13px;background:var(--department-tint);color:var(--department-accent); }
+  .curriculum-card-top .dept-code { background:var(--department-tint);color:var(--department-accent); }
+  .curriculum-department .dept-name { margin:0 0 5px;font-size:16px;line-height:1.4; }
+  .curriculum-card-caption { margin:0;color:#71869b;font-size:12px; }
+  .curriculum-card-count { display:flex;align-items:baseline;gap:8px;margin:18px 0;color:#71869b;font-size:12px; }
+  .curriculum-card-count strong { font-size:29px;line-height:1.2;color:var(--department-accent); }
+  .curriculum-view-subjects { display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;margin-top:auto;padding:14px 0 0;border:0;border-top:1px solid #e3ebf5;background:transparent;color:var(--department-accent);font-size:12px;font-weight:700;text-align:left; }
+  .curriculum-view-subjects:hover { text-decoration:underline; }
+  .curriculum-list-head { display:flex;align-items:center;flex-wrap:wrap;gap:14px;padding:16px 20px; }
+  .curriculum-list-head h3 { flex:1;margin:0;font-size:16px; }
+  .curriculum-back { border:1px solid #d8e6f8;border-radius:8px;padding:9px 12px;background:#fff;color:#1769e8;font-size:12px;font-weight:700; }
   .curriculum-department-count { font-size:11px;color:#71869b; }
-  .curriculum-department .curriculum-table { min-width:580px; }
-  @media(max-width:760px) { .curriculum-departments { padding:0 12px 12px; } }
+  .curriculum-subject-list .curriculum-table { min-width:580px; }
+  @media(max-width:1200px) { .curriculum-departments { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media(max-width:760px) { .curriculum-departments { grid-template-columns:1fr;padding:0 12px 12px; }.curriculum-list-head { align-items:flex-start; }.curriculum-list-head h3 { flex-basis:100%; } }
 }

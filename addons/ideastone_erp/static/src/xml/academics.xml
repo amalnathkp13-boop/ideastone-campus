@@ -5,7 +5,7 @@
         <p t-if="state.loading" class="academic-loading" role="status">Refreshing academic records…</p>
         <div t-if="state.error" class="academic-error" role="alert"><span t-esc="state.error"/><button type="button" class="refresh" t-on-click="load">Retry</button></div>
         <t t-if="d">
-          <div class="breadcrumb-row"><div class="breadcrumb">VCET Campus / <strong t-esc="moduleTitle"/><t t-if="view !== 'overview'"> / <strong t-esc="title"/></t></div><div class="owner"><t t-esc="d.today"/> · <strong t-esc="props.action.context?.campus_workspace_role || 'Owner / Admin'"/></div></div>
+          <div class="breadcrumb-row"><div class="breadcrumb">VCET Campus / <strong t-esc="moduleTitle"/><t t-if="view !== 'overview'"> / <strong t-esc="title"/></t></div><div class="owner"><t t-esc="d.today"/> · <strong t-esc="workspaceRole"/></div></div>
           <div class="page-head"><div><h1 t-esc="title"/><p class="subtitle" t-esc="subtitle"/></div>
             <button t-if="view === 'overview'" type="button" class="refresh" t-on-click="load" t-att-disabled="state.loading">⟳ &#160;Refresh</button>
             <div t-else="" class="years-actions"><button type="button" class="filter-icon" aria-label="Show filters" title="Filters" t-att-aria-expanded="state.filtersOpen ? 'true' : 'false'" t-on-click="() => state.filtersOpen = !state.filtersOpen"><t t-call="ideastone_erp.AcademicFilterIcon"/></button><button t-if="d.can_edit &amp;&amp; d.create[view]" type="button" class="primary-btn" t-on-click="() => this.open()">＋ <t t-esc="addLabel"/></button><button type="button" class="academic-reload" aria-label="Refresh academic records" title="Refresh records" t-on-click="load" t-att-disabled="state.loading">⟳</button></div>
@@ -22,7 +22,7 @@
             <t t-elif="view === 'sections'"><t t-call="ideastone_erp.AcademicSections"/></t>
             <t t-elif="view === 'curriculum'"><t t-call="ideastone_erp.AcademicCurriculum"/></t>
           </t>
-          <div class="footer-note">VCET Campus ERP · <t t-esc="props.action.context?.campus_workspace_role || 'Owner / Admin'"/> workspace · Powered by Ideastone</div>
+          <div class="footer-note">VCET Campus ERP · <t t-esc="workspaceRole"/> workspace · Powered by Ideastone</div>
         </t>
       </div>
     </main>
@@ -75,13 +75,22 @@
   <t t-name="ideastone_erp.AcademicCurriculum">
     <section class="curriculum-top-grid"><article class="curriculum-panel"><div class="curriculum-panel-head"><div><h2>Subject distribution</h2><p>Active subjects grouped by their recorded department</p></div><span class="curriculum-chip">Curriculum overview</span></div><div class="curriculum-bars"><div class="curriculum-bar-row" t-foreach="distribution" t-as="group" t-key="group.name"><span t-esc="group.name"/><div class="curriculum-track"><span t-att-style="'width:' + group.width"/></div><strong t-esc="group.count"/></div><p t-if="!distribution.length" class="academic-empty">No active subjects recorded.</p></div></article><aside class="curriculum-insight"><div class="curriculum-insight-title"><span class="curriculum-spark">✦</span> AI curriculum insight</div><p><t t-esc="c.missing_credits"/> active subjects have zero credits and <t t-esc="c.missing_subjects"/> lack semester mapping. Treat these as data-quality checks before publishing curriculum information.</p><div class="curriculum-insight-list"><div class="curriculum-insight-item"><i>→</i><span>Confirm credit values against the approved curriculum before publishing.</span></div><div class="curriculum-insight-item"><i>→</i><span>Verify semester and department mappings for every subject.</span></div><div class="curriculum-insight-item"><i>→</i><span>Consider applied projects and interdisciplinary electives during curriculum review.</span></div></div></aside></section>
     <section class="curriculum-directory"><div class="curriculum-toolbar"><div><h2>Subject directory</h2><p>Search the subject catalogue by name, code or department.</p></div><div class="curriculum-tools"><label class="curriculum-search"><span>⌕</span><input type="search" placeholder="Search subjects…" aria-label="Search subjects" t-model="state.query"/></label></div></div><t t-call="ideastone_erp.AcademicFilters"/>
-      <div t-if="isPrincipal" class="curriculum-departments">
-        <article class="curriculum-department" t-foreach="subjectDepartments" t-as="department" t-key="department.id">
-          <div class="dept-card-head"><span class="dept-icon" t-esc="initials(department.name)"/><div class="dept-name-wrap"><h3 class="dept-name" t-esc="department.name"/><span class="curriculum-department-count"><t t-esc="department.rows.length"/> subject<t t-if="department.rows.length !== 1">s</t></span></div></div>
+      <t t-if="isPrincipal">
+        <div t-if="selectedSubjectDepartment" class="curriculum-subject-list">
+          <t t-set="department" t-value="selectedSubjectDepartment"/>
+          <div class="curriculum-list-head"><button type="button" class="curriculum-back" t-on-click="() => state.subjectDepartment = null">← All departments</button><h3 tabindex="-1" t-ref="subjectListHeading" t-esc="department.name"/><span class="curriculum-department-count"><t t-esc="department.rows.length"/> subjects</span></div>
           <t t-set="subjectRows" t-value="department.rows"/><t t-call="ideastone_erp.AcademicSubjectTable"/>
-        </article>
-        <p t-if="!rows.length" class="curriculum-empty">No subjects match the selected filters.</p>
-      </div>
+        </div>
+        <div t-else="" class="curriculum-departments">
+          <article class="curriculum-department" t-foreach="subjectDepartments" t-as="department" t-key="department.id" t-att-style="'--department-tint:' + department.colors[0] + ';--department-accent:' + department.colors[1]">
+            <div class="curriculum-card-top"><span class="dept-icon" t-esc="initials(department.name)"/><span class="dept-code" t-esc="department.code"/></div>
+            <h3 class="dept-name" t-esc="department.name"/><p class="curriculum-card-caption">Subjects &amp; curriculum</p>
+            <div class="curriculum-card-count"><strong t-esc="department.rows.length"/><span>subject<t t-if="department.rows.length !== 1">s</t></span></div>
+            <button type="button" class="curriculum-view-subjects" t-att-aria-label="'View subjects for ' + department.name" t-on-click="() => this.showSubjects(department)"><span>View subjects</span><span aria-hidden="true">→</span></button>
+          </article>
+          <p t-if="!subjectDepartments.length" class="curriculum-empty">No departments match the selected filters.</p>
+        </div>
+      </t>
       <t t-else=""><t t-set="subjectRows" t-value="rows"/><t t-call="ideastone_erp.AcademicSubjectTable"/></t>
       <t t-call="ideastone_erp.AcademicFooter"/>
     </section>
