@@ -26,4 +26,4 @@ Results: [WebKit](evidence/webkit-results.json), [Chromium](evidence/chromium-re
 
 ## Use and limits
 
-Reload existing tabs once to load the new asset. One ordinary browser profile still has one active login per site. Use separate browser profiles when demonstrating different roles simultaneously. The WebKit check validates Safari's browser engine; the installed Safari app was not automated. Production and external SSO were not exercised.
+Reload existing tabs once to load the new asset. One ordinary browser profile still has one active login per hostname. For a local presentation, open `http://demo.localhost/` and sign into each role on its own `*.localhost` hostname; the host-only Odoo session cookies stay separate while the same server and database handle every role. The session check still protects multiple tabs on a single hostname. Use the standard College ID/password form for separate role sign-ins; SSO sessions may follow the identity already signed into the shared identity provider. The WebKit check validates Safari's browser engine; the installed Safari app was not automated. Production and external SSO were not exercised.
