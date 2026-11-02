@@ -101,7 +101,9 @@ export class AcademicsWorkspace extends Component {
         } catch (error) { if (request === this.request) this.state.error = error.data?.message || "Academics could not be loaded. Retry to refresh the records."; }
         finally { if (request === this.request) this.state.loading = false; }
     }
-    get title() { return META[this.view][0]; }
+    get isPrincipal() { return this.props.action.context?.campus_workspace_role === "Principal"; }
+    get moduleTitle() { return this.isPrincipal ? "Academic planning" : "Academics"; }
+    get title() { return this.view === "overview" ? this.moduleTitle : META[this.view][0]; }
     get subtitle() { return META[this.view][1]; }
     get d() { return this.state.data; }
     get c() { return this.d.counts; }
@@ -117,6 +119,16 @@ export class AcademicsWorkspace extends Component {
             (!f.duration || r.duration === Number(f.duration)) && (!f.year || (f.year === "missing" ? !r.year_id : String(r.year_id) === f.year)) &&
             (!f.period || r.period_type === f.period) && (!f.mapping || r.mapped === (f.mapping === "mapped")) &&
             (!f.credits || (f.credits === "positive" ? r.credits > 0 : r.credits <= 0)) && (!f.from || Number(r.start?.slice(0,4)) >= Number(f.from))) || [];
+    }
+    get subjectDepartments() {
+        const groups = new Map();
+        for (const row of this.rows) {
+            const id = row.department_id || 0;
+            if (!groups.has(id)) groups.set(id, {id, name: id ? row.department : "Department not assigned", rows: []});
+            groups.get(id).rows.push(row);
+        }
+        return [...groups.values()].sort((a, b) => !a.id - !b.id || a.name.localeCompare(b.name))
+            .map(group => ({...group, rows: group.rows.sort((a, b) => a.name.localeCompare(b.name))}));
     }
     clearFilters() { this.state.filters = {}; this.state.query = ""; }
     open(record = null) {

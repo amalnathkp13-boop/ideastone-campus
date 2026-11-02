@@ -226,3 +226,14 @@ h1{font-size:30px;line-height:1.2;letter-spacing:-.7px;margin:0 0 7px;font-weigh
   .btn{font:650 12px/1.45 Inter,"Segoe UI",Roboto,Arial,sans-serif;border-radius:8px;padding:10px 15px}.btn-primary{background:#1769e8;border-color:#1769e8;color:white}.btn-secondary{background:white;border:1px solid #d8e6f8;color:#425d79}
   @media(max-width:600px){.academic-form{grid-template-columns:1fr}.modal-body,.modal-header,.modal-footer{padding:16px}.dept-detail-grid{grid-template-columns:1fr}.modal-footer{flex-wrap:wrap}}
 }
+
+.campus_academics_workspace.principal-academic {
+  .metric::after { content:none; }
+  .curriculum-departments { display:grid;gap:16px;padding:0 20px 20px; }
+  .curriculum-department { min-width:0;border:1px solid #e0eaf6;border-radius:12px;overflow:hidden;background:#fff; }
+  .curriculum-department>.dept-card-head { padding:16px;margin:0;align-items:center; }
+  .curriculum-department .dept-name { margin:0 0 4px;font-size:14px; }
+  .curriculum-department-count { font-size:11px;color:#71869b; }
+  .curriculum-department .curriculum-table { min-width:580px; }
+  @media(max-width:760px) { .curriculum-departments { padding:0 12px 12px; } }
+}
