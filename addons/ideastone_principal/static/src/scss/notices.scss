@@ -52,8 +52,8 @@
 .pn-notices .btn.pn-compact { min-height: 34px; padding: 7px 11px; font-size: 12px; }
 .pn-notices .btn.approve { background: #e8f5ee; border-color: #bedfcd; color: #166044; }
 .pn-notices .btn.approve:hover:not(:disabled) { background: #d8eddf; border-color: #91bea4; color: #114c36; }
-.pn-notices .btn.return { background: #fff5e6; border-color: #e8cfaa; color: #875410; }
-.pn-notices .btn.return:hover:not(:disabled) { background: #ffecd0; border-color: #d3ac73; color: #70420b; }
+.pn-notices .btn.return { background: #ffe4ec; border-color: #f6bdd0; color: #be185d; }
+.pn-notices .btn.return:hover:not(:disabled) { background: #ffd4e2; border-color: #ef9cbb; color: #9d174d; }
 .pn-notices .rowactions { flex-wrap: wrap; justify-content: flex-end; max-width: 100%; }
 .pn-notices .rowactions .btn { flex: 0 0 auto; }
 .pn-notices .pager { flex-wrap: wrap; color: #64748b; font-size: 12px; }
@@ -61,8 +61,8 @@
 .pn-notices .btn.primary:focus-visible { outline-color: #1769e8; }
 .pn-notices button:disabled { cursor: not-allowed; }
 .pn-notices .pill { background: #eef2f6; color: #526174; }
-.pn-notices .statuspending { background: #fff5e6; color: #875410; }
-.pn-notices .statusviolet { background: #f1edf9; color: #67528d; }
+.pn-notices .statuspending { background: #ffedd5; color: #c2410c; }
+.pn-notices .statusviolet { background: #f0e7ff; color: #7c3aed; }
 .pn-notices .statusgreen { background: #e8f5ee; color: #166044; }
 .pn-notices .statusred { background: #fff0ef; color: #a83a32; }
 .pn-notices .ico, .pn-notices .mark { background: #eef2f6; color: #526174; }
@@ -81,8 +81,8 @@
     white-space: normal;
     overflow-wrap: anywhere;
 }
-.pn-return-confirm { background: #fff5e6; border: 1px solid #e8cfaa; color: #875410; }
-.pn-return-confirm:hover { background: #ffecd0; color: #70420b; }
+.pn-return-confirm { background: #ffe4ec; border: 1px solid #f6bdd0; color: #be185d; }
+.pn-return-confirm:hover { background: #ffd4e2; color: #9d174d; }
 .pn-return-cancel, .pn-notice-form button[name="action_archive"] { background: #f8fafc; border: 1px solid #cbd5e1; color: #475569; }
 .pn-return-cancel:hover { background: #eef2f6; color: #334155; }
 @layer campus-theme {
