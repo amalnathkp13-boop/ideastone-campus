@@ -24,6 +24,7 @@ class TestPrincipalWorkflow(TransactionCase):
             request.with_user(self.staff).action_approve()
         with self.assertRaises(AccessError):
             request.with_user(self.staff).write({"decision_note": "Forged decision"})
+        request.with_user(self.principal).write({"decision_note": "Request reviewed and approved"})
         request.with_user(self.principal).action_approve()
         self.assertEqual(request.state, "approved")
         self.assertEqual(request.decided_by_id, self.principal)

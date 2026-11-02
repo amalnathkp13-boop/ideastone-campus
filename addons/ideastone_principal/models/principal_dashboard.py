@@ -77,6 +77,9 @@ class PrincipalNavigation(models.AbstractModel):
         return dict(super()._client_action_models(),
                     **{"ideastone_principal.action_principal_overview": "ideastone.principal.request",
                        "ideastone_principal.action_principal_decisions": "ideastone.principal.request",
+                       "ideastone_principal.action_principal_staff_leave": "ideastone.principal.request",
+                       "ideastone_principal.action_principal_student_leave": "ideastone.principal.request",
+                       "ideastone_principal.action_principal_events": "ideastone.principal.request",
                        "ideastone_principal.action_principal_notices_workspace": "ideastone.principal.notice"})
 
     def _owner_modules(self):
@@ -93,7 +96,9 @@ class PrincipalNavigation(models.AbstractModel):
             ("home", "Principal overview", "home", [("Overview", "ideastone_principal.action_principal_overview")]),
             ("decisions", "Decisions", "check-square-o", [
                 ("Pending decisions", "ideastone_principal.action_principal_decisions"),
-                ("Student leave approvals", "ideastone_erp.action_student_leave")]),
+                ("Staff leave approvals", "ideastone_principal.action_principal_staff_leave"),
+                ("Student leave approvals", "ideastone_principal.action_principal_student_leave"),
+                ("Event management", "ideastone_principal.action_principal_events")]),
             *modules,
             ("principal_notices", "Principal notices", "bullhorn", [("Notices & circulars", "ideastone_principal.action_principal_notices_workspace")]),
         ]

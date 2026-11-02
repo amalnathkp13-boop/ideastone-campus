@@ -43,15 +43,20 @@ class PrincipalRequest(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        if not self.env.su and not self.env.user.has_group("ideastone_principal.group_principal"):
+        if not self.env.su:
             for vals in vals_list:
                 if (vals.get("state", "draft") != "draft"
                         or vals.get("requester_id", self.env.uid) != self.env.uid
-                        or vals.get("company_id", self.env.company.id) not in self.env.companies.ids):
+                        or vals.get("company_id", self.env.company.id) not in self.env.companies.ids
+                        or set(vals) & {"decided_by_id", "decided_on"}):
                     raise AccessError(_("You can only create your own draft requests."))
         return super().create(vals_list)
 
     def write(self, vals):
+        if set(vals) & {"state", "decided_by_id", "decided_on"}:
+            raise AccessError(_("Use the approval workflow controls to record a decision."))
+        if any(row.state in ("approved", "rejected") for row in self) and set(vals) - {"message_ids", "message_follower_ids", "activity_ids"}:
+            raise UserError(_("Final decisions retain their original request and decision evidence."))
         if not self.env.user.has_group("ideastone_principal.group_principal"):
             if any(record.requester_id != self.env.user or record.state != "draft" for record in self):
                 raise AccessError(_("Only a principal can change submitted requests."))
@@ -75,12 +80,14 @@ class PrincipalRequest(models.Model):
     def _decide(self, state):
         if not self.env.user.has_group("ideastone_principal.group_principal"):
             raise AccessError(_("Only a principal can decide requests."))
+        self.env.cr.execute("SELECT id FROM ideastone_principal_request WHERE id IN %s FOR UPDATE", [tuple(self.ids)])
+        self.invalidate_recordset()
         for request in self:
             if request.state != "submitted":
                 raise UserError(_("Only submitted requests can be decided."))
-            if state == "rejected" and not request.decision_note:
-                raise UserError(_("Add a decision note before rejecting."))
-            request.write({"state": state, "decided_by_id": self.env.uid, "decided_on": fields.Datetime.now()})
+            if not (request.decision_note or "").strip():
+                raise UserError(_("Add a decision note before approving or rejecting."))
+            super(PrincipalRequest, request).write({"state": state, "decided_by_id": self.env.uid, "decided_on": fields.Datetime.now()})
 
     def action_approve(self):
         self._decide("approved")

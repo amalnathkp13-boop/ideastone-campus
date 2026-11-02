@@ -1,7 +1,7 @@
 {
     "name": "Ideastone Campus - Principal",
     "summary": "Principal oversight, approvals, notices and campus records",
-    "version": "17.0.1.2.0",
+    "version": "17.0.1.3.0",
     "category": "Education",
     "author": "Ideastone Technologies Pvt Ltd",
     "license": "OPL-1",
@@ -12,6 +12,8 @@
         "views/principal_request_views.xml",
         "views/principal_notice_views.xml",
         "views/principal_workspace.xml",
+        "security/decisions_security.xml",
+        "views/decisions_views.xml",
     ],
     "assets": {
         "web.assets_backend": [
