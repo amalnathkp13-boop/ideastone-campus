@@ -31,7 +31,7 @@ ACCOUNTANT_MODULES = [
         ("Maintenance bills", "accountant_spending_maintenance"),
     ]),
     ("communication", "Fee circulars", "bullhorn", [
-        ("Fee related circulars", "accountant_notices"),
+        ("Fee related circulars", "action_accountant_fee_circulars"),
     ]),
 ]
 
@@ -221,7 +221,7 @@ class AccountantDashboard(models.AbstractModel):
                  "hint": "Create linked fee invoices", "action": "accountant_transport"},
                 {"key": "circulars", "title": "Fee circulars in draft", "count": self.env["campus.circular"].search_count(
                     company + [("campus_category", "=", "Fees"), ("campus_status", "=", "draft")]),
-                 "detail": "Review fee notices before publishing", "hint": "Open circular records", "action": "accountant_notices"},
+                 "detail": "Review fee notices before publishing", "hint": "Open circular records", "action": "action_accountant_fee_circulars"},
             ],
             "pending_count": len(student_rows),
             "pending": student_rows[:10],
@@ -539,38 +539,45 @@ class AccountantTransportStop(models.Model):
 class AccountantNotice(models.Model):
     _inherit = "campus.circular"
 
+    def _check_accountant_notice_values(self, vals):
+        company = vals.get("company_id", self.company_id.id if self else self.env.company.id)
+        category = vals.get("campus_category", self.campus_category if self else "Fees")
+        managed = vals.get("campus_managed", self.campus_managed if self else True)
+        audience = vals.get("audience", self.audience if self else "student")
+        group = vals.get("campus_group_id", self.campus_group_id.id if self else False)
+        if (company != self.env.company.id or category != "Fees" or not managed
+                or audience not in {"student", "parent", "all", "student_parent", "faculty"}
+                or any(vals.get(key, self[key].id if self else False) for key in ("campus_course_id", "campus_batch_id"))
+                or group and (audience != "faculty" or group != self.env.ref("ideastone_erp.group_mvp_accountant").id)):
+            raise AccessError(_("Accountants may manage fee circulars in the active college only."))
+
     @api.model_create_multi
     def create(self, vals_list):
         if self.env.user.has_group("ideastone_erp.group_mvp_accountant") and not self.env.user.has_group("ideastone_erp.group_mvp_registrar"):
             for vals in vals_list:
                 vals.setdefault("campus_category", "Fees")
                 vals.setdefault("campus_managed", True)
-                if (vals.get("campus_category") != "Fees" or not vals.get("campus_managed")
-                        or vals.get("company_id", self.env.company.id) != self.env.company.id
-                        or vals.get("audience", "student") not in {"student", "parent", "all"}
-                        or any(vals.get(key) for key in ("campus_course_id", "campus_batch_id", "campus_group_id"))):
-                    raise AccessError(_("Accountants may create fee circulars in the active college only."))
+                vals.setdefault("audience", "student")
+                self.browse()._check_accountant_notice_values(vals)
         return super().create(vals_list)
 
     def write(self, vals):
         if self.env.user.has_group("ideastone_erp.group_mvp_accountant") and not self.env.user.has_group("ideastone_erp.group_mvp_registrar"):
-            if (any(n.campus_category != "Fees" or n.company_id != self.env.company for n in self)
-                    or vals.get("campus_category", "Fees") != "Fees"
-                    or vals.get("company_id", self.env.company.id) != self.env.company.id
-                    or vals.get("audience", "student") not in {"student", "parent", "all"}
-                    or any(vals.get(key) for key in ("campus_course_id", "campus_batch_id", "campus_group_id"))):
-                raise AccessError(_("Accountants may edit fee circulars only."))
+            for notice in self:
+                notice._check_accountant_notice_values(vals)
+                if notice.campus_status != "draft" and set(vals) - {"message_follower_ids", "message_ids", "activity_ids"}:
+                    raise ValidationError(_("Released circulars are retained unchanged. Archive and create a new circular for corrections."))
         return super().write(vals)
 
     def action_campus_publish(self):
         if not self.env.user.has_group("ideastone_erp.group_mvp_accountant") or self.env.user.has_group("ideastone_erp.group_mvp_registrar"):
             return super().action_campus_publish()
         today = fields.Date.context_today(self)
+        self._lock()
         for rec in self:
-            if rec.company_id != self.env.company or rec.campus_category != "Fees" or rec.campus_status != "draft" or rec.date_to and rec.date_to < today:
+            if rec.company_id != self.env.company or rec.campus_category != "Fees" or not rec.campus_managed or rec.campus_status != "draft" or rec.date_to and rec.date_to < today:
                 raise ValidationError(_("Publish an unexpired draft fee circular in the active college."))
-            rec._lock()
-            future = rec.date_from > today
+            future = rec.date_from > today or bool(rec.communication_publish_at and rec.communication_publish_at > fields.Datetime.now())
             rec._set_system_values({"campus_status": "scheduled" if future else "published",
                 "state": "submitted" if future else "approved", "approved_by": self.env.uid,
                 "approved_on": fields.Datetime.now()})
@@ -581,7 +588,7 @@ class AccountantNotice(models.Model):
         if not self.env.user.has_group("ideastone_erp.group_mvp_accountant") or self.env.user.has_group("ideastone_erp.group_mvp_registrar"):
             return super().action_campus_archive()
         for rec in self:
-            if rec.company_id != self.env.company or rec.campus_category != "Fees":
+            if rec.company_id != self.env.company or rec.campus_category != "Fees" or not rec.campus_managed:
                 raise AccessError(_("Accountants may archive fee circulars in the active college only."))
             rec._lock()
             rec._set_system_values({"campus_status": "archived", "state": "done"})

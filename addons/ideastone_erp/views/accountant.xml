@@ -150,7 +150,7 @@
         </header>
         <sheet><group>
           <field name="name"/><field name="reference"/>
-          <field name="audience"/><field name="date_from"/><field name="date_to"/>
+          <field name="fee_notice_category"/><field name="audience"/><field name="fee_department_id"/><field name="fee_academic_scope"/><field name="date_from"/><field name="date_to"/><field name="communication_publish_at"/>
           <field name="campus_category" readonly="True"/>
           <field name="campus_managed" invisible="True"/>
           <field name="company_id" invisible="True"/>
@@ -171,5 +171,9 @@
     <field name="sequence" eval="2"/>
     <field name="view_mode">form</field>
     <field name="view_id" ref="accountant_notices_form"/>
+  </record>
+  <record id="accountant_notices_tree_binding" model="ir.actions.act_window.view">
+    <field name="act_window_id" ref="accountant_notices"/><field name="sequence" eval="1"/>
+    <field name="view_mode">tree</field><field name="view_id" ref="accountant_notices_tree"/>
   </record>
 </odoo>

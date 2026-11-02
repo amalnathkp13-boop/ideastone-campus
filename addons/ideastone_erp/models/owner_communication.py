@@ -54,6 +54,7 @@ class OwnerNoticeSchedule(models.Model):
         result = super()._cron_publish_notices()
         now = fields.Datetime.now()
         for rec in self.search([("campus_managed", "=", True), ("campus_status", "=", "scheduled"),
+                                ("date_from", "<=", fields.Date.context_today(self)),
                                 ("communication_publish_at", "!=", False), ("communication_publish_at", "<=", now)]):
             rec._set_system_values({"campus_status": "published", "state": "approved"})
         return result

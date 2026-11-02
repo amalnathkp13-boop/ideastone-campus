@@ -1,0 +1,4 @@
+<odoo>
+  <record id="action_accountant_fee_circulars" model="ir.actions.client"><field name="name">Fee circulars</field><field name="tag">ideastone_erp.accountant_fee_circulars</field><field name="context">{'campus_module':'communication'}</field></record>
+  <record id="sequence_fee_circular" model="ir.sequence"><field name="name">College fee circular</field><field name="code">campus.fee.circular</field><field name="prefix">FC/%(year)s/</field><field name="padding">3</field><field name="company_id" eval="False"/></record>
+</odoo>
