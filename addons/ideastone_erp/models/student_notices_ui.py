@@ -35,7 +35,7 @@ class StudentNoticesUI(models.AbstractModel):
             priority = record.campus_portal_priority
             notices.append(dict(row, reference=record.reference, priority=priority, priority_label=priorities[priority],
                                 summary=html2plaintext(row["body"])[:300], expires=self._dates(record.date_to),
-                                audience="Students" if record.audience == "student" else "Everyone",
+                                audience="Students" if record.audience == "student" else "Students & guardians" if record.audience == "student_parent" else "Everyone",
                                 tone="urgent" if priority == "important" else "soon" if priority == "action" else "new" if not row["read"] else "general"))
         now = fields.Datetime.now()
         # Events are public website publications belonging to this college only.

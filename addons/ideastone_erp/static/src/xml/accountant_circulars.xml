@@ -1,0 +1,55 @@
+<templates xml:space="preserve">
+<t t-name="ideastone_erp.AccountantFeeCirculars">
+<main class="campus_fee_circulars">
+  <nav class="topnav" aria-label="Fee circular navigation"><span class="module">Fee circulars</span><button type="button" class="arrow" aria-label="Previous circular page" title="Previous circular page" t-att-disabled="state.page === 0" t-on-click="() => this.page(-1)">‹</button><button type="button" class="tab active" t-on-click="scrollRegister">Fee related circulars</button><button type="button" class="arrow" aria-label="Next circular page" title="Next circular page" t-att-disabled="state.page &gt;= pageCount - 1" t-on-click="() => this.page(1)">›</button></nav>
+  <section class="content">
+    <div class="breadcrumb">VCET Campus <span>/</span> Fee circulars</div>
+    <header class="pagehead"><div><h1>Fee circulars</h1><p class="subtitle">Create, publish and track fee-related announcements for students and guardians.</p></div><div class="actions"><button type="button" class="btn" t-on-click="archiveView">View archive</button><button type="button" class="btn primary" t-ref="newCircularButton" t-on-click="() => this.open()">＋ New circular</button></div></header>
+    <div t-if="state.error" class="fee_error" role="alert"><span t-esc="state.error"/><button type="button" class="btn" t-on-click="load">Retry</button></div>
+    <p t-if="state.loading" role="status" class="fee_loading">Loading fee circulars…</p>
+    <div class="metrics" aria-label="Circular summary"><article t-foreach="cards" t-as="card" t-key="card.label" class="metric"><div class="label" t-esc="card.label"/><div t-att-class="'value ' + card.tone" t-esc="card.value"/><div class="note" t-esc="card.note"/></article></div>
+    <div class="grid2">
+      <section class="panel"><div class="panelhead"><div><h2>Circular activity</h2><p>Current academic year</p></div><span class="pill blue" t-esc="state.data.year"/></div><div class="panelbody"><div class="statuslist"><div t-foreach="activity" t-as="item" t-key="item.key"><div class="statusrow"><strong t-esc="item.label"/><span><t t-esc="item.count"/> <span class="small inline">/ <t t-esc="state.data.counts.total || 0"/></span></span></div><div class="track"><span t-att-style="item.style"/></div></div></div></div></section>
+      <section class="panel"><div class="panelhead"><div><h2>Quick guidance</h2><p>Before publishing a circular</p></div><span class="pill green">Checklist</span></div><div class="panelbody"><div class="statuslist">
+        <div class="statusrow"><span>Set audience and department scope</span><span class="pill blue">Required</span></div>
+        <div class="statusrow"><span>Confirm effective dates and due date</span><span class="pill blue">Required</span></div>
+        <div class="statusrow"><span>Preview message before release</span><span class="pill gray">Recommended</span></div>
+        <div class="statusrow"><span>Track portal acknowledgement</span><span class="pill gray">After publish</span></div>
+      </div></div></section>
+    </div>
+    <section class="panel" t-ref="circularRegister" aria-label="Circular register">
+      <div class="panelhead"><div><h2 t-esc="state.status === 'archived' ? 'Circular archive' : 'Circular register'"/><p>Manage circulars, schedules, audience and publication state.</p></div><div class="workflow" role="group" aria-label="Circular status"><button t-foreach="statuses" t-as="status" t-key="status.key" type="button" t-att-class="'step ' + (state.status === status.key ? 'active' : '')" t-att-aria-pressed="state.status === status.key ? 'true' : 'false'" t-on-click="() => this.setStatus(status.key)" t-esc="status.label"/></div></div>
+      <div class="filters"><input type="search" class="field search" aria-label="Search circulars" placeholder="⌕  Search circular name or reference…" t-model="state.query" t-on-input="filterChanged"/><select class="field" aria-label="Filter audience" t-model="state.audience" t-on-change="filterChanged"><option value="">All audiences</option><option t-foreach="audiences" t-as="audience" t-key="audience.key" t-att-value="audience.key" t-esc="audience.label"/></select><select class="field" aria-label="Filter category" t-model="state.category" t-on-change="filterChanged"><option value="">All categories</option><option t-foreach="categories" t-as="category" t-key="category.key" t-att-value="category.key" t-esc="category.label"/></select><button type="button" class="btn" t-on-click="reset">Reset</button></div>
+      <div class="tablewrap" tabindex="0" aria-label="Fee circular records"><table><thead><tr><th>Reference</th><th>Circular name</th><th>Category</th><th>Audience</th><th>Department / scope</th><th>Publish date</th><th>Effective / due date</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+        <tr t-foreach="pageRows" t-as="row" t-key="row.id"><td class="ref" t-esc="row.reference"/><td><span class="rowtitle" t-esc="row.name"/><span class="small" t-esc="row.summary"/></td><td><span t-att-class="'category ' + row.category" t-esc="row.category_label"/></td><td t-esc="row.audience_label"/><td><t t-esc="row.scope_label"/><span t-if="row.academic_scope" class="small" t-esc="row.academic_scope"/></td><td t-esc="date(row.publish_date)"/><td t-esc="date(row.due_date || row.effective_from)"/><td><span t-att-class="'pill ' + tone(row.status)" t-esc="statusLabel(row.status)"/></td><td><button type="button" class="actionlink" t-att-aria-label="'View ' + row.reference" t-on-click="() => this.open(row)">View</button></td></tr>
+        <tr t-if="!pageRows.length"><td colspan="9" class="empty">No circulars match the selected filters.</td></tr>
+      </tbody></table></div>
+      <div t-if="rows.length &gt; 10" class="fee_pager" aria-live="polite">Page <t t-esc="state.page + 1"/> of <t t-esc="pageCount"/> · <t t-esc="rows.length"/> circulars</div>
+    </section>
+  </section>
+  <div t-if="state.success" class="fee_toast" role="status" t-esc="state.success"/>
+  <div t-if="state.modal" class="fee_modalback" t-on-click="closeModal">
+    <section class="fee_modal" role="dialog" aria-modal="true" aria-labelledby="feeCircularTitle" t-ref="feeModal">
+      <header class="fee_modalhead"><h2 id="feeCircularTitle" t-esc="state.detail ? 'Circular details' : 'Create fee circular'"/><button type="button" class="btn" aria-label="Close circular" t-on-click="() => this.closeModal()">✕</button></header>
+      <div class="fee_modalbody"><div t-if="state.formError" role="alert" class="fee_error" t-esc="state.formError"/>
+        <form id="feeCircularForm" t-on-submit="save"><div class="formgrid">
+          <div class="formfield"><label for="feeName">Circular name *</label><input id="feeName" required="required" maxlength="200" placeholder="e.g. Semester fee payment schedule" t-model="state.form.name" t-att-readonly="readonly"/></div>
+          <div class="formfield"><label for="feeRef">Reference number</label><input id="feeRef" maxlength="80" placeholder="Auto-generated if left blank" t-model="state.form.reference" t-att-readonly="readonly"/></div>
+          <div class="formfield"><label for="feeCategory">Category *</label><select id="feeCategory" required="required" t-model="state.form.category" t-att-disabled="readonly"><option t-foreach="categories" t-as="category" t-key="category.key" t-att-value="category.key" t-esc="category.label"/></select></div>
+          <div class="formfield"><label for="feeAudience">Audience *</label><select id="feeAudience" required="required" t-model="state.form.audience" t-att-disabled="readonly"><option t-foreach="audiences" t-as="audience" t-key="audience.key" t-att-value="audience.key" t-esc="audience.label"/></select></div>
+          <div class="formfield"><label for="feeScope">Department / scope</label><select id="feeScope" t-model="state.form.scope" t-att-disabled="readonly"><option value="all">All departments</option><option t-foreach="state.data.departments" t-as="department" t-key="department.id" t-att-value="department.id" t-esc="department.name"/><option value="accounts">Accounts office</option></select></div>
+          <div class="formfield"><label for="feeAcademic">Academic year / semester</label><input id="feeAcademic" maxlength="160" placeholder="e.g. 2026–27 / Semester 3" t-model="state.form.academic_scope" t-att-readonly="readonly"/></div>
+          <div class="formfield"><label for="feeFrom">Effective from</label><input id="feeFrom" type="date" required="required" t-model="state.form.effective_from" t-att-readonly="readonly"/></div>
+          <div class="formfield"><label for="feeDue">Due date / effective to</label><input id="feeDue" type="date" t-att-min="state.form.effective_from" t-model="state.form.due_date" t-att-readonly="readonly"/></div>
+          <div class="formfield full"><label for="feeMessage">Circular message *</label><textarea id="feeMessage" required="required" maxlength="20000" placeholder="Write the announcement, fee details, payment instructions and contact information…" t-model="state.form.body" t-att-readonly="readonly"/></div>
+          <div class="formfield"><label for="feeStatus">Save as</label><select id="feeStatus" t-model="state.form.status" t-att-disabled="readonly"><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="published">Published</option><option t-if="state.form.status === 'archived'" value="archived">Archived</option></select></div>
+          <div class="formfield"><label for="feeSchedule">Schedule date / time</label><input id="feeSchedule" type="datetime-local" t-model="state.form.publish_at" t-att-readonly="readonly"/><small class="fee_tz" t-esc="state.data.timezone"/></div>
+        </div></form>
+        <div t-if="state.detail" class="fee_ack" aria-label="Portal acknowledgements"><strong>Portal acknowledgements</strong><span>Students: <t t-esc="state.detail.student_reads"/> · Guardians: <t t-esc="state.detail.parent_reads"/></span></div>
+      </div>
+      <footer class="fee_modalfoot"><button t-if="readonly &amp;&amp; state.detail.status !== 'archived'" type="button" class="btn danger" t-on-click="archive" t-att-disabled="state.saving">Archive circular</button><button type="button" class="btn" t-on-click="() => this.closeModal()" t-att-disabled="state.saving" t-esc="readonly ? 'Close' : 'Cancel'"/><button t-if="!readonly" type="submit" form="feeCircularForm" class="btn primary" t-att-disabled="state.saving" t-esc="state.saving ? 'Saving…' : 'Save circular'"/></footer>
+    </section>
+  </div>
+</main>
+</t>
+</templates>
