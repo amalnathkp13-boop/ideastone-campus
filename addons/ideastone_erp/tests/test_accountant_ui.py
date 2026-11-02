@@ -62,6 +62,12 @@ class TestAccountantWorkspace(OwnerMVPFixture, TransactionCase):
         student_module = next(module for module in overview["faculty_modules"] if module["key"] == "students")
         self.assertEqual([item["label"] for item in student_module["items"]],
                          ["Student fee directory", "Pending fee students", "Student fee accounts"])
+        directory = dashboard.get_accountant_directory()
+        row = next(r for r in directory["rows"] if r["id"] == student.id)
+        self.assertEqual((row["total"], row["paid"], row["pending"]), (500, 125, 375))
+        self.assertTrue(any(r["record_id"] == fee.invoice_id.id and r["pending"] == 375 for r in row["ledger"]))
+        with self.assertRaises(AccessError):
+            self.env["campus.dashboard"].with_user(self.outsider).get_accountant_directory()
         data = dashboard.get_accountant_metrics({"date_from": str(self.today), "date_to": str(self.today)})
         self.assertTrue(any(row["id"] == student.id and row["pending"] == 375 for row in data["pending"]))
         self.assertGreaterEqual(data["cards"][0]["value"], 125)
