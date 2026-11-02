@@ -79,7 +79,7 @@ class OwnerDashboard(models.AbstractModel):
             if key == "settings" and self.env.user.has_group("ideastone_erp.group_mvp_owner"):
                 items.append({"label": "Overview", "page": "settings-overview"})
             for title, action in entries:
-                if action in {"owner-overview", "accountant-overview"}:
+                if action in {"owner-overview", "accountant-overview", "accountant-collections-overview"}:
                     items.append({"label": title, "page": action})
                     continue
                 ref = self.env.ref(action if "." in action else "ideastone_erp." + action, raise_if_not_found=False)

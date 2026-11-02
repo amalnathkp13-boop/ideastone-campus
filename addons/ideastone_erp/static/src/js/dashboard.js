@@ -46,6 +46,9 @@ class CampusBase extends Component {
             accountantMetrics: {cards: [], trend: [], collection_status: {}, activity: [], queue: [], departments: []},
             accountantFilters: {date_from: "", date_to: "", year_id: "", department_id: ""}, accountantError: "", accountantLoading: false,
             accountantTrendPeriod: "half",
+            collectionOverview: {departments: [], by_department: [], status: {}, recent: []},
+            collectionFilters: {date_from: "", date_to: "", department_id: ""},
+            collectionError: "", collectionLoading: false,
             ownerFilters: {date_from: "", date_to: "", year_id: ""}, ownerAppliedFilters: {}, ownerError: "", ownerLoading: false,
             faculty_modules: [], faculty_tasks: [], faculty_schedule: [], faculty_surveys: [], module: route.module, activeAction: 0, activeTool: "",
             busy: false, query: "", cardQuery: "", unit: "", card: "", loanPage: 0, desk: { units: [], cards: [], loans: [], next: false } });
@@ -62,7 +65,7 @@ class CampusBase extends Component {
         try {
             Object.assign(this.state, await this.orm.call("campus.dashboard", "get_overview", []));
             if (this.state.is_owner_workspace) {
-                if (this.state.is_accountant_workspace && !["overview", "accountant-overview", "faculty-module", "modules"].includes(this.state.page)) {
+                if (this.state.is_accountant_workspace && !["overview", "accountant-overview", "accountant-collections-overview", "faculty-module", "modules"].includes(this.state.page)) {
                     this.state.page = "accountant-overview";
                 }
                 if (this.state.page === "overview") this.state.page = this.state.is_accountant_workspace ? "accountant-overview" : "owner-overview";
@@ -73,6 +76,7 @@ class CampusBase extends Component {
                 });
                 if (this.state.page === "owner-overview") await this.loadOwnerMetrics();
                 if (this.state.page === "accountant-overview") await this.loadAccountantMetrics();
+                if (this.state.page === "accountant-collections-overview") await this.loadCollectionOverview();
             }
             if (this.state.page === "library") await this.loadDesk();
             if (this.props.action) this.env.bus.trigger("CAMPUS:PAGE", this.state.page);
@@ -96,6 +100,7 @@ class CampusBase extends Component {
         if (this.state.page === "faculty-departments") return "My departments";
         if (this.state.page === "owner-overview") return "Admin overview";
         if (this.state.page === "accountant-overview") return "Accountant overview";
+        if (this.state.page === "accountant-collections-overview") return "Collections overview";
         if (this.state.page === "faculty-module") return this.facultyModule?.label || "Faculty workspace";
         if (this.state.page === "help") return "Faculty guide";
         if (this.state.page === "analytics") return "My teaching dashboard";
@@ -105,6 +110,10 @@ class CampusBase extends Component {
         return this.state.page === "library" ? "Library circulation desk" : "Reports & exports";
     }
     async chooseModule(module) {
+        if (module.key === "collections" && this.state.is_accountant_workspace) {
+            this.state.module = "collections";
+            return this.go({key: "accountant-collections-overview"});
+        }
         if (module.key === "accounts" && this.state.is_owner_workspace) {
             this.state.module = "accounts";
             return this.go({key: "accountant-overview"});
@@ -228,6 +237,56 @@ class CampusBase extends Component {
         } catch (error) {
             this.state.accountantError = error.data?.message || "Accounts records could not be loaded. Check the period and retry.";
         } finally { this.state.accountantLoading = false; }
+    }
+    async loadCollectionOverview() {
+        if (this.state.collectionLoading) return;
+        this.state.collectionLoading = true;
+        this.state.collectionError = "";
+        try {
+            if (!this.state.collectionFilters.date_from) Object.assign(this.state.collectionFilters, {
+                date_from: `${this.state.today.slice(0, 8)}01`,
+                date_to: `${this.state.today.slice(0, 8)}${new Date(Number(this.state.today.slice(0, 4)), Number(this.state.today.slice(5, 7)), 0).getDate()}`,
+            });
+            this.state.collectionOverview = await this.orm.call("campus.dashboard", "get_accountant_collections_overview", [this.state.collectionFilters]);
+        } catch (error) {
+            this.state.collectionError = error.data?.message || "Collections could not be loaded. Check the filters and retry.";
+        } finally { this.state.collectionLoading = false; }
+    }
+    collectionMoney(value) {
+        const amount = Number(value) || 0;
+        const absolute = Math.abs(amount);
+        const currency = this.state.collectionOverview.currency || "₹";
+        const divisor = currency === "₹" ? (absolute >= 10000000 ? 10000000 : absolute >= 100000 ? 100000 : 1) :
+            (absolute >= 1000000 ? 1000000 : absolute >= 1000 ? 1000 : 1);
+        const suffix = divisor === 1 ? "" : currency === "₹" ? (divisor === 10000000 ? "Cr" : "L") : (divisor === 1000000 ? "M" : "K");
+        return `${currency}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: divisor === 1 ? 0 : 1}).format(amount / divisor)}${suffix}`;
+    }
+    collectionRate(value, total) {
+        return total ? Math.max(0, Math.min(100, Math.round(value / total * 100))) : 0;
+    }
+    get collectionInsights() {
+        const data = this.state.collectionOverview;
+        const weakest = [...(data.by_department || [])].filter(row => row.billed).sort((a, b) => a.rate - b.rate)[0];
+        return [
+            {tag: "FOLLOW-UP PRIORITY", title: weakest ? `Review ${weakest.name} accounts` : "Review outstanding accounts",
+                detail: weakest ? `${weakest.name} has a ${weakest.rate}% collection rate for the selected period. Check its unpaid invoices and reminders.` : "No department invoices are posted in this period. Check the invoice register after billing."},
+            {tag: "RECONCILIATION", title: "Match receipts to invoices",
+                detail: `${this.collectionMoney(data.collected_month)} was received in this period. Confirm receipt references and reversals before closing the report.`},
+            {tag: "PERIOD CLOSE", title: "Prioritize overdue balances",
+                detail: `${this.collectionMoney(data.overdue)} is overdue across the selected accounts. Review the dues report before sending follow-ups.`},
+        ];
+    }
+    async collectionCreateInvoice() {
+        try {
+            const action = await this.orm.call("campus.dashboard", "get_owner_action", ["ideastone_erp.mvp_invoices"]);
+            action.name = "New student invoice";
+            action.views = [[false, "form"]];
+            action.view_mode = "form";
+            action.context = {...action.context, default_move_type: "out_invoice"};
+            await this.action.doAction(action);
+        } catch {
+            this.notification.add("The invoice form could not be opened. Check your permissions and retry.", {type: "danger"});
+        }
     }
     accountantOpen(xmlid) {
         const item = this.state.navigation.find(row => row.action === `ideastone_erp.${xmlid}`);

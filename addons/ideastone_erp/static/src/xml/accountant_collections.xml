@@ -1,0 +1,63 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.AccountantCollectionsOverview">
+    <div class="campus_accountant_collections">
+      <div class="collections_crumb"><span>VCET Campus / Collections</span><span><t t-esc="state.today.slice(0, 4)"/> · Accountant</span></div>
+      <div class="collections_head">
+        <div><h1>Collections overview</h1><p>Monitor fee collection, outstanding balances and recent activity.</p></div>
+        <div class="collections_actions">
+          <button type="button" t-on-click="loadCollectionOverview" t-att-disabled="state.collectionLoading"><i class="fa fa-refresh"/> Refresh</button>
+          <button type="button" class="primary" t-on-click="collectionCreateInvoice"><i class="fa fa-plus"/> New invoice</button>
+        </div>
+      </div>
+      <div t-if="state.collectionError" class="collections_error" role="alert"><span t-esc="state.collectionError"/><button type="button" t-on-click="loadCollectionOverview">Retry</button></div>
+      <p t-if="state.collectionLoading" class="collections_loading" role="status"><i class="fa fa-spinner fa-spin"/> Loading collections…</p>
+      <t t-if="!state.collectionLoading &amp;&amp; !state.collectionError">
+        <div class="collections_kpis">
+          <article class="collections_kpi"><div class="collections_kpi_top"><span class="collections_kpi_icon blue"><i class="fa fa-th-large"/></span><span class="collections_pill">On track</span></div><strong t-esc="collectionMoney(state.collectionOverview.collected_month)"/><span class="collections_kpi_label">Collected this month</span><small t-esc="state.collectionOverview.previous_change === null ? 'Posted receipts in selected period' : (state.collectionOverview.previous_change &gt;= 0 ? '↑ ' : '↓ ') + Math.abs(state.collectionOverview.previous_change) + '% vs previous month'"/></article>
+          <article class="collections_kpi"><div class="collections_kpi_top"><span class="collections_kpi_icon green"><i class="fa fa-check-square-o"/></span><span class="collections_pill">This semester</span></div><strong t-esc="collectionMoney(state.collectionOverview.collected_semester)"/><span class="collections_kpi_label">Collected this semester</span><small t-esc="state.collectionOverview.semester_label"/></article>
+          <article class="collections_kpi"><div class="collections_kpi_top"><span class="collections_kpi_icon amber"><i class="fa fa-clock-o"/></span><span class="collections_pill">Due soon</span></div><strong t-esc="collectionMoney(state.collectionOverview.outstanding)"/><span class="collections_kpi_label">Outstanding dues</span><small class="amber_text"><t t-esc="state.collectionOverview.students_due"/> students</small></article>
+          <article class="collections_kpi"><div class="collections_kpi_top"><span class="collections_kpi_icon purple"><i class="fa fa-file-text-o"/></span><span class="collections_pill">Published</span></div><strong t-esc="number(state.collectionOverview.invoice_count)"/><span class="collections_kpi_label">Invoices issued</span><small>Posted in selected period</small></article>
+        </div>
+        <div class="collections_filters" role="group" aria-label="Refine collection view">
+          <div class="collections_filter_title"><span class="collections_filter_symbol"><i class="fa fa-search"/></span><span><b>Refine collection view</b><small>Choose period and department</small></span></div>
+          <label><span>From date</span><input type="date" t-model="state.collectionFilters.date_from"/></label>
+          <label><span>To date</span><input type="date" t-model="state.collectionFilters.date_to"/></label>
+          <label><span>Department</span><select t-model="state.collectionFilters.department_id"><option value="">All departments</option><option t-foreach="state.collectionOverview.departments" t-as="department" t-key="department.id" t-att-value="department.id" t-esc="department.name"/></select></label>
+          <button type="button" class="primary" t-on-click="loadCollectionOverview" t-att-disabled="state.collectionLoading">Apply filters</button>
+        </div>
+        <div class="collections_grid">
+          <section class="collections_panel collections_status_panel">
+            <div class="collections_status_head"><div><h2>Collection status</h2><p>Invoice balance for selected period</p></div><span class="collections_status_period" t-esc="state.collectionOverview.period.label"/></div>
+            <div class="collections_status_body">
+              <div class="collections_status_summary">
+                <span class="total_label">Total collected</span><strong t-esc="collectionMoney(state.collectionOverview.status.collected)"/>
+                <div class="status_rate"><b><t t-esc="collectionRate(state.collectionOverview.status.collected, state.collectionOverview.status.billed)"/>%</b><span>of <t t-esc="collectionMoney(state.collectionOverview.status.billed)"/> billed</span></div>
+                <div class="chart_title">Balance distribution</div>
+                <div class="status_chart">
+                  <div t-foreach="[['Collected', 'collected'], ['Pending', 'pending'], ['Overdue', 'overdue']]" t-as="part" t-key="part[1]" class="chart_row">
+                    <div class="chart_label"><span><i t-att-class="'chart_dot ' + part[1]"/><t t-esc="part[0]"/></span><b><t t-esc="collectionMoney(state.collectionOverview.status[part[1]])"/> <small><t t-esc="collectionRate(state.collectionOverview.status[part[1]], state.collectionOverview.status.billed)"/>%</small></b></div>
+                    <div class="chart_track"><i t-att-class="part[1]" t-att-style="'width:' + collectionRate(state.collectionOverview.status[part[1]], state.collectionOverview.status.billed) + '%'"/></div>
+                  </div>
+                </div>
+              </div>
+              <div class="collections_side_note"><span>Collection snapshot</span><strong><t t-esc="collectionMoney(state.collectionOverview.status.pending + state.collectionOverview.status.overdue)"/><small>open balance</small></strong><div><span>Pending + overdue</span><b><t t-esc="collectionRate(state.collectionOverview.status.pending + state.collectionOverview.status.overdue, state.collectionOverview.status.billed)"/>% of billed</b></div><p>Prioritize overdue accounts first; pending balances are not yet past due.</p></div>
+            </div>
+            <div class="collections_status_foot"><span t-esc="state.collectionOverview.previous_change === null ? 'Collection updates from posted receipts.' : '↗ Collection changed ' + state.collectionOverview.previous_change + '% against the previous period'"/><span>Live college records</span></div>
+          </section>
+          <section class="collections_panel collections_department_panel">
+            <h2>Collection by department</h2><p>Collected amount against billed amount</p>
+            <div t-foreach="state.collectionOverview.by_department" t-as="department" t-key="department.id" class="collections_bar_row"><span t-esc="department.name"/><div class="collections_bar"><i t-att-style="'width:' + department.rate + '%'"/></div><b><t t-esc="department.rate"/>%</b></div>
+            <div t-if="!state.collectionOverview.by_department.length" class="collections_empty">No posted invoices match these filters.</div>
+            <div class="collections_chart_legend"><span><i/> Collection rate</span><span>Updated for current filter</span></div>
+          </section>
+        </div>
+        <section class="collections_insights"><div class="collections_insights_head"><span class="insight_mark">✦</span><div><h2>AI finance insights</h2><p>Suggested checks from the current collection data</p></div><span class="collections_pill">Decision support</span></div><div class="collections_insight_grid"><article t-foreach="collectionInsights" t-as="insight" t-key="insight.tag"><span t-esc="insight.tag"/><strong t-esc="insight.title"/><p t-esc="insight.detail"/></article></div></section>
+        <div class="collections_grid collections_bottom">
+          <section class="collections_panel"><div class="collections_panel_heading"><h2>Recent invoices</h2><button type="button" t-on-click="() => this.accountantOpen('mvp_invoices')">View all <i class="fa fa-arrow-right"/></button></div><div class="collections_table_wrap"><table><thead><tr><th>Invoice</th><th>Student</th><th>Amount</th><th>Due date</th><th>Status</th></tr></thead><tbody><tr t-foreach="state.collectionOverview.recent_invoices" t-as="invoice" t-key="invoice.id"><td t-esc="invoice.reference"/><td><t t-esc="invoice.student"/><small t-esc="invoice.department"/></td><td t-esc="collectionMoney(invoice.amount)"/><td t-esc="invoice.due"/><td><span t-att-class="'collections_status_chip ' + invoice.status.toLowerCase()" t-esc="invoice.status"/></td></tr><tr t-if="!state.collectionOverview.recent_invoices.length"><td colspan="5" class="collections_empty">No posted invoices in this period.</td></tr></tbody></table></div></section>
+          <section class="collections_panel"><div class="collections_panel_heading"><div><h2>Recent activity</h2><p>Latest receipts in the collections workspace</p></div><button type="button" t-on-click="() => this.accountantOpen('mvp_receipts')">View receipts <i class="fa fa-arrow-right"/></button></div><div class="collections_activity"><div t-foreach="state.collectionOverview.recent" t-as="receipt" t-key="receipt.id" class="collections_activity_item"><span><i class="fa fa-check"/></span><div><b>Receipt <t t-esc="receipt.reference"/> recorded</b><small><t t-esc="collectionMoney(receipt.amount)"/> · <t t-esc="receipt.student"/> · <t t-esc="receipt.date"/></small></div></div><div t-if="!state.collectionOverview.recent.length" class="collections_empty">No receipts in this period.</div></div></section>
+        </div>
+        <footer>VCET Campus ERP · Accountant workspace · Powered by Ideastone</footer>
+      </t>
+    </div>
+  </t>
+</templates>

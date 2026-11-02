@@ -6,6 +6,24 @@ from .test_owner_mvp import OwnerMVPFixture
 
 @tagged("post_install", "-at_install")
 class TestAccountantWorkspace(OwnerMVPFixture, TransactionCase):
+    def test_collections_overview_uses_saved_invoices_and_receipts(self):
+        student = self.enrolled().student_id
+        fee = self.fee(student, 500)
+        fee.action_campus_post()
+        self.payment(fee.invoice_id, 125)
+        dashboard = self.env["campus.dashboard"].with_user(self.accountant)
+        modules = dashboard.get_overview()["faculty_modules"]
+        collections = next(module for module in modules if module["key"] == "collections")
+        self.assertEqual(collections["items"][0]["page"], "accountant-collections-overview")
+        data = dashboard.get_accountant_collections_overview({
+            "date_from": str(self.today), "date_to": str(self.today), "department_id": self.department.id})
+        self.assertEqual(data["invoice_count"], 1)
+        self.assertEqual(data["collected_month"], 125)
+        self.assertEqual(data["status"]["billed"], 500)
+        self.assertEqual(data["status"]["pending"] + data["status"]["overdue"], 375)
+        self.assertEqual(data["recent_invoices"][0]["status"], "Pending")
+        self.assertEqual(data["by_department"][0]["id"], self.department.id)
+
     def test_accountant_sees_saved_fee_balances_without_other_admin_modules(self):
         student = self.enrolled().student_id
         fee = self.fee(student, 500)

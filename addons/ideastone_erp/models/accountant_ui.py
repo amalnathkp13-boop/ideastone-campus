@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import date
+from datetime import date, timedelta
 
 from odoo.exceptions import AccessError, ValidationError
 
@@ -13,6 +13,7 @@ ACCOUNTANT_MODULES = [
         ("Student fee accounts", "mvp_fees"),
     ]),
     ("collections", "Collections", "inr", [
+        ("Overview", "accountant-collections-overview"),
         ("Fee structures", "mvp_structures"),
         ("Assign fee structure", "mvp_assign_fees"),
         ("Invoices", "mvp_invoices"),
@@ -229,6 +230,101 @@ class AccountantDashboard(models.AbstractModel):
                               "category": (m.campus_spend_category or "unclassified").title(), "amount": m.amount_total}
                              for m in bills.sorted("invoice_date", reverse=True)[:8]],
             "notices": [{"id": n.id, "name": n.name, "date": str(n.date_from), "status": n.campus_status} for n in notices],
+        }
+
+    @api.model
+    def get_accountant_collections_overview(self, filters=None):
+        """Live figures for the Collections landing page, scoped to the active college."""
+        self._accountant_access()
+        f = self._mvp_filters(filters)
+        company_id = self.env.company.id
+        departments = self.env["op.department"].search([
+            "|", ("company_id", "=", False), ("company_id", "=", company_id)], order="name")
+        if f["department_id"] and f["department_id"] not in departments.ids:
+            raise AccessError(_("Select a department in the active college."))
+
+        def matching_department(record):
+            return not f["department_id"] or record.campus_course_id.department_id.id == f["department_id"]
+
+        invoices = self._mvp_records("account.move", [
+            ("company_id", "=", company_id), ("state", "=", "posted"),
+            ("move_type", "=", "out_invoice"), ("campus_student_id", "!=", False),
+            ("invoice_date", ">=", f["date_from"]), ("invoice_date", "<=", f["date_to"]),
+        ]).filtered(matching_department)
+        all_dues = self._mvp_records(*self._mvp_source("dues", f)).filtered(matching_department)
+        due_rows = self._mvp_report_rows("dues", f, all_dues)
+        balances = {row["id"]: row for row in due_rows}
+        billed = sum(invoice.amount_total for invoice in invoices)
+        open_period = sum(balances[invoice.id]["balance"] for invoice in invoices if invoice.id in balances)
+        overdue_period = sum(balances[invoice.id]["balance"] for invoice in invoices
+                             if invoice.id in balances and balances[invoice.id]["days_overdue"] > 0)
+        collected_period = max(0.0, billed - open_period)
+
+        def receipts(start, end):
+            receipt_filters = dict(f, date_from=start, date_to=end)
+            payments = self._mvp_records(*self._mvp_source("collection", receipt_filters)).filtered(
+                lambda payment: matching_department(payment.campus_invoice_id))
+            amount = sum(payment.amount for payment in payments if start <= payment.date <= end)
+            amount -= sum(payment.amount for payment in payments if payment.campus_reversal_id
+                          and start <= payment.campus_reversal_id.date <= end)
+            return payments, amount
+
+        payments, collected_month = receipts(f["date_from"], f["date_to"])
+        previous_start = fields.Date.subtract(f["date_from"], months=1)
+        previous_end = f["date_from"] - timedelta(days=1)
+        _, previous_collected = receipts(previous_start, previous_end)
+        change = round((collected_month - previous_collected) / previous_collected * 100, 1) if previous_collected else None
+        semester = self.env["op.academic.term"].search([
+            ("company_id", "=", company_id), ("term_start_date", "<=", f["date_to"]),
+            ("term_end_date", ">=", f["date_to"]),
+        ], order="term_start_date desc", limit=1)
+        semester_start = semester.term_start_date if semester else fields.Date.subtract(f["date_to"], months=6)
+        semester_start = min(semester_start, f["date_to"])
+        _, collected_semester = receipts(semester_start, f["date_to"])
+
+        by_department = {department.id: {"id": department.id, "name": department.name,
+                         "billed": 0.0, "collected": 0.0} for department in departments}
+        for invoice in invoices:
+            department = invoice.campus_course_id.department_id
+            key = department.id or 0
+            if key not in by_department:
+                by_department[key] = {"id": key, "name": department.name or "Unassigned", "billed": 0.0, "collected": 0.0}
+            by_department[key]["billed"] += invoice.amount_total
+            by_department[key]["collected"] += invoice.amount_total - balances.get(invoice.id, {}).get("balance", 0.0)
+        department_rows = [dict(row, rate=round(row["collected"] / row["billed"] * 100) if row["billed"] else 0)
+                           for row in by_department.values() if row["billed"]]
+        department_rows.sort(key=lambda row: row["name"])
+        if f["department_id"]:
+            department_rows = [row for row in department_rows if row["id"] == f["department_id"]]
+
+        outstanding = sum(row["balance"] for row in due_rows)
+        overdue = sum(row["balance"] for row in due_rows if row["days_overdue"] > 0)
+        students_due = len({self.env["account.move"].browse(row["id"]).campus_student_id.id for row in due_rows})
+        recent = [{"id": payment.id, "reference": payment.campus_receipt_number,
+                   "student": payment.campus_invoice_id.campus_student_id.name or "Student fee receipt",
+                   "date": str(payment.date), "amount": payment.amount} for payment in payments
+                  if f["date_from"] <= payment.date <= f["date_to"]]
+        recent.sort(key=lambda row: (row["date"], row["id"]), reverse=True)
+        recent_invoices = [{"id": invoice.id, "reference": invoice.name,
+                            "student": invoice.campus_student_id.name,
+                            "department": invoice.campus_course_id.department_id.name or "",
+                            "amount": invoice.amount_total,
+                            "due": str(invoice.invoice_date_due or invoice.invoice_date),
+                            "status": "Paid" if invoice.id not in balances else
+                                      "Overdue" if balances[invoice.id]["days_overdue"] > 0 else "Pending"}
+                           for invoice in invoices.sorted("invoice_date", reverse=True)[:4]]
+        return {
+            "currency": self.env.company.currency_id.symbol,
+            "period": {"from": str(f["date_from"]), "to": str(f["date_to"]),
+                       "label": f["date_to"].strftime("%b · %Y").upper()},
+            "departments": [{"id": department.id, "name": department.name} for department in departments],
+            "collected_month": collected_month, "collected_semester": collected_semester,
+            "previous_change": change, "semester_label": semester.name if semester else "Last six months",
+            "outstanding": outstanding, "overdue": overdue, "students_due": students_due,
+            "invoice_count": len(invoices),
+            "status": {"billed": billed, "collected": collected_period,
+                       "pending": max(0.0, open_period - overdue_period), "overdue": overdue_period},
+            "by_department": department_rows, "recent": recent[:4], "recent_invoices": recent_invoices,
         }
 
 
