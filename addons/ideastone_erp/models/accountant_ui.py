@@ -24,7 +24,8 @@ ACCOUNTANT_MODULES = [
         ("Transport fee bills", "accountant_transport"),
     ]),
     ("spending", "Spending", "credit-card", [
-        ("Event & maintenance bills", "accountant_expenses"),
+        ("Event bills", "accountant_spending_events"),
+        ("Maintenance bills", "accountant_spending_maintenance"),
     ]),
     ("communication", "Fee circulars", "bullhorn", [
         ("Fee related circulars", "accountant_notices"),
