@@ -76,4 +76,3 @@ class TestAccountantTransport(OwnerMVPFixture, TransactionCase):
             self.env["campus.transport.payroll"].with_user(self.accountant).create({
                 "route_id": route.id, "partner_id": vendor.id, "month": self.today.replace(day=1),
                 "base": 1, "expense_account_id": expense.id, "invoice_id": bill.id})
-

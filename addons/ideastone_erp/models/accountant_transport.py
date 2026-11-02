@@ -265,4 +265,3 @@ class TransportWorkspace(models.AbstractModel):
         return {"type": "ir.actions.act_window", "name": dict(fleet="Bus / Route", payroll="Driver salary record",
                 bill="Transport expense", receipt="Transport receipt")[kind], "res_model": model,
                 "res_id": record_id or False, "views": [(view_id, "form")], "target": "new", "context": context}
-

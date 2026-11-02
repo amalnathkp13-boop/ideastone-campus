@@ -136,4 +136,3 @@ export class AccountantTransport extends Component {
     }
 }
 registry.category("actions").add("ideastone_erp.accountant_transport", AccountantTransport);
-

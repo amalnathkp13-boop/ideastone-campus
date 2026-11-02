@@ -81,4 +81,3 @@ else:
     marker.set_param("accountant_transport_sample", "2026-11-02")
     e.cr.commit()
     print("Transport sample fleet, riders, receipts, expenses and salaries saved")
-

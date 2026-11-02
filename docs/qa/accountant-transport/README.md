@@ -16,4 +16,3 @@ Use the isolated `accountant_ui_preview` database on port 18069. `seed.py` is in
 Run Odoo tests with `--test-tags /ideastone_erp:TestAccountantTransport,/ideastone_erp:TestAccountantWorkspace`. They verify saved riders/receipts, completed allocation history, capacity, salary arithmetic, immutable invoice classification, access restrictions, and no double counting of draft/posted salary bills.
 
 Browser verification covers all four tabs; Manage fleet; View fleet & routes; View all transactions; Add bus and save/refresh; Add transaction; Student fee bills and its invoice redirect; New payroll run; saved receipt/bill/payroll links; search/status/type filters; and all three CSV downloads. Check page overflow at 1440, 820, 390 and 320 pixels. Tables and tabs scroll inside their own containers on narrow screens.
-
