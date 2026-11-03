@@ -1,0 +1,71 @@
+{
+  "checked_on": "2026-11-03",
+  "scope": "Principal module landing pages",
+  "modules": [
+    {
+      "sidebar": "Principal overview",
+      "title": "Principal overview",
+      "matches": true
+    },
+    {
+      "sidebar": "Decisions",
+      "title": "Decisions",
+      "matches": true
+    },
+    {
+      "sidebar": "Admissions oversight",
+      "title": "Admissions oversight",
+      "matches": true
+    },
+    {
+      "sidebar": "Academic planning",
+      "title": "Academic planning",
+      "matches": true
+    },
+    {
+      "sidebar": "Faculty oversight",
+      "title": "Faculty oversight",
+      "matches": true
+    },
+    {
+      "sidebar": "Calendar",
+      "title": "Calendar",
+      "matches": true
+    },
+    {
+      "sidebar": "Attendance oversight",
+      "title": "Attendance oversight",
+      "matches": true
+    },
+    {
+      "sidebar": "Finance oversight",
+      "title": "Finance oversight",
+      "matches": true
+    },
+    {
+      "sidebar": "Learning oversight",
+      "title": "Learning oversight",
+      "matches": true
+    },
+    {
+      "sidebar": "Examination oversight",
+      "title": "Examination oversight",
+      "matches": true
+    },
+    {
+      "sidebar": "Institutional reports",
+      "title": "Institutional reports",
+      "matches": true
+    },
+    {
+      "sidebar": "Principal notices",
+      "title": "Principal notices",
+      "matches": true
+    },
+    {
+      "sidebar": "Student affairs",
+      "title": "Student affairs",
+      "matches": true
+    }
+  ]
+}

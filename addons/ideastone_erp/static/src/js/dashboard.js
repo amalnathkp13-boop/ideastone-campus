@@ -114,6 +114,10 @@ class CampusBase extends Component {
         return this.state.page === "library" ? "Library circulation desk" : "Reports & exports";
     }
     async chooseModule(module) {
+        if (this.state.is_principal_workspace && ["home", "decisions", "principal_notices"].includes(module.key) && module.items?.[0]?.action) {
+            this.state.module = module.key;
+            return this.open(module.items[0]);
+        }
         if (module.key === "collections" && this.state.is_accountant_workspace) {
             this.state.module = "collections";
             return this.go({key: "accountant-collections-overview"});
@@ -180,6 +184,7 @@ class CampusBase extends Component {
                 ].includes(item.action) ?
                     await this.orm.call("campus.dashboard", "get_owner_action", [item.action]) : item.action;
                 if (this.state.is_owner_workspace && action.context) action.context.campus_module = this.state.module;
+                if (this.state.is_principal_workspace && action.context) action.context.campus_workspace_role = "Principal";
                 if (action.tag === "ideastone_erp.examinations") action.context.exams_year_id = this.action.currentController?.action.context?.exams_year_id ?? this.router.current.hash.exams_year_id ?? 0;
                 if (action.help) action.help = markup(action.help);
                 await this.action.doAction(action);
@@ -615,7 +620,7 @@ export class CampusNavigation extends CampusBase {
         catch { /* Default navigation remains usable if preferences cannot load. */ }
     }
     get navigationScope() {
-        return this.state.is_coe_workspace ? "coe" : this.state.is_accountant_workspace ? "accountant" : this.state.is_owner_workspace ? "owner" : this.state.is_hod ? "hod" : this.state.faculty_modules.length ? "faculty" : "staff";
+        return this.state.is_principal_workspace ? "principal" : this.state.is_coe_workspace ? "coe" : this.state.is_accountant_workspace ? "accountant" : this.state.is_owner_workspace ? "owner" : this.state.is_hod ? "hod" : this.state.faculty_modules.length ? "faculty" : "staff";
     }
     get navigationCatalog() {
         const catalog = [];
