@@ -11,7 +11,7 @@ export class PrincipalWorkspace extends Component {
         this.action = useService("action");
         this.notification = useService("notification");
         this.view = this.props.action.params?.view || "overview";
-        this.state = useState({loading:true,error:"",data:null,search:"",type:"",status:"",category:"",modal:null,outcome:"approved",remark:"",saving:false,modalError:""});
+        this.state = useState({loading:true,error:"",data:null,search:"",type:"",status:"",category:"",modal:null,outcome:"approved",remark:"",saving:false,modalError:"",period:6,showPlan:false});
         this.dialog = useRef("dialog");
         useEffect(() => { if (this.state.modal) this.dialog.el?.querySelector("textarea, button")?.focus(); }, () => [this.state.modal]);
         useEffect(() => {
@@ -53,10 +53,30 @@ export class PrincipalWorkspace extends Component {
     }
     async load() {
         this.state.loading=true; this.state.error="";
-        try { this.state.data = await this.orm.call("ideastone.principal.decisions","get_data",[]); }
+        try {
+            // The overview shows #106's campus performance dashboard; the other views use the decision queue.
+            this.state.data = this.view === "overview"
+                ? await this.orm.call("ideastone.principal.dashboard","get_overview",[])
+                : await this.orm.call("ideastone.principal.decisions","get_data",[]);
+        }
         catch(error) { this.state.error=error.data?.message || "Principal records could not be loaded. Retry to refresh saved data."; }
         finally { this.state.loading=false; }
     }
+    get trendRows() { return (this.state.data?.dashboard?.trend || []).slice(-this.state.period); }
+    percent(value) { return value === null || value === undefined ? "—" : `${value}%`; }
+    barHeight(value) { return `height: ${Math.max(0, Math.min(100, value || 0))}%`; }
+    barWidth(value) { return `width: ${Math.max(0, Math.min(100, value || 0))}%`; }
+    donutStyle(outcomes) {
+        const total = outcomes.total || 1;
+        const placed = outcomes.placed * 100 / total;
+        const studies = placed + outcomes.higher_studies * 100 / total;
+        const seeking = studies + outcomes.seeking * 100 / total;
+        return `background: conic-gradient(#1769e8 0 ${placed}%, #36a3f7 ${placed}% ${studies}%, #35b98b ${studies}% ${seeking}%, #f2b34b ${seeking}% 100%)`;
+    }
+    monthLabel(month) { return ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][Number(month.slice(5, 7)) - 1]; }
+    choosePeriod(event) { this.state.period = Number(event.target.value); }
+    togglePlan() { this.state.showPlan = !this.state.showPlan; }
+    openModule(action) { return this.action.doAction(action, {additionalContext: {campus_workspace_role: "Principal"}}); }
     statusLabel(value,kind="") { return {pending:kind === "event" ? "Pending signature" : "Pending",approved:"Approved",rejected:"Rejected",changes:"Needs changes"}[value] || value; }
     date(value) { return value ? new Date(`${value.slice(0,10)}T12:00:00`).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}) : "—"; }
     timestamp(value) { return new Date(`${value.replace(" ","T")}Z`).toLocaleString("en-GB"); }

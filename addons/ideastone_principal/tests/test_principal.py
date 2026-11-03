@@ -101,6 +101,17 @@ class TestPrincipalWorkflow(TransactionCase):
         overview = self.env["ideastone.principal.dashboard"].with_user(self.principal).get_overview()
         self.assertIn("students", overview["counts"])
         self.assertIn("pending", overview["counts"])
+        self.assertEqual(len(overview["dashboard"]["trend"]), 6)
+        self.assertEqual(len(overview["dashboard"]["readiness"]), 4)
+        # The overview reports counselling as counts; the notes themselves stay with mentors.
+        with self.assertRaises(AccessError):
+            self.env["campus.counseling"].with_user(self.principal).check_access_rights("read")
+        request = self.env["ideastone.principal.request"].with_user(self.staff).create({
+            "name": "Dashboard refresh check", "request_type": "academic", "description": "Saved request",
+        })
+        request.with_user(self.staff).action_submit()
+        refreshed = self.env["ideastone.principal.dashboard"].with_user(self.principal).get_overview()
+        self.assertEqual(refreshed["counts"]["pending"], overview["counts"]["pending"] + 1)
         self.assertFalse(self.env["op.student"].with_user(self.principal).check_access_rights("write", raise_exception=False))
 
     def test_finance_rupee_display_is_principal_only(self):
