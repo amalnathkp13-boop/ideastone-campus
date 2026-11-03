@@ -14,5 +14,4 @@
   <record id="action_staff_application_records" model="ir.actions.act_window"><field name="name">Staff applications</field><field name="res_model">ideastone.principal.staff.application</field><field name="view_mode">tree,form</field><field name="domain">[('company_id','=',allowed_company_ids[0])]</field></record>
   <record id="action_staff_directory" model="ir.actions.client"><field name="name">Staff directory</field><field name="tag">ideastone_principal.staff_directory</field><field name="context">{'campus_module':'staff'}</field></record>
   <record id="action_staff_applications" model="ir.actions.client"><field name="name">New staff applications</field><field name="tag">ideastone_principal.staff_workspace</field><field name="params">{'view':'applications'}</field><field name="context">{'campus_module':'staff'}</field></record>
-  <record id="action_staff_payroll" model="ir.actions.client"><field name="name">Payroll History</field><field name="tag">ideastone_principal.staff_workspace</field><field name="params">{'view':'payroll'}</field><field name="context">{'campus_module':'staff'}</field></record>
 </odoo>

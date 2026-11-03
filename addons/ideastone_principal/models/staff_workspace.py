@@ -1,8 +1,5 @@
 from collections import defaultdict
-from datetime import timedelta
 
-import pytz
-from odoo.addons.ideastone_erp.models.late_punch import LATE_CUTOFF, late_punch_dates
 from odoo.exceptions import AccessError, ValidationError
 
 from odoo import _, api, fields, models
@@ -21,20 +18,18 @@ class PrincipalStaffNavigation(models.AbstractModel):
         if not self.env.user.has_group("ideastone_principal.group_principal"):
             return modules
         entries = [("Staff directory", "ideastone_principal.action_staff_directory"),
-                   ("New staff applications", "ideastone_principal.action_staff_applications"),
-                   ("Payroll History", "ideastone_principal.action_staff_payroll")]
+                   ("New staff applications", "ideastone_principal.action_staff_applications")]
         return [(key, label, icon, entries if key == "staff" else items) for key, label, icon, items in modules]
 
     def _client_action_models(self):
         return dict(super()._client_action_models(), **{
             "ideastone_principal.action_staff_directory": "op.faculty",
-            "ideastone_principal.action_staff_applications": "ideastone.principal.staff.application",
-            "ideastone_principal.action_staff_payroll": "ideastone.principal.staff.application"})
+            "ideastone_principal.action_staff_applications": "ideastone.principal.staff.application"})
 
 
 class PrincipalStaffWorkspace(models.AbstractModel):
     _name = "ideastone.principal.staff.workspace"
-    _description = "Principal staff directory, recruitment and payroll oversight"
+    _description = "Principal staff directory and recruitment oversight"
 
     @api.model
     def get_directory(self):
@@ -96,66 +91,7 @@ class PrincipalStaffWorkspace(models.AbstractModel):
 
     @api.model
     def get_payroll(self, year="", month=""):
-        principal_access(self.env)
-        if str(year) not in ("", "all") and (not str(year).isdigit() or not 2000 <= int(year) <= 2100):
-            raise ValidationError(_("Choose a valid year."))
-        if str(month) not in ("", "all") and (not str(month).isdigit() or not 1 <= int(month) <= 12):
-            raise ValidationError(_("Choose a valid month."))
-        year, month = int(year) if str(year).isdigit() else 0, int(month) if str(month).isdigit() else 0
-        company, today = self.env.company, fields.Date.context_today(self)
-        employees = self.env["hr.employee"].sudo().search([("company_id", "=", company.id)], order="name")
-        faculty = self.env["op.faculty"].sudo().search([("company_id", "=", company.id), ("emp_id", "in", employees.ids)])
-        academic = {p.emp_id.id: p.main_department_id for p in faculty
-                    if not p.main_department_id.company_id or p.main_department_id.company_id == company}
-        slips = self.env["campus.payslip"].sudo().search([("company_id", "=", company.id),
-            ("employee_id", "in", employees.ids), ("state", "in", ["approved", "done"])])
-        punches = self.env["hr.attendance"].sudo().search([("employee_id", "in", employees.ids)], order="check_in asc")
-        by_employee = defaultdict(dict)
-        years = {today.year} | {s.date_from.year for s in slips}
-        for punch in punches:
-            timezone = pytz.timezone(punch.employee_id.resource_calendar_id.tz or "UTC")
-            local = pytz.UTC.localize(punch.check_in).astimezone(timezone)
-            years.add(local.year)
-            entries = by_employee[punch.employee_id.id]
-            day = entries.setdefault(local.date(), {"in": local, "out": None})
-            if punch.check_out:
-                out = pytz.UTC.localize(punch.check_out).astimezone(timezone)
-                day["out"] = max(out, day["out"]) if day["out"] else out
+        # Salary figures stay with the owner, HR and accounts; the Principal reviews staff
+        # punctuality through the Attendance module instead.
+        raise AccessError(_("Staff payroll is not available in the Principal workspace."))
 
-        def in_period(day):
-            return (not year or day.year == year) and (not month or day.month == month)
-
-        rows, present, late_today = [], 0, 0
-        week_start = today - timedelta(days=today.weekday())
-        trend = [{"day": str(week_start + timedelta(days=i)), "label": label, "late": 0, "on_time": 0}
-                 for i, label in enumerate(["Mon", "Tue", "Wed", "Thu", "Fri"])]
-        for employee in employees:
-            entries = by_employee[employee.id]
-            months = {day.replace(day=1) for day in entries if in_period(day) or week_start <= day <= today}
-            months.add(today.replace(day=1))
-            late = {day for start in months for day in late_punch_dates(self.sudo().env, employee, start)}
-            present += today in entries
-            late_today += today in late
-            for point in trend:
-                day = fields.Date.to_date(point["day"])
-                if day in entries:
-                    point["late" if day in late else "on_time"] += 1
-            selected_days = sorted(day for day in entries if in_period(day))
-            latest = entries[selected_days[-1]] if selected_days else {}
-            payroll = slips.filtered(lambda s, employee=employee: s.employee_id == employee and in_period(s.date_from))
-            late_count = sum(in_period(day) for day in late)
-            department = academic.get(employee.id)
-            rows.append({"id": employee.id, "name": employee.name,
-                "department": (department.code or department.name) if department else employee.department_id.name or "—",
-                "check_in": latest["in"].strftime("%I:%M %p") if latest else "—",
-                "check_out": latest["out"].strftime("%I:%M %p") if latest and latest["out"] else "—",
-                "date": str(selected_days[-1]) if selected_days else "", "late_count": late_count,
-                "deducted_days": sum(payroll.mapped("late_deducted_days")), "deduction": sum(payroll.mapped("late_deduction")),
-                "gross": sum(payroll.mapped("gross")), "net": sum(payroll.mapped("net")),
-                "pf": sum(payroll.mapped("pf")), "tds": sum(payroll.mapped("tds")),
-                "approved_periods": len(payroll), "status": "Late" if selected_days and selected_days[-1] in late else "On time" if latest else "No punch"})
-        return {"rows": rows, "today": str(today), "company": company.name, "demo": company.campus_demo,
-            "years": sorted(years, reverse=True), "currency": company.currency_id.symbol,
-            "present": present, "total": len(employees), "late_today": late_today,
-            "deductions": sum(r["deduction"] for r in rows), "repeated": sum(r["late_count"] >= 3 for r in rows),
-            "trend": trend, "threshold": LATE_CUTOFF.strftime("%I:%M %p")}

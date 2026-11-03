@@ -2,7 +2,7 @@
   <t t-name="ideastone_erp.OwnerFeesWorkspace">
     <main class="campus_owner_fees_workspace" tabindex="0">
       <div class="content">
-        <div class="crumb">Campus / Owner workspace / Fees &amp; Payments / <strong t-esc="title"/>
+        <div class="crumb">Campus / <t t-esc="props.action.context?.campus_workspace_role || 'Owner'"/> workspace / Fees &amp; Payments / <strong t-esc="title"/>
         </div>
         <p t-if="state.loading" role="status">Refreshing finance records…</p>
         <div t-if="state.error" class="finance-error" role="alert">

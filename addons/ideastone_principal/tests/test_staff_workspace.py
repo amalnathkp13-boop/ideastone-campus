@@ -51,7 +51,7 @@ class TestPrincipalStaffWorkspace(TransactionCase):
         navigation = self.env["campus.dashboard"].with_user(self.principal).get_overview()
         staff = next(m for m in navigation["faculty_modules"] if m["key"] == "staff")
         self.assertEqual([item["label"] for item in staff["items"]],
-                         ["Staff directory", "New staff applications", "Payroll History"])
+                         ["Staff directory", "New staff applications"])
 
     def test_directory_and_punch_reporting_use_active_college(self):
         calendar = self.env["resource.calendar"].create({"name": "QA staff UTC hours", "tz": "UTC", "company_id": self.company.id})
@@ -61,31 +61,11 @@ class TestPrincipalStaffWorkspace(TransactionCase):
                                            "check_out": datetime(2026, 11, 2, 17)})
         directory = self.ui.get_directory()
         self.assertTrue(any(r["key"] == f"employee:{employee.id}" for r in directory["rows"]))
-        payroll = self.ui.get_payroll("2026", "11")
-        row = next(r for r in payroll["rows"] if r["id"] == employee.id)
-        self.assertEqual((row["late_count"], row["deduction"], row["status"]), (1, 0, "Late"))
-        october = self.ui.get_payroll("2026", "10")
-        self.assertTrue(all(r["late_count"] == 0 and r["check_in"] == "—" for r in october["rows"]))
-        with self.assertRaises(ValidationError):
-            self.ui.get_payroll("invalid", "13")
+        # Salary figures are not part of the Principal workspace.
+        with self.assertRaises(AccessError):
+            self.ui.get_payroll("2026", "11")
         with self.assertRaises(AccessError):
             self.env["ideastone.principal.staff.workspace"].with_user(self.outsider).get_payroll()
         other = self.env["res.company"].create({"name": "Other staff reporting college"})
         other_employee = self.env["hr.employee"].create({"name": "Other college technician", "company_id": other.id})
-        self.assertNotIn(other_employee.id, [r["id"] for r in self.ui.get_payroll()["rows"]])
-
-        hr = new_test_user(self.env, login="principal_staff_hr", groups="ideastone_erp.group_people,ideastone_erp.group_manager",
-            company_id=self.company.id, company_ids=[(6, 0, self.company.ids)])
-        agreement = self.env["campus.salary.agreement"].with_user(hr).create({"name": "QA staff salary",
-            "company_id": self.company.id, "employee_id": employee.id, "date_from": "2026-11-01", "basic": 6000})
-        agreement.action_submit()
-        agreement.action_approve()
-        slip = self.env["campus.payslip"].with_user(hr).create({"name": "QA staff payslip", "company_id": self.company.id,
-            "agreement_id": agreement.id, "date_from": "2026-11-01", "date_to": "2026-11-03", "working_days": 1})
-        slip.action_compute()
-        self.assertTrue(all(r["net"] == 0 for r in self.ui.get_payroll("2026", "11")["rows"]))
-        slip.action_submit()
-        slip.action_approve()
-        approved = next(r for r in self.ui.get_payroll("2026", "11")["rows"] if r["id"] == employee.id)
-        self.assertEqual(approved["net"], slip.net)
-        self.assertGreater(approved["net"], 0)
+        self.assertNotIn(f"employee:{other_employee.id}", [r["key"] for r in self.ui.get_directory()["rows"]])
