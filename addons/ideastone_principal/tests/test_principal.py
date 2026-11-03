@@ -29,6 +29,7 @@ class TestPrincipalWorkflow(TransactionCase):
             request.with_user(self.staff).action_approve()
         with self.assertRaises(AccessError):
             request.with_user(self.staff).write({"decision_note": "Forged decision"})
+        request.with_user(self.principal).write({"decision_note": "Request reviewed and approved"})
         request.with_user(self.principal).action_approve()
         self.assertEqual(request.state, "approved")
         self.assertEqual(request.decided_by_id, self.principal)
@@ -102,6 +103,23 @@ class TestPrincipalWorkflow(TransactionCase):
         self.assertIn("pending", overview["counts"])
         self.assertFalse(self.env["op.student"].with_user(self.principal).check_access_rights("write", raise_exception=False))
 
+    def test_finance_rupee_display_is_principal_only(self):
+        usd = self.env.ref("base.USD")
+        college = self.env["res.company"].create({"name": "Finance display test", "currency_id": usd.id})
+        self.principal.write({"company_ids": [(4, college.id)]})
+        owner = self.env["res.users"].create({
+            "name": "Finance owner", "login": "finance.owner@principal.test",
+            "company_id": college.id, "company_ids": [(6, 0, college.ids)],
+            "groups_id": [(6, 0, [self.env.ref("ideastone_erp.group_mvp_owner").id])],
+        })
+        finance = self.env["campus.owner.fees"].with_company(college)
+        principal_data = finance.with_user(self.principal).get_workspace()
+        owner_data = finance.with_user(owner).get_workspace()
+        self.assertEqual((principal_data["currency"], principal_data["symbol"]), ("INR", "₹"))
+        self.assertEqual((owner_data["currency"], owner_data["symbol"]), (usd.name, usd.symbol))
+        self.assertEqual(principal_data["summary"], owner_data["summary"])
+        self.assertEqual(college.currency_id, usd)
+
     def test_shared_navigation_uses_existing_workspaces(self):
         overview = self.env["campus.dashboard"].with_user(self.principal).get_overview()
         self.assertEqual(overview["workspace_role"], "Principal")
@@ -111,6 +129,15 @@ class TestPrincipalWorkflow(TransactionCase):
         self.assertIn("ideastone_erp.action_admissions_overview",
                       [item["action"] for module in overview["faculty_modules"]
                        for item in module["items"] if "action" in item])
+        modules = {module["key"]: module for module in overview["faculty_modules"]}
+        self.assertEqual(modules["staff"]["label"], "Faculty oversight")
+        self.assertNotIn("Payroll History", [item["label"] for item in modules["staff"]["items"]])
+        self.assertNotIn("Fee structures", [item["label"] for item in modules["fees"]["items"]])
+        self.assertNotIn("Enquiries", [item["label"] for item in modules["admissions"]["items"]])
+        self.assertNotIn("Schedule & marks entry", [item["label"] for item in modules["exams"]["items"]])
+        self.assertEqual({item["action"] for item in overview["navigation"]},
+                         {item["action"] for module in modules.values() for item in module["items"]})
+        self.assertNotIn("communication", modules)
         self.assertFalse(any(module["key"] == "settings" for module in overview["faculty_modules"]))
 
     def test_navigation_models_are_readable(self):
@@ -123,3 +150,23 @@ class TestPrincipalWorkflow(TransactionCase):
             model = self.env[action.res_model].with_user(self.principal)
             self.assertTrue(model.check_access_rights("read", raise_exception=False), action.name)
             model.search([], limit=1)
+
+    def test_other_roles_keep_their_navigation(self):
+        for role in ("owner", "accountant"):
+            user = self.env["res.users"].create({
+                "name": role, "login": f"{role}@principal.test",
+                "groups_id": [(6, 0, [self.env.ref(f"ideastone_erp.group_mvp_{role}").id])],
+            })
+            overview = self.env["campus.dashboard"].with_user(user).get_overview()
+            self.assertFalse(overview.get("is_principal_workspace"))
+            modules = {module["key"]: module for module in overview["faculty_modules"]}
+            self.assertNotIn("decisions", modules)
+            self.assertNotIn("principal_notices", modules)
+            if role == "owner":
+                self.assertIn("Payroll History", [item["label"] for item in modules["staff"]["items"]])
+            else:
+                self.assertTrue(overview["is_accountant_workspace"])
+
+    def test_principal_navigation_preferences_scope(self):
+        preferences = self.principal.with_user(self.principal).campus_get_navigation("principal")
+        self.assertEqual(preferences["items"], [])

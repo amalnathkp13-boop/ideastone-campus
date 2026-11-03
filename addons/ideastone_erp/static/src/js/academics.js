@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, useEffect, useRef, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -87,10 +87,16 @@ export class AcademicsWorkspace extends Component {
     static props = ["*"];
     setup() {
         this.orm = useService("orm"); this.dialog = useService("dialog");
+        this.user = useService("user");
         this.view = this.props.action.params?.view || "overview";
-        this.state = useState({data: null, loading: false, error: "", query: "", filtersOpen: false, filters: {}, trend: "progress"});
+        this.state = useState({data: null, loading: false, error: "", query: "", filtersOpen: false, filters: {}, trend: "progress", subjectDepartment: null});
         this.request = 0;
-        onWillStart(() => this.load());
+        this.subjectListHeading = useRef("subjectListHeading");
+        useEffect(() => this.subjectListHeading.el?.focus(), () => [this.state.subjectDepartment]);
+        onWillStart(async () => {
+            this.principalUser = await this.user.hasGroup("ideastone_principal.group_principal");
+            await this.load();
+        });
     }
     async load() {
         const request = ++this.request;
@@ -101,7 +107,10 @@ export class AcademicsWorkspace extends Component {
         } catch (error) { if (request === this.request) this.state.error = error.data?.message || "Academics could not be loaded. Retry to refresh the records."; }
         finally { if (request === this.request) this.state.loading = false; }
     }
-    get title() { return META[this.view][0]; }
+    get isPrincipal() { return this.principalUser || this.props.action.context?.campus_workspace_role === "Principal"; }
+    get workspaceRole() { return this.isPrincipal ? "Principal" : this.props.action.context?.campus_workspace_role || "Owner / Admin"; }
+    get moduleTitle() { return this.isPrincipal ? "Academic planning" : "Academics"; }
+    get title() { return this.view === "overview" ? this.moduleTitle : META[this.view][0]; }
     get subtitle() { return META[this.view][1]; }
     get d() { return this.state.data; }
     get c() { return this.d.counts; }
@@ -118,6 +127,25 @@ export class AcademicsWorkspace extends Component {
             (!f.period || r.period_type === f.period) && (!f.mapping || r.mapped === (f.mapping === "mapped")) &&
             (!f.credits || (f.credits === "positive" ? r.credits > 0 : r.credits <= 0)) && (!f.from || Number(r.start?.slice(0,4)) >= Number(f.from))) || [];
     }
+    get subjectDepartments() {
+        const groups = new Map(this.d.rows.departments.map(department => [department.id, {...department, rows: []}]));
+        for (const row of this.rows) {
+            const id = row.department_id || 0;
+            if (!groups.has(id)) groups.set(id, {id, name: id ? row.department : "Department not assigned", code: "—", rows: []});
+            groups.get(id).rows.push(row);
+        }
+        const filtered = this.state.query.trim() || Object.values(this.state.filters).some(Boolean);
+        const palette = [["#f0eaff", "#6a1fd2"], ["#eaf3ff", "#1769e8"], ["#eaf5ef", "#579477"], ["#fff4e2", "#b8832d"]];
+        return [...groups.values()].filter(group => !filtered || group.rows.length)
+            .sort((a, b) => !a.id - !b.id || a.name.localeCompare(b.name))
+            .map(group => ({...group, colors: palette[Math.max(0, group.id - 1) % palette.length]}));
+    }
+    get selectedSubjectDepartment() {
+        const department = this.state.subjectDepartment;
+        return department && {...department, rows: this.rows.filter(row => (row.department_id || 0) === department.id)
+            .sort((a, b) => a.name.localeCompare(b.name))};
+    }
+    showSubjects(department) { this.state.subjectDepartment = {id: department.id, name: department.name}; }
     clearFilters() { this.state.filters = {}; this.state.query = ""; }
     open(record = null) {
         this.dialog.add(AcademicRecord, {view: this.view, record, data: this.d, saved: () => this.load()});
