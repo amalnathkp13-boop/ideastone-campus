@@ -6,7 +6,7 @@ PRINCIPAL_FOCUS = {
     "admissions": ("Admissions oversight", {"Overview", "Applications & review", "Admission register"}),
     "students": ("Student affairs", {"Student directory", "Enrolments & transfers"}),
     "academics": ("Academic planning", {"Overview", "Departments", "Programmes", "Subjects & curriculum"}),
-    "staff": ("Faculty oversight", {"Staff directory", "Teaching allocation", "Faculty development and appraisal", "Leave Management"}),
+    "staff": ("Faculty oversight", {"Staff directory", "New staff applications", "Teaching allocation", "Faculty development and appraisal", "Leave Management"}),
     "attendance": ("Attendance oversight", {"Staff attendance", "Attendance register", "Student summary & shortage"}),
     "exams": ("Examination oversight", {"Overview", "Exam sessions", "Results & missing entries", "Question papers"}),
     "fees": ("Finance oversight", {"Financial overview", "Invoices & dues", "Overdue follow-up"}),

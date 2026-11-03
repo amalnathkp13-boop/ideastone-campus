@@ -1,7 +1,7 @@
 {
     "name": "Ideastone Campus - Principal",
     "summary": "Principal oversight, approvals, notices and campus records",
-    "version": "17.0.1.3.0",
+    "version": "17.0.1.3.1",
     "category": "Education",
     "author": "Ideastone Technologies Pvt Ltd",
     "license": "OPL-1",
@@ -15,6 +15,7 @@
         "views/principal_workspace.xml",
         "security/decisions_security.xml",
         "views/decisions_views.xml",
+        "views/staff_workspace.xml",
     ],
     "assets": {
         "web.assets_backend": [
@@ -23,9 +24,12 @@
             "ideastone_principal/static/src/xml/workspace.xml",
             "ideastone_principal/static/src/xml/headings.xml",
             "ideastone_principal/static/src/scss/workspace.scss",
-            "ideastone_principal/static/src/js/notices.js",
             "ideastone_principal/static/src/xml/notices.xml",
             "ideastone_principal/static/src/scss/notices.scss",
+            "ideastone_principal/static/src/xml/staff_workspace.xml",
+            "ideastone_principal/static/src/scss/staff_workspace.scss",
+            "ideastone_principal/static/src/js/notices.js",
+            "ideastone_principal/static/src/js/staff_workspace.js",
         ],
     },
     "application": False,

@@ -27,3 +27,5 @@ access_principal_media_movement,principal.media.movement,openeducat_library.mode
 access_principal_activity,principal.activity,openeducat_activity.model_op_activity,ideastone_principal.group_principal,1,0,0,0
 access_principal_facility,principal.facility,openeducat_facility.model_op_facility,ideastone_principal.group_principal,1,0,0,0
 access_principal_classroom,principal.classroom,openeducat_classroom.model_op_classroom,ideastone_principal.group_principal,1,0,0,0
+access_principal_staff_application,principal.staff.application,model_ideastone_principal_staff_application,ideastone_principal.group_principal,1,1,1,1
+access_hr_staff_application,hr.staff.application,model_ideastone_principal_staff_application,ideastone_erp.group_people,1,1,1,1
