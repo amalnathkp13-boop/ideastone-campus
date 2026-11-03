@@ -103,6 +103,9 @@ class TestPrincipalWorkflow(TransactionCase):
         self.assertIn("pending", overview["counts"])
         self.assertEqual(len(overview["dashboard"]["trend"]), 6)
         self.assertEqual(len(overview["dashboard"]["readiness"]), 4)
+        # The overview reports counselling as counts; the notes themselves stay with mentors.
+        with self.assertRaises(AccessError):
+            self.env["campus.counseling"].with_user(self.principal).check_access_rights("read")
         request = self.env["ideastone.principal.request"].with_user(self.staff).create({
             "name": "Dashboard refresh check", "request_type": "academic", "description": "Saved request",
         })
