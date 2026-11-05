@@ -8,10 +8,6 @@
           <button type="button" class="link-btn" t-on-click="load">Retry</button>
         </div>
         <t t-if="d">
-          <div class="hod-context" t-if="d.hod">
-            <span><strong>HOD workspace</strong> · <t t-esc="d.hod.department"/></span>
-            <span>Academic year <t t-esc="academicCycle.replace(' cycle','')"/> · Department administration</span>
-          </div>
           <div class="breadcrumb">
             <span t-if="d.hod">HOD workspace</span>
             <t t-else=""><span>VCET Campus</span><span>›</span><span>My profile &amp; payroll</span></t>

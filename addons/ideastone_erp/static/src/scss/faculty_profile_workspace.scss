@@ -107,24 +107,6 @@ font:13px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
 
 .campus_hod_staff_workspace {
     --ui-font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-    .hod-context {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        flex-wrap: wrap;
-        background: #edf5ff;
-        border: 1px solid #d8e8fb;
-        border-radius: 10px;
-        padding: 10px 13px;
-        margin: 0 0 15px;
-        color: #42617f;
-        font-size: 11px;
-    }
-    .hod-context strong {
-        color: #12314f;
-        font-weight: 750;
-    }
     .page-heading > div:first-child {
         flex: 1 1 300px;
         min-width: 0;
