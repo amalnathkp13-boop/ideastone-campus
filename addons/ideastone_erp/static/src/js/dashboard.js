@@ -52,6 +52,7 @@ class CampusBase extends Component {
             collectionRecords: {columns: [], rows: [], years: [], metrics: [], money_columns: [], date_columns: []},
             collectionYearId: "", collectionSearch: "", collectionStatusFilter: "",
             ownerFilters: {date_from: "", date_to: "", year_id: ""}, ownerAppliedFilters: {}, ownerError: "", ownerLoading: false,
+            ownerFeeYearId: 0, ownerChartMonths: 8,
             faculty_modules: [], faculty_tasks: [], faculty_schedule: [], faculty_surveys: [], module: route.module, activeAction: 0, activeTool: "",
             busy: false, query: "", cardQuery: "", unit: "", card: "", loanPage: 0, desk: { units: [], cards: [], loans: [], next: false } });
         // Handle the drawer before Odoo's global Escape shortcut consumes the key.
@@ -226,7 +227,9 @@ class CampusBase extends Component {
         this.state.ownerLoading = true;
         this.state.ownerError = "";
         try {
-            this.state.ownerMetrics = await this.orm.call("campus.dashboard", "get_owner_metrics", [this.state.ownerFilters]);
+            this.state.ownerMetrics = await this.orm.call("campus.dashboard", "get_owner_metrics",
+                [this.state.ownerFilters, Number(this.state.ownerFeeYearId) || 0, this.state.ownerChartMonths]);
+            this.state.ownerFeeYearId = this.state.ownerMetrics.overview_ui?.annual_fees?.year_id || 0;
             this.state.ownerAppliedFilters = {...this.state.ownerFilters};
             this.router.pushState({owner_from: this.state.ownerFilters.date_from, owner_to: this.state.ownerFilters.date_to, owner_year: this.state.ownerFilters.year_id});
         } catch (error) {
@@ -491,8 +494,11 @@ class CampusBase extends Component {
     async ownerSource(card) {
         if (!card.allowed) return;
         try {
-            if (["services", "attendance_pending", "overdue_services", "overdue_dues", "staff_present", "staff_delayed", "fleet"].includes(card.kind)) return this.ownerOverviewAction(card.kind);
-            const action = await this.orm.call("campus.dashboard", "get_owner_source_action", [card.kind, this.state.ownerAppliedFilters]);
+            if (["complaints", "overdue_complaints", "attendance_pending", "overdue_dues", "fleet_delayed"].includes(card.kind)) return this.ownerOverviewAction(card.kind);
+            const filters = card.kind === "attendance_today" ? {...this.state.ownerAppliedFilters,
+                date_from: this.state.today, date_to: this.state.today} : this.state.ownerAppliedFilters;
+            const action = await this.orm.call("campus.dashboard", "get_owner_source_action",
+                [card.kind === "attendance_today" ? "attendance" : card.kind, filters]);
             if (!action.views) action.views = (action.view_mode || "tree,form").split(",").map(mode => [false, mode]);
             if (action.help) action.help = markup(action.help);
             await this.action.doAction(action);
@@ -530,6 +536,8 @@ class CampusBase extends Component {
     }
     ownerCanOpen(xmlid) { return this.state.navigation.some(row => row.action === xmlid); }
     ownerPrint() { window.print(); }
+    ownerFeeYear(event) { this.state.ownerFeeYearId = Number(event.target.value) || 0; this.loadOwnerMetrics(); }
+    ownerChartRange(event) { this.state.ownerChartMonths = Number(event.target.value); this.loadOwnerMetrics(); }
     ownerMoney(value) { return `${this.ownerUI.currency_symbol || ""} ${this.number(value)}`.trim(); }
     ownerCompactMoney(value) {
         const magnitude = Math.abs(value);
@@ -550,14 +558,14 @@ class CampusBase extends Component {
             .reduce((parts, point) => { if (point === null) parts.push([]); else parts[parts.length - 1].push(point); return parts; }, [[]]).filter(part => part.length).map(part => part.join(" "));
     }
     get ownerQuickActions() {
-        return [{label: "Review admissions", detail: "Applications & decisions", icon: "envelope-o", action: "ideastone_erp.mvp_applications"},
-            {label: "Record a payment", detail: "Student fee accounts", icon: "inr", action: "ideastone_erp.action_owner_fees_overview"},
-            {label: "Track attendance", detail: "Completed class registers", icon: "check", action: "ideastone_erp.mvp_attendance"},
-            {label: "College calendar", detail: "Plan campus activities", icon: "calendar", action: "ideastone_erp.action_college_calendar"},
-            {label: "Plan examinations", detail: "Schedules & marks", icon: "file-text-o", action: "ideastone_erp.mvp_exams"},
-            {label: "Manage staff", detail: "Faculty directory", icon: "users", action: "ideastone_erp.action_owner_staff_directory"},
-            {label: "Service desk", detail: "Open campus requests", icon: "flag-o", kind: "services", allowed: this.ownerUI.kpis.some(card => card.kind === "services" && card.allowed)},
-            {label: "Build a report", detail: "Reports & analytics", icon: "bar-chart", module: "reports"}]
+        return [{label: "Admissions", detail: "Applications & decisions", icon: "envelope-o", action: "ideastone_erp.mvp_applications"},
+            {label: "Fee collections", detail: "Student fee accounts", icon: "inr", action: "ideastone_erp.action_owner_fees_overview"},
+            {label: "Attendance", detail: "Completed class registers", icon: "check", action: "ideastone_erp.mvp_attendance"},
+            {label: "College calendar", detail: "Campus activities", icon: "calendar", action: "ideastone_erp.action_college_calendar"},
+            {label: "Exams", detail: "Schedules & results", icon: "file-text-o", action: "ideastone_erp.mvp_exams"},
+            {label: "Faculty", detail: "Staff directory", icon: "users", action: "ideastone_erp.action_owner_staff_directory"},
+            {label: "Fleet", detail: "Bus routes", icon: "bus", kind: "fleet", allowed: this.ownerUI.kpis.some(card => card.kind === "fleet_delayed" && card.allowed)},
+            {label: "Reports", detail: "Campus analytics", icon: "bar-chart", module: "reports"}]
             .filter(item => item.action ? this.ownerCanOpen(item.action) : item.module ? this.state.faculty_modules.some(module => module.key === item.module) : item.allowed);
     }
     ownerQuick(item) { return item.action ? this.ownerOpenAction(item.action) : item.kind ? this.ownerOverviewAction(item.kind) : this.chooseModule({key: item.module}); }
