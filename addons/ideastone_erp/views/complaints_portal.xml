@@ -1,0 +1,67 @@
+<odoo>
+  <template id="complaints_portal">
+    <t t-set="cases" t-value="d['complaints']"/>
+    <div class="campus_complaints_portal">
+      <section id="complaints-dashboard" class="student_panel">
+        <h2>Complaints dashboard</h2><p>Follow every concern you reported and see its current in-charge and outcome.</p>
+        <div class="campus_complaints_portal_cards">
+          <div><small>My reports</small><strong t-esc="cases['counts']['mine']"/></div>
+          <div><small>New or reopened</small><strong t-esc="cases['counts']['submitted']"/></div>
+          <div><small>Being handled</small><strong t-esc="cases['counts']['assigned']"/></div>
+          <div><small>About me</small><strong t-esc="cases['counts']['about_me']"/></div>
+        </div>
+      </section>
+      <section class="student_panel">
+        <h2>Register a concern</h2>
+        <p>Report infrastructure, work, staff, student, academic, fee or safety issues. Feedback and incidents use the same tracked case history.</p>
+        <form t-att-action="'/my/campus/parent/action' if cases['source'] == 'parent' else '/my/campus/student/action'" method="post" enctype="multipart/form-data" class="campus_complaints_portal_form">
+          <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+          <input type="hidden" name="operation" value="complaint_submit"/><input type="hidden" name="return_to" value="complaints"/>
+          <input t-if="cases['source'] == 'parent'" type="hidden" name="child" t-att-value="d['student_id']"/>
+          <label>Case type<select name="kind" required="required"><option t-foreach="cases['kinds']" t-as="item" t-att-value="item[0]" t-esc="item[1]"/></select></label>
+          <label>Category<select name="category" required="required"><option t-foreach="cases['categories']" t-as="item" t-att-value="item[0]" t-esc="item[1]"/></select></label>
+          <label class="wide">Subject<input name="subject" type="text" maxlength="180" required="required"/></label>
+          <label class="wide">What happened?<textarea name="description" maxlength="5000" rows="4" required="required"/></label>
+          <label>Location, if relevant<input name="location" type="text" maxlength="200"/></label>
+          <label>Incident date, if relevant<input name="incident_date" type="date"/></label>
+          <label>For staff concerns: staff member<select name="target_user_id"><option value="">Select staff</option><option t-foreach="cases['staff_targets']" t-as="person" t-att-value="person['id']" t-esc="person['name']"/></select></label>
+          <label>For student concerns: register number<input name="student_number" type="text" maxlength="60"/></label>
+          <label>Evidence (PDF, PNG, JPEG; 5 MB max)<input name="file" type="file" accept=".pdf,.png,.jpg,.jpeg"/></label>
+          <label>Show my account name to the person concerned?<select name="anonymous_to_respondent"><option value="1">No, hide my account name</option><option value="0">Yes, show my account name</option></select></label>
+          <button class="btn btn-primary" type="submit">Submit case</button>
+        </form>
+      </section>
+      <section id="complaints-students" class="student_panel">
+        <h2>Student complaints</h2><p>Cases submitted from student and parent accounts.</p>
+        <t t-call="ideastone_erp.complaints_portal_rows"><t t-set="visible_rows" t-value="[row for row in cases['rows'] if row['source'] in ('student','parent')]"/></t>
+      </section>
+      <section id="complaints-staff" class="student_panel">
+        <h2>Staff complaints</h2><p>Cases submitted by college staff.</p>
+        <t t-call="ideastone_erp.complaints_portal_rows"><t t-set="visible_rows" t-value="[row for row in cases['rows'] if row['source'] == 'staff']"/></t>
+      </section>
+      <section id="complaints-about-me" class="student_panel">
+        <h2>Complaints about me</h2><p>Concerns that name your account and need your statement.</p>
+        <t t-call="ideastone_erp.complaints_portal_rows"><t t-set="visible_rows" t-value="[row for row in cases['rows'] if row['about_me']]"/></t>
+      </section>
+    </div>
+  </template>
+  <template id="complaints_portal_rows">
+    <div t-if="not visible_rows" class="campus_complaints_portal_empty">No cases in this section.</div>
+    <article t-foreach="visible_rows" t-as="row" class="campus_complaints_portal_case">
+      <div class="campus_complaints_portal_case_head"><strong t-esc="row['reference'] + ' · ' + row['subject']"/><span t-esc="row['state']"/></div>
+      <p><t t-esc="row['kind']"/> · <t t-esc="row['category']"/> · In-charge: <t t-esc="row['assigned']"/></p>
+      <p t-esc="row['description']"/>
+      <p t-if="row['resolution']"><strong>Resolution: </strong><t t-esc="row['resolution']"/></p>
+      <p t-if="row['statement']"><strong>Statement: </strong><t t-esc="row['statement']"/></p>
+      <form t-if="row['can_reopen'] or row['can_respond']" t-att-action="'/my/campus/parent/action' if cases['source'] == 'parent' else '/my/campus/student/action'" method="post">
+        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+        <input type="hidden" name="operation" value="complaint_act"/><input type="hidden" name="return_to" value="complaints"/>
+        <input type="hidden" name="case_id" t-att-value="row['id']"/>
+        <input type="hidden" name="case_action" t-att-value="'reopen' if row['can_reopen'] else 'respond'"/>
+        <input t-if="cases['source'] == 'parent'" type="hidden" name="child" t-att-value="d['student_id']"/>
+        <label t-esc="'Reason for review' if row['can_reopen'] else 'Your statement'"/><textarea name="note" rows="2" maxlength="3000" required="required"/>
+        <button class="btn btn-outline-primary" type="submit" t-esc="'Reopen case' if row['can_reopen'] else 'Submit statement'"/>
+      </form>
+    </article>
+  </template>
+</odoo>
