@@ -35,15 +35,19 @@ class StudentWorkspace(CampusPortal):
             monday = today - timedelta(days=today.weekday())
             kw["date_from"] = str(monday)
             kw["date_to"] = str(monday + timedelta(days=6))
-        data, error = None, ""
+        data, error, placements = None, "", None
         status = 200
         try:
             data = service.snapshot(kw.get("enrolment"), kw.get("date_from"), kw.get("date_to"))
             if section not in {item[0] for item in data["navigation"]}:
                 return request.not_found()
+            if section == "placements":
+                placements = service._placement_overview(kw.get("enrolment"))
         except AccessError as exc:
+            data = None
             error, status = str(exc), 403 if request.httprequest.path != "/my/campus" else 200
         except UserError as exc:
+            data = None
             error, status = str(exc), 400
         filters = data["filters"] if data else {}
         suffix = "?" + urlencode(filters) if filters else ""
@@ -55,6 +59,7 @@ class StudentWorkspace(CampusPortal):
             return "/my/campus/student/" + page + suffix
         response = request.render("ideastone_erp.student_workspace", {
             "portal_data": data, "portal_error": error, "section": section,
+            "placement_data": placements,
             "saved": bool(kw.get("saved")), "form_error": str(kw.get("form_error") or "")[:500],
             "student_url_for": student_url_for,
             "money": lambda amount: format_amount(request.env, amount, company.currency_id),
@@ -64,7 +69,10 @@ class StudentWorkspace(CampusPortal):
 
     @http.route("/my/campus/student/action", type="http", auth="user", website=True, methods=["POST"], csrf=True)
     def student_action(self, operation="", return_to="dashboard", **kw):
-        allowed = {"dashboard", "profile", "academics", "timetable", "attendance", "exams", "fees", "notices", "requests", "on-duty", "library", "help", "account"}
+        placement_operation = operation in ("placement_apply", "placement_profile", "placement_consent")
+        allowed = {"dashboard", "profile", "academics", "timetable", "attendance", "exams", "fees", "notices", "requests", "on-duty", "library", "help", "account", "placements"}
+        if placement_operation:
+            return_to = "placements"
         return_to = return_to if return_to in allowed else "dashboard"
         service = request.env["campus.student.portal"]
         try:
@@ -85,7 +93,11 @@ class StudentWorkspace(CampusPortal):
                 # Bound before allocating/encoding untrusted multipart data.
                 raw = upload.read(10 * 1024 * 1024 + 1)
                 payload.update(file=base64.b64encode(raw), filename=upload.filename)
-            service.with_company(student.company_id).act(operation, payload)
+            scoped = service.with_company(student.company_id)
+            if placement_operation:
+                scoped._save_placement(operation, payload, kw.get("enrolment"))
+            else:
+                scoped.act(operation, payload)
             query = {"saved": "1"}
         except (UserError, ValueError, TypeError) as exc:
             query = {"form_error": str(exc)}

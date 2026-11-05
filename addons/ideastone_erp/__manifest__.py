@@ -1,7 +1,7 @@
 {
     "name": "Ideastone Campus Operations",
     "summary": "Teaching, campus services, staff administration and institutional engagement",
-    "version": "17.0.1.0.39",
+    "version": "17.0.1.0.40",
     "category": "Education",
     "author": "Ideastone Technologies Pvt Ltd",
     "license": "OPL-1",
@@ -20,6 +20,7 @@
         "views/accountant_spending.xml",
         "security/student_portal.xml", "data/student_portal.xml", "views/student_operations.xml", "views/student_portal.xml", "views/student_academics.xml", "views/student_timetable.xml", "views/student_examinations.xml", "views/student_attendance.xml",
         "views/student_account.xml", "views/faculty_grievances.xml",
+        "views/student_placements.xml", "views/placement_operations.xml",
         "data/parent_portal.xml", "views/parent_operations.xml", "views/parent_portal.xml", "views/admissions_ui.xml", "views/students_directory_ui.xml", "views/examinations_ui.xml",
         "security/learning.xml", "views/mvp_learning.xml", "views/student_notices.xml", "views/student_fees.xml",
         "views/student_help.xml", "views/student_od.xml", "views/student_od_policy.xml",
@@ -58,6 +59,8 @@
             "ideastone_erp/static/src/js/student_notices.js",
             "ideastone_erp/static/src/js/student_library.js", "ideastone_erp/static/src/js/student_requests.js",
             "ideastone_erp/static/src/js/student_od.js",
+            "ideastone_erp/static/src/scss/student_placements.scss",
+            "ideastone_erp/static/src/js/student_placements.js",
         ],
         "web.assets_backend": [
             "ideastone_erp/static/src/js/accountant_transport.js",

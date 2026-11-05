@@ -333,6 +333,7 @@ class StudentPortal(models.AbstractModel):
         navigation = [("dashboard", "Student Dashboard", "home"), ("profile", "My Profile", "user"), ("academics", "Academics", "graduation-cap"), ("timetable", "Timetable", "calendar"), ("attendance", "My Attendance", "calendar-check-o"), ("exams", "Examinations & Results", "file-text-o"), ("fees", "Fees & Payments", "inr"), ("notices", "Notices & Calendar", "bullhorn"), ("requests", "Requests & Certificates", "folder-open-o")]
         if loans or books or materials:
             navigation.append(("library", "Library", "book"))
+        navigation.append(("placements", "Campus placements", "briefcase"))
         navigation += [("help", "Help & Feedback", "question-circle-o"), ("account", "Account & Preferences", "cog")]
         return {"company": company.name, "demo": company.campus_demo, "today": self._dates(today), "today_iso": str(today), "timezone": self.env.user.tz or "UTC", "student_id": student.id,
             "student": {"name": student.name, "number": student.gr_no or "Not assigned", "register": student.register_no or "Not assigned", "status": student.campus_status, "email": student.email or "", "phone": student.phone or "", "mobile": student.mobile or "", "street": student.street or "", "street2": student.street2 or "", "city": student.city or "", "zip": student.zip or "", "admitted": self._dates(student.campus_admission_date), "birth_date": self._dates(student.birth_date), "gender": {"m": "Male", "f": "Female", "o": "Other"}.get(student.gender, "Not recorded"), "initials": profile_initials},
