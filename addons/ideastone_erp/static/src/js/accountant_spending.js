@@ -54,7 +54,7 @@ class AccountantSpending extends Component {
         return months.map(m=>({...m,totalHeight:Math.max(0,m.total)/max*100,paidHeight:Math.max(0,m.paid)/max*100}));
     }
     get largestDue() { return [...this.bills].filter(r=>r.due>0).sort((a,b)=>b.due-a.due)[0]; }
-    money(value, digits=2) { return this.state.currency + new Intl.NumberFormat("en-IN",{minimumFractionDigits:digits,maximumFractionDigits:digits}).format(value || 0); }
+    money(value, digits=2) { return "₹" + new Intl.NumberFormat("en-IN",{minimumFractionDigits:digits,maximumFractionDigits:digits}).format(value || 0); }
     dateLabel(value) { return new Date(value+"T12:00:00").toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}); }
     categoryLabel(value) { return value === "event" ? "College event" : "Maintenance"; }
     async load() {
