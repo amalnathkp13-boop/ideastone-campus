@@ -6,6 +6,8 @@ from pytz import UTC, timezone
 
 from odoo import _, api, fields, models
 
+from .faculty_profile_workspace import HOD_LABELS, profile_items
+
 
 def rate(numerator, denominator):
     return round(100 * numerator / denominator, 1) if denominator else None
@@ -277,4 +279,8 @@ class HodDashboardNavigation(models.AbstractModel):
                 home = next((module for module in data["faculty_modules"] if module["key"] == "home"), None)
                 if home:
                     home["items"] = [{"label": _("Department overview"), "page": "overview"}]
+                staff = next((module for module in data["faculty_modules"] if module["key"] == "staff"), None)
+                if staff:
+                    data["faculty_profile_enabled"] = True
+                    staff["items"] = profile_items(self.env, HOD_LABELS)
         return data
