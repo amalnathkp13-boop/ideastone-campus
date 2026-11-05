@@ -445,6 +445,20 @@
     grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
+  .placement-panel {
+    margin-top: 14px;
+  }
+  .placement-upcoming {
+    margin-top: 14px;
+  }
+  .placement-upcoming .rowlist {
+    margin-top: 10px;
+  }
+  @media (min-width: 641px) {
+    .placement-panel .department-snapshot {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
   .dept-tile {
     border: 1px solid var(--border);
     border-radius: 10px;

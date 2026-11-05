@@ -166,6 +166,8 @@ class HodDashboard(models.AbstractModel):
             "completion": rate(completed, expected), "present": len(faculty.filtered(lambda member: member.user_id in present_users)),
             "mentor_groups": len(enrolments.filtered(lambda row: row.student_id in mentors.student_id).batch_id),
             "appraisal_due": len(appraisal), "approvals": approvals, "schedule": schedule,
+            "placement_preview": self._placement_preview(len(by_year[4]), today, start, end)
+                if self.env.company.campus_demo else None,
             "student_rows": [[student.name, student.gr_no or "—",
                 ", ".join(sorted(student_sections[student.id])),
                 rate(present[student.id], totals[student.id]), student.id in risks] for student in students.sorted("name")],
@@ -178,6 +180,28 @@ class HodDashboard(models.AbstractModel):
                 fields.Datetime.context_timestamp(self, exam.start_time).strftime("%Y-%m-%d %H:%M"),
                 dict(exam._fields["campus_state"].selection).get(exam.campus_state, "—")]
                 for exam in exams],
+        }
+
+    def _placement_preview(self, cohort_size, today, start, end):
+        # ponytail: illustrative totals for the scoped final-year cohort until placement preferences are available.
+        placed = cohort_size // 2
+        willing = cohort_size - cohort_size // 3
+        upcoming = []
+        for days, recruiter, role in [
+            (7, _("Sample recruiter · Nexa Circuits"), _("Graduate electronics engineer")),
+            (14, _("Sample recruiter · Meridian Systems"), _("Graduate engineer trainee")),
+        ]:
+            day = today + timedelta(days=days)
+            if cohort_size and (not start or start <= day) and (not end or day <= end):
+                upcoming.append({"name": recruiter, "role": role, "date": str(day)})
+        return {
+            "metrics": [
+                [_("Placed"), placed],
+                [_("Not placed"), cohort_size - placed],
+                [_("Willing"), willing],
+                [_("Not willing"), cohort_size - willing],
+            ],
+            "upcoming": upcoming,
         }
 
     def _approvals(self, department, students, batches, exams, year, semester, start, end):

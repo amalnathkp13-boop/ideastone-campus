@@ -175,6 +175,11 @@ export class HodDashboard extends Component {
             const [title, columns, data] = this.detail(key);
             rows.push([], [title], columns, ...data);
         }
+        const placements = this.d.placement_preview;
+        if (placements) {
+            rows.push([], [_t("Department placements · Sample data")], ...placements.metrics,
+                [], [_t("Upcoming placements")], ...placements.upcoming.map(drive => [drive.name, drive.role, drive.date]));
+        }
         const csv = rows.map(row => row.map(value => {
             const safe = String(value ?? "").replace(/^\s*[=+@-]/, "'$&");
             return '"' + safe.replaceAll('"', '""') + '"';

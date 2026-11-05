@@ -115,6 +115,37 @@
             </section>
           </div>
         </div>
+        <section class="panel placement-panel" aria-labelledby="hod-placement-title">
+          <div class="panel-head">
+            <div>
+              <h2 id="hod-placement-title">Department placements</h2>
+              <p><t t-esc="d.department"/> · Final-year placement overview</p>
+            </div>
+            <span t-if="d.placement_preview" class="badge blue">Sample data</span>
+          </div>
+          <div class="panel-body" t-if="d.placement_preview">
+            <div class="department-snapshot">
+              <div class="dept-tile" t-foreach="d.placement_preview.metrics" t-as="metric" t-key="metric[0]">
+                <div class="label" t-esc="metric[0]"/>
+                <div class="big" t-esc="metric[1]"/>
+              </div>
+            </div>
+            <div class="placement-upcoming" aria-labelledby="hod-placement-upcoming" role="group">
+              <div id="hod-placement-upcoming" class="rowtitle">Upcoming placements</div>
+              <div class="rowlist">
+                <div class="rowitem" t-foreach="d.placement_preview.upcoming" t-as="drive" t-key="drive.name">
+                  <div>
+                    <div class="rowtitle" t-esc="drive.name"/>
+                    <div class="rowmeta" t-esc="drive.role"/>
+                  </div>
+                  <span class="badge blue" t-esc="date(drive.date)"/>
+                </div>
+                <div class="empty-note" t-if="!d.placement_preview.upcoming.length">No upcoming sample drives in this scope.</div>
+              </div>
+            </div>
+          </div>
+          <div class="panel-body empty-note" t-else="">Placement figures and upcoming drives will appear when placement data is available.</div>
+        </section>
         <div class="footer">VCET Campus ERP · HOD workspace · Powered by Ideastone · <t t-esc="d.sample ? 'Sample department records' : 'Saved department records'"/></div>
       </t>
     </div>

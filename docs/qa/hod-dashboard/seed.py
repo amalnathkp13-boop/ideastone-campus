@@ -132,6 +132,11 @@ def seed(env):
     assert any(row[1] == "HOD-QA-FRESH" for row in overview["student_rows"])
     assert len(overview["years"]) == 4 and overview["students"] >= 12 and overview["attendance"] is not None
     assert overview["attendance_today"] is not None
+    placed, not_placed, willing, not_willing = [value for _, value in overview["placement_preview"]["metrics"]]
+    final_year_students = next(row["students"] for row in overview["years"] if row["year"] == "Year 4")
+    assert placed + not_placed == willing + not_willing == final_year_students
+    assert len(overview["placement_preview"]["upcoming"]) == 2
+    assert not api.get_overview({"year": "1"})["placement_preview"]["upcoming"]
     assert api.get_overview({"section": str(batches[0].id)})["students"] < overview["students"]
     assert api.get_overview({"year": "3"})["years"][0]["year"] == "Year 3"
     for filters in ({"section": "999999"}, {"from": "2026-11-10", "to": "2026-11-01"}):
