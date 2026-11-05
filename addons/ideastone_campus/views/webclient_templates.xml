@@ -30,7 +30,7 @@
   </template>
   <template id="login_ideastone" inherit_id="web.login" name="VCET Campus login">
     <xpath expr="//t[@t-call='web.login_layout']" position="attributes"><attribute name="t-call">ideastone_campus.campus_login_layout</attribute></xpath>
-    <xpath expr="//div[contains(@class,'field-login')]" position="before"><fieldset class="vcet_login_roles"><legend>One sign-in for every campus role</legend><span><i class="fa fa-graduation-cap" aria-hidden="true"/>Student</span><span><i class="fa fa-book" aria-hidden="true"/>Faculty</span><span><i class="fa fa-users" aria-hidden="true"/>Parent</span><span><i class="fa fa-shield" aria-hidden="true"/>Admin</span><span><i class="fa fa-inr" aria-hidden="true"/>Accountant</span></fieldset></xpath>
+    <xpath expr="//div[contains(@class,'field-login')]" position="before"><fieldset class="vcet_login_roles"><legend>One sign-in for every campus role</legend><span><i class="fa fa-graduation-cap" aria-hidden="true"/>Student</span><span><i class="fa fa-book" aria-hidden="true"/>Faculty</span><span><i class="fa fa-users" aria-hidden="true"/>Parent</span><span><i class="fa fa-shield" aria-hidden="true"/>Admin</span><span><i class="fa fa-inr" aria-hidden="true"/>Accountant</span><span><i class="fa fa-university" aria-hidden="true"/>Principal</span></fieldset></xpath>
     <xpath expr="//label[@for='login']" position="replace"><label for="login" class="form-label">College ID / Email</label></xpath>
     <xpath expr="//input[@name='login']" position="attributes"><attribute name="placeholder">Your college ID or email</attribute></xpath>
   </template>

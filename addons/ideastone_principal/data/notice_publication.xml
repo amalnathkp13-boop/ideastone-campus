@@ -1,0 +1,17 @@
+<odoo noupdate="1">
+  <record id="sequence_principal_notice" model="ir.sequence">
+    <field name="name">Principal notice reference</field>
+    <field name="code">principal.notice</field>
+    <field name="prefix">PN/%(year)s/</field>
+    <field name="padding">4</field>
+  </record>
+  <record id="cron_notice_publication" model="ir.cron">
+    <field name="name">Principal notices: publish scheduled and archive expired notices</field>
+    <field name="model_id" ref="model_ideastone_principal_notice"/>
+    <field name="state">code</field>
+    <field name="code">model._cron_publication()</field>
+    <field name="interval_number">1</field>
+    <field name="interval_type">minutes</field>
+    <field name="numbercall">-1</field>
+  </record>
+</odoo>

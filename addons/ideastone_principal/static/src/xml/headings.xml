@@ -1,0 +1,26 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_principal.AdmissionsHeading" t-inherit="ideastone_erp.AdmissionsWorkspace" t-inherit-mode="extension">
+    <xpath expr="//h1" position="attributes"><attribute name="t-esc">principalHeading(meta.title, view === 'overview')</attribute></xpath>
+  </t>
+  <t t-name="ideastone_principal.StudentsHeading" t-inherit="ideastone_erp.StudentsDirectoryWorkspace" t-inherit-mode="extension">
+    <xpath expr="//div[@class='headingrow']//h1" position="attributes"><attribute name="t-esc">principalHeading(title, state.screen === 'directory')</attribute></xpath>
+  </t>
+  <t t-name="ideastone_principal.StaffHeading" t-inherit="ideastone_erp.OwnerStaffDirectory" t-inherit-mode="extension">
+    <xpath expr="//h1[.='Staff Directory']" position="replace"><h1 t-esc="principalHeading('Staff Directory')"/></xpath>
+  </t>
+  <t t-name="ideastone_principal.CalendarHeading" t-inherit="ideastone_erp.CollegeCalendar" t-inherit-mode="extension">
+    <xpath expr="//h1" position="replace"><h1 t-esc="principalHeading('College Calendar')"/></xpath>
+  </t>
+  <t t-name="ideastone_principal.AttendanceHeading" t-inherit="ideastone_erp.FacultyAttendancePage" t-inherit-mode="extension">
+    <xpath expr="//h1" position="replace"><h1 t-esc="principalHeading('Attendance')"/></xpath>
+  </t>
+  <t t-name="ideastone_principal.FinanceHeading" t-inherit="ideastone_erp.OwnerFeesWorkspace" t-inherit-mode="extension">
+    <xpath expr="//h1[.='Fees &amp; Payments']" position="replace"><h1 t-esc="principalHeading('Fees &amp; Payments')"/></xpath>
+  </t>
+  <t t-name="ideastone_principal.ExaminationsHeading" t-inherit="ideastone_erp.ExaminationsWorkspace" t-inherit-mode="extension">
+    <xpath expr="//h1" position="attributes"><attribute name="t-esc">principalHeading(page[1], view === 'overview')</attribute></xpath>
+  </t>
+  <t t-name="ideastone_principal.NoticesHeading" t-inherit="ideastone_principal.Workspace" t-inherit-mode="extension">
+    <xpath expr="//h1[.='Notices &amp; circulars']" position="replace"><h1>Principal notices</h1></xpath>
+  </t>
+</templates>
