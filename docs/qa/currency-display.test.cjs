@@ -30,6 +30,10 @@ test('every custom money formatter displays rupees for USD records without chang
     const principal = page('ideastone_principal/static/src/js/staff_workspace.js', 'PrincipalStaffWorkspace',
         {state: {data: {currency: '$'}}});
     assert.equal(principal.money(1234.56), '₹1,234.56');
+    const decisions = page('ideastone_principal/static/src/js/workspace.js', 'PrincipalWorkspace',
+        {state: {data: {rows: [{kind: 'event', currency: '$', budget: 1234.56}]}}});
+    assert.equal(decisions.money(1234.56), '₹1,235');
+    assert.equal(decisions.compactMoney(100000), '₹1.0L');
 });
 
 test('accountant charts retain original compact scales while replacing only the symbol', () => {

@@ -18,6 +18,7 @@ The requested change is presentation only. Existing monetary numbers, stored cur
 | Accountant transport | Transport revenue/expenses, route amounts and salary displays | `ideastone_erp/static/src/js/accountant_transport.js`; native entries use the shared layer |
 | Faculty/staff/HOD and owner staff reports | Salary agreements, monthly salary, salary trends, payroll history, deductions, contributions and CSV column units | `ideastone_erp/static/src/js/faculty_profile_workspace.js`, `static/src/xml/faculty_profile_workspace.xml`, `static/src/js/payroll_history.js` (also inherited by owner payroll) |
 | Principal Faculty & Staff | Attendance/payroll, salary and deduction report amounts | `ideastone_principal/static/src/js/staff_workspace.js` |
+| Principal decisions and events | Event budgets and compact budget summaries | `ideastone_principal/static/src/js/workspace.js` |
 | Student and parent | Dashboard fee summaries, fee structures, invoices, dues, payments/receipts, library fines and request fees wherever the portal money helper is used | `ideastone_erp/models/student_service.py` and the two portal controllers; existing ₹-formatted screens stay as they are |
 | AI insights | Student-success radar overdue amounts/CSV unit; Campus Assistant monetary display instruction | `ideastone_ai/models/success_radar.py`, `models/assistant.py`, `static/src/js/success_radar.js`. Stored/source currency codes are retained; the provider is instructed to display ₹ without conversion |
 
@@ -32,6 +33,6 @@ Version bumps in the four affected manifests load the updated models and assets.
 - Browser verification: the USD-backed owner dashboard shows ₹92,000.00 collected and ₹192,000.00 outstanding; native invoice 206 shows ₹112,000.00 total, ₹92,000.00 paid and ₹20,000.00 due while its currency configuration still reads USD. The printable native invoice shows ₹ for line amounts and total.
 - Before/after checksums match for all invoice amount/residual/state/currency/company tuples, all currency definitions, all company currency assignments and all exchange-rate records in the cloned preview database.
 
-The isolated preview is `http://inr.localhost:18097`, database `inr_display_preview`, cloned from the existing Principal staff preview. Credentials remain outside Git. Other localhost preview containers have not been upgraded by this task. No push or PR was created.
+The isolated preview is `http://inr.localhost:18097`, database `inr_display_preview`, cloned from the existing Principal staff preview. Credentials remain outside Git. Other localhost preview containers have not been upgraded by this task.
 
 Deployment, when approved: upgrade `ideastone_campus,ideastone_erp,ideastone_ai,ideastone_principal`, restart Odoo and reload each browser session so its currency metadata and assets refresh. Omit optional modules that are not installed in the target database.
