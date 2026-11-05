@@ -120,7 +120,7 @@ class FacultyTaskList(models.AbstractModel):
         followups = counseling.search(domain, order="date desc, id desc", limit=100)
         result["open_followups"] = counseling.search_count(domain + [("follow_up_completed", "=", False)])
         for student in students.sorted("name"):
-            attendance = lines.filtered(lambda row: row.student_id == student)
+            attendance = lines.filtered(lambda row, student=student: row.student_id == student)
             result["students"].append({"id": student.id, "name": student.name, "roll": student.gr_no or "—",
                 "excused": len(attendance.filtered("excused")), **self._summary(attendance)})
         result["subjects"] = [{"id": subject.id, "name": subject.name,
