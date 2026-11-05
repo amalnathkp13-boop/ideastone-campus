@@ -273,6 +273,17 @@ $ui-pages: ".campus_dashboard, .admin_overview, .student_main, .parent_main, .st
     > strong { font-size: 13px !important; font-weight: 700 !important; color: var(--ui-title) !important; }
     a, button:not(.campus_subnav_scroll) { font-size: 12px !important; font-weight: 400 !important; color: #425d78 !important; }
     .active { font-weight: 650 !important; color: var(--ui-blue) !important; }
+    [aria-current="page"] {font-weight:650 !important;color:#1769e8 !important;background:#f0f6ff !important;border-bottom:3px solid #1769e8 !important}
+}
+/* Module pages keep saved facts in plain panels; only dashboards use welcome banners. */
+:is(#{$ui-roots}) :is(.academic_hero, .profile_hero, .timetable_hero, .staff_profile_hero,
+    .payroll_hero, .campus_students_workspace .detailhero, .campus_owner_staff .detailhero,
+    .fee_view .balance-card, .hero-search) {
+    background:#fff !important;color:#132a44 !important;border:1px solid #e1e9f2 !important;
+    border-radius:15px !important;box-shadow:var(--ui-shadow) !important;
+    :is(h1,h2,h3) {color:#132a44 !important}
+    p,small,.label,[class$="_meta"],[class$="-meta"] {color:#556b82 !important}
+    :is([class$="_icon"],[class$="-icon"],[class$="_tag"],[class$="-tag"]) {color:#1769e8 !important;background:#eaf3ff !important;border-color:#d8e6f8 !important}
 }
 :is(#{$ui-roots}) .student_header_title { font-size: 15px !important; font-weight: 650 !important; }
 :is(#{$ui-roots}) .academic_placement_select button { white-space: nowrap; flex: none; }

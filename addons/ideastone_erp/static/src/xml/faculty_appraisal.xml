@@ -6,11 +6,7 @@
           <button type="button" t-att-class="{active: state.section === section.key}" t-on-click="() => this.selectSection(section.key)" t-esc="section.label"/>
         </t>
       </nav>
-      <section class="appraisal_hero">
-        <div class="appraisal_hero_icon"><i class="fa fa-users" aria-hidden="true"/></div>
-        <h1>Professional Development and Appraisal</h1>
-        <span class="appraisal_hero_meta">Staff portfolio · live campus records</span>
-      </section>
+      <header class="appraisal_page_heading"><h1>Professional Development and Appraisal</h1><p>Staff portfolio · live campus records</p></header>
       <div t-if="state.error" class="appraisal_error" role="alert"><span t-esc="state.error"/><button type="button" t-on-click="load">Retry</button></div>
       <div t-if="state.loading" class="appraisal_loading" role="status">Loading staff development records…</div>
       <t t-else="">
