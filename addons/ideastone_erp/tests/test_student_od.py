@@ -85,6 +85,7 @@ class TestStudentOD(OwnerMVPFixture, TransactionCase):
         self.assertNotIn("od", hod_modules)
         self.assertEqual(hod_modules["attendance"]["label"], "Attendance & OD")
         tabs = {item["action"]: item for item in hod_modules["attendance"]["items"]}
+        self.assertNotIn("ideastone_erp.action_subject_attendance_workspace", tabs)
         for action, label in [
             ("ideastone_erp.action_green_card_hod", "Leave management"),
             ("ideastone_erp.action_hod_od_management", "OD Management"),
