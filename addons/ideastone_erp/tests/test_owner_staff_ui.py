@@ -8,14 +8,12 @@ from .test_owner_mvp import OwnerMVPFixture
 
 @tagged("post_install", "-at_install")
 class TestOwnerStaffUI(OwnerMVPFixture, TransactionCase):
-    def test_three_owner_tabs_and_existing_staff_workflows(self):
+    def test_owner_tabs_and_existing_staff_workflows(self):
         dashboard = self.env["campus.dashboard"].with_user(self.owner)
         staff = next(module for module in dashboard.get_overview()["faculty_modules"] if module["key"] == "staff")
         labels = [item["label"] for item in staff["items"]]
-        # The redesigned pages lead; the existing staff tools stay reachable after them.
-        self.assertEqual(labels[:3], ["Staff directory", "Leave Management", "Payroll History"])
-        self.assertIn("Teaching allocation", labels[3:])
-        for item in staff["items"][:3]:
+        self.assertEqual(labels, ["Staff directory", "Leave Management", "Staff Profile", "OD Management", "OD Staffs"])
+        for item in (staff["items"][0], staff["items"][1], staff["items"][-1]):
             self.assertTrue(dashboard.get_owner_action(item["action"])["tag"].startswith("ideastone_erp.owner_staff_"))
         source = dashboard.get_owner_source_action("faculty")
         self.assertEqual(source["res_model"], "op.faculty")
@@ -44,6 +42,13 @@ class TestOwnerStaffUI(OwnerMVPFixture, TransactionCase):
         department = next(row for row in data["departments"] if row["key"] == f"academic:{self.department.id}")
         self.assertEqual((department["teaching"], department["non_teaching"]), (1, 1))
         self.assertNotIn("campus_pan_reference", row)
+        self.env["campus.faculty.detail"].create({"name": "Degree record", "faculty_id": self.faculty.id,
+            "kind": "qualification", "specialization": "Computer Science", "company_id": self.env.company.id})
+        profile = self.env["campus.owner.staff.ui"].with_user(self.owner).get_profile(self.faculty.id)
+        self.assertEqual(profile["records"][0]["name"], "Degree record")
+        self.assertNotIn("PAN", str(profile))
+        with self.assertRaises(AccessError):
+            self.env["campus.owner.staff.ui"].with_user(self.owner).get_profile(foreign_faculty.id)
 
     def test_leave_queue_and_native_decisions(self):
         employee = self.env["hr.employee"].create({"name": "Review sample staff", "company_id": self.env.company.id})
@@ -79,3 +84,14 @@ class TestOwnerStaffUI(OwnerMVPFixture, TransactionCase):
         self.assertNotIn(other_leave.id, [row["id"] for row in service.get_leave_queue()])
         with self.assertRaises(AccessError):
             service.review_leave(other_leave.id, "approve")
+
+    def test_od_staff_register_uses_saved_leave_records(self):
+        employee = self.env["hr.employee"].create({"name": "Duty sample", "company_id": self.env.company.id})
+        kind = self.env["hr.leave.type"].create({"name": "On Duty", "requires_allocation": "no", "leave_validation_type": "hr"})
+        day = self.today + timedelta(days=7)
+        leave = self.env["hr.leave"].create({"employee_id": employee.id, "holiday_status_id": kind.id,
+            "request_date_from": day, "request_date_to": day, "name": "College visit"})
+        rows = self.env["campus.owner.staff.ui"].with_user(self.owner).get_od_staff()["rows"]
+        self.assertIn(leave.id, [row["id"] for row in rows])
+        with self.assertRaises(AccessError):
+            self.env["campus.owner.staff.ui"].with_user(self.outsider).get_od_staff()
