@@ -23,8 +23,6 @@
 }
 body.campus_faculty_workspace:has(.campus_fee_circulars) {
     .o_navbar, .o_main_navbar { height: 52px !important; min-height: 52px !important; }
-    .campus_faculty_subnav { display: none; }
-    &.o_web_client > .o_action_manager { margin-top: 0; }
 }
 .campus_fee_circulars {
     --navy: #0b2e49; --blue: #1769e8; --blue2: #0f5fd5; --blue-pale: #eaf2ff; --bg: #f3f7fc;

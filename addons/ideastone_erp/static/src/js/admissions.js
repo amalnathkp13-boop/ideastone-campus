@@ -95,8 +95,8 @@ export class AdmissionsWorkspace extends Component {
         } catch (error) { this.notification.add(error.data?.message || "The admissions record could not be opened.", {type: "danger"}); }
     }
     get stats() {
-        return [{label: "New enquiries", value: this.c.enquiries, icon: "envelope-o", view: "enquiries", detail: "Saved college enquiries"},
-            {label: "Applications started", value: this.c.applications, icon: "files-o", view: "applications", detail: "Managed applications"},
+        return [{label: "New enquiries", value: this.c.new_enquiries, icon: "envelope-o", view: "enquiries", detail: "Not yet contacted or converted"},
+            {label: "Applications received", value: this.c.applications, icon: "files-o", view: "applications", detail: "Managed applications"},
             {label: "Awaiting review", value: this.c.review, icon: "clock-o", view: "applications", detail: "Submitted, documents or review"},
             {label: "Confirmed enrolments", value: this.c.enrolled, icon: "check", view: "applications", detail: "Converted through approval"}];
     }
@@ -104,7 +104,7 @@ export class AdmissionsWorkspace extends Component {
         return [{title: "Follow up on scheduled activities", detail: `${this.c.follow_up} ${this.c.follow_up === 1 ? 'enquiry' : 'enquiries'} · Due today or earlier`, value: this.c.follow_up, icon: "phone", view: "enquiries", label: "Due"},
             {title: "Verify pending certificates", detail: `${this.c.pending_documents} uploaded ${this.c.pending_documents === 1 ? 'document' : 'documents'} · Awaiting verification`, value: this.c.pending_documents, icon: "file-text-o", view: "documents", label: "Review"},
             {title: "Review open offers", detail: `${this.c.offers} approved ${this.c.offers === 1 ? 'application' : 'applications'} · Not yet enrolled`, value: this.c.offers, icon: "envelope-o", view: "applications", label: "Open"}]
-            .filter(item => this.state.data.allowed[item.view]);
+            .filter(item => this.state.data.allowed[item.view] && item.value);
     }
     get brief() {
         return `${this.c.follow_up} ${this.c.follow_up === 1 ? 'enquiry has' : 'enquiries have'} a scheduled follow-up due. ${this.c.pending_documents} uploaded ${this.c.pending_documents === 1 ? 'document is' : 'documents are'} awaiting verification. Review these saved records with the responsible admissions staff.`;

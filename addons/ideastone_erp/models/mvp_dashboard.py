@@ -56,6 +56,39 @@ MODULES = [
 class OwnerDashboard(models.AbstractModel):
     _inherit = "campus.dashboard"
 
+    @api.model
+    def get_module_overview(self, module_key):
+        """Counts for the caller's visible workspaces, scoped to the active college."""
+        if not isinstance(module_key, str) or len(module_key) > 80:
+            raise ValidationError(_("Choose a valid module."))
+        module = next((item for item in self.get_overview().get("faculty_modules", [])
+                       if item["key"] == module_key), None)
+        if not module:
+            raise AccessError(_("This module is unavailable to your account."))
+        rows = []
+        for item in module["items"]:
+            if item.get("page") == "faculty-module":
+                continue
+            count = None
+            action = self.env.ref(item.get("action"), raise_if_not_found=False) if item.get("action") else None
+            unfiltered_client = {"ideastone_erp.action_students_directory", "ideastone_erp.action_students_enrolments"}
+            model_name = action.res_model if action and action._name == "ir.actions.act_window" else (
+                item.get("model") if item.get("action") in unfiltered_client else None)
+            if model_name and model_name in self.env:
+                model = self.env[model_name]
+                if model.check_access_rights("read", raise_exception=False):
+                    try:
+                        domain = safe_eval(action.domain or "[]") if action._name == "ir.actions.act_window" else []
+                        if not isinstance(domain, list):
+                            raise ValueError("Invalid action domain")
+                        if "company_id" in model._fields:
+                            domain = [("company_id", "=", self.env.company.id)] + domain
+                        count = model.search_count(domain)
+                    except (ValueError, NameError, TypeError):
+                        pass  # Dynamic action domains are shown as available, without a misleading count.
+            rows.append({"label": item["label"], "count": count})
+        return {"label": module["label"], "rows": rows}
+
     def _is_mvp_user(self):
         return any(self.env.user.has_group("ideastone_erp.group_mvp_" + role) for role in ROLES)
 

@@ -118,9 +118,11 @@ class AdmissionsUI(models.AbstractModel):
             label, tone = STAGES.get(app.campus_stage, (app.campus_stage, "new"))
             if app.campus_stage in {"submitted", "documents"}:
                 label, tone = ("Ready for review", "ready") if complete == 100 else ("Documents pending", "docs")
+            issue = {"submitted": "Review submission", "documents": "Verify required documents",
+                     "review": "Record admission decision"}.get(app.campus_stage, label)
             application_rows.append({"id": app.id, "name": app.name, "reference": app.application_number or str(app.id),
                 "programme": app.course_id.name or "—", "submitted": self._local_date(app.application_date), "completeness": complete,
-                "stage": app.campus_stage, "status": label, "tone": tone, "owner": app.campus_officer_id.name or _("Unassigned"),
+                "stage": app.campus_stage, "status": label, "issue": issue, "tone": tone, "owner": app.campus_officer_id.name or _("Unassigned"),
                 "updated": self._local_date(app.write_date), "kind": "applications"})
         lead_rows = [{"id": lead.id, "name": lead.contact_name or lead.partner_name or lead.name, "reference": lead.name,
             "programme": lead.campus_course_id.name or "—", "source": lead.source_id.name or _("Not specified"),
@@ -167,9 +169,35 @@ class AdmissionsUI(models.AbstractModel):
                 if len(department_cards) == 5:
                     break
         capacity = sum(r["capacity"] for r in departments.values())
+        offers_by_department = Counter(app.course_id.department_id.id or 0 for app in apps if app.campus_stage == "approved")
+        seat_forecast = []
+        for row in sorted(departments.values(), key=lambda r: r["name"]):
+            offers = offers_by_department[row["id"]]
+            seat_forecast.append({"name": row["name"], "capacity": row["capacity"],
+                "confirmed": row["confirmed"], "offers": offers,
+                "if_offers_convert": min(row["capacity"], row["confirmed"] + offers) if row["capacity"] else None})
+        scholarship_mix = None
+        fee_model = self.env["op.student.fees.details"]
+        if fee_model.check_access_rights("read", raise_exception=False):
+            student_ids = set(enrolled.student_id.ids)
+            fee_domain = [("company_id", "=", self.env.company.id), ("campus_managed", "=", True),
+                          ("student_id", "in", list(student_ids))]
+            if f["year_id"]:
+                fee_domain.append(("campus_year_id", "=", f["year_id"]))
+            fees = self._records("op.student.fees.details", fee_domain)
+            assessed = set(fees.student_id.ids)
+            approved = {fee.student_id.id for fee in fees if fee.campus_concession and fee.campus_approved_by}
+            pending = {fee.student_id.id for fee in fees if fee.campus_concession and not fee.campus_approved_by} - approved
+            scholarship_mix = [
+                {"label": "Approved concession", "count": len(approved)},
+                {"label": "Pending concession", "count": len(pending)},
+                {"label": "Assessed without concession", "count": len(assessed - approved - pending)},
+                {"label": "No fee assessment", "count": len(student_ids - assessed)},
+            ]
         review = [r for r in application_rows if r["stage"] in {"submitted", "documents", "review"}]
         ready = [r for r in review if r["status"] == "Ready for review"]
-        counts = {"enquiries": len(leads), "contacted": len(leads.filtered("campus_contacted")), "follow_up": len(due_ids - converted),
+        counts = {"enquiries": len(leads), "new_enquiries": len(leads.filtered(lambda r: not r.campus_contacted and r.id not in converted)),
+            "contacted": len(leads.filtered("campus_contacted")), "follow_up": len(due_ids - converted),
             "applications": len(apps), "review": len(review), "ready": len(ready), "enrolled": len(enrolled), "offers": len(apps.filtered(lambda r: r.campus_stage == "approved")),
             "documents": len(docs), "pending_documents": len(docs.filtered(lambda r: r.state == "pending")),
             "verified_week": len(docs.filtered(lambda r: r.state == "verified" and r.verified_on and r.verified_on.date() >= week_start)),
@@ -191,6 +219,7 @@ class AdmissionsUI(models.AbstractModel):
         return {"view": view, "company": self.env.company.name, "is_demo": self.env.company.campus_demo, "today": str(today), "counts": counts, "summary": summary.get(view, []),
             "conversion": round(len(enrolled) * 100 / len(apps), 1) if apps else None, "fill": round(len(enrolled) * 100 / capacity, 1) if capacity else None,
             "departments": sorted(departments.values(), key=lambda r: r["name"]), "department_cards": department_cards, "pipeline": pipeline,
+            "scholarship_mix": scholarship_mix, "seat_forecast": seat_forecast,
             "journey": [{"label": label, "count": count, "tone": tone} for label, count, tone in [("Enquiries", len(leads), "blue"), ("Contacted leads", counts["contacted"], "blue"), ("Applications", len(apps), "purple"), ("Offer issued", counts["offers"], "purple"), ("Enrolled", len(enrolled), "green")]],
             "sources": [{"name": name, "count": count} for name, count in sources.most_common()], "rows": rows[page * 30:(page + 1) * 30], "total_rows": len(rows), "has_next": len(rows) > (page + 1) * 30,
             "statuses": options, "allowed": allowed, "create": create,
