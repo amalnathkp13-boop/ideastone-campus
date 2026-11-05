@@ -46,7 +46,7 @@
     .appraisal_insights header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
     .appraisal_insights header > i { font-size: 26px; color: #0957ed; }
     .appraisal_insights header p { color: #4a75bc; font-size: 12px; }
-    .appraisal_coach { background: linear-gradient(115deg, #f5f1ff, white); }
+    .appraisal_coach { background: linear-gradient(115deg, #f8fbfb, white); }
     .appraisal_coach_cards, .appraisal_metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
     .appraisal_coach_cards > div, .appraisal_metrics > div { min-width: 0; padding: 11px; border: 1px solid #e2eafa; border-radius: 6px; background: #fff; }
     .appraisal_coach_cards i { display: block; margin-bottom: 5px; color: var(--app-blue); font-size: 20px; }

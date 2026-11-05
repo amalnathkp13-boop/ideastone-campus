@@ -1,14 +1,6 @@
-body.campus_faculty_workspace:has(.campus_collections_page) {
-    &.o_web_client > .o_action_manager { margin-top: 76px; }
-    .campus_faculty_subnav {
-        height: 76px; gap: 0; padding: 0 24px;
-        > strong { font-size: 16px; font-weight: 750; padding-right: 14px; margin-right: 10px; }
-        > div { gap: 0; }
-        button:not(.campus_subnav_scroll) { padding: 0 20px; color: #526f8e; font: 500 16px Inter, ui-sans-serif, system-ui, sans-serif; }
-        button.active { color: #1769e8; background: #f1f6ff; border-bottom: 2px solid #1769e8; font-weight: 600; }
-    }
-    .campus_dashboard.campus_collections_page { padding: 0; background: #f3f7fc; }
-    @media (max-width: 1023px) { .campus_faculty_subnav { left: 0; padding: 0 10px; button:not(.campus_subnav_scroll) { padding: 0 13px; font-size: 14px; } } }
+body.campus_faculty_workspace:has(.campus_collections_page) .campus_dashboard.campus_collections_page {
+    padding: 0;
+    background: #f4f7fb;
 }
 .campus_collections_page > .campus_footer { display: none; }
 .campus_accountant_collections {
@@ -39,7 +31,7 @@ body.campus_faculty_workspace:has(.campus_collections_page) {
     .collections_kpi_top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 13px; }
     .collections_kpi_icon { flex: 0 0 40px; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 20px; }
     .collections_kpi_icon.blue { color: #1769e8; background: #e8f2ff; } .collections_kpi_icon.green { color: #299a79; background: #e6f7ef; }
-    .collections_kpi_icon.amber { color: #bd7c16; background: #fff2df; } .collections_kpi_icon.purple { color: #8062cc; background: #f0eaff; }
+    .collections_kpi_icon.amber { color: #bd7c16; background: #fff2df; } .collections_kpi_icon.purple { color: #117c87; background: #f1f9f9; }
     .collections_pill { flex: 0 1 auto; padding: 7px 11px; border-radius: 20px; color: var(--col-muted); background: #eff4fa; font-size: 12px; font-weight: 700; white-space: nowrap; }
     .collections_kpi strong { display: block; max-width: 100%; font-size: 25px; font-weight: 650; line-height: 1.2; letter-spacing: -.5px; overflow-wrap: anywhere; }
     .collections_kpi_label { display: block; color: var(--col-muted); margin-top: 6px; font-size: 12px; }

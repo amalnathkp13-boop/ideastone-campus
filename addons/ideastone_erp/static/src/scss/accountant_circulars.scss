@@ -87,7 +87,7 @@ body.campus_faculty_workspace:has(.campus_fee_circulars) {
     .small { display: block; color: var(--muted); font-size: 12px; margin-top: 3px; }
     .small.inline { display: inline; }
     .category { font-weight: 700; font-size: 12px; padding: 5px 9px; border-radius: 7px; display: inline-block; }
-    .category.fees { background: #eaf2ff; color: #1769e8; } .category.exam { background: #f0eaff; color: #7652c7; }
+    .category.fees { background: #eaf2ff; color: #1769e8; } .category.exam { background: #f1f9f9; color: #117c87; }
     .category.event { background: #fff2df; color: #a96608; } .category.general { background: #e8f7ef; color: #16845b; }
     .actionlink { color: var(--blue); text-decoration: none; border: 1px solid #cfe0ff; background: #f4f8ff; border-radius: 7px; padding: 7px 10px; }
     .workflow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }

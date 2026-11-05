@@ -1,6 +1,6 @@
 /* Reference styles are scoped to the center content; shared navigation is untouched. */
 .campus_exams_workspace {
---navy:#0b2d47;--navy2:#123b5b;--blue:#0866e9;--blue2:#2d7df0;--pale:#eef5ff;--bg:#f3f7fc;--line:#d9e5f4;--text:#183957;--muted:#68819f;--green:#16866a;--greenbg:#e3f6ef;--amber:#a96a08;--amberbg:#fff3dc;--red:#c44949;--redbg:#ffeded;--purple:#7057b8;--purplebg:#f0ebff;--shadow:0 8px 24px rgba(20,57,91,.045);
+--navy:#0b2d47;--navy2:#123b5b;--blue:#0866e9;--blue2:#2d7df0;--pale:#eef5ff;--bg:#f3f7fc;--line:#d9e5f4;--text:#183957;--muted:#68819f;--green:#16866a;--greenbg:#e3f6ef;--amber:#a96a08;--amberbg:#fff3dc;--red:#c44949;--redbg:#ffeded;--purple:#117c87;--purplebg:#f1f9f9;--shadow:0 8px 24px rgba(20,57,91,.045);
 font:14px/normal Inter,"Segoe UI",Arial,sans-serif;color:var(--text);background:var(--bg);height:100%;min-width:0;overflow:auto;
 *,*::before,*::after{box-sizing:border-box}button,input,select{font-family:inherit}h1,h2,h3{font-family:inherit;font-weight:700;line-height:normal}button:focus-visible,a:focus-visible{outline:3px solid #8eb8ff;outline-offset:3px}button:disabled{opacity:.5;cursor:not-allowed}
 .content{padding:28px 32px 40px;max-width:1800px;margin:auto}
