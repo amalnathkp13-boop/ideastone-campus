@@ -81,12 +81,18 @@ class TestStudentOD(OwnerMVPFixture, TransactionCase):
         dashboard = self.env["campus.dashboard"]
         hod_data = dashboard.with_user(self.hod).get_overview()
         mentor_data = dashboard.with_user(self.mentor).get_overview()
-        for data, action in [(hod_data, "ideastone_erp.action_hod_od_management"),
-                             (mentor_data, "ideastone_erp.action_staff_od_management")]:
-            od = next((module for module in data["faculty_modules"] if module["key"] == "od"), None)
-            self.assertTrue(od, (action, data["faculty_modules"]))
-            self.assertEqual([item["action"] for item in od["items"]], [action])
-            self.assertEqual(od["items"][0]["action_id"], self.env.ref(action).id)
+        hod_modules = {module["key"]: module for module in hod_data["faculty_modules"]}
+        self.assertNotIn("od", hod_modules)
+        self.assertEqual(hod_modules["attendance"]["label"], "Attendance & OD")
+        tabs = {item["action"]: item for item in hod_modules["attendance"]["items"]}
+        for action, label in [
+            ("ideastone_erp.action_green_card_hod", "Leave management"),
+            ("ideastone_erp.action_hod_od_management", "OD Management"),
+        ]:
+            self.assertEqual(tabs[action]["label"], label)
+            self.assertEqual(tabs[action]["action_id"], self.env.ref(action).id)
+        mentor_od = next(module for module in mentor_data["faculty_modules"] if module["key"] == "od")
+        self.assertEqual([item["action"] for item in mentor_od["items"]], ["ideastone_erp.action_staff_od_management"])
         self.assertEqual(self.env.ref("ideastone_erp.action_hod_od_management").tag, "ideastone_erp.hod_od_management")
         self.assertEqual(self.env["campus.staff.od.ui"].with_user(self.hod).get_page_data()["role"], "hod")
         self.assertNotEqual(self.mentor_ui.get_page_data().get("role"), "hod")
