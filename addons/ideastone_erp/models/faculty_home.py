@@ -173,6 +173,10 @@ class FacultyHome(models.AbstractModel):
             return session.action_campus_attendance()
         actions = {"attendance": "ideastone_erp.action_my_teaching_subjects",
             "tasks": "ideastone_erp.action_faculty_task", "papers": "ideastone_erp.action_faculty_question_papers"}
+        if not self.env.user.has_group("ideastone_erp.group_od_hod_approver"):
+            actions.update({key: "ideastone_erp.action_faculty_sop_" + page for key, page in
+                            [("tasks", "tasks"), ("papers", "exams"), ("results", "exams"), ("timetable", "timetable"),
+                             ("notices", "circulars")]})
         if kind in actions:
             action = self.env["ir.actions.actions"]._for_xml_id(actions[kind])
             action["context"] = dict(self.env.context, campus_module="teaching")

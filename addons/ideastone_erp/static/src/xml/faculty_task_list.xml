@@ -1,6 +1,6 @@
 <templates xml:space="preserve">
   <t t-name="ideastone_erp.FacultyTaskList">
-    <main class="campus_task_list" t-ref="root">
+    <main class="campus_task_list" t-att-class="{task_sop_layout: !d?.is_hod}" t-ref="root">
       <p t-if="state.loading" class="task_loading" role="status">Loading your assigned responsibilities…</p>
       <div t-if="state.error" class="task_error" role="alert"><span t-esc="state.error"/><button t-on-click="load">Retry</button></div>
       <t t-if="d">

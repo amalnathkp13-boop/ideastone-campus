@@ -1,7 +1,7 @@
 {
     "name": "Ideastone Campus Operations",
     "summary": "Teaching, campus services, staff administration and institutional engagement",
-    "version": "17.0.1.0.39",
+    "version": "17.0.1.0.40",
     "category": "Education",
     "author": "Ideastone Technologies Pvt Ltd",
     "license": "OPL-1",
@@ -13,7 +13,7 @@
     "data": [
         "security/groups.xml", "security/directory.xml", "security/ir.model.access.csv", "security/rules.xml",
         "views/operations.xml", "views/faculty_campus_services.xml", "views/faculty.xml", "views/faculty_leave.xml", "views/faculty_attendance.xml", "views/student_attendance_workspace.xml", "views/subject_attendance_workspace.xml", "views/payroll_history.xml", "views/menus.xml", "views/portal.xml", "views/website_icon.xml", "views/reports.xml", "views/faculty_profile_workspace.xml",
-        "security/workspace.xml", "views/workspace.xml", "views/faculty_workspace.xml",
+        "security/workspace.xml", "views/workspace.xml", "views/faculty_workspace.xml", "views/faculty_sop.xml",
         "security/faculty_tools.xml", "views/faculty_tools.xml", "views/student_leave.xml", "views/faculty_reports.xml",
         "security/mvp.xml", "security/accountant.xml", "security/accountant_transport.xml", "security/hod_od.xml", "data/mvp.xml", "data/hod_od.xml", "views/mvp.xml", "views/mvp_search.xml", "views/mvp_reports.xml", "views/accountant.xml", "views/accountant_transport.xml", "views/accountant_circulars.xml",
         "views/accountant_directory.xml",
@@ -92,6 +92,9 @@
             "ideastone_erp/static/src/js/faculty_task_list.js",
             "ideastone_erp/static/src/xml/faculty_task_list.xml",
             "ideastone_erp/static/src/scss/faculty_task_list.scss",
+            "ideastone_erp/static/src/js/faculty_sop.js",
+            "ideastone_erp/static/src/xml/faculty_sop.xml",
+            "ideastone_erp/static/src/scss/faculty_sop.scss",
             "ideastone_erp/static/src/js/academics.js",
             "ideastone_erp/static/src/js/session_sync.js",
             "ideastone_erp/static/src/js/college_calendar.js",

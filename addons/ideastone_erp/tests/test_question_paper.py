@@ -356,10 +356,13 @@ class TestQuestionPapers(TransactionCase):
         self.env['op.faculty'].create({'first_name': 'Question paper', 'last_name': 'HOD QA', 'gender': 'male', 'birth_date': '1980-01-01',
             'partner_id': self.env['res.partner'].create({'name': 'HOD QA', 'user_id': self.hod.id, 'company_id': self.env.company.id}).id,
             'main_department_id': self.dept.id})
-        for account, expected in [(self.teacher,'ideastone_erp.action_faculty_question_papers'), (self.hod,'ideastone_erp.action_hod_question_papers')]:
+        for account, label, expected in [
+            (self.teacher, "Examinations & Marks", "ideastone_erp.action_faculty_sop_exams"),
+            (self.hod, "Examinations", "ideastone_erp.action_hod_question_papers"),
+        ]:
             data=self.env['campus.dashboard'].with_user(account).get_overview()
             teaching=next(m for m in data['faculty_modules'] if m['key']=='teaching')
-            action=next(i for i in teaching['items'] if i['label']=='Examinations')
+            action=next(i for i in teaching['items'] if i['label']==label)
             self.assertEqual(action['action'], expected)
 
     def test_revoked_hod_and_past_exam_submission_are_rejected(self):

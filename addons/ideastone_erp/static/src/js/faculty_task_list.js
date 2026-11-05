@@ -16,6 +16,11 @@ export class FacultyTaskList extends Component {
         this.state = useState({data: null, loading: true, saving: false, error: "", classKey: "", termId: "",
             date: "", subjectKey: "", sessionId: "", search: "", filter: "all", page: 1, step: 1,
             statuses: {}, notes: "", dirty: false, profile: null, followup: null, confirm: false});
+        const context = this.props.action?.context || {};
+        if (!this.mentor && context.sop_session_id) {
+            Object.assign(this.state, {termId: String(context.sop_term_id || ""), date: context.sop_date,
+                subjectKey: context.sop_subject_key, sessionId: String(context.sop_session_id)});
+        }
         useSetupAction({beforeLeave: () => {
             if (this.state.dirty) this.notification.add("Save or discard your attendance draft before leaving this page.", {type: "warning"});
             return !this.state.dirty;

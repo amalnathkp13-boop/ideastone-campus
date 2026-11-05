@@ -12,6 +12,7 @@ class TaskListNavigation(models.AbstractModel):
 
     def _faculty_modules(self, visible, faculty, pages):
         is_hod = self.env.user.has_group("ideastone_erp.group_od_hod_approver")
+        uses_sop = not (is_hod or self.env.user.has_group("ideastone_erp.group_exam_paper_hod"))
         if not is_hod:
             visible[:] = [item for item in visible if item.get("action") != "ideastone_erp.action_subject_attendance_workspace"]
         modules = super()._faculty_modules(visible, faculty, pages)
@@ -19,12 +20,28 @@ class TaskListNavigation(models.AbstractModel):
             modules = [module for module in modules if module["key"] != "attendance"]
         teaching = next((module for module in modules if module["key"] == "teaching"), None)
         if teaching:
-            entries = [("My Teaching Subjects", "action_my_teaching_subjects")]
-            if not is_hod:
-                entries.insert(0, ("My Mentorship Class", "action_my_mentorship_class"))
-            teaching["items"] = [{"label": title, "action": "ideastone_erp." + name,
+            if uses_sop:
+                entries = [
+                    ("My Teaching Subjects", "action_my_teaching_subjects"),
+                    ("Timetable", "action_faculty_sop_timetable"),
+                    ("Student Attendance", "action_faculty_sop_attendance"),
+                    ("My Mentorship Class", "action_my_mentorship_class"),
+                    ("My Tasks & e-Diary", "action_faculty_sop_tasks"),
+                    ("Examinations & Marks", "action_faculty_sop_exams"),
+                    ("Assignments", "action_faculty_sop_assignments"),
+                    ("Alternate Hour", "action_faculty_sop_alternate"),
+                    ("Lesson Plans", "action_faculty_sop_lessons"),
+                    ("Circulars & Announcements", "action_faculty_sop_circulars"),
+                ]
+            else:
+                entries = [("My Teaching Subjects", "action_my_teaching_subjects")]
+                if not is_hod:
+                    entries.insert(0, ("My Mentorship Class", "action_my_mentorship_class"))
+            items = [{"label": title, "action": "ideastone_erp." + name,
                 "action_id": self.env.ref("ideastone_erp." + name).id, "allowed": True}
-                for title, name in entries] + [item for item in teaching["items"] if item.get("tool") != "subject_attendance"]
+                for title, name in entries]
+            teaching["items"] = items + ([item for item in teaching["items"]
+                if item.get("tool") != "subject_attendance"] if not uses_sop else [])
         return modules
 
 

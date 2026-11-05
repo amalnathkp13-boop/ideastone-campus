@@ -6,6 +6,14 @@ const path = require('node:path');
 const base = 'http://127.0.0.1:18069';
 const out = process.env.FACULTY_QA_OUT;
 if (!out || !process.env.FACULTY_QA_PASSWORD) throw Error('Disposable QA configuration required');
+async function assertSopTheme(heading) {
+    const actual = await heading.evaluate(el => {
+        const style = getComputedStyle(el);
+        return [style.fontFamily.split(',')[0], style.fontSize, style.fontWeight, style.color];
+    });
+    const expected = ['Inter', '27px', '650', 'rgb(16, 44, 73)'];
+    if (actual.some((value, i) => value !== expected[i])) throw Error(`Faculty task-list title theme drifted: ${actual}`);
+}
 async function diagnosticMarkup(page) {
     return page.evaluate(() => {
         const body = document.body.cloneNode(true);
@@ -33,34 +41,43 @@ async function diagnosticMarkup(page) {
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'faculty-overview-1440.png')});
         await page.locator('.campus_sidebar').getByRole('button',{name:'My task list',exact:true}).click();
-        await page.getByRole('heading',{name:'My Mentorship Class',exact:true,level:1}).waitFor();
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My Teaching Subjects',exact:true}).waitFor();
+        const taskNav = page.locator('.campus_faculty_subnav');
+        const teachingTitle = page.getByRole('heading',{name:'My Teaching Subjects',exact:true,level:1});
+        await teachingTitle.waitFor();
+        const tabs = ['My Teaching Subjects','Timetable','Student Attendance','My Mentorship Class','My Tasks & e-Diary',
+            'Examinations & Marks','Assignments','Alternate Hour','Lesson Plans','Circulars & Announcements'];
+        for (const label of tabs) await taskNav.getByRole('button',{name:label,exact:true}).waitFor();
+        if (await taskNav.getByRole('button').count() !== tabs.length + 2) throw Error('Unexpected My Task List tabs');
         if(await page.locator('.campus_sidebar').getByRole('button',{name:'Subject-wise Attendance',exact:true}).count()) throw Error('Faculty attendance must stay under My Task List');
-        await assertCampusTheme(page);
+        await assertSopTheme(teachingTitle);
         await page.screenshot({path:path.join(out,'faculty-module-1440.png')});
         await page.reload();
-        await page.getByRole('heading',{name:'My Mentorship Class',exact:true,level:1}).waitFor();
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My tasks & e-diary',exact:true}).click();
-        const createButton = page.locator('.o_list_button_add:visible');
+        await teachingTitle.waitFor();
+        const diaryTitle = page.getByRole('heading',{name:'My Tasks & e-Diary',exact:true,level:1});
+        await taskNav.getByRole('button',{name:'My Tasks & e-Diary',exact:true}).click();
+        const createButton = page.getByRole('button',{name:'New Task',exact:true});
         await createButton.waitFor();
         const createBox=await createButton.boundingBox();
         const navigationBox=await page.locator('.campus_faculty_subnav').boundingBox();
         if(createBox.y < navigationBox.y + navigationBox.height) throw Error('Faculty topbar obscures native controls');
         await createButton.click();
-        await page.locator('.o_field_widget[name=name] input').fill('QA browser persisted diary');
-        const saveResponse = page.waitForResponse(response => response.url().includes('/campus.faculty.task/web_save'));
-        await page.locator('.o_form_button_save:visible').click();
+        await page.getByLabel('Task Title',{exact:true}).fill('QA browser persisted task');
+        const saveResponse = page.waitForResponse(response => response.url().includes('/campus.faculty.task.list/save_sop_task'));
+        await page.getByRole('button',{name:'Add Task',exact:true}).click();
         const saveData = await (await saveResponse).json();
         if (saveData.error) throw Error(JSON.stringify(saveData.error));
         const saved = await page.evaluate(async () => {
             const response=await fetch('/web/dataset/call_kw/campus.faculty.task/search_read',{
                 method:'POST',headers:{'Content-Type':'application/json'},
                 body:JSON.stringify({jsonrpc:'2.0',method:'call',params:{model:'campus.faculty.task',method:'search_read',
-                    args:[[ ['name','=','QA browser persisted diary'] ]],kwargs:{fields:['name','state']}}})});
+                    args:[[ ['name','=','QA browser persisted task'] ]],kwargs:{fields:['name','state']}}})});
             return response.json();
         });
-        if (saved.result?.length !== 1) throw Error('Diary was not persisted by the real form');
-        await assertCampusTheme(page);
+        if (saved.result?.length !== 1) throw Error('Task was not persisted by the real form');
+        await page.getByLabel('Teaching / Activity Notes',{exact:true}).fill('QA browser persisted diary');
+        await page.getByRole('button',{name:'Save Diary Entry',exact:true}).click();
+        await page.getByText('QA browser persisted diary',{exact:true}).waitFor();
+        await assertSopTheme(diaryTitle);
         await page.screenshot({path:path.join(out,'faculty-diary-1440.png')});
         const assessment = await page.evaluate(async () => {
             const response=await fetch('/web/dataset/call_kw/campus.faculty.assessment/search_read',{
@@ -74,7 +91,7 @@ async function diagnosticMarkup(page) {
         const pdfBytes=await pdf.body();
         if(!pdf.ok() || pdfBytes.subarray(0,5).toString() !== '%PDF-') throw Error('Internal assessment PDF export failed');
         await fs.writeFile(path.join(out,'faculty-assessment.pdf'),pdfBytes);
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Internal mark generation',exact:true}).click();
+        await page.goto(base+'/web#action=ideastone_erp.action_faculty_assessment');
         await page.locator('.o_data_row:visible').filter({hasText:'QA Internal Assessment'}).click();
         await page.getByRole('button',{name:'Reopen calculation',exact:true}).click();
         await page.locator('.o_field_widget[name=output_maximum] input').fill('30');
@@ -130,22 +147,22 @@ async function diagnosticMarkup(page) {
         await page.locator('.campus_sidebar').getByRole('button',{name:'My profile & payroll',exact:true}).click();
         await page.getByRole('heading',{name:'My staff profile',exact:true,level:1}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'My task list',exact:true}).click();
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Internal mark generation',exact:true}).waitFor();
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My tasks & e-diary',exact:true}).click();
-        await page.locator('.o_list_view:visible .o_data_row').filter({hasText:'QA browser persisted diary'}).waitFor();
+        await taskNav.getByRole('button',{name:'Examinations & Marks',exact:true}).waitFor();
+        await taskNav.getByRole('button',{name:'My Tasks & e-Diary',exact:true}).click();
+        await page.getByText('QA browser persisted diary',{exact:true}).waitFor();
         await page.reload();
         await page.locator('body.campus_faculty_workspace').waitFor();
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My tasks & e-diary',exact:true}).waitFor();
+        await taskNav.getByRole('button',{name:'My Tasks & e-Diary',exact:true}).waitFor();
         await page.setViewportSize({width:390,height:844});
         await page.locator('.campus_mobile_toggle').click();
         await page.locator('.campus_sidebar.is-open').waitFor();
         await page.keyboard.press('Escape');
         await page.locator('.campus_sidebar:not(.is-open)').waitFor({state:'attached'});
         await page.locator('.campus_sidebar').waitFor({state:'hidden'});
-        await assertCampusTheme(page);
+        await assertSopTheme(diaryTitle);
         await page.screenshot({path:path.join(out,'faculty-mobile-390.png')});
         await fs.writeFile(path.join(out,'mobile-dom.html'),await diagnosticMarkup(page));
-        const unobscured=await page.evaluate(()=>Boolean(document.elementFromPoint(window.innerWidth/2,window.innerHeight/2)?.closest('.o_list_view')));
+        const unobscured=await page.evaluate(()=>Boolean(document.elementFromPoint(window.innerWidth/2,window.innerHeight/2)?.closest('.campus_faculty_sop')));
         if(!unobscured) throw Error('An unexpected overlay covers the faculty list');
         const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);
         if(overflow) throw Error('Faculty document overflows mobile viewport');

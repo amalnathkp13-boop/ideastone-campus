@@ -22,16 +22,20 @@ class TestFacultyTaskList(OwnerMVPFixture, TransactionCase):
         attendance_action = self.env["campus.faculty.home"].with_user(self.teacher).get_action("attendance")
         self.assertEqual(attendance_action["tag"], "ideastone_erp.my_teaching_subjects")
         self.assertEqual(attendance_action["context"]["campus_module"], "teaching")
-        for user, expected in [(self.teacher, ["My Mentorship Class", "My Teaching Subjects"]),
-                               (self.hod, ["My Teaching Subjects"])]:
+        faculty_tabs = ["My Teaching Subjects", "Timetable", "Student Attendance", "My Mentorship Class",
+                        "My Tasks & e-Diary", "Examinations & Marks", "Assignments", "Alternate Hour",
+                        "Lesson Plans", "Circulars & Announcements"]
+        for user in (self.teacher, self.hod):
             data = self.env["campus.dashboard"].with_user(user).get_overview()
             task = next(module for module in data["faculty_modules"] if module["key"] == "teaching")
-            self.assertEqual([row["label"] for row in task["items"][:len(expected)]], expected)
+            labels = [row["label"] for row in task["items"]]
             if user == self.hod:
-                self.assertNotIn("My Mentorship Class", [row["label"] for row in task["items"]])
+                self.assertEqual(labels[0], "My Teaching Subjects")
+                self.assertNotIn("My Mentorship Class", labels)
                 attendance = next(module for module in data["faculty_modules"] if module["key"] == "attendance")
                 self.assertIn("ideastone_erp.action_green_card_hod", [row.get("action") for row in attendance["items"]])
             else:
+                self.assertEqual(labels, faculty_tabs)
                 attendance = next(module for module in data["faculty_modules"] if module["key"] == "attendance")
                 self.assertEqual([row["action"] for row in attendance["items"]], ["ideastone_erp.action_green_card_mentor"])
                 self.assertFalse(any(item.get("action") == "ideastone_erp.action_subject_attendance_workspace" for item in data["navigation"]))
@@ -39,6 +43,25 @@ class TestFacultyTaskList(OwnerMVPFixture, TransactionCase):
             self.env["campus.faculty.task.list"].with_user(self.hod).get_mentor_data()
         with self.assertRaises(AccessError):
             self.env["campus.faculty.task.list"].with_user(self.outsider).get_teaching_data()
+
+    def test_daily_register_cannot_be_overwritten_or_accessed_outside_mentorship(self):
+        day = str(self.today)
+        data = self.ui.get_sop_daily(False, day, "FN")
+        self.assertEqual([row["id"] for row in data["rows"]], self.student.ids)
+        key = data["class_key"]
+        with self.assertRaises(AccessError):
+            self.ui.save_sop_daily(key, day, "FN", {"999999": {"status": "present"}})
+        values = {str(self.student.id): {"status": "late", "remark": "Arrived after roll call"}}
+        self.ui.save_sop_daily(key, day, "FN", values, submit=True)
+        saved = self.ui.get_sop_daily(key, day, "FN")
+        self.assertTrue(saved["locked"])
+        self.assertEqual(saved["rows"][0]["status"], "late")
+        with self.assertRaises(ValidationError):
+            self.ui.save_sop_daily(key, day, "FN", values)
+        with self.assertRaises(ValidationError):
+            self.ui.save_sop_daily(key, day, "FULL", values, submit=True)
+        with self.assertRaises(AccessError):
+            self.ui.with_user(self.hod).get_sop_daily(key, day, "FN")
 
     def test_mentor_monitors_only_assigned_students_and_saves_real_followups(self):
         other_student = self.enrolled().student_id

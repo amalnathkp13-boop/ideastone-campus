@@ -23,8 +23,10 @@ export class FacultyQuestionPapers extends Component {
         this.examTypes = ["Internal Assessment — CAT I", "Internal Assessment — CAT II", "Internal Assessment — CAT III",
             "University Semester Examination", "Model Examination", "Campus / Certification Examination"];
         onWillStart(() => this.load());
-        onMounted(() => document.body.classList.add("campus_question_paper_shell"));
-        onWillUnmount(() => document.body.classList.remove("campus_question_paper_shell"));
+        if (!this.props.embedded) {
+            onMounted(() => document.body.classList.add("campus_question_paper_shell"));
+            onWillUnmount(() => document.body.classList.remove("campus_question_paper_shell"));
+        }
         useEffect(() => { if(this.state.modal || this.state.history) this.dialogRef.el?.querySelector('button')?.focus(); }, () => [this.state.modal, this.state.history]);
     }
     async load() {
