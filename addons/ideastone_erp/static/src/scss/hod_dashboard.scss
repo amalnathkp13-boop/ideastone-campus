@@ -449,24 +449,62 @@
   }
   .placement-charts {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
-  .placement-chart .bar {
-    margin: 6px 0 4px;
+  .placement-chart {
+    --segment: var(--blue);
+    --remainder: #d6a04a;
   }
-  .placement-chart .bar.has-data {
-    background: var(--amber-bg);
+  .placement-chart.outcomes {
+    --segment: var(--green);
   }
-  .placement-chart.outcomes .bar span {
-    background: var(--green);
+  .placement-graphic {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin-top: 8px;
+  }
+  .placement-ring {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    flex: none;
+    border-radius: 50%;
+    background: #eaf0f6;
+    color: var(--navy);
+    font-size: 12px;
+  }
+  .placement-ring.has-data {
+    background: conic-gradient(var(--segment) var(--share), var(--remainder) 0);
+  }
+  .placement-ring b {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #fbfdff;
   }
   .placement-counts {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 2px 8px;
+    display: grid;
+    gap: 3px;
     font-size: 11px;
     color: var(--muted);
+  }
+  .placement-counts span::before {
+    content: "";
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-inline-end: 5px;
+    border-radius: 50%;
+    background: var(--segment);
+  }
+  .placement-counts span:last-child::before {
+    background: var(--remainder);
   }
   .placement-counts b {
     color: var(--navy);

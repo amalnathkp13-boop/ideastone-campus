@@ -63,6 +63,22 @@
               <div class="dept-tile"><div class="label">Faculty appraisal due</div><div class="big" t-esc="d.appraisal_due"/><div class="label">Open appraisal tasks before month end</div></div>
             </div></div>
           </section>
+          <section class="panel">
+            <div class="panel-head"><div><h2>Approvals requiring attention</h2><p>Items waiting for HOD action</p></div><button type="button" class="link" t-on-click="() => this.openDetail('approvals')">Open approval queue →</button></div>
+            <div class="panel-body"><div class="rowlist">
+              <button type="button" class="rowitem row-button" t-foreach="d.approvals" t-as="queue" t-key="queue.key" t-on-click="() => this.openQueue(queue)">
+                <div><div class="rowtitle" t-esc="queue.name"/><div class="rowmeta"><t t-esc="queue.rows.length"/> pending records</div></div>
+                <span class="badge" t-att-class="queue.rows.length ? queue.tone : 'green'" t-esc="queue.rows.length ? queue.status : 'Clear'"/>
+              </button>
+            </div></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><div><h2>Upcoming department schedule</h2><p>Important academic dates</p></div><button type="button" class="link" t-on-click="() => this.openDetail('calendar')">Full calendar →</button></div>
+            <div class="panel-body"><div class="rowlist">
+              <div class="rowitem" t-foreach="d.schedule.slice(0,4)" t-as="row" t-key="row_index"><div><div class="rowtitle" t-esc="row.name"/><div class="rowmeta"><t t-esc="date(row.date)"/> · <t t-esc="row.detail"/></div></div><span class="badge" t-att-class="row.status === 'Review' ? 'amber' : 'blue'" t-esc="row.status"/></div>
+              <div t-if="!d.schedule.length" class="empty-note">No upcoming dates in this scope.</div>
+            </div></div>
+          </section>
           <section class="panel panel-wide placement-panel" aria-labelledby="hod-placement-title">
             <div class="panel-head">
               <div>
@@ -73,12 +89,16 @@
             </div>
             <div class="panel-body placement-body" t-if="d.placement_preview">
               <div class="placement-charts">
-                <div class="placement-chart" t-foreach="placementBreakdowns" t-as="group" t-key="group.tone" t-att-class="group.tone">
+                <div class="dept-tile placement-chart" t-foreach="placementBreakdowns" t-as="group" t-key="group.tone" t-att-class="group.tone">
                   <div class="rowtitle" t-esc="group.title"/>
-                  <div class="bar" aria-hidden="true" t-att-class="{ 'has-data': group.total }"><span t-att-style="progress(group.share)"/></div>
-                  <div class="placement-counts">
-                    <span><b t-esc="group.primary[1]"/> <t t-esc="group.primary[0]"/></span>
-                    <span><b t-esc="group.secondary[1]"/> <t t-esc="group.secondary[0]"/></span>
+                  <div class="placement-graphic">
+                    <div class="placement-ring" aria-hidden="true" t-att-class="{ 'has-data': group.total }" t-attf-style="--share: {{ group.share }}%">
+                      <b t-esc="group.total ? group.share.toFixed(0) + '%' : '—'"/>
+                    </div>
+                    <div class="placement-counts">
+                      <span><b t-esc="group.primary[1]"/> <t t-esc="group.primary[0]"/></span>
+                      <span><b t-esc="group.secondary[1]"/> <t t-esc="group.secondary[0]"/></span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -97,22 +117,6 @@
               </div>
             </div>
             <div class="panel-body empty-note" t-else="">Placement figures and upcoming drives will appear when placement data is available.</div>
-          </section>
-          <section class="panel">
-            <div class="panel-head"><div><h2>Approvals requiring attention</h2><p>Items waiting for HOD action</p></div><button type="button" class="link" t-on-click="() => this.openDetail('approvals')">Open approval queue →</button></div>
-            <div class="panel-body"><div class="rowlist">
-              <button type="button" class="rowitem row-button" t-foreach="d.approvals" t-as="queue" t-key="queue.key" t-on-click="() => this.openQueue(queue)">
-                <div><div class="rowtitle" t-esc="queue.name"/><div class="rowmeta"><t t-esc="queue.rows.length"/> pending records</div></div>
-                <span class="badge" t-att-class="queue.rows.length ? queue.tone : 'green'" t-esc="queue.rows.length ? queue.status : 'Clear'"/>
-              </button>
-            </div></div>
-          </section>
-          <section class="panel">
-            <div class="panel-head"><div><h2>Upcoming department schedule</h2><p>Important academic dates</p></div><button type="button" class="link" t-on-click="() => this.openDetail('calendar')">Full calendar →</button></div>
-            <div class="panel-body"><div class="rowlist">
-              <div class="rowitem" t-foreach="d.schedule.slice(0,4)" t-as="row" t-key="row_index"><div><div class="rowtitle" t-esc="row.name"/><div class="rowmeta"><t t-esc="date(row.date)"/> · <t t-esc="row.detail"/></div></div><span class="badge" t-att-class="row.status === 'Review' ? 'amber' : 'blue'" t-esc="row.status"/></div>
-              <div t-if="!d.schedule.length" class="empty-note">No upcoming dates in this scope.</div>
-            </div></div>
           </section>
           <section class="panel">
             <div class="panel-head"><div><h2>Year-wise student overview</h2><p>Enrollment and attendance snapshot</p></div><button type="button" class="link" t-on-click="() => this.openDetail('students')">Student directory →</button></div>
