@@ -207,7 +207,8 @@ class FacultySop(models.AbstractModel):
         faculty, year, sessions, batches, _enrolments = self._sop_scope()
         today = fields.Date.context_today(self)
         result = {"user": self.env.user.name, "today": str(today), "year": year.name or "",
-                  "demo": self.env.company.campus_demo, "rows": []}
+                  "demo": self.env.company.campus_demo, "rows": [], "is_hod": self._is_task_list_hod(),
+                  "can_review_papers": self.env.user.has_group("ideastone_erp.group_exam_paper_hod")}
         company = self.env.company
         if page == "timetable":
             first = today - timedelta(days=today.weekday())
@@ -218,7 +219,7 @@ class FacultySop(models.AbstractModel):
                 original=row.faculty_id.name, substitute=row.replacement_id.name, covering=row.replacement_id == faculty)
                 for row in self._sop_alternates(faculty) if row.state in {"approved", "done"}
                 and row.campus_alternate_session_id and row.campus_alternate_session_id.end_datetime >= fields.Datetime.now()]
-            if not self.env.user.has_group("ideastone_erp.group_od_hod_approver"):
+            if not result["is_hod"]:
                 _mentor, _classes, assigned = self._mentor_context()
                 result["mentorship"] = assigned["label"] if assigned else False
         elif page == "tasks":
@@ -290,7 +291,7 @@ class FacultySop(models.AbstractModel):
         self._faculty()
         if priority not in ("0", "0m", "1"):
             raise ValidationError(_("Choose a valid priority."))
-        return self.env["campus.faculty.task"].create({"name": self._sop_text(title, 200),
+        return self._task_list_writer(self.env["campus.faculty.task"]).create({"name": self._sop_text(title, 200),
             "campus_area": self._sop_text(area or _("Faculty work"), 200),
             "deadline": self._sop_date(date), "priority": priority}).id
 
@@ -300,7 +301,7 @@ class FacultySop(models.AbstractModel):
         day = self._sop_date(date)
         if day > fields.Date.context_today(self):
             raise ValidationError(_("Choose today or an earlier diary date."))
-        return self.env["campus.faculty.task"].create({"name": _("Daily e-Diary"), "date": day, "deadline": day,
+        return self._task_list_writer(self.env["campus.faculty.task"]).create({"name": _("Daily e-Diary"), "date": day, "deadline": day,
             "campus_diary": True, "state": "done", "notes": plaintext2html(self._sop_text(note, 5000))}).id
 
     @api.model
@@ -311,7 +312,7 @@ class FacultySop(models.AbstractModel):
             ("campus_diary", "=", False), ("state", "!=", "cancelled")], limit=1)
         if not task or type(completed) is not bool:
             raise AccessError(_("Choose a task assigned to your account."))
-        return task.write({"state": "done" if completed else "planned"})
+        return self._task_list_writer(task).write({"state": "done" if completed else "planned"})
 
     @api.model
     def save_sop_assignment(self, session_id, title, due, maximum, assignment_type):
@@ -329,7 +330,7 @@ class FacultySop(models.AbstractModel):
             raise ValidationError(_("Choose an assignment submission type."))
         zone = pytz.timezone(self.env.user.tz or "UTC")
         deadline = zone.localize(datetime.combine(day, time(23, 59))).astimezone(pytz.UTC).replace(tzinfo=None)
-        record = self.env["op.assignment"].create({"name": name, "description": name, "campus_learning": True,
+        record = self._task_list_writer(self.env["op.assignment"]).create({"name": name, "description": name, "campus_learning": True,
             "course_id": session.course_id.id, "batch_id": session.batch_id.id, "subject_id": session.subject_id.id,
             "faculty_id": faculty.id, "assignment_type": kind.id, "issued_date": fields.Datetime.now(),
             "submission_date": deadline, "allocation_ids": [fields.Command.set(students.ids)], "marks": maximum})
@@ -365,7 +366,7 @@ class FacultySop(models.AbstractModel):
             raise ValidationError(_("Only submitted work can receive a grade."))
         if type(marks) not in (int, float) or not math.isfinite(marks) or not 0 <= marks <= record.assignment_id.marks:
             raise ValidationError(_("Enter a score between zero and the assignment maximum."))
-        return record.write({"marks": marks, "note": self._sop_text(feedback, 5000), "state": "accept"})
+        return self._task_list_writer(record).write({"marks": marks, "note": self._sop_text(feedback, 5000), "state": "accept"})
 
     @api.model
     def save_sop_alternate(self, session_id, replacement_id, reason):
@@ -380,7 +381,7 @@ class FacultySop(models.AbstractModel):
             ("campus_substitute_consent", "!=", "declined"),
         ]):
             raise ValidationError(_("This teaching hour already has a coverage request."))
-        record = self.env["campus.service.request"].create({
+        record = self._task_list_writer(self.env["campus.service.request"]).create({
             "name": _("Alternate hour · %s", session.subject_id.name), "kind": "alternate",
             "faculty_id": faculty.id, "replacement_id": self._sop_id(replacement_id),
             "campus_alternate_session_id": session.id, "date_from": day, "date_to": day,
@@ -413,7 +414,7 @@ class FacultySop(models.AbstractModel):
         if type(week) is not int or not 1 <= week <= 26 or not term or not term.term_start_date <= day <= term.term_end_date:
             raise ValidationError(_("Choose week 1–26 and a target date in the assigned semester."))
         topic = self._sop_text(topic, 200)
-        return self.env["campus.teaching.plan"].create({"name": topic, "topic": topic, "faculty_id": faculty.id,
+        return self._task_list_writer(self.env["campus.teaching.plan"]).create({"name": topic, "topic": topic, "faculty_id": faculty.id,
             "subject_id": session.subject_id.id, "batch_id": session.batch_id.id, "term_id": term.id,
             "unit": _("Week %s", week), "campus_week": week, "planned_date": day,
             "campus_outcome": self._sop_text(outcome, 5000)}).id
@@ -425,7 +426,7 @@ class FacultySop(models.AbstractModel):
             ("company_id", "=", self.env.company.id), ("faculty_id", "=", faculty.id)], limit=1)
         if not plan or type(completed) is not bool:
             raise AccessError(_("Choose your own lesson topic."))
-        return plan.write({"execution_date": fields.Date.context_today(self) if completed else False,
+        return self._task_list_writer(plan).write({"execution_date": fields.Date.context_today(self) if completed else False,
                            "actual_hours": plan.actual_hours if completed else 0})
 
     @api.model
@@ -472,9 +473,11 @@ class FacultySop(models.AbstractModel):
 
     @api.model
     def save_sop_marks(self, exam_id, values, submit=False):
-        exam = self._sop_exam(exam_id)
-        exam._campus_can_enter()
+        exam = self._task_list_writer(self._sop_exam(exam_id))
         exam._mvp_lock()
+        # Recheck the assigned assessor after taking the lock before writing as a teaching HOD.
+        exam = self._task_list_writer(self._sop_exam(exam_id))
+        exam._campus_can_enter()
         if (exam.campus_state not in {"draft", "entry"} or not isinstance(values, dict)
                 or type(submit) is not bool or len(values) > 2000):
             raise ValidationError(_("Enter marks on an open, assigned assessment."))

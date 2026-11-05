@@ -6,7 +6,9 @@
         <span t-esc="state.error"/><button type="button" class="btn" t-on-click="() => this.load(!d)">Retry</button>
       </div>
       <t t-if="d">
-        <t t-call="ideastone_erp.FacultySopHeader"/>
+        <HODQuestionPapers t-if="page === 'exams' &amp;&amp; d.can_review_papers" embedded="true" openMarks.bind="openMarks"/>
+        <t t-else="" t-call="ideastone_erp.FacultySopHeader"/>
+        <h2 t-if="page === 'exams' &amp;&amp; d.can_review_papers" class="hod-marks-heading" tabindex="-1" t-ref="marksSection">Examinations &amp; Marks</h2>
         <t t-if="page === 'attendance'" t-call="ideastone_erp.FacultySopAttendanceIntro"/>
         <t t-call="ideastone_erp.FacultySopKpis"><t t-set="metrics" t-value="kpis"/></t>
         <t t-if="page === 'timetable'" t-call="ideastone_erp.FacultySopTimetable"/>
@@ -17,7 +19,7 @@
         <t t-elif="page === 'alternate'" t-call="ideastone_erp.FacultySopAlternate"/>
         <t t-elif="page === 'lessons'" t-call="ideastone_erp.FacultySopLessons"/>
         <t t-elif="page === 'circulars'" t-call="ideastone_erp.FacultySopCirculars"/>
-        <p class="footer-note">VCET Faculty Workspace · <t t-esc="d.demo ? 'Sample college records' : 'Saved campus records'"/></p>
+        <p class="footer-note">VCET <t t-esc="d.is_hod ? 'HOD' : 'Faculty'"/> Workspace · <t t-esc="d.demo ? 'Sample college records' : 'Saved campus records'"/></p>
         <t t-if="state.modal" t-call="ideastone_erp.FacultySopDrawer"/>
       </t>
     </main>
@@ -31,7 +33,7 @@
       </div>
       <div class="faculty-card">
         <t t-call="ideastone_erp.FacultySopIcon"><t t-set="iconName" t-value="'user'"/></t>
-        <div><strong t-esc="d.user"/><small>Faculty Workspace</small></div>
+        <div><strong t-esc="d.user"/><small t-esc="d.is_hod ? 'Department HOD' : 'Faculty Workspace'"/></div>
       </div>
     </header>
   </t>
@@ -378,7 +380,8 @@
         </t>
       </aside>
     </div>
-    <FacultySopPapers embedded="true"/>
+    <FacultySopPapers t-if="!d.is_hod" embedded="true"/>
+    <p t-elif="!d.can_review_papers" class="notice">Ask the college administrator to assign your department question-paper review role.</p>
   </t>
   <t t-name="ideastone_erp.FacultySopAssignments">
     <div class="grid wide">
@@ -702,10 +705,12 @@
       <p class="notice warn" t-if="state.error" role="alert"><t t-esc="state.error"/> <button class="btn sm" type="button" t-on-click="load">Retry</button></p>
       <t t-if="state.data">
         <div class="section-heading">
-          <div><div class="eyebrow">Question paper submission</div><h2>Submit question-paper set to HOD</h2>
-            <p>Upload the exam paper for the assigned subject. The HOD reviews one set and either approves it or returns it for revision.</p>
-          </div><span class="pill pill-blue">Staff workspace</span>
+          <div><div class="eyebrow">Question paper submission</div>
+            <h2 t-esc="props.direct ? 'Create and send your question paper' : 'Submit question-paper set to HOD'"/>
+            <p t-esc="props.direct ? 'For a subject you teach, upload the PDF sets, approve one official version and send it directly to COE / Exam Control.' : 'Upload the exam paper for the assigned subject. The HOD reviews one set and either approves it or returns it for revision.'"/>
+          </div><span class="pill pill-blue" t-esc="props.direct ? 'HOD · Teaching responsibilities' : 'Staff workspace'"/>
         </div>
+        <p t-if="props.direct &amp;&amp; !state.data.subjects.length" class="notice">No teaching subjects are assigned to you in this department.</p>
         <div class="paper-layout">
           <form class="paper-form" t-ref="paperForm" t-on-submit.prevent="() => this.save(true)">
             <div class="paper-fields">
@@ -763,14 +768,20 @@
                 </label>
               </div>
             </div>
-            <label class="field"><span>Notes for HOD <small>(optional)</small></span>
-              <textarea rows="3" maxlength="4000" placeholder="Add syllabus coverage, blueprint notes, or anything the HOD should know." t-model="state.form.notes"/>
+            <label class="field" t-if="props.direct"><span>Official set for COE</span>
+              <select t-model="state.officialLevel">
+                <option value="">Select the official PDF set</option>
+                <option t-foreach="levels.filter(level => state.levels[level.key])" t-as="level" t-key="level.key" t-att-value="level.key" t-esc="level.label"/>
+              </select>
+            </label>
+            <label class="field"><span><t t-esc="props.direct ? 'Notes for COE' : 'Notes for HOD'"/> <small>(optional)</small></span>
+              <textarea rows="3" maxlength="4000" placeholder="Add syllabus coverage or blueprint notes." t-model="state.form.notes"/>
             </label>
             <div class="paper-actions">
               <span class="confidential-note"><i class="fa fa-lock"/> Question papers are confidential and visible only to authorised reviewers.</span>
               <div class="row">
                 <button type="button" class="btn" t-att-disabled="state.busy" t-on-click="() => this.save(false)">Save draft</button>
-                <button type="submit" class="btn primary" t-att-disabled="state.busy">Submit to HOD →</button>
+                <button type="submit" class="btn primary" t-att-disabled="state.busy || !state.data.subjects.length" t-esc="props.direct ? 'Approve and send to COE →' : 'Submit to HOD →'"/>
               </div>
             </div>
             <p class="paper-feedback" t-if="state.id">Editing a saved question-paper draft.</p>
@@ -778,7 +789,7 @@
           <aside class="paper-aside">
             <div class="readiness-card">
               <div class="aside-title"><span class="spark">✦</span><b>AI paper readiness check</b><span class="pill">Assisted</span></div>
-              <p>Run PDF validation before submitting. Academic checks require HOD review.</p>
+              <p t-esc="props.direct ? 'Run PDF validation and review the selected set before sending.' : 'Run PDF validation before submitting. Academic checks require HOD review.'"/>
               <ul class="readiness-list">
                 <li><i>✓</i><span><b>Syllabus coverage</b><small>Check questions against the selected syllabus and learning outcomes.</small></span></li>
                 <li><i>✓</i><span><b>Marks &amp; blueprint</b><small>Check total marks and required sections.</small></span></li>
@@ -786,11 +797,16 @@
                 <li><i>✓</i><span><b>Duplicate &amp; PDF quality</b><small>Review repeated questions and unreadable or blank pages.</small></span></li>
               </ul>
               <button type="button" class="btn primary readiness-run" t-att-disabled="state.busy" t-on-click="() => this.save(false, true)">Run readiness check</button>
-              <div class="note-warn">PDF format, size, encryption and page count are checked. Syllabus, marks and difficulty are reviewed by the HOD.</div>
+              <div class="note-warn">PDF format, size, encryption and page count are checked. Syllabus, marks and difficulty require your academic review.</div>
             </div>
             <div class="workflow-card">
               <h3>Submission workflow</h3><p>What happens after you submit</p>
-              <ol>
+              <ol t-if="props.direct">
+                <li><b>1. Prepare your paper</b><small>Use an assigned teaching subject and upload the draft PDF sets.</small></li>
+                <li><b>2. Approve one official set</b><small>Review the syllabus, blueprint and difficulty before selecting the official PDF.</small></li>
+                <li><b>3. Send directly to COE</b><small>Only the selected PDF goes to Exam Control. The other sets remain confidential.</small></li>
+              </ol>
+              <ol t-else="">
                 <li><b>1. Staff submits PDF set</b><small>Upload the question paper and select the examination details.</small></li>
                 <li><b>2. Department HOD reviews</b><small>HOD approves one set or returns it with revision comments.</small></li>
                 <li><b>3. Approved set is forwarded</b><small>The selected paper is sent to COE / Exam Control and the main admin workflow.</small></li>
@@ -805,7 +821,7 @@
             <div class="submission-tools">
               <input type="search" placeholder="Search subject or exam..." aria-label="Search question papers" t-model="state.search"/>
               <select aria-label="Question paper status" t-model="state.filter">
-                <option value="">All statuses</option><option value="draft">Draft</option><option value="submitted">Awaiting HOD review</option>
+                <option value="">All statuses</option><option value="draft">Draft</option><option t-if="!props.direct" value="submitted">Awaiting HOD review</option>
                 <option value="approved">Approved</option><option value="returned">Needs revision</option><option value="forwarded">Forwarded to COE</option>
               </select>
             </div>
