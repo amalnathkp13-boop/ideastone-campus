@@ -377,6 +377,25 @@
     select { appearance: auto; }
 }
 
+.campus_mentorship_class {
+    .mentor-intro { gap: 15px; }
+    .mentor-class-select { min-width: 175px; max-width: 100%; }
+    .mentor-progress-label { margin-bottom: 7px; font-size: 12px; }
+    .mentor-follow-meta { margin-top: 8px; }
+    .mentor-insights { margin-bottom: 0; background: #fbfcff; }
+    .mentor-insights strong { font-size: 14px; }
+    .mentor-insights .row { flex: 1; flex-wrap: nowrap; }
+    .mentor-drawer {
+        inset: 0 0 0 auto;
+        margin: 0;
+        max-height: none;
+        border: 0;
+        color: var(--ink);
+    }
+    .mentor-drawer::backdrop { background: #092c4770; }
+    .mentor-drawer .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 .campus_task_list.task_sop_layout {
     --task-line: #e2eaf3;
     --task-blue: #1769e8;
@@ -393,12 +412,6 @@
     .task_card { border-radius: 12px; box-shadow: 0 4px 16px rgba(21, 54, 91, .045); }
     .task_intro { padding: 17px 20px; margin-bottom: 16px; }
     .task_panel { padding: 18px 20px; }
-    .task_kpis { gap: 12px; margin-bottom: 16px; }
-    .task_kpis article { position: relative; min-height: 112px; align-items: center; padding: 16px; }
-    .task_kpis small { display: block; padding-inline-end: 34px; }
-    .task_kpis strong { line-height: 1.12; margin: 9px 0 5px; }
-    .task_kpis p { margin: 0; }
-    .task_kpi_icon { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 10px; }
     .task_stages { margin-bottom: 16px; }
     .task_stages button { padding: 12px; border-radius: 8px; }
 }
@@ -426,14 +439,23 @@
         .panel h3 { font-size: 12px !important; font-weight: 600 !important; }
         p { line-height: 1.45 !important; }
         .subtitle, .helper, .task_title p, .task_intro p { font-size: 12px !important; }
-        .kpi-value, .task_kpis strong { font-size: 27px !important; font-weight: 650 !important; line-height: 1.12 !important; }
+        .kpi-value { font-size: 27px !important; font-weight: 650 !important; line-height: 1.12 !important; }
         .kpi-label { font-size: 11px !important; color: #5e748a !important; }
-        .task_kpis p, .task_workspace small, .faculty-card small { font-size: 11px !important; }
+        .task_workspace small, .faculty-card small { font-size: 11px !important; }
         .btn { font-size: 11px !important; font-weight: 500 !important; border-radius: 7px !important; }
         .status, .tag { font-size: 10px !important; font-weight: 500 !important; }
         .tablewrap th { font-size: 10px !important; font-weight: 600 !important; color: #596b82 !important; }
         .tablewrap td { font-size: 11px !important; color: #294760 !important; }
         .drawer h2 { font-size: 20px !important; }
+        .mentor-drawer h2.mentor-student-name { font-size: 18px !important; }
+
+        &.campus_mentorship_class {
+            .subtitle { color: #647b92 !important; }
+            .mentor-intro strong { font-weight: 750 !important; }
+            .panel h2 { line-height: 1.45 !important; }
+            .field label { font-weight: 600 !important; color: #405c76 !important; }
+            :is(input, select, textarea) { color: #183b58 !important; border-radius: 7px !important; }
+        }
 
         .exam-paper-workflow {
             h2, h3 { font-weight: 750 !important; line-height: 1.25 !important; color: var(--ui-text) !important; }

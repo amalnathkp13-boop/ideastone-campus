@@ -74,9 +74,22 @@ class TestFacultyTaskList(OwnerMVPFixture, TransactionCase):
         self.assertEqual([row["id"] for row in data["students"]], self.student.ids)
         self.assertEqual((data["students"][0]["present"], data["students"][0]["held"], data["students"][0]["shortage"]), (0, 1, True))
         self.assertEqual((data["history"][0]["present"], data["history"][0]["absent"]), (0, 1))
-        self.ui.save_followup(self.student.id, "Review attendance with the student", data["class_key"])
-        saved = self.ui.get_mentor_data()["followups"]
+        class_key = data["class_key"]
+        self.ui.save_followup(self.student.id, "Review attendance with the student", class_key, str(self.today))
+        data = self.ui.get_mentor_data()
+        saved = data["followups"]
         self.assertEqual((saved[0]["student_id"], saved[0]["note"]), (self.student.id, "Review attendance with the student"))
+        self.assertEqual((saved[0]["due"], saved[0]["completed"], data["open_followups"]), (str(self.today), False, 1))
+        self.ui.resolve_followup(saved[0]["id"], class_key)
+        resolved = self.ui.get_mentor_data()
+        self.assertTrue(resolved["followups"][0]["completed"])
+        self.assertEqual(resolved["open_followups"], 0)
+        foreign = self.env["campus.counseling"].create({
+            "name": "Outside the selected class", "student_id": other_student.id, "mentor_id": self.faculty.id,
+            "discussion": "Private follow-up", "follow_up_date": self.today,
+        })
+        with self.assertRaises(AccessError):
+            self.ui.resolve_followup(foreign.id, class_key)
         self.assertEqual(sheet.state, "done")
         with self.assertRaises(AccessError):
             self.ui.save_followup(other_student.id, "Not assigned")

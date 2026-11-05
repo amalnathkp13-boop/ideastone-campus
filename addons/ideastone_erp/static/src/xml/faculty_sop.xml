@@ -6,25 +6,9 @@
         <span t-esc="state.error"/><button type="button" class="btn" t-on-click="() => this.load(!d)">Retry</button>
       </div>
       <t t-if="d">
-        <header class="pagehead">
-          <div>
-            <div class="crumb">VCET Campus <span>/</span> My Task List <span>/</span> <t t-esc="title"/></div>
-            <h1 t-esc="title"/><p class="subtitle" t-esc="description"/>
-          </div>
-          <div class="faculty-card">
-            <t t-call="ideastone_erp.FacultySopIcon"><t t-set="iconName" t-value="'user'"/></t>
-            <div><strong t-esc="d.user"/><small>Faculty Workspace</small></div>
-          </div>
-        </header>
+        <t t-call="ideastone_erp.FacultySopHeader"/>
         <t t-if="page === 'attendance'" t-call="ideastone_erp.FacultySopAttendanceIntro"/>
-        <div class="kpis">
-          <article class="kpi" t-foreach="kpis" t-as="metric" t-key="metric[0]">
-            <div class="kpi-top"><span class="kpi-label" t-esc="metric[0]"/>
-              <span class="kpi-icon"><t t-call="ideastone_erp.FacultySopIcon"><t t-set="iconName" t-value="metric[3]"/></t></span>
-            </div>
-            <div class="kpi-value" t-esc="metric[1]"/><div class="kpi-foot" t-esc="metric[2]"/>
-          </article>
-        </div>
+        <t t-call="ideastone_erp.FacultySopKpis"><t t-set="metrics" t-value="kpis"/></t>
         <t t-if="page === 'timetable'" t-call="ideastone_erp.FacultySopTimetable"/>
         <t t-elif="page === 'attendance'" t-call="ideastone_erp.FacultySopAttendance"/>
         <t t-elif="page === 'tasks'" t-call="ideastone_erp.FacultySopTasks"/>
@@ -37,6 +21,30 @@
         <t t-if="state.modal" t-call="ideastone_erp.FacultySopDrawer"/>
       </t>
     </main>
+  </t>
+
+  <t t-name="ideastone_erp.FacultySopHeader">
+    <header class="pagehead">
+      <div>
+        <div class="crumb">VCET Campus <span>/</span> My Task List <span>/</span> <t t-esc="title"/></div>
+        <h1 t-esc="title"/><p class="subtitle" t-esc="description"/>
+      </div>
+      <div class="faculty-card">
+        <t t-call="ideastone_erp.FacultySopIcon"><t t-set="iconName" t-value="'user'"/></t>
+        <div><strong t-esc="d.user"/><small>Faculty Workspace</small></div>
+      </div>
+    </header>
+  </t>
+
+  <t t-name="ideastone_erp.FacultySopKpis">
+    <div class="kpis">
+      <article class="kpi" t-foreach="metrics" t-as="metric" t-key="metric[0]">
+        <div class="kpi-top"><span class="kpi-label" t-esc="metric[0]"/>
+          <span class="kpi-icon"><t t-call="ideastone_erp.FacultySopIcon"><t t-set="iconName" t-value="metric[3]"/></t></span>
+        </div>
+        <div class="kpi-value" t-esc="metric[1]"/><div class="kpi-foot" t-esc="metric[2]"/>
+      </article>
+    </div>
   </t>
 
   <t t-name="ideastone_erp.FacultySopPanel">
@@ -840,7 +848,7 @@
     </div>
   </t>
   <t t-name="ideastone_erp.FacultySopIcon">
-    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+    <svg class="icon" t-att-class="iconSize" viewBox="0 0 24 24" aria-hidden="true">
       <t t-if="iconName === 'book'"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6 2h14v20H6.5A2.5 2.5 0 0 1 4 19.5V4a2 2 0 0 1 2-2z"/></t>
       <t t-if="iconName === 'user'"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></t>
       <t t-if="iconName === 'users'"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></t>
@@ -854,6 +862,10 @@
       <t t-if="iconName === 'trend'"><path d="m3 17 6-6 4 4 8-8M15 7h6v6"/></t>
       <t t-if="iconName === 'shield'"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4"/></t>
       <t t-if="iconName === 'refresh'"><path d="M21 12a9 9 0 1 1-3-7M21 3v6h-6"/></t>
+      <t t-if="iconName === 'chart'"><path d="M4 20V4M4 20h17M8 16v-5M13 16V7M18 16V3"/></t>
+      <t t-if="iconName === 'download'"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></t>
+      <t t-if="iconName === 'plus'"><path d="M12 5v14M5 12h14"/></t>
+      <t t-if="iconName === 'x'"><path d="M5 5l14 14M19 5 5 19"/></t>
     </svg>
   </t>
 </templates>

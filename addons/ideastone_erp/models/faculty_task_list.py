@@ -92,6 +92,7 @@ class FacultyTaskList(models.AbstractModel):
             result.append({"id": sheet.id, "date": str(sheet.attendance_date),
                 "subject": sheet.campus_subject_id.name or sheet.campus_manual_subject_id.name,
                 "class": sheet.batch_id.name, "hour": fields.Datetime.context_timestamp(self, session.start_datetime).strftime("%H:%M") if session else "—",
+                "period": session.timing_id.sequence,
                 "present": len(scoped.filtered(lambda r: r.present or r.late)),
                 "absent": len(scoped.filtered("absent")), "status": "Submitted"})
         return result
@@ -103,7 +104,8 @@ class FacultyTaskList(models.AbstractModel):
             "classes": [{"key": item["key"], "label": item["label"], "semester": item["semester"]} for item in classes.values()],
             "class_key": selected["key"] if selected else "", "class_label": selected["label"] if selected else _("No mentorship class assigned"),
             "semester": selected["semester"] if selected else "", "threshold": self.env.company.campus_attendance_threshold,
-            "students": [], "subjects": [], "history": [], "followups": []}
+            "today": str(fields.Date.context_today(self)), "demo": self.env.company.campus_demo,
+            "students": [], "subjects": [], "history": [], "followups": [], "open_followups": 0}
         if not selected:
             return result
         batch_id, term_id = (int(value) for value in selected["key"].split(":"))
@@ -112,30 +114,50 @@ class FacultyTaskList(models.AbstractModel):
         lines = self._lines([("student_id", "in", list(selected["student_ids"])), ("batch_id", "=", batch_id),
             ("attendance_date", ">=", term.term_start_date), ("attendance_date", "<=", term.term_end_date)], sudo=True) if term else self.env["op.attendance.line"]
         students = self.env["op.student"].sudo().browse(list(selected["student_ids"])).filtered("active")
-        followups = self.env["campus.counseling"].search([("mentor_id", "=", faculty.id),
-            ("student_id", "in", students.ids), ("company_id", "=", self.env.company.id)], order="date desc, id desc", limit=100)
-        result["students"] = [{"id": student.id, "name": student.name, "roll": student.gr_no or "—",
-            "followup": student in followups.filtered(lambda r: r.follow_up_date and r.follow_up_date >= fields.Date.context_today(self)).student_id,
-            **self._summary(lines.filtered(lambda row, student=student: row.student_id == student))}
-            for student in students.sorted("name")]
+        counseling = self.env["campus.counseling"]
+        domain = [("mentor_id", "=", faculty.id), ("student_id", "in", students.ids),
+                  ("company_id", "=", self.env.company.id), ("follow_up_date", "!=", False)]
+        followups = counseling.search(domain, order="date desc, id desc", limit=100)
+        result["open_followups"] = counseling.search_count(domain + [("follow_up_completed", "=", False)])
+        for student in students.sorted("name"):
+            attendance = lines.filtered(lambda row: row.student_id == student)
+            result["students"].append({"id": student.id, "name": student.name, "roll": student.gr_no or "—",
+                "excused": len(attendance.filtered("excused")), **self._summary(attendance)})
         result["subjects"] = [{"id": subject.id, "name": subject.name,
             **self._summary(lines.filtered(lambda r, subject=subject: r.attendance_id.campus_subject_id == subject))}
             for subject in lines.attendance_id.campus_subject_id.sorted("name")]
         result["history"] = self._history(lines)
         result["followups"] = [{"id": row.id, "student_id": row.student_id.id, "student": row.student_id.name,
-            "note": row.discussion, "date": str(row.date), "due": str(row.follow_up_date) if row.follow_up_date else ""} for row in followups]
+            "note": row.discussion, "due": str(row.follow_up_date), "completed": row.follow_up_completed} for row in followups]
         return result
 
     @api.model
-    def save_followup(self, student_id, note, class_key=None):
+    def save_followup(self, student_id, note, class_key=None, follow_up_date=None):
         faculty, _classes, selected = self._mentor_context(class_key)
         if type(student_id) is not int or not selected or student_id not in selected["student_ids"]:
             raise AccessError(_("Choose a student from your assigned mentorship class."))
         if not isinstance(note, str) or not 1 <= len(note.strip()) <= 2000:
             raise ValidationError(_("Enter a follow-up note of 1–2,000 characters."))
+        today = fields.Date.context_today(self)
+        due = self._sop_date(follow_up_date) if follow_up_date is not None else today + timedelta(days=7)
         self.env["campus.counseling"].create({"name": _("Attendance follow-up"), "student_id": student_id,
             "mentor_id": faculty.id, "company_id": self.env.company.id, "discussion": note.strip(),
-            "follow_up_date": fields.Date.context_today(self) + timedelta(days=7)})
+            "date": today, "follow_up_date": due})
+        return True
+
+    @api.model
+    def resolve_followup(self, followup_id, class_key=None):
+        faculty, _classes, selected = self._mentor_context(class_key)
+        if type(followup_id) is not int or not selected:
+            raise AccessError(_("Choose a follow-up from your assigned mentorship class."))
+        followup = self.env["campus.counseling"].search([
+            ("id", "=", followup_id), ("mentor_id", "=", faculty.id),
+            ("student_id", "in", list(selected["student_ids"])),
+            ("company_id", "=", self.env.company.id), ("follow_up_date", "!=", False),
+        ], limit=1)
+        if not followup:
+            raise AccessError(_("Choose a follow-up from your assigned mentorship class."))
+        followup.follow_up_completed = True
         return True
 
     @api.model

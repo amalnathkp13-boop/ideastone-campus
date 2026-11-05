@@ -1,11 +1,11 @@
 /** @odoo-module **/
-import { Component, onWillStart, useRef, useState } from "@odoo/owl";
+import { Component, onWillStart, useEffect, useRef, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { useSetupAction } from "@web/webclient/actions/action_hook";
 
 export class FacultyTaskList extends Component {
-    static template = "ideastone_erp.FacultyTaskList";
+    static template = "ideastone_erp.FacultyMentorshipClass";
     static props = ["*"];
     static mode = "mentor";
 
@@ -13,9 +13,11 @@ export class FacultyTaskList extends Component {
         this.orm = useService("orm");
         this.notification = useService("notification");
         this.root = useRef("root");
+        this.mentorSearch = useRef("mentorSearch");
+        this.mentorDialog = useRef("mentorDialog");
         this.state = useState({data: null, loading: true, saving: false, error: "", classKey: "", termId: "",
             date: "", subjectKey: "", sessionId: "", search: "", filter: "all", page: 1, step: 1,
-            statuses: {}, notes: "", dirty: false, profile: null, followup: null, confirm: false});
+            statuses: {}, notes: "", dirty: false, profile: null, followStudent: "", followDate: "", followNote: "", confirm: false});
         const context = this.props.action?.context || {};
         if (!this.mentor && context.sop_session_id) {
             Object.assign(this.state, {termId: String(context.sop_term_id || ""), date: context.sop_date,
@@ -28,6 +30,9 @@ export class FacultyTaskList extends Component {
             if (this.state.dirty) { event.preventDefault(); event.returnValue = ""; }
         }});
         onWillStart(() => this.load());
+        useEffect((profile, dialog) => {
+            if (profile && dialog && !dialog.open) dialog.showModal();
+        }, () => [this.state.profile, this.mentorDialog.el]);
     }
     get mentor() { return this.constructor.mode === "mentor"; }
     get d() { return this.state.data; }
@@ -35,6 +40,14 @@ export class FacultyTaskList extends Component {
     get subject() { return this.d?.subjects.find(row => row.key === this.state.subjectKey); }
     get editable() { return !this.mentor && this.d?.can_save && !this.state.saving; }
     get riskRows() { return (this.d?.students || []).filter(row => row.shortage); }
+    get mentorKpis() {
+        return [
+            ["My Class Students", this.d.students.length, "Assigned mentorship class", "users"],
+            ["Subjects Monitored", this.d.subjects.length, "Across submitted attendance", "book"],
+            ["Below " + this.d.threshold + "%", this.riskRows.length, "Students requiring review", "trend"],
+            ["Open Follow-ups", this.d.open_followups, "Upcoming counseling reviews", "clipboard"],
+        ];
+    }
     get counts() {
         const values = Object.values(this.state.statuses);
         return {total: values.length, present: values.filter(x => ["present", "late"].includes(x)).length,
@@ -44,12 +57,25 @@ export class FacultyTaskList extends Component {
     get filteredRows() {
         const query = this.state.search.toLowerCase().trim();
         return (this.d?.students || []).filter(row => (!query || `${row.name} ${row.roll}`.toLowerCase().includes(query)) &&
-            (this.state.filter === "all" || (this.mentor ? this.state.filter === "risk" ? row.shortage : row.followup : this.state.statuses[row.id] === this.state.filter)));
+            (this.state.filter === "all" || (this.mentor
+                ? (this.state.filter === "risk" ? row.shortage : row.held > 0 && !row.shortage)
+                : this.state.statuses[row.id] === this.state.filter)));
     }
     get pageCount() { return Math.max(1, Math.ceil(this.filteredRows.length / 8)); }
     get rows() { return this.filteredRows.slice((this.state.page - 1) * 8, this.state.page * 8); }
     get ready() { return this.editable && this.counts.total > 0 && this.counts.unmarked === 0 && this.state.notes.trim().length > 0; }
     rate(value) { return value === null || value === undefined ? "—" : `${value}%`; }
+    mentorRate(value) { return value == null ? "—" : value.toFixed(1) + "%"; }
+    displayDate(value) {
+        return new Intl.DateTimeFormat("en-GB", {day: "2-digit", month: "short", year: "numeric", timeZone: "UTC"})
+            .format(new Date(value));
+    }
+    shortageHours(row) { return Math.max(0, Math.ceil(row.held * this.d.threshold / 100) - row.present); }
+    reviewShortages() {
+        this.state.filter = "risk";
+        this.state.search = "";
+        this.mentorSearch.el.focus();
+    }
     status(value) { return {present: "Present", absent: "Absent", excused: "Approved OD / Leave", late: "Late", unmarked: "Unmarked"}[value] || value; }
 
     async load() {
@@ -59,8 +85,13 @@ export class FacultyTaskList extends Component {
             const data = await this.orm.call("campus.faculty.task.list", this.mentor ? "get_mentor_data" : "get_teaching_data",
                 this.mentor ? [this.state.classKey || false] : [this.state.termId || false, this.state.date || false, this.state.subjectKey || false, this.state.sessionId || false]);
             this.state.data = data;
-            if (this.mentor) this.state.classKey = data.class_key;
-            else Object.assign(this.state, {termId: String(data.term_id || ""), date: data.date, subjectKey: data.subject_key,
+            if (this.mentor) {
+                this.state.classKey = data.class_key;
+                this.state.followDate ||= data.today;
+                if (!data.students.some(row => String(row.id) === this.state.followStudent)) {
+                    this.state.followStudent = data.students[0] ? String(data.students[0].id) : "";
+                }
+            } else Object.assign(this.state, {termId: String(data.term_id || ""), date: data.date, subjectKey: data.subject_key,
                 sessionId: String(data.session_id || ""), notes: data.notes,
                 statuses: Object.fromEntries(data.students.map(row => [row.id, data.sheet_state === "unrecorded" ? "unmarked" : row.status]))});
             this.state.dirty = false;
@@ -96,17 +127,36 @@ export class FacultyTaskList extends Component {
     }
     notes(event) { this.state.notes = event.target.value; this.state.dirty = true; }
     showProfile(row) { this.state.profile = {...row, ...(row.performance || {})}; }
-    showFollowup(row) { this.state.followup = {id: row.id, name: row.name, note: ""}; }
+    mentorDrawerKey(event) {
+        if (event.key === "Escape") {
+            event.preventDefault();
+            event.stopPropagation();
+            this.mentorDialog.el.close();
+        }
+    }
     async saveFollowup() {
         if (this.state.saving) return;
         this.state.saving = true;
         try {
-            await this.orm.call("campus.faculty.task.list", "save_followup", [this.state.followup.id, this.state.followup.note, this.state.classKey]);
-            this.state.followup = null;
+            await this.orm.call("campus.faculty.task.list", "save_followup", [
+                Number(this.state.followStudent), this.state.followNote, this.state.classKey, this.state.followDate,
+            ]);
+            this.state.followNote = "";
             await this.load();
             this.notification.add("Follow-up saved to mentor counseling.", {type: "success"});
         } catch (error) { this.notification.add(error.data?.message || "The follow-up could not be saved.", {type: "danger"}); }
         finally { this.state.saving = false; }
+    }
+    async resolveFollowup(row) {
+        if (this.state.saving) return;
+        this.state.saving = true;
+        try {
+            await this.orm.call("campus.faculty.task.list", "resolve_followup", [row.id, this.state.classKey]);
+            await this.load();
+            this.notification.add("Follow-up marked resolved.", {type: "success"});
+        } catch (error) {
+            this.notification.add(error.data?.message || "The follow-up could not be resolved.", {type: "danger"});
+        } finally { this.state.saving = false; }
     }
     async save(submit = false) {
         if (!this.editable || this.counts.unmarked) return;
@@ -120,15 +170,20 @@ export class FacultyTaskList extends Component {
         finally { this.state.saving = false; }
     }
     download(kind) {
-        const rows = kind === "history" ? this.d.history : this.d.students;
+        const rows = kind === "history" ? this.d.history : this.filteredRows;
         const fields = kind === "history" ? ["date", "subject", "class", "hour", "present", "absent", "status"] : ["roll", "name", "present", "held", "rate"];
         const escape = value => `"${String(value ?? "").replace(/^[=+@\-]/, "'$&").replaceAll('"', '""')}"`;
-        const csv = [fields.join(","), ...rows.map(row => fields.map(key => escape(row[key])).join(","))].join("\n");
+        const headings = this.mentor ? ["Roll No.", "Student", "Attended", "Held", "Percentage"] : fields;
+        const csv = [headings.join(","), ...rows.map(row => fields.map(key =>
+            escape(this.mentor && key === "rate" ? this.mentorRate(row.rate) : row[key])).join(","))].join("\n");
         const url = URL.createObjectURL(new Blob([csv], {type: "text/csv;charset=utf-8"}));
         const link = document.createElement("a"); link.href = url; link.download = `${this.mentor ? "mentorship" : "teaching"}-${kind}.csv`; link.click(); URL.revokeObjectURL(url);
     }
 }
 
-export class MyTeachingSubjects extends FacultyTaskList { static mode = "teaching"; }
+export class MyTeachingSubjects extends FacultyTaskList {
+    static template = "ideastone_erp.FacultyTaskList";
+    static mode = "teaching";
+}
 registry.category("actions").add("ideastone_erp.my_mentorship_class", FacultyTaskList);
 registry.category("actions").add("ideastone_erp.my_teaching_subjects", MyTeachingSubjects);
