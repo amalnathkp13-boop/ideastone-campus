@@ -271,12 +271,9 @@
     display: grid;
     grid-template-columns: minmax(0, 1.55fr) minmax(330px, 1fr);
     gap: 14px;
-    align-items: start;
   }
-  .stack {
-    display: grid;
-    gap: 14px;
-    min-width: 0;
+  .panel-wide {
+    grid-column: 1 / -1;
   }
   .panel {
     background: #fff;
@@ -445,17 +442,40 @@
     grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
-  .placement-panel {
-    margin-top: 14px;
+  .placement-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    gap: 16px;
   }
-  .placement-upcoming {
-    margin-top: 14px;
+  .placement-charts {
+    display: grid;
+    gap: 12px;
+  }
+  .placement-chart .bar {
+    margin: 6px 0 4px;
+  }
+  .placement-chart .bar.has-data {
+    background: var(--amber-bg);
+  }
+  .placement-chart.outcomes .bar span {
+    background: var(--green);
+  }
+  .placement-counts {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .placement-counts b {
+    color: var(--navy);
   }
   .placement-upcoming .rowlist {
     margin-top: 10px;
   }
   @media (min-width: 641px) {
-    .placement-panel .department-snapshot {
+    .quick-access .department-snapshot {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
@@ -617,6 +637,9 @@
     }
   }
   @media (max-width: 640px) {
+    .placement-body {
+      grid-template-columns: minmax(0, 1fr);
+    }
     .content {
       padding: 13px;
     }

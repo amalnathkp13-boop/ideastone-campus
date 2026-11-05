@@ -108,6 +108,16 @@ export class HodDashboard extends Component {
         return [[_t("Attendance"), d.attendance], [_t("Pass rate"), d.pass_rate],
             [_t("Assignment completion"), d.completion], [_t("Exam readiness"), d.readiness]];
     }
+    get placementBreakdowns() {
+        const [placed, notPlaced, willing, notWilling] = this.d.placement_preview.metrics;
+        return [
+            {title: _t("Placement outcomes"), tone: "outcomes", primary: placed, secondary: notPlaced},
+            {title: _t("Placement interest"), tone: "interest", primary: willing, secondary: notWilling},
+        ].map(group => {
+            const total = group.primary[1] + group.secondary[1];
+            return {...group, total, share: total ? 100 * group.primary[1] / total : 0};
+        });
+    }
     get attentionYear() {
         return this.d.years.filter(row => row.attendance !== null && row.attendance < this.d.attendance)
             .sort((a, b) => a.attendance - b.attendance)[0];

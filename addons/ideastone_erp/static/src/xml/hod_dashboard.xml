@@ -45,107 +45,107 @@
           </article>
         </section>
         <div class="layout">
-          <div class="stack">
-            <section class="panel">
-              <div class="panel-head"><div><h2>Department at a glance</h2><p>Current academic year · overview of department-wide records</p></div><button type="button" class="link" t-on-click="() => this.openDetail('details')">View details →</button></div>
-              <div class="panel-body"><div class="metrics">
-                <div class="metric" t-foreach="metrics" t-as="metric" t-key="metric.name">
-                  <label t-esc="metric.name"/><strong t-esc="metric.value"/><small t-esc="metric.foot"/>
-                  <div t-if="metric.progress != null" class="progress" t-att-class="metric.tone"><span t-att-style="progress(metric.progress)"/></div>
-                </div>
-              </div></div>
-            </section>
-            <section class="panel">
-              <div class="panel-head"><div><h2>Approvals requiring attention</h2><p>Items waiting for HOD action</p></div><button type="button" class="link" t-on-click="() => this.openDetail('approvals')">Open approval queue →</button></div>
-              <div class="panel-body"><div class="rowlist">
-                <button type="button" class="rowitem row-button" t-foreach="d.approvals" t-as="queue" t-key="queue.key" t-on-click="() => this.openQueue(queue)">
-                  <div><div class="rowtitle" t-esc="queue.name"/><div class="rowmeta"><t t-esc="queue.rows.length"/> pending records</div></div>
-                  <span class="badge" t-att-class="queue.rows.length ? queue.tone : 'green'" t-esc="queue.rows.length ? queue.status : 'Clear'"/>
-                </button>
-              </div></div>
-            </section>
-            <section class="panel">
-              <div class="panel-head"><div><h2>Year-wise student overview</h2><p>Enrollment and attendance snapshot</p></div><button type="button" class="link" t-on-click="() => this.openDetail('students')">Student directory →</button></div>
-              <div class="table-wrap" tabindex="0" aria-label="Year-wise student overview"><table>
-                <thead><tr><th>YEAR</th><th>STUDENTS</th><th>AVG. ATTENDANCE</th><th>AT-RISK</th><th>STATUS</th></tr></thead>
-                <tbody>
-                  <tr t-foreach="d.years" t-as="row" t-key="row.year"><td t-esc="row.year"/><td t-esc="row.students"/><td t-esc="pct(row.attendance)"/><td t-esc="row.risk"/>
-                    <td><span class="badge" t-att-class="row.attendance == null ? 'blue' : row.risk ? 'amber' : 'green'" t-esc="row.attendance == null ? 'No attendance' : row.risk ? 'Monitor' : 'On track'"/></td>
-                  </tr>
-                  <tr t-if="!d.years.length"><td colspan="5" class="muted">No students match the selected scope.</td></tr>
-                </tbody>
-              </table></div>
-            </section>
-          </div>
-          <div class="stack">
-            <section class="panel">
-              <div class="panel-head"><div><h2>Department performance</h2><p>Key academic indicators</p></div><button type="button" class="link" t-on-click="() => this.openDetail('reports')">Reports →</button></div>
-              <div class="panel-body"><div class="bars">
-                <div class="barline" t-foreach="performance" t-as="row" t-key="row[0]"><span t-esc="row[0]"/><div class="bar" aria-hidden="true"><span t-att-style="progress(row[1])"/></div><b t-esc="pct(row[1])"/></div>
+          <section class="panel">
+            <div class="panel-head"><div><h2>Department at a glance</h2><p>Current academic year · overview of department-wide records</p></div><button type="button" class="link" t-on-click="() => this.openDetail('details')">View details →</button></div>
+            <div class="panel-body"><div class="metrics">
+              <div class="metric" t-foreach="metrics" t-as="metric" t-key="metric.name">
+                <label t-esc="metric.name"/><strong t-esc="metric.value"/><small t-esc="metric.foot"/>
+                <div t-if="metric.progress != null" class="progress" t-att-class="metric.tone"><span t-att-style="progress(metric.progress)"/></div>
               </div>
-                <div class="notice" style="margin-top:15px">
-                  <strong>Heads-up:</strong>&#160;
-                  <t t-if="attentionYear"><t t-esc="attentionYear.year"/> attendance is below the department average. Review the flagged students and follow up with mentors.</t>
-                  <t t-elif="d.attendance == null">Attendance will appear after department attendance is recorded.</t>
-                  <t t-else="">Review the attendance and published results for the selected scope.</t>
-                </div>
+            </div></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><div><h2>Faculty &amp; workload</h2><p>Staff availability and assigned responsibilities</p></div><button type="button" class="link" t-on-click="() => this.openDetail('faculty')">Faculty directory →</button></div>
+            <div class="panel-body"><div class="department-snapshot">
+              <div class="dept-tile"><div class="label">Present today</div><div class="big"><t t-esc="d.present"/> / <t t-esc="d.faculty"/></div><div class="progress green"><span t-att-style="progress(d.faculty ? 100 * d.present / d.faculty : 0)"/></div></div>
+              <div class="dept-tile"><div class="label">Workload exceptions</div><div class="big" t-esc="d.unassigned"/><div class="label">Periods needing allocation or confirmation</div></div>
+              <div class="dept-tile"><div class="label">Mentor groups</div><div class="big" t-esc="d.mentor_groups"/><div class="label">Sections with assigned mentors</div></div>
+              <div class="dept-tile"><div class="label">Faculty appraisal due</div><div class="big" t-esc="d.appraisal_due"/><div class="label">Open appraisal tasks before month end</div></div>
+            </div></div>
+          </section>
+          <section class="panel panel-wide placement-panel" aria-labelledby="hod-placement-title">
+            <div class="panel-head">
+              <div>
+                <h2 id="hod-placement-title">Department placements</h2>
+                <p><t t-esc="d.department"/> · Final-year placement overview</p>
               </div>
-            </section>
-            <section class="panel">
-              <div class="panel-head"><div><h2>Faculty &amp; workload</h2><p>Staff availability and assigned responsibilities</p></div><button type="button" class="link" t-on-click="() => this.openDetail('faculty')">Faculty directory →</button></div>
-              <div class="panel-body"><div class="department-snapshot">
-                <div class="dept-tile"><div class="label">Present today</div><div class="big"><t t-esc="d.present"/> / <t t-esc="d.faculty"/></div><div class="progress green"><span t-att-style="progress(d.faculty ? 100 * d.present / d.faculty : 0)"/></div></div>
-                <div class="dept-tile"><div class="label">Workload exceptions</div><div class="big" t-esc="d.unassigned"/><div class="label">Periods needing allocation or confirmation</div></div>
-                <div class="dept-tile"><div class="label">Mentor groups</div><div class="big" t-esc="d.mentor_groups"/><div class="label">Sections with assigned mentors</div></div>
-                <div class="dept-tile"><div class="label">Faculty appraisal due</div><div class="big" t-esc="d.appraisal_due"/><div class="label">Open appraisal tasks before month end</div></div>
-              </div></div>
-            </section>
-            <section class="panel">
-              <div class="panel-head"><div><h2>Upcoming department schedule</h2><p>Important academic dates</p></div><button type="button" class="link" t-on-click="() => this.openDetail('calendar')">Full calendar →</button></div>
-              <div class="panel-body"><div class="rowlist">
-                <div class="rowitem" t-foreach="d.schedule.slice(0,4)" t-as="row" t-key="row_index"><div><div class="rowtitle" t-esc="row.name"/><div class="rowmeta"><t t-esc="date(row.date)"/> · <t t-esc="row.detail"/></div></div><span class="badge" t-att-class="row.status === 'Review' ? 'amber' : 'blue'" t-esc="row.status"/></div>
-                <div t-if="!d.schedule.length" class="empty-note">No upcoming dates in this scope.</div>
-              </div></div>
-            </section>
-            <section class="panel">
-              <div class="panel-head"><div><h2>Quick department access</h2><p>Frequently used HOD workspaces</p></div></div>
-              <div class="panel-body"><div class="department-snapshot">
-                <button type="button" class="dept-tile quick-tile" t-foreach="quickLinks" t-as="link" t-key="link.key" t-on-click="() => this.openDetail(link.key)"><div class="label" t-esc="link.title"/><div class="rowtitle" t-esc="link.label"/></button>
-              </div></div>
-            </section>
-          </div>
-        </div>
-        <section class="panel placement-panel" aria-labelledby="hod-placement-title">
-          <div class="panel-head">
-            <div>
-              <h2 id="hod-placement-title">Department placements</h2>
-              <p><t t-esc="d.department"/> · Final-year placement overview</p>
+              <span t-if="d.placement_preview" class="badge blue">Sample data</span>
             </div>
-            <span t-if="d.placement_preview" class="badge blue">Sample data</span>
-          </div>
-          <div class="panel-body" t-if="d.placement_preview">
-            <div class="department-snapshot">
-              <div class="dept-tile" t-foreach="d.placement_preview.metrics" t-as="metric" t-key="metric[0]">
-                <div class="label" t-esc="metric[0]"/>
-                <div class="big" t-esc="metric[1]"/>
-              </div>
-            </div>
-            <div class="placement-upcoming" aria-labelledby="hod-placement-upcoming" role="group">
-              <div id="hod-placement-upcoming" class="rowtitle">Upcoming placements</div>
-              <div class="rowlist">
-                <div class="rowitem" t-foreach="d.placement_preview.upcoming" t-as="drive" t-key="drive.name">
-                  <div>
-                    <div class="rowtitle" t-esc="drive.name"/>
-                    <div class="rowmeta" t-esc="drive.role"/>
+            <div class="panel-body placement-body" t-if="d.placement_preview">
+              <div class="placement-charts">
+                <div class="placement-chart" t-foreach="placementBreakdowns" t-as="group" t-key="group.tone" t-att-class="group.tone">
+                  <div class="rowtitle" t-esc="group.title"/>
+                  <div class="bar" aria-hidden="true" t-att-class="{ 'has-data': group.total }"><span t-att-style="progress(group.share)"/></div>
+                  <div class="placement-counts">
+                    <span><b t-esc="group.primary[1]"/> <t t-esc="group.primary[0]"/></span>
+                    <span><b t-esc="group.secondary[1]"/> <t t-esc="group.secondary[0]"/></span>
                   </div>
-                  <span class="badge blue" t-esc="date(drive.date)"/>
                 </div>
-                <div class="empty-note" t-if="!d.placement_preview.upcoming.length">No upcoming sample drives in this scope.</div>
+              </div>
+              <div class="placement-upcoming" aria-labelledby="hod-placement-upcoming" role="group">
+                <div id="hod-placement-upcoming" class="rowtitle">Upcoming placements</div>
+                <div class="rowlist">
+                  <div class="rowitem" t-foreach="d.placement_preview.upcoming" t-as="drive" t-key="drive.name">
+                    <div>
+                      <div class="rowtitle" t-esc="drive.name"/>
+                      <div class="rowmeta" t-esc="drive.role"/>
+                    </div>
+                    <span class="badge blue" t-esc="date(drive.date)"/>
+                  </div>
+                  <div class="empty-note" t-if="!d.placement_preview.upcoming.length">No upcoming sample drives in this scope.</div>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="panel-body empty-note" t-else="">Placement figures and upcoming drives will appear when placement data is available.</div>
-        </section>
+            <div class="panel-body empty-note" t-else="">Placement figures and upcoming drives will appear when placement data is available.</div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><div><h2>Approvals requiring attention</h2><p>Items waiting for HOD action</p></div><button type="button" class="link" t-on-click="() => this.openDetail('approvals')">Open approval queue →</button></div>
+            <div class="panel-body"><div class="rowlist">
+              <button type="button" class="rowitem row-button" t-foreach="d.approvals" t-as="queue" t-key="queue.key" t-on-click="() => this.openQueue(queue)">
+                <div><div class="rowtitle" t-esc="queue.name"/><div class="rowmeta"><t t-esc="queue.rows.length"/> pending records</div></div>
+                <span class="badge" t-att-class="queue.rows.length ? queue.tone : 'green'" t-esc="queue.rows.length ? queue.status : 'Clear'"/>
+              </button>
+            </div></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><div><h2>Upcoming department schedule</h2><p>Important academic dates</p></div><button type="button" class="link" t-on-click="() => this.openDetail('calendar')">Full calendar →</button></div>
+            <div class="panel-body"><div class="rowlist">
+              <div class="rowitem" t-foreach="d.schedule.slice(0,4)" t-as="row" t-key="row_index"><div><div class="rowtitle" t-esc="row.name"/><div class="rowmeta"><t t-esc="date(row.date)"/> · <t t-esc="row.detail"/></div></div><span class="badge" t-att-class="row.status === 'Review' ? 'amber' : 'blue'" t-esc="row.status"/></div>
+              <div t-if="!d.schedule.length" class="empty-note">No upcoming dates in this scope.</div>
+            </div></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><div><h2>Year-wise student overview</h2><p>Enrollment and attendance snapshot</p></div><button type="button" class="link" t-on-click="() => this.openDetail('students')">Student directory →</button></div>
+            <div class="table-wrap" tabindex="0" aria-label="Year-wise student overview"><table>
+              <thead><tr><th>YEAR</th><th>STUDENTS</th><th>AVG. ATTENDANCE</th><th>AT-RISK</th><th>STATUS</th></tr></thead>
+              <tbody>
+                <tr t-foreach="d.years" t-as="row" t-key="row.year"><td t-esc="row.year"/><td t-esc="row.students"/><td t-esc="pct(row.attendance)"/><td t-esc="row.risk"/>
+                  <td><span class="badge" t-att-class="row.attendance == null ? 'blue' : row.risk ? 'amber' : 'green'" t-esc="row.attendance == null ? 'No attendance' : row.risk ? 'Monitor' : 'On track'"/></td>
+                </tr>
+                <tr t-if="!d.years.length"><td colspan="5" class="muted">No students match the selected scope.</td></tr>
+              </tbody>
+            </table></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><div><h2>Department performance</h2><p>Key academic indicators</p></div><button type="button" class="link" t-on-click="() => this.openDetail('reports')">Reports →</button></div>
+            <div class="panel-body"><div class="bars">
+              <div class="barline" t-foreach="performance" t-as="row" t-key="row[0]"><span t-esc="row[0]"/><div class="bar" aria-hidden="true"><span t-att-style="progress(row[1])"/></div><b t-esc="pct(row[1])"/></div>
+            </div>
+              <div class="notice" style="margin-top:15px">
+                <strong>Heads-up:</strong>&#160;
+                <t t-if="attentionYear"><t t-esc="attentionYear.year"/> attendance is below the department average. Review the flagged students and follow up with mentors.</t>
+                <t t-elif="d.attendance == null">Attendance will appear after department attendance is recorded.</t>
+                <t t-else="">Review the attendance and published results for the selected scope.</t>
+              </div>
+            </div>
+          </section>
+          <section class="panel panel-wide quick-access">
+            <div class="panel-head"><div><h2>Quick department access</h2><p>Frequently used HOD workspaces</p></div></div>
+            <div class="panel-body"><div class="department-snapshot">
+              <button type="button" class="dept-tile quick-tile" t-foreach="quickLinks" t-as="link" t-key="link.key" t-on-click="() => this.openDetail(link.key)"><div class="label" t-esc="link.title"/><div class="rowtitle" t-esc="link.label"/></button>
+            </div></div>
+          </section>
+        </div>
         <div class="footer">VCET Campus ERP · HOD workspace · Powered by Ideastone · <t t-esc="d.sample ? 'Sample department records' : 'Saved department records'"/></div>
       </t>
     </div>
