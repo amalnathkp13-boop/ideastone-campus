@@ -4,7 +4,16 @@
  <div t-if="state.error" class="notice" role="alert"><t t-esc="state.error"/><button class="btn" t-on-click="load">Retry</button></div>
  <t t-if="state.data">
   <div class="crumb">Campus home / <b>My task list</b> / <b>Examinations</b> / <t t-esc="state.data.role === 'coe' ? 'Exam control receipts' : 'HOD review workspace'"/></div>
-  <div class="heading"><div><h1>Examinations</h1><div class="subtitle" t-esc="state.data.role === 'coe' ? 'Exam Control workspace · received official question papers.' : 'Department HOD workspace · review, approve and forward question papers.'"/></div><div class="actions"><button t-if="props.openMarks" class="btn" t-on-click="props.openMarks">Internal marks ↓</button><button class="btn" t-on-click="openHistory">◷ Approval history</button><button class="btn primary" t-on-click="load">↻ Refresh queue</button></div></div>
+  <div class="heading">
+    <div><h1>Examinations</h1><div class="subtitle" t-esc="state.data.role === 'coe' ? 'Exam Control workspace · received official question papers.' : 'Department HOD workspace · review, approve and forward question papers.'"/></div>
+    <div class="actions">
+      <button t-if="props.embedded &amp;&amp; state.data.role === 'hod'" class="btn" type="button"
+              t-on-click="openAuthor" t-att-aria-expanded="state.showAuthor ? 'true' : 'false'">Create own question paper</button>
+      <button t-if="props.openMarks" class="btn" t-on-click="props.openMarks">Internal marks ↓</button>
+      <button class="btn" t-on-click="openHistory">◷ Approval history</button>
+      <button class="btn primary" t-on-click="load">↻ Refresh queue</button>
+    </div>
+  </div>
   <div class="stats">
    <div class="stat"><div class="sicon amber">◷</div><div><div class="num" t-esc="count('submitted')"/><div class="label">Papers awaiting review</div><div class="foot">Across your department</div></div></div>
    <div class="stat"><div class="sicon">▤</div><div><div class="num" t-esc="receivedSets"/><div class="label">Sets received this cycle</div><div class="foot">Across assigned subjects</div></div></div>
@@ -43,12 +52,8 @@
   </div><div class="modalfoot"><t t-if="state.data.role === 'hod' &amp;&amp; state.modal.state === 'submitted'"><button class="btn danger" t-att-disabled="state.busy" t-on-click="() => this.decide('return')">Return for revision</button><button class="btn green" t-att-disabled="state.busy || !state.selectedSet" t-on-click="() => this.decide('approve')">Approve selected set</button></t><button t-elif="state.data.role === 'hod' &amp;&amp; state.modal.state === 'approved'" class="btn primary" t-att-disabled="state.busy" t-on-click="() => this.decide('forward')">Forward to COE →</button><span t-elif="state.modal.state === 'forwarded'" class="pill forwarded">Official selected paper delivered to COE</span><button t-else="" class="btn" t-on-click="closeModal">Close</button></div></t>
  </section></div>
 </div>
-<section t-if="props.embedded &amp;&amp; state.data?.role === 'hod'" class="panel hod-author-section">
-  <div class="between">
-    <div><h2>My question papers</h2><p>Prepare papers for the subjects you teach and send one approved set directly to COE.</p></div>
-    <button class="btn primary" type="button" t-on-click="openAuthor" t-att-aria-expanded="state.showAuthor ? 'true' : 'false'">Create own question paper</button>
-  </div>
-  <div t-if="state.showAuthor" t-ref="authorPanel" tabindex="-1"><FacultySopPapers embedded="true" direct="true"/></div>
+<section t-if="state.showAuthor" class="panel hod-author-section" t-ref="authorPanel" tabindex="-1">
+  <FacultySopPapers embedded="true" direct="true"/>
 </section>
 </t>
 </templates>
