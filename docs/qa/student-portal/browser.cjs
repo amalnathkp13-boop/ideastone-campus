@@ -222,8 +222,8 @@ async function save(page, control) {
         await page.locator('.student_subnav').getByRole('link',{name:'Notices & Circulars',exact:true}).click();
         assert.equal(await page.locator('[data-notice-record] .badge.urgent').first().evaluate(element=>getComputedStyle(element).color),'rgb(180, 71, 58)');
         const noticeTypography=await page.locator('[data-notice-record] .notice-body span').first().evaluate(element=>({color:getComputedStyle(element).color,size:getComputedStyle(element).fontSize,font:getComputedStyle(element).fontFamily}));
-        // Saved notice metadata follows the shared SOP typography.
-        assert.equal(noticeTypography.color,'rgb(85, 107, 130)'); assert.equal(noticeTypography.size,'12px'); assert.match(noticeTypography.font,/^Inter,/);
+        // Saved notice rich text uses the shared body size and SOP palette.
+        assert.equal(noticeTypography.color,'rgb(85, 107, 130)'); assert.equal(noticeTypography.size,'14px'); assert.match(noticeTypography.font,/^Inter,/);
         await page.locator('[data-notices-filter="search"]').fill('no-such-published-notice');
         await page.locator('[data-notices-apply="notices"]').click();
         assert.equal(await page.locator('[data-notice-record]:visible').count(),0);
