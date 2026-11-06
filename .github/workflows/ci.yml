@@ -103,7 +103,7 @@ jobs:
             if curl -fsS http://127.0.0.1:18069/web/login >/dev/null; then break; fi
             sleep 2
           done
-          npm install --prefix "$RUNNER_TEMP/faculty-ui-tools" playwright
+          npm install --prefix "$RUNNER_TEMP/faculty-ui-tools" playwright@1.64.1
           "$RUNNER_TEMP/faculty-ui-tools/node_modules/.bin/playwright" install --with-deps chromium
           export NODE_PATH="$RUNNER_TEMP/faculty-ui-tools/node_modules"
           node --test docs/qa/ai-audit/ui.test.cjs
