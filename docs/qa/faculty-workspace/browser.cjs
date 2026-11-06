@@ -108,7 +108,13 @@ async function diagnosticMarkup(page) {
         await page.getByRole('button',{name:'Reopen calculation',exact:true}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'My profile & payroll',exact:true}).click();
         await page.getByRole('heading',{name:'My staff profile',exact:true,level:1}).waitFor();
-        if(await page.locator('.campus_faculty_subnav').getByRole('button').count() !== 9) throw Error('Expected seven profile submodules and two scroll controls');
+        const profileNav = page.locator('.campus_faculty_subnav');
+        if (await profileNav.locator(':scope > div').getByRole('button').count() !== 7) {
+            throw Error('Expected seven profile submodules');
+        }
+        for (const name of ['Previous submodules', 'Next submodules', 'Customize top navigation']) {
+            await profileNav.getByRole('button', {name, exact:true}).waitFor();
+        }
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Leave requests',exact:true}).click();
         await page.getByRole('heading',{name:'Online Leave Apply & Status',exact:true}).waitFor();
         if(!await page.locator('.campus_leave_page .leave_balance').innerText().then(text=>text.includes('5 days'))) throw Error('Expired leave allocation inflated available balance');
