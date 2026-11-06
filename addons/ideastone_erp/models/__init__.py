@@ -33,6 +33,7 @@ from . import responsibility, library_desk, attendance_export
 from . import academic_security
 from . import faculty_task
 from . import faculty_leave_ui
+from . import staff_leave_coverage
 from . import faculty_attendance_ui
 from . import subject_attendance_ui
 from . import student_attendance_ui
@@ -44,6 +45,7 @@ from . import mvp_academics, mvp_admissions, mvp_attendance, mvp_fees, mvp_exams
 from . import mvp_dashboard, mvp_communication, mvp_import
 from . import admin_overview_ui
 from . import student_portal, student_service
+from . import student_placements
 from . import student_account_ui
 
 from . import parent_portal
@@ -80,3 +82,5 @@ from . import accountant_transport
 from . import accountant_circulars
 from . import accountant_directory
 from . import accountant_spending
+from . import hod_directory
+from . import fleet_management

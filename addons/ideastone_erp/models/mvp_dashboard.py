@@ -300,7 +300,7 @@ class OwnerDashboard(models.AbstractModel):
                 "due_dates": sorted(due_rows, key=lambda r: r["due"])[:8]}
 
     def _mvp_money(self, amount):
-        return f"{self.env.company.currency_id.symbol} {amount:,.2f}"
+        return f"₹ {amount:,.2f}"
 
     def _mvp_upcoming_count(self, f):
         domain = [("company_id", "=", self.env.company.id), ("state", "!=", "cancel"),
