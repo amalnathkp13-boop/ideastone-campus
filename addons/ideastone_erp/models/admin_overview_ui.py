@@ -341,9 +341,6 @@ class AdminOverviewUI(models.AbstractModel):
         user = self.env.user
         if user.has_group("ideastone_erp.group_mvp_owner") or user.has_group("base.group_system"):
             fleet = self.env["campus.fleet.ui"]._snapshot()["totals"]
-            fleet_card = next(card for card in kpis if card["kind"] == "fleet")
-            fleet_card.update(label=_("Active buses"), value=fleet["active"], allowed=True,
-                              detail=_("Operating buses · View active routes"))
         # The requested overview uses rupee labels; retain the recorded amounts.
         for card in kpis:
             if card["kind"] in {"collection", "dues"} and card["allowed"]:
