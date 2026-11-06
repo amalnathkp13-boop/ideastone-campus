@@ -199,7 +199,7 @@ class AdminOverviewUI(models.AbstractModel):
         # The requested overview uses rupee labels; retain the recorded amounts.
         for card in kpis:
             if card["kind"] in {"collection", "dues"} and card["allowed"]:
-                amount = card["value"].removeprefix(f"{self.env.company.currency_id.symbol} ")
+                amount = card["value"].removeprefix("₹ ")
                 card["value"] = f"₹ {amount}"
         service_allowed = self.env["campus.service.request"].check_access_rights("read", raise_exception=False)
         kpis.append({"kind": "services", "label": "Open service requests", "value": len(services) if service_allowed else "—",

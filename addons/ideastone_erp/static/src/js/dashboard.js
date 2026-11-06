@@ -297,8 +297,7 @@ class CampusBase extends Component {
         return [...new Set((this.state.collectionRecords.rows || []).map(row => row.status).filter(Boolean))];
     }
     collectionFullMoney(value) {
-        const currency = this.state.collectionRecords.currency || "₹";
-        return `${currency}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(Number(value) || 0)}`;
+        return `₹${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(Number(value) || 0)}`;
     }
     async collectionOpenEditor() {
         const screen = this.collectionScreen;
@@ -359,7 +358,7 @@ class CampusBase extends Component {
         const divisor = currency === "₹" ? (absolute >= 10000000 ? 10000000 : absolute >= 100000 ? 100000 : 1) :
             (absolute >= 1000000 ? 1000000 : absolute >= 1000 ? 1000 : 1);
         const suffix = divisor === 1 ? "" : currency === "₹" ? (divisor === 10000000 ? "Cr" : "L") : (divisor === 1000000 ? "M" : "K");
-        return `${currency}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: divisor === 1 ? 0 : 1}).format(amount / divisor)}${suffix}`;
+        return `₹${new Intl.NumberFormat("en-IN", {maximumFractionDigits: divisor === 1 ? 0 : 1}).format(amount / divisor)}${suffix}`;
     }
     collectionRate(value, total) {
         return total ? Math.max(0, Math.min(100, Math.round(value / total * 100))) : 0;
@@ -398,7 +397,7 @@ class CampusBase extends Component {
         if (item) return this.open(item);
     }
     accountantMoney(value) {
-        return `${this.state.accountantMetrics.currency || ""}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(value || 0)}`;
+        return `₹${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(value || 0)}`;
     }
     accountantCompactMoney(value) {
         const amount = Number(value) || 0;
@@ -407,7 +406,7 @@ class CampusBase extends Component {
         const divisor = indian ? (absolute >= 10000000 ? 10000000 : absolute >= 100000 ? 100000 : 1) :
             (absolute >= 1000000 ? 1000000 : absolute >= 1000 ? 1000 : 1);
         const suffix = divisor === 1 ? "" : indian ? (divisor === 10000000 ? "Cr" : "L") : (divisor === 1000000 ? "M" : "K");
-        return `${this.state.accountantMetrics.currency || ""}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(amount / divisor)}${suffix}`;
+        return `₹${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(amount / divisor)}${suffix}`;
     }
     get accountantTrendRows() {
         const rows = this.state.accountantMetrics.trend || [];
@@ -444,7 +443,7 @@ class CampusBase extends Component {
         return this.number(value / divisor);
     }
     get accountantChartUnit() {
-        return `${this.state.accountantMetrics.currency || ""} ${this.state.accountantMetrics.currency === "₹" ? "lakh" : this.accountantChartMax >= 10000 ? "thousand" : "units"}`;
+        return `₹ ${this.state.accountantMetrics.currency === "₹" ? "lakh" : this.accountantChartMax >= 10000 ? "thousand" : "units"}`;
     }
     get accountantTrendChange() {
         const rows = this.accountantTrendRows;
@@ -530,10 +529,10 @@ class CampusBase extends Component {
     }
     ownerCanOpen(xmlid) { return this.state.navigation.some(row => row.action === xmlid); }
     ownerPrint() { window.print(); }
-    ownerMoney(value) { return `${this.ownerUI.currency_symbol || ""} ${this.number(value)}`.trim(); }
+    ownerMoney(value) { return `₹ ${this.number(value)}`; }
     ownerCompactMoney(value) {
         const magnitude = Math.abs(value);
-        return `${this.ownerUI.currency_symbol || ""}${this.number(value / (magnitude >= 10000000 ? 10000000 : magnitude >= 100000 ? 100000 : 1))}${magnitude >= 10000000 ? "Cr" : magnitude >= 100000 ? "L" : ""}`;
+        return `₹${this.number(value / (magnitude >= 10000000 ? 10000000 : magnitude >= 100000 ? 100000 : 1))}${magnitude >= 10000000 ? "Cr" : magnitude >= 100000 ? "L" : ""}`;
     }
     ownerMonth(value) { return new Date(`${value.slice(0, 7)}-15T12:00:00Z`).toLocaleDateString(undefined, {month: "short", year: "2-digit", timeZone: "UTC"}); }
     ownerDay(value) { return value.slice(8, 10); }
