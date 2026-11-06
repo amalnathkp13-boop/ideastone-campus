@@ -20,6 +20,7 @@ class OwnerStaffNavigation(models.AbstractModel):
             return super()._owner_modules()
         tabs = [("Staff directory", "action_owner_staff_directory"),
                 ("Leave Management", "action_owner_staff_leave"),
+                ("Payroll History", "action_owner_staff_payroll"),
                 ("Staff Profile", "action_staff_profile"),
                 ("OD Management", "action_staff_od_management"),
                 ("OD Staffs", "action_owner_staff_od")]

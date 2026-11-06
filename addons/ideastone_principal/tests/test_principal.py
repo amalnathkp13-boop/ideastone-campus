@@ -175,6 +175,7 @@ class TestPrincipalWorkflow(TransactionCase):
             self.assertNotIn("principal_notices", modules)
             if role == "owner":
                 self.assertIn("OD Staffs", [item["label"] for item in modules["staff"]["items"]])
+                self.assertIn("Payroll History", [item["label"] for item in modules["staff"]["items"]])
             else:
                 self.assertTrue(overview["is_accountant_workspace"])
 

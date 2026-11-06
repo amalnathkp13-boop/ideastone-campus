@@ -209,7 +209,7 @@ async function markup(page) {
         await assertCampusTheme(page);
         const staffTabs=await page.locator('.campus_faculty_subnav button:not(.campus_subnav_scroll)').allTextContents();
         const staffTabNames=staffTabs.map(t=>t.trim()).filter(t=>!['','',''].includes(t));
-        if(staffTabNames.join('|')!=='Staff directory|Leave Management|Staff Profile|OD Management|OD Staffs')
+        if(staffTabNames.join('|')!=='Staff directory|Leave Management|Payroll History|Staff Profile|OD Management|OD Staffs')
             throw Error('Owner staff tabs do not match the approved navigation');
         await page.locator('.campus_owner_staff .dept-actions').first().click();
         await page.getByRole('button',{name:'View teaching staff',exact:true}).click();
