@@ -30,7 +30,7 @@
               <a t-att-href="student_url_for('account')" aria-label="Parent account"><i class="fa fa-user-circle-o" aria-hidden="true"/></a>
             </div>
           </header>
-          <nav t-if="d" class="student_subnav" aria-label="Parent submodules"><strong t-esc="dict((i[0],i[1]) for i in d['navigation'])[section]"/><a t-foreach="d['navigation']" t-as="item" t-att-href="student_url_for(item[0])" t-att-aria-current="'page' if section == item[0] else None" t-esc="item[1]"/></nav>
+          <nav t-if="d" class="student_subnav" aria-label="Parent submodules"><strong t-esc="dict((i[0],i[1]) for i in d['navigation'])[section]"/><t t-if="section == 'complaints'"><a href="#complaints-dashboard">Dashboard</a><a href="#complaints-students">Student complaints</a><a href="#complaints-staff">Staff complaints</a><a href="#complaints-about-me">About me</a></t><a t-else="" t-foreach="d['navigation']" t-as="item" t-att-href="student_url_for(item[0])" t-att-aria-current="'page' if section == item[0] else None" t-esc="item[1]"/></nav>
           <main id="student_main" class="student_main" tabindex="-1">
             <div class="student_network_error alert alert-danger" role="alert" hidden="hidden"><span/><button type="button" class="btn btn-outline-danger student_retry">Retry</button></div>
             <div class="student_busy" role="status" hidden="hidden">Loading saved college records…</div>
@@ -54,6 +54,7 @@
               <t t-elif="section == 'fees'" t-call="ideastone_erp.student_fees"/>
               <t t-elif="section == 'notices'" t-call="ideastone_erp.parent_notices"/>
               <t t-elif="section == 'requests'" t-call="ideastone_erp.parent_requests"/>
+              <t t-elif="section == 'complaints'" t-call="ideastone_erp.complaints_portal"/>
               <t t-elif="section == 'documents'" t-call="ideastone_erp.parent_documents"/>
               <t t-elif="section == 'transport'" t-call="ideastone_erp.parent_transport"/>
               <t t-elif="section == 'account'" t-call="ideastone_erp.parent_account"/>

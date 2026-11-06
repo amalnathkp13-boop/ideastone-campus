@@ -179,7 +179,8 @@ class TestVcetWorkspace(TransactionCase):
             for item in module["items"]:
                 if item.get("action"):
                     self.assertEqual(self.env.ref(item["action"]).id, item["action_id"])
-        self.assertFalse(self.env["campus.dashboard"].with_user(self.admin).get_overview()["faculty_modules"])
+        admin_modules = self.env["campus.dashboard"].with_user(self.admin).get_overview()["faculty_modules"]
+        self.assertEqual([module["key"] for module in admin_modules], ["complaints"])
         with self.assertRaises(AccessError):
             self.env["campus.library.desk"].with_user(self.other_teacher).get_desk()
 

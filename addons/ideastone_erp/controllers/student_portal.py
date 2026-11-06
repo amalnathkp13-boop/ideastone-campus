@@ -41,6 +41,8 @@ class StudentWorkspace(CampusPortal):
             data = service.snapshot(kw.get("enrolment"), kw.get("date_from"), kw.get("date_to"))
             if section not in {item[0] for item in data["navigation"]}:
                 return request.not_found()
+            if section == "complaints":
+                data["complaints"] = request.env["campus.complaints.ui"].get_page_data()
         except AccessError as exc:
             error, status = str(exc), 403 if request.httprequest.path != "/my/campus" else 200
         except UserError as exc:
@@ -64,7 +66,7 @@ class StudentWorkspace(CampusPortal):
 
     @http.route("/my/campus/student/action", type="http", auth="user", website=True, methods=["POST"], csrf=True)
     def student_action(self, operation="", return_to="dashboard", **kw):
-        allowed = {"dashboard", "profile", "academics", "timetable", "attendance", "exams", "fees", "notices", "requests", "on-duty", "library", "help", "account"}
+        allowed = {"dashboard", "profile", "academics", "timetable", "attendance", "exams", "fees", "notices", "requests", "complaints", "on-duty", "library", "help", "account"}
         return_to = return_to if return_to in allowed else "dashboard"
         service = request.env["campus.student.portal"]
         try:
@@ -85,7 +87,14 @@ class StudentWorkspace(CampusPortal):
                 # Bound before allocating/encoding untrusted multipart data.
                 raw = upload.read(10 * 1024 * 1024 + 1)
                 payload.update(file=base64.b64encode(raw), filename=upload.filename)
-            service.with_company(student.company_id).act(operation, payload)
+            if operation == "complaint_submit":
+                payload["evidence"] = payload.pop("file", False)
+                payload["evidence_filename"] = payload.pop("filename", False)
+                request.env["campus.complaints.ui"].submit(payload)
+            elif operation == "complaint_act":
+                request.env["campus.complaints.ui"].act(payload.get("case_id"), payload.get("case_action"), payload)
+            else:
+                service.with_company(student.company_id).act(operation, payload)
             query = {"saved": "1"}
         except (UserError, ValueError, TypeError) as exc:
             query = {"form_error": str(exc)}

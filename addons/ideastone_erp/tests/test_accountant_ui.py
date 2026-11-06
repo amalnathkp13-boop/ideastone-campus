@@ -58,7 +58,7 @@ class TestAccountantWorkspace(OwnerMVPFixture, TransactionCase):
         overview = dashboard.get_overview()
         self.assertEqual(overview["workspace_role"], "Accountant")
         self.assertEqual([module["key"] for module in overview["faculty_modules"]],
-                         ["home", "students", "collections", "transport", "spending", "communication"])
+                         ["home", "students", "collections", "transport", "spending", "communication", "complaints"])
         student_module = next(module for module in overview["faculty_modules"] if module["key"] == "students")
         self.assertEqual([item["label"] for item in student_module["items"]],
                          ["Student fee directory", "Pending fee students", "Student fee accounts"])
