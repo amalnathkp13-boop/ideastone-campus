@@ -37,7 +37,7 @@ export class FacultyHome extends Component {
     get stats() {
         return [
             {label: "Classes scheduled", value: this.c.classes, icon: "▦", tag: "Today", foot: `${this.c.completed} completed · ${this.c.remaining} remaining`, tone: "positive"},
-            {label: "Students taught", value: this.c.students, icon: "♙", tag: "Assigned", foot: `Across ${this.c.subjects} assigned subjects`, tone: ""},
+            {label: "Classes assigned", value: this.c.assigned_classes, icon: "♙", tag: "Assigned", foot: "Class sections you teach", tone: ""},
             {label: "Attendance pending", value: this.c.pending, icon: "☑", tag: "Action needed", foot: "Elapsed class sessions to submit", tone: "warn"},
             {label: "Tasks due", value: this.c.tasks, icon: "⚑", tag: "Open", foot: `${this.c.due_today} due today · ${this.c.upcoming} upcoming${this.c.overdue ? ' · ' + this.c.overdue + ' overdue' : ''}`, tone: "warn"},
         ];
