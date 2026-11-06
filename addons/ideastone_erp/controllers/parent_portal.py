@@ -2,9 +2,9 @@ import base64
 from urllib.parse import urlencode
 
 from markupsafe import Markup
+from odoo.addons.ideastone_campus.currency_display import format_amount
 from odoo.exceptions import AccessError, UserError
 from odoo.http import content_disposition, request
-from odoo.tools.misc import format_amount
 
 from odoo import http
 

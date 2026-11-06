@@ -300,8 +300,7 @@ class CampusBase extends Component {
         return [...new Set((this.state.collectionRecords.rows || []).map(row => row.status).filter(Boolean))];
     }
     collectionFullMoney(value) {
-        const currency = this.state.collectionRecords.currency || "₹";
-        return `${currency}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(Number(value) || 0)}`;
+        return `₹${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(Number(value) || 0)}`;
     }
     async collectionOpenEditor() {
         const screen = this.collectionScreen;
@@ -362,7 +361,7 @@ class CampusBase extends Component {
         const divisor = currency === "₹" ? (absolute >= 10000000 ? 10000000 : absolute >= 100000 ? 100000 : 1) :
             (absolute >= 1000000 ? 1000000 : absolute >= 1000 ? 1000 : 1);
         const suffix = divisor === 1 ? "" : currency === "₹" ? (divisor === 10000000 ? "Cr" : "L") : (divisor === 1000000 ? "M" : "K");
-        return `${currency}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: divisor === 1 ? 0 : 1}).format(amount / divisor)}${suffix}`;
+        return `₹${new Intl.NumberFormat("en-IN", {maximumFractionDigits: divisor === 1 ? 0 : 1}).format(amount / divisor)}${suffix}`;
     }
     collectionRate(value, total) {
         return total ? Math.max(0, Math.min(100, Math.round(value / total * 100))) : 0;
@@ -401,7 +400,7 @@ class CampusBase extends Component {
         if (item) return this.open(item);
     }
     accountantMoney(value) {
-        return `${this.state.accountantMetrics.currency || ""}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(value || 0)}`;
+        return `₹${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(value || 0)}`;
     }
     accountantCompactMoney(value) {
         const amount = Number(value) || 0;
@@ -410,7 +409,7 @@ class CampusBase extends Component {
         const divisor = indian ? (absolute >= 10000000 ? 10000000 : absolute >= 100000 ? 100000 : 1) :
             (absolute >= 1000000 ? 1000000 : absolute >= 1000 ? 1000 : 1);
         const suffix = divisor === 1 ? "" : indian ? (divisor === 10000000 ? "Cr" : "L") : (divisor === 1000000 ? "M" : "K");
-        return `${this.state.accountantMetrics.currency || ""}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(amount / divisor)}${suffix}`;
+        return `₹${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(amount / divisor)}${suffix}`;
     }
     get accountantTrendRows() {
         const rows = this.state.accountantMetrics.trend || [];
@@ -447,7 +446,7 @@ class CampusBase extends Component {
         return this.number(value / divisor);
     }
     get accountantChartUnit() {
-        return `${this.state.accountantMetrics.currency || ""} ${this.state.accountantMetrics.currency === "₹" ? "lakh" : this.accountantChartMax >= 10000 ? "thousand" : "units"}`;
+        return `₹ ${this.state.accountantMetrics.currency === "₹" ? "lakh" : this.accountantChartMax >= 10000 ? "thousand" : "units"}`;
     }
     get accountantTrendChange() {
         const rows = this.accountantTrendRows;
@@ -494,7 +493,8 @@ class CampusBase extends Component {
     async ownerSource(card) {
         if (!card.allowed) return;
         try {
-            if (["complaints", "overdue_complaints", "attendance_pending", "overdue_dues", "fleet_delayed"].includes(card.kind)) return this.ownerOverviewAction(card.kind);
+            if (card.kind === "fleet" && this.ownerUI.fleet) return this.openOwnerFleet("active");
+            if (["complaints", "overdue_complaints", "attendance_pending", "overdue_dues", "fleet_delayed", "services", "overdue_services", "staff_present", "staff_delayed", "fleet"].includes(card.kind)) return this.ownerOverviewAction(card.kind);
             const filters = card.kind === "attendance_today" ? {...this.state.ownerAppliedFilters,
                 date_from: this.state.today, date_to: this.state.today} : this.state.ownerAppliedFilters;
             const action = await this.orm.call("campus.dashboard", "get_owner_source_action",
@@ -503,6 +503,9 @@ class CampusBase extends Component {
             if (action.help) action.help = markup(action.help);
             await this.action.doAction(action);
         } catch (error) { this.notification.add(error.data?.message || "The source register is unavailable.", {type: "danger"}); }
+    }
+    openOwnerFleet(filter = "all") {
+        return this.action.doAction("ideastone_erp.action_fleet_management", {props: {initialFilter: filter}});
     }
     chartWidth(value, rows, field = "value") {
         const keys = Array.isArray(field) ? field : [field];
@@ -541,7 +544,7 @@ class CampusBase extends Component {
     ownerMoney(value) { return `${this.ownerUI.currency_symbol || ""} ${this.number(value)}`.trim(); }
     ownerCompactMoney(value) {
         const magnitude = Math.abs(value);
-        return `${this.ownerUI.currency_symbol || ""}${this.number(value / (magnitude >= 10000000 ? 10000000 : magnitude >= 100000 ? 100000 : 1))}${magnitude >= 10000000 ? "Cr" : magnitude >= 100000 ? "L" : ""}`;
+        return `₹${this.number(value / (magnitude >= 10000000 ? 10000000 : magnitude >= 100000 ? 100000 : 1))}${magnitude >= 10000000 ? "Cr" : magnitude >= 100000 ? "L" : ""}`;
     }
     ownerMonth(value) { return new Date(`${value.slice(0, 7)}-15T12:00:00Z`).toLocaleDateString(undefined, {month: "short", year: "2-digit", timeZone: "UTC"}); }
     ownerDay(value) { return value.slice(8, 10); }

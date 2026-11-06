@@ -337,10 +337,17 @@ class AdminOverviewUI(models.AbstractModel):
                  ("dues", "Outstanding fees", "inr", "amber"), ("faculty", "Faculty & staff", "users", "green"),
                  ("fleet_delayed", "Fleet delayed", "bus", "amber"), ("complaints", "Complaints", "flag-o", "red")]
         kpis = [dict(stats[kind], label=label, icon=icon, tone=tone) for kind, label, icon, tone in specs]
+        fleet = None
+        user = self.env.user
+        if user.has_group("ideastone_erp.group_mvp_owner") or user.has_group("base.group_system"):
+            fleet = self.env["campus.fleet.ui"]._snapshot()["totals"]
+            fleet_card = next(card for card in kpis if card["kind"] == "fleet")
+            fleet_card.update(label=_("Active buses"), value=fleet["active"], allowed=True,
+                              detail=_("Operating buses · View active routes"))
         # The requested overview uses rupee labels; retain the recorded amounts.
         for card in kpis:
             if card["kind"] in {"collection", "dues"} and card["allowed"]:
-                amount = card["value"].removeprefix(f"{self.env.company.currency_id.symbol} ")
+                amount = card["value"].removeprefix("₹ ")
                 card["value"] = f"₹ {amount}"
         insights = []
         shortage = sum(row["value"] < threshold for row in department_rows)
@@ -358,7 +365,7 @@ class AdminOverviewUI(models.AbstractModel):
             {"kind": "attendance_pending", "label": _("Attendance not submitted"), "count": len(pending), "detail": _("Elapsed sessions in this period without completed attendance"), "icon": "check", "tone": "blue", "allowed": self.env["op.attendance.sheet"].check_access_rights("read", raise_exception=False)},
             {"kind": "fleet_delayed", "label": _("Delayed buses"), "count": len(delayed_buses), "detail": _("Current fleet status"), "icon": "bus", "tone": "amber", "allowed": fleet_allowed}]
         calendar = self._owner_calendar()
-        data["overview_ui"] = {"kpis": kpis, "activity": activity, "departments": department_rows, "threshold": threshold, "currency_symbol": "₹",
+        data["overview_ui"] = {"kpis": kpis, "fleet": fleet, "activity": activity, "departments": department_rows, "threshold": threshold, "currency_symbol": "₹",
             "chart_months": chart_months, "annual_fees": self._owner_annual_fees(fee_year_id),
             "performance": self._owner_performance(f["year_id"]), "calendar": calendar,
             "fee_months": fee_rows, "fee_allowed": self.env["account.move"].check_access_rights("read", raise_exception=False),
