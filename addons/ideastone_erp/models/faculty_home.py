@@ -150,7 +150,7 @@ class FacultyHome(models.AbstractModel):
         return {"user": self.env.user.name, "company": self.env.company.name, "demo": self.env.company.campus_demo,
             "today": str(today), "academic_year": year.name or _("Assigned classes"), "department": faculty.main_department_id.code or faculty.main_department_id.name or _("Not recorded"),
             "semesters": sorted(set(batches.campus_term_id.mapped("name"))), "schedule": schedule,
-            "counts": {"classes": len(day_sessions), "completed": completed, "remaining": len(day_sessions) - completed,
+            "counts": {"classes": len(day_sessions), "assigned_classes": len(batches), "completed": completed, "remaining": len(day_sessions) - completed,
                 "students": len(enrolments.student_id), "subjects": len(sessions.subject_id | faculty.faculty_subject_ids), "pending": len(pending),
                 "tasks": len(tasks), "due_today": len(tasks.filtered(lambda r: r.deadline == today)), "overdue": len(tasks.filtered(lambda r: r.deadline < today)),
                 "upcoming": len(tasks.filtered(lambda r: r.deadline > today)), "papers": len(papers.filtered(lambda r: r.state in {"draft", "returned"})),

@@ -43,13 +43,15 @@ class FacultyLeaveUI(models.AbstractModel):
             "today": fields.Date.to_string(today),
             "reporting_authority": employee.parent_id.name if employee and employee.parent_id else "Not assigned",
             "can_apply": bool(employee and leave_types),
-            "leave_types": [{"id": item.id, "name": item.name, "unit": item.request_unit}
+            "leave_types": [{"id": item.id, "name": item.name, "unit": item.request_unit,
+                             "staff_od": item == self.env.ref("ideastone_erp.staff_on_duty_leave_type", raise_if_not_found=False)}
                             for item in leave_types],
             "balance": None,
             "monthly_eligibility": None,
             "approved_count": 0,
             "pending_count": 0,
             "history": [],
+            "assigned_coverage": self._assigned_coverage(today),
             "attendance": [],
             "approval_percent": None,
             "most_common_leave": "No approved requests",
@@ -82,6 +84,8 @@ class FacultyLeaveUI(models.AbstractModel):
             "days": round(leave.number_of_days_display, 2),
             "reason": leave.private_name or "",
             "status": state_labels.get(leave.state, leave.state or "Pending"),
+            "coverage": leave._coverage_rows(),
+            "can_plan": leave.state in ("draft", "confirm", "validate1"),
         } for leave in leaves]
         decided = [leave for leave in leaves if leave.state in ("validate", "refuse")]
         if decided:
@@ -118,8 +122,27 @@ class FacultyLeaveUI(models.AbstractModel):
         result["attendance"] = list(days.values())[:4]
         return result
 
-    @api.model
-    def submit_leave(self, values):
+    def _substitute_faculty(self):
+        return self.env["op.faculty"].sudo().search([
+            ("company_id", "in", [False, self.env.company.id]),
+            "|", ("user_id", "=", self.env.uid), ("emp_id.user_id", "=", self.env.uid),
+        ])
+
+    def _assigned_coverage(self, today):
+        faculty = self._substitute_faculty()
+        if not faculty:
+            return []
+        faculty_ids = set(faculty.ids)
+        leaves = self.env["hr.leave"].sudo().search([
+            ("company_id", "=", self.env.company.id), ("state", "in", ["confirm", "validate1", "validate"]),
+            ("request_date_to", ">=", today), ("campus_coverage", "!=", False),
+        ], order="request_date_from, id")
+        now = fields.Datetime.to_string(fields.Datetime.now())
+        return [dict(row, leave_id=leave.id, can_respond=row["status"] == "Awaiting acceptance" and row["end"] > now) for leave in leaves
+                if any(slot["faculty_id"] in faculty_ids for slot in leave.campus_coverage or [])
+                for row in leave._coverage_rows() if row["faculty_id"] in faculty_ids]
+
+    def _request_values(self, values):
         self._check_staff()
         allowed = {"leave_type_id", "date_from", "date_to", "from_session", "to_session", "reason"}
         if not isinstance(values, dict) or set(values) - allowed:
@@ -170,7 +193,94 @@ class FacultyLeaveUI(models.AbstractModel):
         if partial:
             data.update(request_unit_half=True,
                         request_date_from_period="pm" if first == "AN" else "am")
-        leave = self.env["hr.leave"].sudo().create(data)
+        return data
+
+    def _own_pending_leave(self, leave_id):
+        self._check_staff()
+        employee = self._employee()
+        if type(leave_id) is not int or not employee:
+            raise AccessError(_("Choose one of your pending leave requests."))
+        leave = self.env["hr.leave"].sudo().search([
+            ("id", "=", leave_id), ("employee_id", "=", employee.id),
+            ("company_id", "=", self.env.company.id), ("state", "in", ["draft", "confirm", "validate1"]),
+        ])
+        if not leave:
+            raise AccessError(_("Choose one of your pending leave requests."))
+        return leave
+
+    @api.model
+    def get_coverage(self, values=None, leave_id=None):
+        if leave_id:
+            leave = self._own_pending_leave(leave_id)
+        else:
+            if not isinstance(values, dict):
+                raise UserError(_("Choose leave dates first."))
+            leave = self.env["hr.leave"].sudo().new(self._request_values(dict(values, reason="Coverage preview")))
+        sessions = leave._coverage_sessions()
+        candidates = leave._coverage_candidates() if sessions else self.env["op.faculty"].sudo().browse()
+        availability = leave._coverage_availability(sessions, candidates)
+        names = {faculty.id: faculty.name for faculty in candidates}
+        rows = leave._coverage_rows()
+        for row in rows:
+            row["options"] = [{"id": faculty_id, "name": names[faculty_id]} for faculty_id in availability[row["id"]]]
+        return {"rows": rows}
+
+    def _lock_coverage_leave(self, leave):
+        self.env.cr.execute("SELECT id FROM hr_leave WHERE id = %s FOR UPDATE", [leave.id])
+        leave.invalidate_recordset()
+
+    @api.model
+    def save_coverage(self, leave_id, coverage):
+        leave = self._own_pending_leave(leave_id)
+        self._lock_coverage_leave(leave)
+        leave = self._own_pending_leave(leave_id)
+        previous = leave._normalize_coverage(leave.campus_coverage or [])
+        updated = leave._normalize_coverage(coverage)
+        responses = leave.campus_coverage_responses or {}
+        leave.write({"campus_coverage": coverage or False, "campus_coverage_responses": {
+            str(session): responses[str(session)] for session, faculty in updated.items()
+            if previous.get(session) == faculty and str(session) in responses
+        }})
+        leave._check_coverage()
+        return True
+
+    @api.model
+    def respond_to_coverage(self, leave_id, session_id, accept):
+        self._check_staff()
+        if type(leave_id) is not int or type(session_id) is not int or type(accept) is not bool:
+            raise UserError(_("Choose an assigned substitute duty."))
+        faculty = self._substitute_faculty()
+        leave = self.env["hr.leave"].sudo().search([
+            ("id", "=", leave_id), ("company_id", "=", self.env.company.id),
+            ("state", "in", ["confirm", "validate1"]), ("date_to", ">", fields.Datetime.now()),
+        ])
+        if not faculty or not leave:
+            raise AccessError(_("This substitute duty is unavailable."))
+        self._lock_coverage_leave(leave)
+        substitute_id = leave._normalize_coverage(leave.campus_coverage or []).get(session_id)
+        session = leave._coverage_sessions().filtered(lambda period: period.id == session_id)
+        if (leave.state not in ("confirm", "validate1") or substitute_id not in faculty.ids or not session
+                or session.end_datetime <= fields.Datetime.now()
+                or leave._coverage_status(session_id, substitute_id) != "Awaiting acceptance"):
+            raise AccessError(_("This substitute duty is unavailable."))
+        if accept and substitute_id not in leave._coverage_availability(session, faculty)[session_id]:
+            raise UserError(_("You are unavailable for this period. Decline it so the applicant can choose another substitute."))
+        responses = dict(leave.campus_coverage_responses or {})
+        responses[str(session_id)] = "Accepted" if accept else "Declined"
+        leave.campus_coverage_responses = responses
+        return True
+
+    @api.model
+    def submit_leave(self, values):
+        if not isinstance(values, dict):
+            raise UserError(_("Enter a valid leave request."))
+        values = dict(values)
+        coverage = values.pop("coverage", [])
+        data = self._request_values(values)
+        model = self.env["hr.leave"].sudo()
+        model._normalize_coverage(coverage)
+        leave = model.create(dict(data, campus_coverage=coverage or False))
+        leave._check_coverage()
         if leave.state == "draft":
             leave.action_confirm()
         return {"id": leave.id, "status": leave.state}
