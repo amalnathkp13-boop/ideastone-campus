@@ -36,43 +36,30 @@ async function markup(page) {
         // Wait for the login POST to finish before navigating elsewhere; navigating early cancels it.
         await Promise.all([page.waitForURL(url=>!url.pathname.startsWith('/web/login')), page.locator('button[type=submit]').click()]);
         await page.goto(base+'/web#action=ideastone_erp.action_dashboard');
-        await page.getByRole('heading',{name:'Admin overview',exact:true}).waitFor();
+        await page.locator('.admin_overview .hero h1').waitFor();
         await page.locator('.campus_owner_stat').first().waitFor();
         const firstMetrics = await rpc(page,'campus.dashboard','get_owner_metrics');
         const studentCard = firstMetrics.stats.find(s=>s.kind==='active_students');
         if(studentCard.value!==3) throw Error('Owner demo does not reconcile with its saved students');
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-dashboard-1440.png'),fullPage:true});
-        await page.locator('.collection-panel').evaluate(element=>element.scrollIntoView({block:'start'}));
-        const feeMonths=firstMetrics.overview_ui.fee_months;
-        const collectionBars=await page.locator('.collection-panel .fee-bar-fill').evaluateAll(nodes=>nodes.map(node=>parseFloat(node.style.height)));
-        // Each vertical bar compares the amount collected with the billed fees for
-        // that same due-month invoice cohort; empty months must remain at zero.
-        if(feeMonths.length!==6 || collectionBars.length!==6
-            || feeMonths.reduce((sum,row)=>sum+row.target,0)!==500
-            || feeMonths.reduce((sum,row)=>sum+row.collected,0)!==300
-            || firstMetrics.overview_ui.fee_percent!==60
-            || collectionBars.some((height,index)=>Math.abs(height-(feeMonths[index].target ? feeMonths[index].collected/feeMonths[index].target*100 : 0))>0.1)) throw Error('Monthly fee bars do not reconcile with the billed and collected amounts');
-        const panelHeights=await page.locator('.collection-panel,.ai-panel').evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().height));
-        if(Math.abs(panelHeights[0]-panelHeights[1])>1) throw Error('Fee and insights cards are not balanced on desktop');
+        const annual = firstMetrics.overview_ui.annual_fees;
+        if(annual.billed!==500 || annual.collected!==300 || annual.balance!==200 || annual.rate!==60)
+            throw Error('Annual fee summary does not reconcile with posted student charges');
+        await page.locator('.owner-annual-fees .owner-fee-headline strong').first().waitFor();
         await page.getByRole('heading',{name:'Decision Overview',exact:true}).waitFor();
-        if(await page.locator('.decision-grid .deadlines-panel').evaluate(el=>getComputedStyle(el).gridColumn)!=='1 / -1') throw Error('Dashboard deadlines do not span the full row');
+        if(await page.locator('.admin_overview .kpi').count()!==8) throw Error('Admin overview does not show eight indicators');
+        if(await page.locator('.owner-calendar-panel .deadline').count()!==firstMetrics.overview_ui.calendar.rows.length)
+            throw Error('Calendar highlights do not reconcile with saved events');
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-charts-1440.png')});
-        if(await page.locator('.admin_overview .kpi').count()!==8) throw Error('Admin overview does not show eight indicators');
-        if(await page.locator('.event-card').count()!==3) throw Error('Admin event cards do not reflect the four saved events');
-        if(await page.locator('.admin_overview .kpi-value').first().evaluate(el=>getComputedStyle(el).color)!=='rgb(16, 45, 73)') throw Error('Saved KPI text does not use the reference color');
-        if(await page.locator('.event-category').first().evaluate(el=>getComputedStyle(el).color)!=='rgb(115, 85, 199)') throw Error('Saved event category does not use the reference color');
         for(const width of [320,390,768,1440]) {
             await page.setViewportSize({width,height:1000});
             if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)) throw Error(`Admin overview overflows at ${width}`);
         }
-        await page.locator('.feature-open').click();
-        await page.locator('.o_form_view').waitFor();
-        await page.locator('.campus_sidebar').getByRole('button',{name:'Dashboard',exact:true}).click();
-        await page.locator('.admin_overview .kpi').first().waitFor();
-        await page.getByRole('button',{name:'Event calendar',exact:true}).click();
-        await page.locator('.o_calendar_view').waitFor();
+        await page.locator('.admin_overview').evaluate(element=>element.scrollIntoView({block:'start'}));
+        await page.locator('.owner-calendar-panel').getByRole('button',{name:'View events',exact:false}).click();
+        await page.getByRole('heading',{name:'College Calendar',exact:true,level:1}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Dashboard',exact:true}).click();
         await page.locator('.admin_overview .kpi').first().waitFor();
         if(await page.locator('.campus_dashboard').innerText().then(text=>/Â·|â€”|â†/.test(text))) throw Error('Owner template contains incorrectly decoded UTF-8 punctuation');

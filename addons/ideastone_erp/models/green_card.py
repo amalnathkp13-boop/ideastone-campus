@@ -94,8 +94,16 @@ class GreenCardStaffNavigation(models.AbstractModel):
         if attendance is None:
             attendance = {"key": "attendance", "label": "Attendance", "icon": "calendar-check-o", "items": []}
             modules.insert(next((i for i, row in enumerate(modules) if row["key"] == "od"), len(modules)), attendance)
-        attendance["label"] = "Attendance"
-        attendance["items"].append({"label": "Green Card", "action": action.get_external_id()[action.id], "action_id": action.id})
+        attendance["label"] = _("Attendance & OD") if role == "hod" else "Attendance"
+        attendance["items"].append({"label": _("Leave management") if role == "hod" else "Green Card",
+                                    "action": action.get_external_id()[action.id], "action_id": action.id})
+        if role == "hod":
+            attendance["items"] = [item for item in attendance["items"]
+                                   if item.get("action") != "ideastone_erp.action_subject_attendance_workspace"]
+            od = next((module for module in modules if module["key"] == "od"), None)
+            if od:
+                attendance["items"].extend(od["items"])
+                modules.remove(od)
         return modules
 
     def _client_action_models(self):

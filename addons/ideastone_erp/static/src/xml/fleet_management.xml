@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.FleetManagement">
+    <main class="campus-fleet" t-if="state.data">
+      <div class="fleet-header"><div><span class="fleet-eyebrow">TRANSPORT OPERATIONS</span><h1>Fleet Management</h1><p>Bus readiness, route coverage and daily transport operations</p></div><span class="fleet-badge"><i t-att-class="state.data.readonly ? 'fa fa-lock' : 'fa fa-shield'"/> <t t-esc="state.data.readonly ? 'Read only' : 'Fleet Manager'"/></span></div>
+      <section class="fleet-hero"><div><span class="fleet-eyebrow" t-esc="state.data.company"/><h2>Fleet Operations Overview</h2><p>Track bus availability, transport expenditure and temporary route replacements.</p></div><i class="fa fa-bus fleet-hero-icon" aria-hidden="true"/></section>
+      <section class="fleet-metrics" aria-label="Fleet metrics">
+        <article t-foreach="metrics" t-as="metric" t-key="metric[0]" t-att-class="'fleet-tone-' + metric[4]">
+          <i t-att-class="'fa fa-' + metric[3]" aria-hidden="true"/><span t-esc="metric[1]"/><strong t-esc="state.data.totals[metric[0]]"/><small t-esc="metric[2]"/>
+        </article>
+      </section>
+      <div class="fleet-columns">
+        <section class="fleet-panel fleet-expenses">
+          <header><div><h2>Fleet Expenditure</h2><p>Money spent by category · all buses in the selected period</p></div>
+            <button t-if="!state.data.readonly" type="button" class="fleet-primary" t-on-click="() => this.entry('expense', 'Add fleet expense')">+ Add expense</button>
+          </header>
+          <div class="fleet-expense-total">
+            <div><span>Total recorded spending</span><strong t-esc="amount(state.data.expense_total, true)"/></div>
+            <select aria-label="Expense period" t-on-change="changePeriod">
+              <option value="month" t-att-selected="state.period === 'month'">This month · <t t-esc="expenseMonth(0)"/></option>
+              <option value="previous" t-att-selected="state.period === 'previous'">Last month · <t t-esc="expenseMonth(-1)"/></option>
+              <option value="year" t-att-selected="state.period === 'year'">Academic year</option>
+            </select>
+          </div>
+          <div class="fleet-expense-categories">
+            <div class="fleet-expense-row" t-foreach="expenseBars" t-as="category" t-key="category.key">
+              <span t-esc="category.name"/><span class="fleet-expense-track" aria-hidden="true"><span t-att-style="'width: ' + category.width + '%'"/></span><strong t-esc="amount(category.amount, true)"/>
+            </div>
+          </div>
+          <p class="fleet-expense-note">Only recorded expenses are included. Pending repair estimates are excluded.</p>
+        </section>
+        <section class="fleet-panel"><header><div><h2>Needs Attention</h2><p>Compliance and daily follow-up</p></div></header>
+          <div class="fleet-attention"><div t-foreach="attention" t-as="item" t-key="item[0]" t-att-class="'fleet-tone-' + item[2]"><span t-esc="item[1]"/><strong t-esc="state.data.totals[item[0]]"/></div></div>
+        </section>
+      </div>
+      <section class="fleet-panel fleet-coverage"><header><div><h2>Temporary Route Coverage</h2><p>Standby buses follow the regular route’s existing stops. Student allocations stay with that route.</p></div><button t-if="!state.data.readonly" type="button" class="fleet-primary" t-on-click="() => this.entry('replacement', 'Assign replacement bus')">+ Assign replacement</button></header>
+        <div t-if="state.data.coverage.length" class="fleet-table"><table><thead><tr><th>Route</th><th>Regular bus</th><th>Replacement bus</th><th>Since</th><th>Reason</th><th t-if="!state.data.readonly">Action</th></tr></thead><tbody>
+          <tr t-foreach="state.data.coverage" t-as="event" t-key="event.id"><td t-esc="event.route"/><td t-esc="event.bus"/><td><span class="fleet-pill fleet-tone-blue" t-esc="event.replacement"/></td><td t-esc="event.date"/><td t-esc="event.note"/><td t-if="!state.data.readonly"><button type="button" t-on-click="() => this.entry('close', 'Restore regular bus', undefined, event)">Restore bus</button></td></tr>
+        </tbody></table></div><p t-else="" class="fleet-empty">No active temporary assignments.</p>
+        <details t-if="state.data.previous.length"><summary>Replacement history</summary><ul><li t-foreach="state.data.previous" t-as="event" t-key="event.id"><t t-esc="event.date"/> · <t t-esc="event.route"/> · <t t-esc="event.replacement"/> · <t t-esc="event.close_note || 'Regular bus restored'"/></li></ul></details>
+      </section>
+      <section class="fleet-panel"><header><div><h2>Bus &amp; Route Coverage</h2><p>Academic year routes, driver assignments and bus readiness</p></div><button type="button" t-on-click="exportRoutes"><i class="fa fa-download"/> Export routes</button></header>
+        <div class="fleet-toolbar"><input type="search" aria-label="Search fleet" placeholder="Search bus, route or driver…" t-model="state.search"/><select aria-label="Operating status" t-model="state.filter"><option value="all">All buses</option><option value="active">Running only</option><option value="inactive">Not running</option></select></div>
+        <div class="fleet-table"><table><thead><tr><th>Bus / Route</th><th>Driver</th><th>Expected / Actual</th><th>Insurance</th><th>Service</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+          <tr t-foreach="rows" t-as="row" t-key="row.id"><td><strong t-esc="row.bus"/><small t-esc="row.route"/></td><td t-esc="row.driver || 'Unassigned'"/><td><t t-esc="row.expected || '—'"/> / <t t-esc="row.actual || '—'"/></td>
+            <td><span t-att-class="'fleet-pill fleet-tone-' + (row.insured ? 'green' : 'amber')" t-esc="row.insured ? 'Active' : 'Pending'"/></td>
+            <td><span t-att-class="'fleet-pill fleet-tone-' + (row.service ? 'rose' : 'blue')" t-esc="row.service ? 'Due' : (row.service_due || 'Unscheduled')"/></td>
+            <td><span t-att-class="'fleet-pill fleet-tone-' + (row.running ? 'green' : 'amber')" t-esc="row.running ? 'Running' : (row.standby ? 'Standby' : 'Not running')"/></td>
+            <td><div class="fleet-actions"><button type="button" t-on-click="() => this.entry('view', 'Bus and route details', row)">View</button><t t-if="!state.data.readonly"><button type="button" t-on-click="() => this.entry('update', 'Edit bus', row)">Edit</button><button type="button" t-on-click="() => this.entry('arrival', 'Record arrival', row)">Arrival</button></t></div></td>
+          </tr>
+        </tbody></table><p t-if="!rows.length" class="fleet-empty">No buses match these filters.</p></div>
+      </section>
+      <div class="fleet-columns">
+        <section class="fleet-panel"><header><div><h2>Recent Expense Records</h2><p>Expenses in the selected period</p></div></header><div class="fleet-register">
+          <div t-foreach="state.data.expenses" t-as="event" t-key="event.id"><span><strong t-esc="event.category"/><small><t t-esc="event.date"/> · <t t-esc="event.bus"/> · <t t-esc="event.note"/></small></span><strong t-esc="amount(event.amount)"/></div>
+          <p t-if="!state.data.expenses.length" class="fleet-empty">No expenses recorded in this period.</p>
+        </div></section>
+        <section class="fleet-panel"><header><div><h2>Incident Register</h2><p>Vehicle incidents and resolutions</p></div><button t-if="!state.data.readonly" type="button" t-on-click="() => this.entry('incident', 'Report an incident')">+ Report incident</button></header><div class="fleet-register">
+          <div t-foreach="state.data.incidents" t-as="event" t-key="event.id"><span><strong t-esc="event.bus"/><small><t t-esc="event.date"/> · <t t-esc="event.note"/></small><small t-if="event.closed" t-esc="event.close_note || 'Resolved'"/></span>
+          <button t-if="!state.data.readonly &amp;&amp; !event.closed" type="button" t-on-click="() => this.entry('close', 'Resolve incident', undefined, event)">Resolve</button><span t-else="" t-att-class="'fleet-pill fleet-tone-' + (event.closed ? 'green' : 'rose')" t-esc="event.closed ? 'Resolved' : 'Open'"/></div>
+          <p t-if="!state.data.incidents.length" class="fleet-empty">No incidents recorded.</p>
+        </div></section>
+      </div>
+    </main>
+  </t>
+
+  <t t-name="ideastone_erp.FleetEntry">
+    <Dialog title="props.title">
+      <div class="fleet-dialog" t-if="props.mode === 'view'">
+        <strong t-esc="props.row.bus"/><h4 t-esc="props.row.route"/>
+        <p>Driver: <t t-esc="props.row.driver || 'Unassigned'"/> · Insurance through: <t t-esc="props.row.insurance_until || 'Pending'"/></p>
+        <p t-if="props.row.replacement">Replacement bus: <t t-esc="props.row.replacement"/></p>
+        <h5>Route stops</h5><ol><li t-foreach="props.row.stops" t-as="stop" t-key="stop_index" t-esc="stop"/></ol>
+        <p t-if="!props.row.stops.length">No stops configured for this route.</p>
+      </div>
+      <form t-else="" id="campus-fleet-entry" class="fleet-dialog" t-on-submit.prevent="submit">
+        <div t-if="state.error" role="alert" class="alert alert-danger" t-esc="state.error"/>
+        <label t-if="!props.row &amp;&amp; props.mode !== 'close'">Bus<select t-model="state.route_id" required="required"><option value="">Choose a bus</option><option t-foreach="props.workspace.rows" t-as="row" t-key="row.id" t-att-value="row.id"><t t-esc="row.bus"/> · <t t-esc="row.assigned_route"/></option></select></label>
+        <p t-if="props.row"><strong t-esc="props.row.bus"/> · <t t-esc="props.row.route"/></p>
+        <t t-if="props.mode === 'update'">
+          <label>Operating status<select t-model="state.status"><option value="operational">Operational</option><option value="maintenance">Maintenance</option><option value="reserve">Reserve</option></select></label>
+          <label>Driver<input t-model="state.driver" maxlength="100"/></label>
+          <label>Insurance expiry<input type="date" t-model="state.insurance_until"/></label>
+          <label>Next service due<input type="date" t-model="state.service_due"/></label>
+          <label>Expected arrival<input type="time" t-model="state.expected"/></label>
+        </t>
+        <label t-if="props.mode === 'arrival'">Actual arrival today<input type="time" required="required" t-model="state.arrival"/></label>
+        <t t-if="props.mode === 'expense'">
+          <label>Category<select required="required" t-model="state.category"><option value="">Choose a category</option><option t-foreach="props.workspace.categories" t-as="category" t-key="category.key" t-att-value="category.key" t-esc="category.name"/></select></label>
+          <label>Amount (₹)<input type="number" step="0.01" min="0.01" max="10000000" required="required" t-model="state.amount"/></label>
+          <label>Expense date<input type="date" required="required" t-att-max="props.workspace.today" t-model="state.date"/></label>
+        </t>
+        <t t-if="props.mode === 'replacement'">
+          <label>Standby bus<select required="required" t-model="state.replacement_id"><option value="">Choose an available standby bus</option><option t-foreach="props.workspace.rows.filter(bus => bus.standby)" t-as="row" t-key="row.id" t-att-value="row.id"><t t-esc="row.bus"/> · <t t-esc="row.driver"/></option></select></label>
+          <label class="fleet-confirm"><input type="checkbox" required="required" t-model="state.verified"/> I verified the standby bus is roadworthy and insured.</label>
+        </t>
+        <label class="fleet-confirm" t-if="props.mode === 'close' &amp;&amp; props.event.replacement"><input type="checkbox" required="required" t-model="state.verified"/> I verified the regular bus is roadworthy, insured and cleared for service.</label>
+        <label t-if="['expense', 'incident', 'replacement', 'close'].includes(props.mode)"><t t-esc="props.mode === 'close' ? 'Resolution note' : 'Reason or description'"/><textarea maxlength="500" rows="3" t-att-required="props.mode !== 'close'" t-model="state.note"/></label>
+      </form>
+      <t t-set-slot="footer">
+        <button t-if="props.mode !== 'view'" class="btn btn-primary" type="submit" form="campus-fleet-entry" t-att-disabled="state.busy">Save</button>
+        <button type="button" class="btn btn-secondary" t-on-click="props.close" t-esc="props.mode === 'view' ? 'Close' : 'Cancel'"/>
+      </t>
+    </Dialog>
+  </t>
+</templates>

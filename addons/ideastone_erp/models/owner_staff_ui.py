@@ -107,7 +107,8 @@ class OwnerStaffUI(models.AbstractModel):
             "from": str(leave.request_date_from), "to": str(leave.request_date_to),
             "days": leave.number_of_days_display, "reason": leave.name or "—",
             "status": "Second approval" if leave.state == "validate1" else "Pending",
-            "can_approve": leave.can_approve} for leave in leaves]
+            "can_approve": leave.can_approve,
+            "coverage": leave.campus_coverage_summary} for leave in leaves]
 
     @api.model
     def get_profile(self, faculty_id):

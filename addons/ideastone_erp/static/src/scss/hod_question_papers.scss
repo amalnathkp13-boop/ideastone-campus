@@ -38,3 +38,37 @@
 }
 .qp-hod { h1,h2,h3 {line-height:inherit;} }
 .qp-hod select {appearance:auto;line-height:normal;}
+
+.campus_faculty_sop {
+    .qp-hod-embedded {
+        height: auto;
+        overflow: visible;
+        background: transparent;
+        margin-bottom: 18px;
+        .content { padding: 0; }
+        .panel { padding: 0; }
+        .panelhead h2 { font-size: 18px; }
+        .grid { gap: 18px; }
+        .modalfoot { flex-wrap: wrap; }
+        .heading { flex-wrap: wrap; }
+        .set-choice { overflow-wrap: anywhere; }
+        @media (max-width: 1050px) {
+            .grid { grid-template-columns: minmax(0, 1fr); }
+        }
+        @media (max-width: 420px) {
+            .stat { flex-direction: column; align-items: flex-start; }
+        }
+    }
+    .hod-author-section { margin: 0 0 20px; }
+    .hod-marks-heading { margin: 24px 0 16px; }
+}
+
+@layer campus-theme {
+    .o_web_client .campus_faculty_sop .qp-hod-embedded {
+        h1 { font-weight: 750 !important; color: #102f4c !important; }
+        .panelhead h2 { font-size: 18px !important; font-weight: 700 !important; color: #173754 !important; }
+        .dept h3 { font-size: 13px !important; font-weight: 700 !important; }
+        .subtitle { font-size: 14px !important; }
+        .btn { font-size: 14px !important; font-weight: 650 !important; border-radius: 9px !important; }
+    }
+}
