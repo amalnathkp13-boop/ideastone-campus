@@ -10,7 +10,7 @@ class AccountantDirectory extends Component {
         this.state = useState({rows: [], currency: "₹", mode: this.props.action.params?.mode || "directory", level: "department", department: "", year: "", section: "", student: null, search: "", status: "", semester: "", error: ""});
         onWillStart(async () => { try { Object.assign(this.state, await this.orm.call("campus.dashboard", "get_accountant_directory", [])); } catch (e) { this.state.error = e.data?.message || "Fee records could not be loaded."; } });
     }
-    money(n) { return this.state.currency + new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(n || 0); }
+    money(n) { return "₹" + new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(n || 0); }
     initials(name) { return name.split(" ").map(s => s[0]).slice(0, 2).join(""); }
     get years() { return [...new Set(this.state.rows.map(r => r.year))].sort(); }
     get departments() { return [...new Set(this.state.rows.map(r => r.department))].sort(); }

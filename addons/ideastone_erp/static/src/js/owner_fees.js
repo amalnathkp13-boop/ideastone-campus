@@ -63,7 +63,7 @@ export class OwnerFeesWorkspace extends Component {
     }
     get d(){return this.state.data;}get title(){return PAGES[this.page];}
     get year(){return this.d.years.find(y=>y.id===Number(this.state.year));}
-    money(value){return this.d.symbol+" "+new Intl.NumberFormat("en-IN",{maximumFractionDigits:2}).format(value||0);}
+    money(value){return "₹ "+new Intl.NumberFormat("en-IN",{maximumFractionDigits:2}).format(value||0);}
     compact(value){const n=Math.abs(value),scale=n>=1e7?1e7:n>=1e5?1e5:1;return this.money(value/scale)+(scale===1e7?" Cr":scale===1e5?" L":"");}
     lakh(value){return this.money(value/100000)+" L";}
     date(value){return value?new Date(value.slice(0,10)+"T12:00:00Z").toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric",timeZone:"UTC"}):"—";}
