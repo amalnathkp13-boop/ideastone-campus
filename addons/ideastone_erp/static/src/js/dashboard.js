@@ -490,12 +490,16 @@ class CampusBase extends Component {
     async ownerSource(card) {
         if (!card.allowed) return;
         try {
+            if (card.kind === "fleet" && this.ownerUI.fleet) return this.openOwnerFleet("active");
             if (["services", "attendance_pending", "overdue_services", "overdue_dues", "staff_present", "staff_delayed", "fleet"].includes(card.kind)) return this.ownerOverviewAction(card.kind);
             const action = await this.orm.call("campus.dashboard", "get_owner_source_action", [card.kind, this.state.ownerAppliedFilters]);
             if (!action.views) action.views = (action.view_mode || "tree,form").split(",").map(mode => [false, mode]);
             if (action.help) action.help = markup(action.help);
             await this.action.doAction(action);
         } catch (error) { this.notification.add(error.data?.message || "The source register is unavailable.", {type: "danger"}); }
+    }
+    openOwnerFleet(filter = "all") {
+        return this.action.doAction("ideastone_erp.action_fleet_management", {props: {initialFilter: filter}});
     }
     chartWidth(value, rows, field = "value") {
         const keys = Array.isArray(field) ? field : [field];
