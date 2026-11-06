@@ -152,7 +152,10 @@ class AcademicsUI(models.AbstractModel):
         planned_hours = sum(due.mapped("planned_hours"))
         delivered = sum(min(r.actual_hours, r.planned_hours) for r in due if r.execution_date and r.execution_date <= today)
         coverage = round(delivered * 100 / planned_hours, 1) if planned_hours else None
-        checks = missing_credits + missing_subjects + missing_sections + missing_terms
+        lagging_departments = len({plan.batch_id.course_id.department_id.id for plan in due
+            if plan.batch_id.course_id.department_id and
+            (not plan.execution_date or plan.execution_date > today or plan.actual_hours < plan.planned_hours)})
+        checks = missing_credits + missing_subjects + missing_sections + missing_terms + lagging_departments
         def percent(count, total):
             return round(count * 100 / total) if total else None
         mapped_subjects = set(active_programmes.subject_ids.ids)
@@ -188,9 +191,11 @@ class AcademicsUI(models.AbstractModel):
                 milestones.append({"name": exam.name, "date": str(when), "detail": exam.course_id.name, "status": _("Scheduled")})
         return {"today": str(today), "company": self.env.company.name, "is_demo": self.env.company.campus_demo,
             "rows": rows, "current": next((r for r in rows["years"] if r["id"] == year_id), None),
-            "counts": {"programmes": len(active_programmes), "coverage": coverage, "sections": len(current_sections), "checks": checks,
+            "counts": {"programmes": len(active_programmes), "departments": len(departments.filtered("active")),
+                "coverage": coverage, "sections": len(current_sections), "checks": checks,
                 "students": len(enrolments.student_id), "missing_credits": missing_credits, "missing_subjects": missing_subjects,
-                "missing_sections": missing_sections, "missing_terms": missing_terms},
+                "missing_sections": missing_sections, "missing_terms": missing_terms,
+                "lagging_departments": lagging_departments},
             "readiness": readiness, "trend": trend, "milestones": sorted(milestones, key=lambda r: r["date"])[:12],
             "distribution": dict(Counter(s.department_id.name or _("Not specified") for s in active_subjects)),
             "can_edit": self.env.user.has_group("ideastone_erp.group_mvp_registrar"),

@@ -53,6 +53,7 @@ class CampusBase extends Component {
             collectionYearId: "", collectionSearch: "", collectionStatusFilter: "",
             ownerFilters: {date_from: "", date_to: "", year_id: ""}, ownerAppliedFilters: {}, ownerError: "", ownerLoading: false,
             faculty_modules: [], faculty_tasks: [], faculty_schedule: [], faculty_surveys: [], module: route.module, activeAction: 0, activeTool: "",
+            moduleOverview: {rows: []},
             busy: false, query: "", cardQuery: "", unit: "", card: "", loanPage: 0, desk: { units: [], cards: [], loans: [], next: false } });
         // Handle the drawer before Odoo's global Escape shortcut consumes the key.
         useExternalListener(window, "keydown", (event) => {
@@ -66,6 +67,9 @@ class CampusBase extends Component {
         this.state.error = "";
         try {
             Object.assign(this.state, await this.orm.call("campus.dashboard", "get_overview", []));
+            if (this.state.page === "faculty-module") {
+                this.state.moduleOverview = await this.orm.call("campus.dashboard", "get_module_overview", [this.state.module]);
+            }
             if (this.state.is_owner_workspace) {
                 if (this.state.is_accountant_workspace && !["overview", "accountant-overview", "faculty-module", "modules"].includes(this.state.page) && !this.state.page.startsWith("accountant-collections-")) {
                     this.state.page = "accountant-overview";
@@ -96,7 +100,18 @@ class CampusBase extends Component {
             items: this.state.navigation.filter(item => item.group === label && (!query || `${item.label} ${label}`.toLowerCase().includes(query))),
         })).filter(group => group.items.length);
     }
-    get facultyModule() { return this.state.faculty_modules.find(item => item.key === this.state.module) || this.state.faculty_modules[0]; }
+    moduleItems(module) {
+        if (!module) return [];
+        if (module.key === "students" && this.state.is_owner_workspace) {
+            return module.items.filter(item => item.page !== "faculty-module");
+        }
+        return module.key === "home" || module.items.some(item => item.label === "Overview") ? module.items :
+            [{label: "Overview", page: "faculty-module"}, ...module.items];
+    }
+    get facultyModule() {
+        const module = this.state.faculty_modules.find(item => item.key === this.state.module) || this.state.faculty_modules[0];
+        return module && {...module, items: this.moduleItems(module)};
+    }
     get pageTitle() {
         if (this.state.page.startsWith("settings-")) return "Settings";
         if (this.state.faculty_home_enabled && this.state.page === "overview") return "Faculty overview";
@@ -105,7 +120,7 @@ class CampusBase extends Component {
         if (this.state.page === "accountant-overview") return "Accountant overview";
         if (this.state.page === "accountant-collections-overview") return "Collections overview";
         if (this.state.page.startsWith("accountant-collections-")) return this.collectionPage.title;
-        if (this.state.page === "faculty-module") return this.facultyModule?.label || "Faculty workspace";
+        if (this.state.page === "faculty-module") return `${this.facultyModule?.label || "Faculty workspace"} overview`;
         if (this.state.page === "help") return "Faculty guide";
         if (this.state.page === "analytics") return "My teaching dashboard";
         if (this.state.page === "surveys") return "My survey invitations";
@@ -114,6 +129,10 @@ class CampusBase extends Component {
         return this.state.page === "library" ? "Library circulation desk" : "Reports & exports";
     }
     async chooseModule(module) {
+        if (module.key === "students" && this.state.is_owner_workspace) {
+            this.state.module = module.key;
+            return this.open({action: "ideastone_erp.action_students_directory"});
+        }
         if (this.state.is_principal_workspace && ["home", "decisions", "principal_notices"].includes(module.key) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
@@ -138,12 +157,12 @@ class CampusBase extends Component {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
-        if (((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library", "grievances"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics", "fees", "calendar", "staff", "communication"].includes(module.key))) && module.items?.[0]?.action) {
+        if (module.items?.[0]?.label === "Overview" && module.items[0].action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
         await this.action.doAction("ideastone_erp.action_dashboard", {
-            additionalContext: { campus_page: module.key === "home" ? (this.state.is_accountant_workspace ? "accountant-overview" : this.state.is_owner_workspace ? "owner-overview" : "overview") : module.key === "engagement" ? "communication-surveys" : module.key === "services" ? "campus-services-service" : "faculty-module", campus_module: module.key },
+            additionalContext: { campus_page: module.key === "home" ? (this.state.is_accountant_workspace ? "accountant-overview" : this.state.is_owner_workspace ? "owner-overview" : "overview") : "faculty-module", campus_module: module.key },
         });
         this.state.module = module.key;
         this.state.open = false;
@@ -630,7 +649,7 @@ export class CampusNavigation extends CampusBase {
         if (this.state.faculty_modules.length) {
             for (const module of this.state.faculty_modules) {
                 catalog.push({id: `module/${module.key}`, label: module.label, icon: module.icon, main: true, kind: "module", data: module});
-                for (const item of module.items || []) {
+                for (const item of this.moduleItems(module)) {
                     const key = item.action || item.tool || (item.page && `page-${item.page}`) || (item.profile_id && "profile") || (item.url && "url");
                     if (!key || item.allowed === false) continue;
                     catalog.push({id: `item/${module.key}/${key}`, label: item.label, icon: module.icon, group: module.label, kind: "item", module: module.key, data: item});

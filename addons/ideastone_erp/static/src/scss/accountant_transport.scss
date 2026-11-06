@@ -22,8 +22,6 @@
 body.campus_faculty_workspace:has(.campus_transport_workspace) {
     .o_navbar { height: 53px !important; min-height: 53px !important; }
     .o_main_navbar { height: 53px !important; min-height: 53px !important; }
-    .campus_faculty_subnav { display: none; }
-    &.o_web_client > .o_action_manager { margin-top: 0; }
 }
 .campus_transport_workspace {
     --navy: #102c46; --blue: #1769d2; --blue2: #eaf3ff; --canvas: #f5f8fc; --ink: #102c46;

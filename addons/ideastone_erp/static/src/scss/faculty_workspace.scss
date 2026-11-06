@@ -21,6 +21,7 @@ body.campus_faculty_workspace {
         > .campus_subnav_scroll { flex: 0 0 32px; padding: 0; border: 1px solid #e0e8f2; border-radius: 7px; height: 32px; color: #1668df; }
     }
     .campus_dashboard { padding: 26px 30px; background: #f4f7fb; }
+    .campus_dashboard:has(.campus_module_overview) > .campus_page_heading { display: none; }
     .campus_faculty_welcome { display: flex; justify-content: space-between; align-items: center; gap: 20px;
         padding: 30px; margin-bottom: 24px; border-radius: 16px; color: #fff;
         background: linear-gradient(115deg, #082b46, #145e9c); box-shadow: 0 8px 24px #082b461a;
@@ -37,6 +38,25 @@ body.campus_faculty_workspace {
     .campus_faculty_tile { padding: 24px; min-height: 160px; background: #fff; gap: 15px; transition: box-shadow .15s, border-color .15s;
         small { display: flex; justify-content: space-between; width: 100%; color: #0666e7; }
         &:hover { box-shadow: 0 8px 20px #082b4612; }
+    }
+    .campus_module_overview {
+        color: #0b2c46;
+        .campus_module_overview_head { display: flex; justify-content: space-between; gap: 16px; align-items: start; margin-bottom: 22px; }
+        h1 { margin: 0 0 5px; font-size: 29px; }
+        h3 { margin: 0 0 4px; font-size: 18px; }
+        p { margin: 0; color: #627b94; }
+        .campus_module_overview_stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+        .campus_module_overview_stats article, .campus_module_overview_panels section { background: #fff; border: 1px solid #dfe8f2; border-radius: 14px; padding: 20px; box-shadow: 0 9px 25px #14375a0d; }
+        .campus_module_overview_stats small, .campus_module_overview_stats span { display: block; color: #627b94; }
+        .campus_module_overview_stats strong { display: block; font-size: 28px; margin: 8px 0 2px; }
+        .campus_module_overview_panels { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .campus_module_overview_links, .campus_module_overview_rows { margin-top: 16px; display: grid; gap: 8px; }
+        .campus_module_overview_links button, .campus_module_overview_rows > div { display: flex; justify-content: space-between; gap: 14px; align-items: center; width: 100%; padding: 11px 12px; border: 1px solid #e5edf6; border-radius: 9px; background: #f8faff; color: #173b60; }
+        .campus_module_overview_links button span { display: flex; align-items: center; gap: 11px; }
+        .campus_module_overview_links button:hover { border-color: #91bcf7; background: #edf5ff; }
+        .campus_module_overview_rows b { color: #1769e8; }
+        @media (max-width: 1050px) { .campus_module_overview_stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 700px) { .campus_module_overview_panels { grid-template-columns: 1fr; } .campus_module_overview_head { flex-wrap: wrap; } }
     }
     .o_control_panel { padding: 16px 22px; }
     .o_form_view .o_form_sheet { border-radius: 14px; }
