@@ -12,8 +12,8 @@ class TestOwnerStaffUI(OwnerMVPFixture, TransactionCase):
         dashboard = self.env["campus.dashboard"].with_user(self.owner)
         staff = next(module for module in dashboard.get_overview()["faculty_modules"] if module["key"] == "staff")
         labels = [item["label"] for item in staff["items"]]
-        self.assertEqual(labels, ["Staff directory", "Leave Management", "Staff Profile", "OD Management", "OD Staffs"])
-        for item in (staff["items"][0], staff["items"][1], staff["items"][-1]):
+        self.assertEqual(labels, ["Staff directory", "Leave Management", "Payroll History", "Staff Profile", "OD Management", "OD Staffs"])
+        for item in (staff["items"][0], staff["items"][1], staff["items"][2], staff["items"][-1]):
             self.assertTrue(dashboard.get_owner_action(item["action"])["tag"].startswith("ideastone_erp.owner_staff_"))
         source = dashboard.get_owner_source_action("faculty")
         self.assertEqual(source["res_model"], "op.faculty")
