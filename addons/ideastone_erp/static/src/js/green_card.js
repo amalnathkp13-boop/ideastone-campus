@@ -28,7 +28,7 @@ export class GreenCard extends Component {
     }
     label(row){return labels[row.state] || row.state;}
     tone(row){return row.state==="approved"?"green":row.state==="rejected"?"red":/proof|return/.test(row.state)?"amber":"blue";}
-    get title(){return this.student?"Green Card":this.hod?"Green Card":"Green Card – Mentor Review";}
+    get title(){return this.student?"Green Card":this.hod?"Leave management":"Green Card – Mentor Review";}
     get subtitle(){return this.student?"Apply for announced or unannounced leave, respond to verification, and follow approvals.":this.hod?"Review mentor-approved department applications and record the final decision.":"Review your mentorship class requests, verify exceptions, and forward to the HOD.";}
     get rows(){
         const query=this.state.search.trim().toLowerCase();

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.HodDirectory">
+    <div class="hod-directory">
+      <main class="directory-content">
+        <div class="crumb">VCET Campus / HOD workspace / <b>Staff &amp; Students</b></div>
+        <div t-if="state.error" class="notice" role="alert">
+          <t t-esc="state.error"/> <button type="button" class="directory-btn small" t-on-click="() => this.load()">Retry</button>
+        </div>
+        <t t-if="data">
+          <header class="pagehead">
+            <div>
+              <h1 t-esc="staff ? 'Staff directory' : 'Student directory'"/>
+              <p t-if="staff">View teaching and non-teaching staff in your department, including daily attendance and profile details.</p>
+              <p t-else="">Browse students by academic year and section, with daily attendance and individual profile access.</p>
+            </div>
+            <div class="head-actions">
+              <span class="pill blue">Department: <t t-esc="data.department"/></span>
+              <button t-if="staff" type="button" class="directory-btn" t-att-disabled="state.loading" t-on-click="() => this.load()">↻ Refresh</button>
+              <button t-else="" type="button" class="directory-btn" t-on-click="showYears">↻ All years</button>
+            </div>
+          </header>
+          <div class="kpis">
+            <div class="kpi" t-foreach="stats" t-as="item" t-key="item[0]">
+              <div class="kpi-top"><t t-esc="item[0]"/> <span class="kpi-icon" aria-hidden="true" t-esc="item[1]"/></div>
+              <div class="kpi-value" t-esc="item[2]"/>
+              <div class="kpi-note" t-esc="item[3]"/>
+            </div>
+          </div>
+          <section class="panel">
+            <header class="panel-head">
+              <div>
+                <h2 t-esc="staff ? 'Department staff' : browseTitle"/>
+                <p t-esc="staff ? 'Teaching and non-teaching staff are maintained in separate lists.' : browseSubtitle"/>
+              </div>
+              <span t-if="data.demo" class="pill neutral">Illustrative sample data</span>
+            </header>
+            <t t-if="staff">
+              <t t-set="filterKey" t-value="'staff'"/>
+              <t t-call="ideastone_erp.HodDirectoryFilters"/>
+              <div class="tabs" aria-label="Staff category">
+                <button t-foreach="['Teaching', 'Non-teaching']" t-as="category" t-key="category" type="button" class="tab"
+                  t-att-class="{active: state.category === category}" t-att-data-kind="category" t-att-aria-pressed="state.category === category ? 'true' : 'false'"
+                  t-on-click="() => state.category = category">
+                  <t t-esc="category"/> staff <span class="pill neutral" t-esc="category === 'Teaching' ? teaching : data.total - teaching"/>
+                </button>
+              </div>
+              <t t-call="ideastone_erp.HodDirectoryRoster"/>
+            </t>
+            <t t-else="">
+              <t t-set="filterKey" t-value="'browse'"/>
+              <t t-call="ideastone_erp.HodDirectoryFilters"/>
+              <div t-if="!state.year" class="section-grid">
+                <button t-foreach="years" t-as="year" t-key="year.year" type="button" class="year-card" t-on-click="() => this.selectYear(year.year)">
+                  <span class="arrow" aria-hidden="true">→</span><div class="year">Year <t t-esc="year.year"/></div>
+                  <div class="count" t-esc="year.count"/><small>Students · <t t-esc="year.sections"/> <t t-esc="year.sections === 1 ? 'section' : 'sections'"/></small>
+                </button>
+              </div>
+              <t t-elif="!roster">
+                <div t-if="sections.length" class="section-grid">
+                  <button t-foreach="sections" t-as="section" t-key="section.id" type="button" class="section-card" t-on-click="() => this.selectSection(section.id)">
+                    <strong>Year <t t-esc="section.year"/> · <t t-esc="section.name"/></strong>
+                    <small t-esc="section.programme"/><div class="section-meta"><span class="pill blue"><t t-esc="section.count"/> students</span><span class="arrow">Open →</span></div>
+                  </button>
+                </div>
+                <div t-else="" class="empty">No current sections are recorded for this year.</div>
+              </t>
+              <t t-else="">
+                <div class="backline"><button type="button" t-on-click="backToSections">← Back to sections</button><span class="pill blue" t-esc="browseTitle"/></div>
+                <t t-set="filterKey" t-value="'roster'"/>
+                <t t-call="ideastone_erp.HodDirectoryFilters"/>
+                <t t-call="ideastone_erp.HodDirectoryRoster"/>
+              </t>
+            </t>
+          </section>
+          <div t-if="!staff" class="notice">
+            Attendance comes from submitted class registers for the selected date. Profiles show read-only directory information.
+          </div>
+          <div class="footer-note">VCET Campus ERP · HOD workspace · Powered by Ideastone<t t-if="data.demo"> · Sample data for UI demonstration</t></div>
+        </t>
+        <dialog t-if="state.profile" t-ref="profileDialog" class="directory-modal" aria-labelledby="directory-profile-title"
+          t-on-click="closeBackdrop" t-on-cancel="closeProfile" t-on-keydown="onProfileKeydown">
+          <div class="directory-modal-content">
+            <header class="modal-head">
+              <h2 id="directory-profile-title" t-esc="staff ? 'Staff profile' : 'Student profile'"/>
+              <button type="button" class="directory-close" aria-label="Close profile" t-on-click="closeProfile">×</button>
+            </header>
+            <div class="modal-body">
+              <div class="profile-top">
+                <div class="initials" aria-hidden="true" t-esc="initials(state.profile.name)"/>
+                <div><h3 t-esc="state.profile.name"/><p t-esc="state.profile.subtitle"/></div>
+                <span t-attf-class="pill {{tone(state.profile.attendance)}}">● <t t-esc="state.profile.attendance"/></span>
+              </div>
+              <div class="modal-section">Basic information</div>
+              <div class="detail-grid">
+                <div t-foreach="state.profile.details" t-as="detail" t-key="detail.label" class="detail">
+                  <div class="detail-label" t-esc="detail.label"/><strong t-esc="detail.value"/>
+                </div>
+              </div>
+            </div>
+          </div>
+        </dialog>
+      </main>
+    </div>
+  </t>
+
+  <t t-name="ideastone_erp.HodDirectoryFilters">
+    <div class="filter-toolbar" t-att-class="{'browse-only': filterKey === 'browse'}">
+      <input t-if="filterKey !== 'browse'" type="search" class="field search" t-model="state.query" maxlength="200"
+        t-att-aria-label="staff ? 'Search staff' : 'Search student roster'"
+        t-att-placeholder="staff ? 'Search by name, staff ID or designation…' : 'Search student name, register number or email…'"/>
+      <div class="filter-wrap">
+        <button type="button" class="filter-icon-btn" t-att-aria-expanded="state.filter === filterKey ? 'true' : 'false'"
+          t-att-aria-controls="'hod-directory-filter-' + filterKey"
+          t-att-aria-label="filterKey === 'staff' ? 'Open staff filters' : filterKey === 'browse' ? 'Open student filters' : 'Open roster filters'"
+          t-on-click="() => this.openFilter(filterKey)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M7 12h10m-7 7h4"/><path d="M6 5v2m12-2v2M9 12v2m6-2v2m-3 5v2"/></svg>
+        </button>
+        <form class="filter-popover" t-att-class="{open: state.filter === filterKey}" t-att-id="'hod-directory-filter-' + filterKey" t-on-submit.prevent="applyFilter">
+          <h3 t-esc="filterKey === 'staff' ? 'Filter staff directory' : filterKey === 'browse' ? 'Student directory filters' : 'Filter student roster'"/>
+          <t t-if="filterKey !== 'roster'">
+            <label t-att-for="'hod-directory-date-' + filterKey">Attendance date</label>
+            <input t-att-id="'hod-directory-date-' + filterKey" type="date" class="field" t-model="state.draftDate"
+              min="1900-01-01" t-att-max="data.today" required="required"/>
+          </t>
+          <t t-if="filterKey !== 'browse'">
+            <label t-att-for="'hod-directory-attendance-' + filterKey">Attendance status</label>
+            <select t-att-id="'hod-directory-attendance-' + filterKey" class="field" t-model="state.draftAttendance">
+              <option value="">All attendance</option><option>Present</option><option>Absent</option>
+              <option t-if="!staff">Excused</option><option>Not recorded</option>
+            </select>
+          </t>
+          <div class="filter-actions">
+            <button type="button" class="directory-btn small" t-on-click="resetFilter">Reset</button>
+            <button type="submit" class="directory-btn small primary" t-att-disabled="state.loading">Apply</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </t>
+
+  <t t-name="ideastone_erp.HodDirectoryRoster">
+    <div class="table-wrap" tabindex="0" role="region" t-att-aria-label="staff ? 'Department staff table' : 'Student roster table'">
+      <table>
+        <thead><tr>
+          <th scope="col" t-esc="staff ? 'Staff member' : 'Student'"/><th scope="col" t-esc="staff ? 'Staff ID' : 'Register number'"/>
+          <th scope="col" t-esc="staff ? 'Designation' : 'Year / Section'"/><th scope="col" t-esc="staff ? 'Department / Unit' : 'Semester'"/>
+          <th scope="col">Attendance</th><th scope="col" t-esc="staff ? 'Contact' : 'College email'"/><th scope="col">Action</th>
+        </tr></thead>
+        <tbody>
+          <tr t-foreach="rows" t-as="row" t-key="row.id">
+            <td><div class="person"><div class="initials" aria-hidden="true" t-esc="initials(row.name)"/>
+              <div><strong t-esc="row.name"/><small t-esc="staff ? row.designation : row.programme"/></div>
+            </div></td>
+            <td t-esc="row.code || '—'"/>
+            <td><t t-if="staff" t-esc="row.designation || '—'"/><t t-else="">Year <t t-esc="row.year"/> / <t t-esc="row.section"/></t></td>
+            <td t-esc="(staff ? row.unit : row.semester) || '—'"/>
+            <td><span t-attf-class="pill {{tone(row.attendance)}}">● <t t-esc="row.attendance"/></span></td>
+            <td t-esc="row.contact || '—'"/>
+            <td><button type="button" class="directory-btn small link" t-on-click="() => this.openProfile(row)">View profile ↗</button></td>
+          </tr>
+          <tr t-if="!rows.length"><td colspan="7" class="empty" t-esc="staff ? 'No staff match the selected filters.' : 'No students match the selected filters.'"/></tr>
+        </tbody>
+      </table>
+    </div>
+  </t>
+</templates>
