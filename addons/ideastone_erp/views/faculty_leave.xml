@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+  <data noupdate="1"><record id="staff_on_duty_leave_type" model="hr.leave.type">
+    <field name="name">Staff On Duty</field>
+    <field name="company_id" eval="False"/>
+    <field name="requires_allocation">no</field>
+    <field name="leave_validation_type">hr</field>
+    <field name="time_type">other</field>
+    <field name="request_unit">half_day</field>
+  </record></data>
+  <record id="hr_leave_form_staff_coverage" model="ir.ui.view">
+    <field name="name">hr.leave.form.staff.coverage</field>
+    <field name="model">hr.leave</field>
+    <field name="inherit_id" ref="hr_holidays.hr_leave_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//sheet" position="inside">
+        <group string="Teaching coverage">
+          <field name="campus_coverage_summary" readonly="1" nolabel="1"/>
+        </group>
+      </xpath>
+    </field>
+  </record>
   <record id="action_faculty_leave_page" model="ir.actions.client">
     <field name="name">Leave Requests</field>
     <field name="tag">ideastone_erp.faculty_leave_page</field>

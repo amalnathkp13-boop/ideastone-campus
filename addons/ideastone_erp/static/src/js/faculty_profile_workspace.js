@@ -57,7 +57,7 @@ export class FacultyProfileWorkspace extends Component {
     relation(value){return Array.isArray(value)?value[1]:value||"Not recorded";}
     initials(value){return String(value||"").trim().split(/\s+/).slice(0,2).map(w=>w[0]).join("").toUpperCase();}
     num(v){return new Intl.NumberFormat("en-IN",{maximumFractionDigits:2}).format(v||0);}
-    money(v){return new Intl.NumberFormat("en-IN",{style:"currency",currency:this.d.currency,minimumFractionDigits:0,maximumFractionDigits:2}).format(v||0);}
+    money(v){return new Intl.NumberFormat("en-IN",{style:"currency",currency:this.d.currency,minimumFractionDigits:0,maximumFractionDigits:2}).formatToParts(v||0).map(p=>p.type==="currency"?"₹":p.value).join("");}
     date(v){return v?new Date(String(v).slice(0,10)+"T12:00:00Z").toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric",timeZone:"UTC"}):"Not recorded";}
     period(v){return v?new Date(String(v).slice(0,10)+"T12:00:00Z").toLocaleDateString("en-GB",{month:"long",year:"numeric",timeZone:"UTC"}):"No approved payroll";}
     stateLabel(v){return {draft:"Draft",submitted:"Awaiting review",approved:"Approved",done:"Completed",cancelled:"Cancelled"}[v]||v;}
@@ -73,7 +73,7 @@ export class FacultyProfileWorkspace extends Component {
     get evidenceCompleteness(){return this.d.activities.length?Math.round(this.evidenced/this.d.activities.length*100):0;}
     get coveredCategories(){return this.categories.slice(1).filter(c=>c.count).length;}
     get academicCycle(){const date=this.d.today,year=Number(date.slice(0,4))-(Number(date.slice(5,7))<6?1:0);return year+"–"+String(year+1).slice(-2)+" cycle";}
-    compactMoney(value){return new Intl.NumberFormat("en-IN",{style:"currency",currency:this.d.currency,notation:"compact",maximumFractionDigits:1}).format(value||0);}
+    compactMoney(value){return new Intl.NumberFormat("en-IN",{style:"currency",currency:this.d.currency,notation:"compact",maximumFractionDigits:1}).formatToParts(value||0).map(p=>p.type==="currency"?"₹":p.value).join("");}
     get salaryTrendCopy(){const rows=this.trend;if(!rows.length)return "No approved payslips match the selected period.";const first=rows[0],last=rows[rows.length-1];return rows.length===1?"Net pay is "+this.money(last.net)+" for "+this.period(last.date_from)+".":"Net pay changed from "+this.money(first.net)+" in "+this.period(first.date_from)+" to "+this.money(last.net)+" in "+this.period(last.date_from)+".";}
     kindName(kind){return this.d.kinds.find(k=>k.id===kind)?.name||kind;}
     get documents(){return this.d.documents.filter(r=>(!this.state.status||r.status===this.state.status)&&r.name.toLowerCase().includes(this.state.query.toLowerCase()));}
