@@ -40,8 +40,8 @@ class TestCollegeCalendar(TransactionCase):
         action = dashboard.get_owner_action("ideastone_erp.action_college_calendar")
         self.assertEqual(action["tag"], "ideastone_erp.college_calendar")
         self.assertEqual(action["context"]["campus_module"], "calendar")
-        # Teaching allocation still uses the original session model.
-        self.assertEqual(dashboard.get_owner_action("ideastone_erp.mvp_timetable")["res_model"], "op.session")
+        with self.assertRaises(AccessError):
+            dashboard.get_owner_action("ideastone_erp.mvp_timetable")
 
     def test_active_college_isolation_even_when_both_companies_allowed(self):
         own = self.event()
