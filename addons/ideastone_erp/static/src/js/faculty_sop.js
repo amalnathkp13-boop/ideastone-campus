@@ -3,7 +3,8 @@ import { Component, onWillStart, useEffect, useRef, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { useSetupAction } from "@web/webclient/actions/action_hook";
-import { FacultyQuestionPapers } from "./faculty_question_papers";
+import { FacultySopPapers } from "./faculty_question_papers";
+import { HODQuestionPapers } from "./hod_question_papers";
 
 const PAGES = {
     timetable: ["Timetable", "Check your teaching hours, rooms, mentorship periods and substitute assignments."],
@@ -20,13 +21,9 @@ const ASSESSMENT = {draft: "Draft", entry: "Entry in progress", submitted: "Subm
 const ASSIGNMENT = {draft: "Draft", publish: "Open", finish: "Closed", cancel: "Cancelled"};
 const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-export class FacultySopPapers extends FacultyQuestionPapers {
-    static template = "ideastone_erp.FacultySopPapers";
-}
-
 export class FacultySop extends Component {
     static template = "ideastone_erp.FacultySop";
-    static components = { FacultySopPapers };
+    static components = { FacultySopPapers, HODQuestionPapers };
     static props = ["*"];
 
     setup() {
@@ -34,6 +31,7 @@ export class FacultySop extends Component {
         this.action = useService("action");
         this.notification = useService("notification");
         this.drawer = useRef("drawer");
+        this.marks = useRef("marksSection");
         this.page = this.props.action.params.page;
         this.weekdays = WEEKDAYS;
         this.markOptions = ["present", "absent", "late"];
@@ -58,7 +56,12 @@ export class FacultySop extends Component {
 
     get d() { return this.state.data; }
     get title() { return PAGES[this.page][0]; }
-    get description() { return PAGES[this.page][1]; }
+    get description() {
+        return this.d?.is_hod && this.page === "timetable"
+            ? "Check your teaching hours, rooms and substitute assignments."
+            : PAGES[this.page][1];
+    }
+    openMarks() { this.marks.el?.focus(); }
     get rows() { return this.d.rows; }
     get todayRows() { return this.rows.filter(row => row.date === this.d.today); }
     get dayRows() { return this.rows.filter(row => row.day === this.state.day); }

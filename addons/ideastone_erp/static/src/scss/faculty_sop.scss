@@ -416,6 +416,20 @@
     .task_stages button { padding: 12px; border-radius: 8px; }
 }
 
+.campus_task_list.hod-task-sop {
+    .task_mark { padding: 5px 8px; }
+    .task_status.present, .task_mark.selected:not(.absent) {
+        background: #e8f6ef;
+        border-color: #ccebdc;
+        color: #16845f;
+    }
+    .task_status.absent, .task_mark.absent.selected {
+        background: #fff0ef;
+        border-color: #f4d4d1;
+        color: #b4473a;
+    }
+}
+
 @layer campus-theme {
     .o_web_client :is(.campus_faculty_sop, .campus_task_list.task_sop_layout) {
         --ui-font: Inter, "Segoe UI", Arial, sans-serif;
