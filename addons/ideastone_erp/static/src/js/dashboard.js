@@ -10,6 +10,7 @@ import { FacultyCampusServices } from "./faculty_campus_services";
 import { NavigationCustomizer } from "@ideastone_campus/js/navigation_customizer";
 import { navigationItems, sidebarCollapsed, saveSidebarCollapsed } from "@ideastone_campus/js/navigation_state";
 import { OwnerSettings } from "./owner_settings";
+import { HodDashboard } from "./hod_dashboard";
 
 class OwnerReportFilters extends Component {
     static template = "ideastone_erp.OwnerReportFilters";
@@ -115,6 +116,10 @@ class CampusBase extends Component {
         return this.state.page === "library" ? "Library circulation desk" : "Reports & exports";
     }
     async chooseModule(module) {
+        if (this.state.hod_dashboard_enabled && module.key === "home") {
+            this.state.module = "home";
+            return this.go({key: "overview"});
+        }
         if (this.state.is_principal_workspace && ["home", "decisions", "principal_notices"].includes(module.key) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
@@ -600,7 +605,7 @@ class CampusBase extends Component {
 export class CampusDashboard extends CampusBase {
     static template = "ideastone_erp.Dashboard";
     static props = ["*"];
-    static components = { FacultyHome, FacultyDepartments, FacultyCommunication, FacultyCampusServices, OwnerSettings };
+    static components = { FacultyHome, FacultyDepartments, FacultyCommunication, FacultyCampusServices, OwnerSettings, HodDashboard };
 }
 export class CampusNavigation extends CampusBase {
     static template = "ideastone_erp.Navigation";
