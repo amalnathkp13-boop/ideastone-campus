@@ -108,6 +108,11 @@ class CampusBase extends Component {
         return module.key === "home" || module.items.some(item => item.label === "Overview") ? module.items :
             [{label: "Overview", page: "faculty-module"}, ...module.items];
     }
+    submoduleActive(item) {
+        return item.page?.startsWith("settings-") ? this.state.page === item.page :
+            item.tool ? this.state.activeTool === item.tool :
+            item.action_id ? this.state.activeAction === item.action_id : this.state.page === item.page;
+    }
     get facultyModule() {
         const module = this.state.faculty_modules.find(item => item.key === this.state.module) || this.state.faculty_modules[0];
         return module && {...module, items: this.moduleItems(module)};
@@ -625,10 +630,8 @@ export class CampusNavigation extends CampusBase {
         this.navPreferences = useState({revision: 0, items: []});
         useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", () => this.syncFacultyRoute());
         useEffect(() => {
-            if (this.action.currentController?.action.tag?.includes("question_papers")) {
-                this.subnavRef.el?.querySelector("button.active")?.scrollIntoView({block: "nearest", inline: "nearest"});
-            }
-        }, () => [this.state.activeAction, this.state.module, this.state.faculty_modules.length]);
+            this.subnavRef.el?.querySelector("button.active")?.scrollIntoView({block: "nearest", inline: "nearest"});
+        }, () => [this.state.activeAction, this.state.activeTool, this.state.page, this.state.module, this.state.faculty_modules.length]);
         onWillUnmount(() => { document.body.classList.remove("campus_faculty_workspace"); this.navCustomizer?.close(); });
     }
     async load() {
