@@ -45,6 +45,7 @@ from . import mvp_academics, mvp_admissions, mvp_attendance, mvp_fees, mvp_exams
 from . import mvp_dashboard, mvp_communication, mvp_import
 from . import admin_overview_ui
 from . import student_portal, student_service
+from . import student_placements
 from . import student_account_ui
 
 from . import parent_portal
@@ -73,6 +74,7 @@ from . import owner_fees
 from . import faculty_profile_workspace
 from . import faculty_library
 from . import faculty_task_list
+from . import faculty_sop
 from . import green_card
 from . import owner_attendance_ui
 from . import accountant_ui
@@ -80,4 +82,6 @@ from . import accountant_transport
 from . import accountant_circulars
 from . import accountant_directory
 from . import accountant_spending
+from . import hod_dashboard
+from . import hod_directory
 from . import fleet_management

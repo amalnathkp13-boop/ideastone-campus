@@ -1,10 +1,12 @@
 import base64
 import uuid
 from datetime import datetime, time, timedelta
+from io import BytesIO
 from types import SimpleNamespace
 
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import TransactionCase, new_test_user, tagged
+from PyPDF2 import PdfFileWriter
 
 from .test_owner_mvp import OwnerMVPFixture
 
@@ -26,6 +28,57 @@ class TestStudentPortal(OwnerMVPFixture, TransactionCase):
                    "key": uuid.uuid4().hex, "title": "QA bonafide", "description": "For education verification."}
         payload.update(changes)
         return payload
+
+    def test_placements_require_published_results_and_keep_profiles_and_applications_private(self):
+        enrolment = self.student.course_detail_ids
+        exam = self.exam().with_user(self.teacher)
+        exam.action_campus_roster()
+        exam.campus_result_ids.write({"marks": 78})
+        recruiter = self.env["res.partner"].create({"name": "Placement QA Company", "is_company": True})
+        drive = self.env["campus.placement.drive"].create({
+            "name": "QA Graduate Trainee", "recruiter_id": recruiter.id,
+            "interview_on": datetime.combine(self.today + timedelta(days=7), time(10)),
+            "application_deadline": self.today + timedelta(days=2), "location": "On campus",
+            "portal_published": True, "job_description": "QA role", "min_percentage": 70,
+            "course_ids": [(4, self.course.id)], "batch_ids": [(4, self.section.id)],
+        })
+        drive.action_submit()
+        drive.with_user(self.env.ref("base.user_admin")).action_approve()
+        self.assertFalse(self.portal._placement_overview(enrolment.id)["drives"])
+        with self.assertRaises(AccessError):
+            self.portal._save_placement("placement_apply", {"drive_id": drive.id}, enrolment.id)
+        exam.action_campus_submit()
+        exam.with_user(self.examiner).action_campus_lock()
+        exam.with_user(self.examiner).action_campus_publish()
+        self.assertEqual([row["id"] for row in self.portal._placement_overview(enrolment.id)["drives"]], [drive.id])
+        with self.assertRaises(ValidationError):
+            self.portal._save_placement("placement_apply", {"drive_id": drive.id}, enrolment.id)
+        pdf = PdfFileWriter()
+        pdf.addBlankPage(width=595, height=842)
+        output = BytesIO()
+        pdf.write(output)
+        document = base64.b64encode(output.getvalue())
+        profile_id = self.portal._save_placement("placement_profile", {
+            "skills": "Excel, written communication", "file": document, "filename": "resume.pdf",
+        }, enrolment.id)
+        self.portal._save_placement("placement_consent", {"consent": "willing"}, enrolment.id)
+        candidate_id = self.portal._save_placement("placement_apply", {"drive_id": drive.id}, enrolment.id)
+        self.assertEqual(self.portal._placement_overview(enrolment.id)["applications"][0]["id"], candidate_id)
+        with self.assertRaises(ValidationError):
+            self.portal._save_placement("placement_apply", {"drive_id": drive.id}, enrolment.id)
+        outsider = self.portal.with_user(self.other_user)
+        self.assertFalse(outsider._placement_overview()["applications"])
+        with self.assertRaises(AccessError):
+            outsider._download("placement-resume", profile_id)
+        with self.assertRaises(AccessError):
+            outsider._save_placement("placement_apply", {"drive_id": drive.id}, enrolment.id)
+        resource = self.env["campus.placement.resource"].create({
+            "name": "QA checklist", "description": "Practice", "document": document, "filename": "guide.pdf",
+        })
+        with self.assertRaises(AccessError):
+            self.portal._download("placement-resource", resource.id)
+        resource.published = True
+        self.assertEqual(self.portal._download("placement-resource", resource.id), (output.getvalue(), "guide.pdf", "application/pdf"))
 
     def test_library_projection_and_enquiry_do_not_change_circulation(self):
         author = self.env["op.author"].create({"name": "Library QA author"})

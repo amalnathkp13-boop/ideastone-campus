@@ -91,4 +91,16 @@
 <record id="rule_exam_review_manager" model="ir.rule"><field name="name">Mark reviews and revaluation operator</field><field name="model_id" ref="model_campus_exam_review"/><field name="domain_force">[(1,'=',1)]</field><field name="groups" eval="[(4, ref('ideastone_erp.group_manager'))]"/></record>
 <record id="rule_exam_review_academic" model="ir.rule"><field name="name">Mark reviews and revaluation operator</field><field name="model_id" ref="model_campus_exam_review"/><field name="domain_force">[(1,'=',1)]</field><field name="groups" eval="[(4, ref('ideastone_erp.group_academic'))]"/></record>
 <record id="rule_exam_review_faculty" model="ir.rule"><field name="name">Own Mark reviews and revaluation</field><field name="model_id" ref="model_campus_exam_review"/><field name="domain_force">[('evaluator_id.user_id','=',user.id)]</field><field name="groups" eval="[(4,ref('openeducat_core.group_op_faculty'))]"/></record>
+<record id="rule_placement_profile_company" model="ir.rule">
+  <field name="name">Placement profiles company boundary</field><field name="model_id" ref="model_campus_placement_profile"/>
+  <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+</record>
+<record id="rule_placement_resource_company" model="ir.rule">
+  <field name="name">Placement study materials company boundary</field><field name="model_id" ref="model_campus_placement_resource"/>
+  <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+</record>
+<record id="rule_placement_milestone_company" model="ir.rule">
+  <field name="name">Placement milestones company boundary</field><field name="model_id" ref="model_campus_placement_milestone"/>
+  <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+</record>
 </odoo>

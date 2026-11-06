@@ -1,5 +1,6 @@
 /** @odoo-module **/
 import { Component, onWillStart, onWillUnmount, useEffect, useExternalListener, useRef, useState, markup } from "@odoo/owl";
+import { session } from "@web/session";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -7,8 +8,9 @@ import { FacultyHome, FacultyDepartments } from "./faculty_home";
 import { FacultyCommunication } from "./faculty_communication";
 import { FacultyCampusServices } from "./faculty_campus_services";
 import { NavigationCustomizer } from "@ideastone_campus/js/navigation_customizer";
-import { navigationItems } from "@ideastone_campus/js/navigation_state";
+import { navigationItems, sidebarCollapsed, saveSidebarCollapsed } from "@ideastone_campus/js/navigation_state";
 import { OwnerSettings } from "./owner_settings";
+import { HodDashboard } from "./hod_dashboard";
 
 class OwnerReportFilters extends Component {
     static template = "ideastone_erp.OwnerReportFilters";
@@ -115,6 +117,10 @@ class CampusBase extends Component {
         return this.state.page === "library" ? "Library circulation desk" : "Reports & exports";
     }
     async chooseModule(module) {
+        if (this.state.hod_dashboard_enabled && module.key === "home") {
+            this.state.module = "home";
+            return this.go({key: "overview"});
+        }
         if (this.state.is_principal_workspace && ["home", "decisions", "principal_notices"].includes(module.key) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
@@ -139,7 +145,7 @@ class CampusBase extends Component {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
-        if (((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library", "grievances"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics", "fees", "calendar", "staff", "communication"].includes(module.key))) && module.items?.[0]?.action) {
+        if (((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library", "grievances", "hod-directory"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics", "fees", "calendar", "staff", "communication"].includes(module.key))) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
@@ -607,7 +613,7 @@ class CampusBase extends Component {
 export class CampusDashboard extends CampusBase {
     static template = "ideastone_erp.Dashboard";
     static props = ["*"];
-    static components = { FacultyHome, FacultyDepartments, FacultyCommunication, FacultyCampusServices, OwnerSettings };
+    static components = { FacultyHome, FacultyDepartments, FacultyCommunication, FacultyCampusServices, OwnerSettings, HodDashboard };
 }
 export class CampusNavigation extends CampusBase {
     static template = "ideastone_erp.Navigation";
@@ -615,6 +621,15 @@ export class CampusNavigation extends CampusBase {
     setup() {
         super.setup();
         this.navPreferences = useState({revision: 0, items: []});
+        this.topPreferences = useState({});
+        this.sidebar = useState({collapsed: false});
+        useEffect(() => {
+            document.body.classList.toggle("campus_sidebar_collapsed", this.sidebar.collapsed);
+            return () => document.body.classList.remove("campus_sidebar_collapsed");
+        }, () => [this.sidebar.collapsed]);
+        useEffect(() => {
+            if (this.topModule) this.loadTopNavigation(this.navigationScope, this.topModule);
+        }, () => [this.navigationScope, this.topModule]);
         useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", () => this.syncFacultyRoute());
         useEffect(() => {
             if (this.action.currentController?.action.tag?.includes("question_papers")) {
@@ -627,6 +642,7 @@ export class CampusNavigation extends CampusBase {
         await super.load();
         document.body.classList.toggle("campus_faculty_workspace", this.state.faculty_modules.length > 0);
         this.syncFacultyRoute();
+        this.sidebar.collapsed = sidebarCollapsed(this.sidebarStorageKey);
         try { Object.assign(this.navPreferences, await this.orm.call("res.users", "campus_get_navigation", [this.navigationScope])); }
         catch { /* Default navigation remains usable if preferences cannot load. */ }
     }
@@ -652,6 +668,46 @@ export class CampusNavigation extends CampusBase {
         }
         return [...new Map(catalog.map(item => [item.id, item])).values()];
     }
+    get sidebarStorageKey() { return [session.uid, this.navigationScope].join(":"); }
+    toggleDesktopSidebar() {
+        this.sidebar.collapsed = !this.sidebar.collapsed;
+        saveSidebarCollapsed(this.sidebarStorageKey, this.sidebar.collapsed);
+    }
+    get topModule() {
+        return this.facultyModule?.key || (this.state.pages.length ? "campus" : null);
+    }
+    get topCatalog() {
+        const module = this.facultyModule;
+        return this.navigationCatalog.filter(item => module ? item.module === module.key : item.kind === "page")
+            .map(item => ({...item, main: true}));
+    }
+    get topItems() {
+        const catalog = this.topCatalog;
+        const items = this.topPreferences[this.topModule]?.items;
+        return navigationItems(catalog, items).filter(row => row.visible && !row.removed).map(row => {
+            const target = catalog.find(item => item.id === row.target);
+            const item = target.data;
+            const active = target.kind === "page" ? this.state.page === item.key :
+                item.page?.startsWith("settings-") ? this.state.page === item.page :
+                item.tool ? this.state.activeTool === item.tool :
+                item.action_id ? this.state.activeAction === item.action_id : this.state.page === item.page;
+            return {...row, active, target};
+        });
+    }
+    applyTopNavigation(module, preferences) {
+        if (preferences.revision >= (this.topPreferences[module]?.revision ?? -1)) {
+            this.topPreferences[module] = preferences;
+        }
+    }
+    async loadTopNavigation(scope, module) {
+        try {
+            const preferences = await this.orm.call("res.users", "campus_get_navigation", [scope, module]);
+            if (scope === this.navigationScope) this.applyTopNavigation(module, preferences);
+        } catch { /* Keep the default module destinations usable. */ }
+    }
+    openTopItem(target) {
+        return target.kind === "page" ? this.go(target.data) : this.facultyGo(target.data);
+    }
     get sidebarItems() {
         const catalog = this.navigationCatalog;
         return navigationItems(catalog, this.navPreferences.items).filter(row => row.visible && !row.removed).map(row => {
@@ -670,16 +726,21 @@ export class CampusNavigation extends CampusBase {
         this.state.module = target.module;
         return this.facultyGo(target.data);
     }
-    async customizeNavigation() {
+    async customizeNavigation(event, top = false) {
+        const trigger = event.currentTarget;
+        const scope = this.navigationScope;
+        const module = top ? this.topModule : null;
+        const catalog = top ? this.topCatalog : this.navigationCatalog;
         try {
-            const scope = this.navigationScope;
-            const preferences = await this.orm.call("res.users", "campus_get_navigation", [scope]);
-            Object.assign(this.navPreferences, preferences);
+            const preferences = await this.orm.call("res.users", "campus_get_navigation", [scope, module]);
+            if (!trigger.isConnected || (top && this.topModule !== module)) return;
+            const apply = saved => top ? this.applyTopNavigation(module, saved) : Object.assign(this.navPreferences, saved);
+            apply(preferences);
             this.navCustomizer?.close();
-            this.navCustomizer = new NavigationCustomizer({catalog: this.navigationCatalog, preferences,
-                save: (items, revision) => this.orm.call("res.users", "campus_save_navigation", [scope, items, revision]),
-                apply: saved => Object.assign(this.navPreferences, saved)});
-            this.navCustomizer.open();
+            this.navCustomizer = new NavigationCustomizer({catalog, preferences, top,
+                save: (items, revision) => this.orm.call("res.users", "campus_save_navigation", [scope, items, revision, module]),
+                apply});
+            this.navCustomizer.open(trigger);
         } catch {
             this.notification.add("Navigation customization could not be loaded. Please retry.", {type: "danger"});
         }

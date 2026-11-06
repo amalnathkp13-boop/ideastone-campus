@@ -30,3 +30,12 @@ export function moveNavigation(items, id, to) {
     if (from < 0 || to < 0 || to >= items.length) return;
     items.splice(to, 0, items.splice(from, 1)[0]);
 }
+
+export function sidebarCollapsed(scope) {
+    try { return localStorage.getItem("campus.sidebar:" + scope) === "collapsed"; }
+    catch { return false; }
+}
+export function saveSidebarCollapsed(scope, collapsed) {
+    try { localStorage.setItem("campus.sidebar:" + scope, collapsed ? "collapsed" : "expanded"); }
+    catch { /* The sidebar can still be toggled for the current page. */ }
+}
