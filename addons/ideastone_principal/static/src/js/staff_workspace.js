@@ -68,7 +68,7 @@ export class PrincipalStaffWorkspace extends Component {
     label(value) {return {pending:"Pending",interview:"Interview",approved:"Approved",rejected:"Rejected",verified:"Verified",incomplete:"Incomplete",teaching:"Teaching",non_teaching:"Non-teaching"}[value] || value;}
     statusClass(value) {return value==="approved" || value==="verified" ? "" : value==="interview" ? "blue" : "pending";}
     date(value) {return value ? new Date(value.replace(" ","T")+"Z").toLocaleString("en-GB",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}) : "Not scheduled";}
-    money(value) {return (this.state.data?.currency || "₹") + new Intl.NumberFormat("en-IN",{maximumFractionDigits:2}).format(value || 0);}
+    money(value) {return "₹" + new Intl.NumberFormat("en-IN",{maximumFractionDigits:2}).format(value || 0);}
     reset() {Object.assign(this.state,{query:"",type:"",status:""});}
     async changePeriod(key,value) {this.state[key]=value;await this.load();}
     show(row,decision="") {this.opener=document.activeElement;Object.assign(this.state,{modal:decision ? "decision" : "details",selected:row,decision,note:"",modalError:""});}

@@ -93,15 +93,19 @@ class Exam(models.Model):
             if not rec.campus_year_id or not rec.session_id:
                 raise ValidationError(_("Configure an examination session with academic year, programme and section."))
             rec._mvp_company("session_id", "subject_id")
-            day = fields.Datetime.context_timestamp(rec, rec.start_time).date()
-            enrolments = self.env["op.student.course"].search([
-                ("batch_id", "=", rec.batch_id.id), ("academic_years_id", "=", rec.campus_year_id.id),
-                ("campus_date_from", "<=", day), "|", ("campus_date_to", "=", False), ("campus_date_to", ">=", day)])
+            enrolments = rec._campus_roster_enrolments()
             for enrolment in enrolments.filtered(lambda e, existing=rec.campus_result_ids.student_id: e.student_id not in existing):
                 self.env["op.result.line"].create({"exam_id": rec.id, "student_id": enrolment.student_id.id,
                     "marks": 0, "campus_entered": False, "campus_enrolment_id": enrolment.id})
             super(Exam, rec).write({"campus_state": "entry"})
         return True
+
+    def _campus_roster_enrolments(self):
+        self.ensure_one()
+        day = fields.Datetime.context_timestamp(self, self.start_time).date()
+        return self.env["op.student.course"].search([
+            ("batch_id", "=", self.batch_id.id), ("academic_years_id", "=", self.campus_year_id.id),
+            ("campus_date_from", "<=", day), "|", ("campus_date_to", "=", False), ("campus_date_to", ">=", day)])
 
     def action_campus_submit(self):
         self._campus_can_enter()

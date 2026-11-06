@@ -1,0 +1,180 @@
+<odoo>
+  <template id="student_placements" name="Student campus placements">
+    <t t-set="p" t-value="placement_data"/>
+    <t t-set="profile" t-value="p['profile']"/>
+    <div class="placements_view" id="student_placement_overview">
+      <div class="crumb"><span>My campus / <b>Campus placements</b></span><span t-esc="d['today']"/></div>
+      <header class="heading">
+        <div><h1>Campus placements</h1><p class="subtitle">Explore placement opportunities, track your recruitment journey and build career readiness.</p></div>
+        <div class="head-actions">
+          <a class="pl-btn" t-att-href="student_url_for('placements')">↻ Refresh</a>
+          <button class="pl-btn soft" type="button" data-placement-open="placement-profile">▣ Placement profile</button>
+        </div>
+      </header>
+      <section class="hero">
+        <div><div class="eyebrow">YOUR CAREER JOURNEY, CONNECTED</div><h2>Build your next opportunity, <t t-esc="d['student']['name'].split()[0]"/></h2>
+          <p>Stay ready for upcoming drives, understand your progress and focus on the skills that move you forward.</p></div>
+        <div class="hero-icon" aria-hidden="true">♜</div>
+      </section>
+      <section class="profile-strip">
+        <div class="profile-left"><div class="profile-mark" aria-hidden="true">✓</div><div>
+          <div class="profile-title" t-esc="'Placement profile is ready' if profile['complete'] == 100 else 'Placement profile is almost ready' if profile['complete'] >= 67 else 'Build your placement profile'"/>
+          <div class="profile-sub">The Placement Cell can review your resume, skills and academic details.</div>
+        </div></div>
+        <div class="progress-wrap"><div class="progress-label"><span>Profile completeness</span><strong><t t-esc="profile['complete']"/>%</strong></div>
+          <div class="progress" role="progressbar" aria-label="Profile completeness" aria-valuemin="0" aria-valuemax="100" t-att-aria-valuenow="profile['complete']"><span t-attf-style="width:#{profile['complete']}%"/></div>
+        </div>
+        <button class="pl-btn small soft" type="button" data-placement-open="placement-profile">Complete profile →</button>
+      </section>
+      <section class="kpis" aria-label="Placement summary">
+        <article class="kpi"><div class="kpi-top">Eligible drives <span class="kicon" aria-hidden="true">▣</span></div><div class="kvalue" t-esc="len(p['drives'])"/><div class="knote">Matching your current academic profile</div></article>
+        <article class="kpi"><div class="kpi-top">Applications active <span class="kicon teal" aria-hidden="true">↗</span></div><div class="kvalue" t-esc="p['active']"/><div class="knote"><t t-esc="p['companies']"/> recruiting companies</div></article>
+        <article class="kpi"><div class="kpi-top">Interviews upcoming <span class="kicon amber" aria-hidden="true">◷</span></div><div class="kvalue" t-esc="p['interviews']"/><div class="knote" t-esc="'Next interview: ' + p['next'] if p['next'] else 'No interview scheduled yet'"/></article>
+        <article class="kpi"><div class="kpi-top">Offers received <span class="kicon violet" aria-hidden="true">✧</span></div><div class="kvalue" t-esc="p['offers']"/><div class="knote" t-esc="'Review outcomes in your applications' if p['offers'] else 'No offer recorded yet'"/></article>
+      </section>
+      <div class="grid">
+        <div class="leftcol">
+          <section class="panel">
+            <div class="panel-head"><div><h2 class="panel-title">Upcoming placement drives</h2><p class="panel-desc">Opportunities matched against your department, batch and eligibility.</p></div><span class="tag eligible"><t t-esc="len(p['drives'])"/> eligible</span></div>
+            <div class="panel-body"><div class="drive-list">
+              <article class="drive" t-foreach="p['drives']" t-as="drive">
+                <div>
+                  <div class="company-row"><div t-attf-class="company-logo logo-#{drive_index % 3}" aria-hidden="true" t-esc="drive['company'][:1].upper()"/>
+                    <div><div class="company-name" t-esc="drive['company']"/><div class="role"><t t-esc="drive['role']"/><t t-if="drive['sector']"> · <t t-esc="drive['sector']"/></t></div></div>
+                  </div>
+                  <div class="drive-meta"><span>◷ <t t-esc="drive['date']"/></span><span>⌖ <t t-esc="drive['venue']"/></span><span>Apply by <t t-esc="drive['deadline']"/></span></div>
+                  <div class="drive-footer"><span class="tag eligible">Eligible</span><span class="tag closing" t-if="drive['closing']">Closing soon</span><span class="tag" t-if="drive['departments']" t-esc="drive['departments']"/></div>
+                </div>
+                <div class="drive-right"><div class="package" t-if="drive['ctc']">₹<t t-esc="drive['ctc']"/> LPA<small>Expected CTC</small></div>
+                  <button class="pl-btn primary small" type="button" t-att-data-placement-open="'placement-drive-%s' % drive['id']" t-esc="'View drive' if drive['applied'] else 'View &amp; apply'"/>
+                </div>
+              </article>
+              <p class="empty" t-if="not p['drives']">No open drives currently match your enrolment and published academic results.</p>
+            </div></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><div><h2 class="panel-title">My applications &amp; interview status</h2><p class="panel-desc">Track every application from registration through final outcome.</p></div>
+              <div class="tabs" role="group" aria-label="Filter applications"><button type="button" aria-pressed="true" data-placement-filter="all">All</button><button type="button" aria-pressed="false" data-placement-filter="active">In progress</button><button type="button" aria-pressed="false" data-placement-filter="closed">Completed</button></div>
+            </div>
+            <div class="table-wrap" tabindex="0" role="region" aria-label="Placement applications"><table class="placement-table">
+              <thead><tr><th scope="col">Company / Role</th><th scope="col">Applied on</th><th scope="col">Latest stage</th><th scope="col">Next update</th><th scope="col">Status</th><th scope="col">Action</th></tr></thead>
+              <tbody><tr t-foreach="p['applications']" t-as="app" t-att-data-placement-state="app['state']">
+                <td><strong t-esc="app['company']"/><br/><t t-esc="app['role']"/></td><td t-esc="app['applied']"/><td t-esc="app['stage']"/><td t-esc="app['next']"/>
+                <td><span t-attf-class="tag #{app['tone']}" t-esc="app['status']"/></td>
+                <td><button class="pl-btn small" type="button" t-att-data-placement-open="'placement-app-%s' % app['id']">Details</button></td>
+              </tr></tbody>
+            </table></div>
+            <p class="empty" data-placement-empty="" role="status" t-att-hidden="'hidden' if p['applications'] else None">No applications match this view.</p>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><div><h2 class="panel-title">Interview journey</h2><p class="panel-desc">Your recent recruitment activity and upcoming milestones.</p></div>
+              <span class="tag" t-if="p['journey']"><t t-esc="p['journey']['company']"/> · <t t-esc="p['journey']['role']"/></span>
+            </div>
+            <div class="panel-body">
+              <t t-if="p['journey']" t-call="ideastone_erp.student_placement_timeline"><t t-set="journey" t-value="p['journey']['timeline']"/></t>
+              <p class="empty" t-else="">Your interview journey appears after you apply for a drive.</p>
+            </div>
+          </section>
+        </div>
+        <aside class="rightcol" aria-label="Career preparation">
+          <section class="panel">
+            <div class="panel-head"><div><h2 class="panel-title">AI career readiness insights</h2><p class="panel-desc">Preparation signals from your recorded practice assessments.</p></div><span class="tag offer">AI insights</span></div>
+            <div class="panel-body">
+              <div class="insight" t-if="p['weakest']"><span class="insight-icon warn" aria-hidden="true">!</span><div>
+                <strong><t t-esc="p['weakest'][0]"/> is your first practice priority</strong>
+                <p>Your latest recorded score is <t t-esc="p['weakest'][1]"/>%. Start with the recommended materials and track your accuracy before the next assessment.</p>
+              </div></div>
+              <p class="empty" t-else="">Preparation signals appear when the Placement Cell records your practice scores.</p>
+              <div class="focus-row" t-foreach="p['scores']" t-as="score"><span t-esc="score[0]"/><div class="mini-track" aria-hidden="true"><i t-attf-style="width:#{score[1]}%"/></div><b><t t-esc="score[1]"/>%</b></div>
+              <div class="insight"><span class="insight-icon teal" aria-hidden="true">↗</span><div><strong>Prepare project explanations</strong><p>Practise a 90-second explanation of your strongest project, your contribution, and the outcome.</p></div></div>
+              <div class="insight"><span class="insight-icon" aria-hidden="true">✓</span><div><strong>Keep interview readiness current</strong><p>Review core technical concepts and prepare examples that demonstrate teamwork and problem-solving.</p></div></div>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><div><h2 class="panel-title">Recommended study material</h2><p class="panel-desc">Focused resources from the Placement Cell.</p></div></div>
+            <div class="panel-body">
+              <div class="resource" t-foreach="p['resources']" t-as="item"><div class="resource-icon" aria-hidden="true" t-esc="item['icon']"/><div class="resource-info"><strong t-esc="item['name']"/><small>PDF · <t t-esc="item['description']"/></small></div><a class="download" t-att-href="'/my/campus/student/download/placement-resource/%s' % item['id']" t-att-aria-label="'Download ' + item['name']">Download</a></div>
+              <p class="empty" t-if="not p['resources']">The Placement Cell has not published study materials yet.</p>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><div><h2 class="panel-title">Placement essentials</h2><p class="panel-desc">Keep your application documents ready.</p></div></div>
+            <div class="panel-body">
+              <div class="insight"><span class="insight-icon" aria-hidden="true">▣</span><div><strong>Latest resume</strong><p>
+                <t t-if="profile['resume']"><a t-att-href="'/my/campus/student/download/placement-resume/%s' % profile['id']" t-esc="profile['resume']"/> · Uploaded <t t-esc="profile['uploaded'] or 'date unavailable'"/></t>
+                <t t-else="">Upload a PDF in your placement profile.</t></p></div>
+                <span t-attf-class="tag #{'eligible' if profile['verified'] else 'closing'}" t-esc="'Verified' if profile['verified'] else 'Awaiting verification' if profile['resume'] else 'Needed'"/>
+              </div>
+              <div class="insight"><span class="insight-icon" aria-hidden="true">▤</span><div><strong>Academic details</strong><p>
+                <t t-if="p['academic']"><t t-esc="p['academic']['percentage']"/>% · <t t-esc="str(p['academic']['arrears']) + ' active backlogs' if p['academic']['arrears'] else 'No active backlogs'"/> · Published academic records</t>
+                <t t-else="">Published academic records are pending.</t></p></div><span t-if="p['academic']" class="tag eligible">Synced</span>
+              </div>
+              <div class="insight"><span class="insight-icon" aria-hidden="true">⌑</span><div><strong>Placement consent</strong><p t-esc="{'willing': 'Willing to participate in campus placements', 'declined': 'Not participating in campus placements', 'undecided': 'Participation preference not recorded'}[profile['consent']]"/></div>
+                <button class="pl-btn small" type="button" data-placement-open="placement-consent">Review</button>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
+      <footer class="placement-footer">VCET Campus ERP · Student self-service<t t-if="d['demo']"> · Sample data for UI preview</t></footer>
+
+      <dialog class="placement-dialog" id="placement-profile" aria-labelledby="placement-profile-title">
+        <header class="dialog-head"><h3 id="placement-profile-title">Placement profile</h3><button class="dialog-close" type="button" data-placement-close="" aria-label="Close placement profile">×</button></header>
+        <div class="dialog-body">
+          <p><b>Student:</b> <t t-esc="d['student']['name']"/> · <t t-esc="d['placement']['programme']"/> · <t t-esc="d['placement']['section']"/></p>
+          <p><b>Profile completeness:</b> <t t-esc="profile['complete']"/>%</p>
+          <form class="placement-form" action="/my/campus/student/action" method="post" enctype="multipart/form-data">
+            <t t-call="ideastone_erp.student_action_fields"/><input type="hidden" name="operation" value="placement_profile"/>
+            <label>Skills<input name="skills" maxlength="500" t-att-value="profile['skills']" placeholder="e.g. Communication, MS Excel, documentation"/></label>
+            <div class="form-grid"><label>Preferred job roles<input name="preferred_roles" maxlength="250" t-att-value="profile['roles']"/></label><label>Preferred locations<input name="preferred_locations" maxlength="250" t-att-value="profile['locations']"/></label></div>
+            <label>Project or experience summary<textarea name="experience" maxlength="2000" rows="3" t-esc="profile['experience'] or ''"/></label>
+            <label>Resume (PDF, up to 5 MB)<input type="file" name="file" accept="application/pdf,.pdf"/></label>
+            <p t-if="profile['resume']" class="fine">Current resume: <t t-esc="profile['resume']"/>. Uploading a replacement sends it for verification again.</p>
+            <button class="pl-btn primary" type="submit">Save placement profile</button>
+          </form>
+        </div>
+      </dialog>
+      <dialog class="placement-dialog" id="placement-consent" aria-labelledby="placement-consent-title">
+        <header class="dialog-head"><h3 id="placement-consent-title">Placement participation preference</h3><button class="dialog-close" type="button" data-placement-close="" aria-label="Close participation preference">×</button></header>
+        <div class="dialog-body"><form class="placement-form" action="/my/campus/student/action" method="post">
+          <t t-call="ideastone_erp.student_action_fields"/><input type="hidden" name="operation" value="placement_consent"/>
+          <p>Confirm your participation preference before applying. This choice applies to future applications.</p>
+          <label>Participation preference<select name="consent" required="required"><option value="" t-att-selected="profile['consent'] == 'undecided'">Choose your preference</option><option value="willing" t-att-selected="profile['consent'] == 'willing'">Willing to participate</option><option value="declined" t-att-selected="profile['consent'] == 'declined'">Not participating</option></select></label>
+          <button class="pl-btn primary" type="submit">Save preference</button>
+        </form></div>
+      </dialog>
+      <dialog class="placement-dialog" t-foreach="p['drives']" t-as="drive" t-attf-id="placement-drive-#{drive['id']}" t-attf-aria-labelledby="placement-drive-title-#{drive['id']}">
+        <header class="dialog-head"><h3 t-attf-id="placement-drive-title-#{drive['id']}"><t t-esc="drive['company']"/> · <t t-esc="drive['role']"/></h3><button class="dialog-close" type="button" data-placement-close="" aria-label="Close drive details">×</button></header>
+        <div class="dialog-body">
+          <p><b>Eligibility:</b> Your current enrolment and published results match this drive.</p>
+          <p><b>Drive:</b> <t t-esc="drive['date']"/> · <t t-esc="drive['venue']"/></p><p class="pre-line" t-esc="drive['description']"/>
+          <p t-if="drive['process']"><b>Recruitment process:</b> <t t-esc="drive['process']"/></p>
+          <p><b>Application deadline:</b> <t t-esc="drive['deadline']"/>. Applications are subject to Placement Cell verification.</p>
+          <p t-if="drive['applied']" class="tag applied">Application submitted</p>
+          <form t-elif="profile['resume'] and profile['skills'] and profile['consent'] == 'willing'" action="/my/campus/student/action" method="post">
+            <t t-call="ideastone_erp.student_action_fields"/><input type="hidden" name="operation" value="placement_apply"/><input type="hidden" name="drive_id" t-att-value="drive['id']"/>
+            <button class="pl-btn primary" type="submit">Confirm application</button>
+          </form>
+          <div t-else="" class="placement-prerequisites">
+            <p>Add your skills and resume and confirm participation before applying.</p>
+            <button class="pl-btn soft" type="button" data-placement-open="placement-profile">Complete profile</button>
+            <button class="pl-btn" type="button" data-placement-open="placement-consent">Review consent</button>
+          </div>
+        </div>
+      </dialog>
+      <dialog class="placement-dialog" t-foreach="p['applications']" t-as="app" t-attf-id="placement-app-#{app['id']}" t-attf-aria-labelledby="placement-app-title-#{app['id']}">
+        <header class="dialog-head"><h3 t-attf-id="placement-app-title-#{app['id']}"><t t-esc="app['company']"/> · <t t-esc="app['role']"/></h3><button class="dialog-close" type="button" data-placement-close="" aria-label="Close application details">×</button></header>
+        <div class="dialog-body"><p><span t-attf-class="tag #{app['tone']}" t-esc="app['status']"/> <t t-esc="app['next']"/></p>
+          <p t-if="app['offer']"><b>Offer reference:</b> <t t-esc="app['offer']"/></p>
+          <t t-call="ideastone_erp.student_placement_timeline"><t t-set="journey" t-value="app['timeline']"/></t>
+          <p class="fine">The Placement Cell records recruitment outcomes and interview schedules.</p>
+        </div>
+      </dialog>
+    </div>
+  </template>
+  <template id="student_placement_timeline">
+    <div class="timeline">
+      <div class="timeline-item" t-foreach="journey" t-as="step"><span t-attf-class="timeline-dot #{step['tone']}" aria-hidden="true"/><div><div class="timeline-title" t-esc="step['title']"/><div class="timeline-sub" t-esc="step['text']"/></div></div>
+    </div>
+  </template>
+</odoo>

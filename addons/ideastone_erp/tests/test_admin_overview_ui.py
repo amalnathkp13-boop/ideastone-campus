@@ -50,7 +50,7 @@ class TestAdminOverviewUI(OwnerMVPFixture, TransactionCase):
         with self.assertRaises(AccessError):
             limited.get_owner_overview_action("staff_present")
 
-    def test_fleet_counts_distinct_active_registrations_in_the_academic_year(self):
+    def test_fleet_counts_distinct_operating_buses_with_current_insurance(self):
         user = new_test_user(self.env, login="overview_fleet_owner", groups="ideastone_erp.group_mvp_owner,ideastone_erp.group_manager")
         dashboard = self.env["campus.dashboard"].with_user(user)
         filters = {"year_id": self.year.id}
@@ -60,7 +60,13 @@ class TestAdminOverviewUI(OwnerMVPFixture, TransactionCase):
         routes = self.env["campus.transport.route"]
         for name, registration in [("Overview bus A", "QA 99 BUS 01"), ("Overview A second route", "qa-99-bus-01"),
                                     ("Overview bus B", "QA 99 BUS 02")]:
-            routes.create({"name": name, "year_id": self.year.id, "vehicle_registration": registration})
+            routes.create({"name": name, "year_id": self.year.id, "vehicle_registration": registration,
+                           "fleet_insured_until": self.today + timedelta(days=30)})
+        routes.create({"name": "Unverified insurance", "year_id": self.year.id, "vehicle_registration": "QA99BUS05"})
+        routes.create({"name": "Expired insurance", "year_id": self.year.id, "vehicle_registration": "QA99BUS06",
+                       "fleet_insured_until": self.today - timedelta(days=1)})
+        routes.create({"name": "Bus under repair", "year_id": self.year.id, "vehicle_registration": "QA99BUS07",
+                       "fleet_insured_until": self.today + timedelta(days=30), "fleet_status": "maintenance"})
         routes.create({"name": "Archived bus", "year_id": self.year.id, "vehicle_registration": "QA99BUS03", "active": False})
         old_year = self.year.copy({"name": "Old fleet year", "code": "FLEET-OLD",
             "start_date": self.year.start_date - timedelta(days=730), "end_date": self.year.start_date - timedelta(days=365)})

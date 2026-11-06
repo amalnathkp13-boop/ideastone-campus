@@ -15,6 +15,7 @@ class Counseling(models.Model):
     outcome = fields.Text()
     shared_remarks = fields.Text("Remarks visible to student and parent")
     follow_up_date = fields.Date()
+    follow_up_completed = fields.Boolean(default=False, copy=False)
     future_plan = fields.Selection([
         ("job", "Employment"), ("studies", "Higher studies"), ("business", "Entrepreneurship"),
         ("government", "Government examinations"), ("other", "Other"),

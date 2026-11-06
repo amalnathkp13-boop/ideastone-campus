@@ -1,4 +1,9 @@
 // Tokens extracted from Logo/VCET_Staff_Profile_Complete.html.
+// Keep the existing icon font, size and color while using the rupee glyph.
+.fa.fa-dollar::before, .fa.fa-usd::before, .fa.fa-money::before {
+  content: "\f156";
+}
+
 :root {
   --campus-navy: #062743;
   --campus-navy-secondary: #0b3554;
