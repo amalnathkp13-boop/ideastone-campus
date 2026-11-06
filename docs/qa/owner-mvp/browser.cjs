@@ -117,9 +117,10 @@ async function markup(page) {
         }
         for (const module of overview.faculty_modules.filter(module=>module.key!=='home')) {
             await page.locator('.campus_sidebar').getByRole('button',{name:module.label,exact:true}).click();
-            await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory',staff:'Staff Directory',calendar:'College Calendar',attendance:'Attendance Overview',accounts:'Accountant overview'})[module.key]||module.label,exact:true,level:1}).waitFor();
+            await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory',accounts:'Accountant overview'})[module.key]||module.label,exact:true,level:1}).waitFor();
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Attendance',exact:true}).click();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Attendance overview',exact:true}).click();
         const attendance=page.locator('.owner_attendance');
         await attendance.getByRole('heading',{name:'Attendance Overview',exact:true,level:1}).waitFor();
         for(const mode of ['staff','student']) {
@@ -164,6 +165,7 @@ async function markup(page) {
         await page.getByRole('heading',{name:'Enrolments & Transfers',exact:true,level:1}).waitFor();
         if(await page.locator('.campus_students_workspace .alert-danger').count()) throw Error('Enrolments workspace failed to load');
         await page.locator('.campus_sidebar').getByRole('button',{name:'Calendar',exact:true}).click();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'College calendar',exact:true}).click();
         await page.getByRole('heading',{name:'College Calendar',exact:true,level:1}).waitFor();
         if(await page.locator('.campus_sidebar').getByRole('button',{name:'Timetable',exact:true}).count()) throw Error('Owner timetable module was not replaced');
         const filterFonts=await page.locator('.campus_college_calendar .filters select,.campus_college_calendar .filters input,.campus_college_calendar .viewtoggle button').evaluateAll(nodes=>nodes.map(node=>getComputedStyle(node).fontSize));
@@ -204,12 +206,13 @@ async function markup(page) {
         await page.locator('.owner-communication .oc-table').waitFor();
         await page.locator('.owner-communication').getByRole('button',{name:'Log request',exact:true}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Faculty & Staff',exact:true}).click();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Staff directory',exact:true}).click();
         await page.locator('.campus_owner_staff h1').getByText('Staff Directory',{exact:true}).waitFor();
         await page.locator('.campus_owner_staff .dept').first().waitFor();
         await assertCampusTheme(page);
         const staffTabs=await page.locator('.campus_faculty_subnav button:not(.campus_subnav_scroll)').allTextContents();
         const staffTabNames=staffTabs.map(t=>t.trim()).filter(t=>!['','',''].includes(t));
-        if(staffTabNames.slice(0,3).join('|')!=='Staff directory|Leave Management|Payroll History') throw Error('Owner staff tabs do not lead with the approved three-page design');
+        if(staffTabNames.slice(0,4).join('|')!=='Overview|Staff directory|Leave Management|Payroll History') throw Error('Owner staff tabs do not lead with the approved overview and three-page design');
         if(!staffTabNames.includes('Teaching allocation')) throw Error('Existing owner staff tools are no longer reachable');
         await page.locator('.campus_owner_staff .dept-actions').first().click();
         await page.getByRole('button',{name:'View teaching staff',exact:true}).click();
@@ -247,7 +250,7 @@ async function markup(page) {
         await page.locator('.appraisal_entry button[type=submit]').click();
         await page.getByRole('cell',{name:'Owner QA portfolio entry',exact:true}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Faculty & Staff',exact:true}).click();
-        await page.locator('.campus_owner_staff').waitFor({state:'visible'});
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Staff directory',exact:true}).waitFor();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Leave Management',exact:true}).click();
         await page.getByRole('heading',{name:'Online Leave Apply & Status',exact:true}).waitFor();
         await page.locator('.leave_loading').waitFor({state:'hidden'});
