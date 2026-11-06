@@ -78,9 +78,9 @@ async function markup(page) {
         if(await page.locator('.campus_dashboard').innerText().then(text=>/Â·|â€”|â†/.test(text))) throw Error('Owner template contains incorrectly decoded UTF-8 punctuation');
         await page.locator('.campus_dashboard').evaluate(element=>element.scrollTop=0);
         const modules = await page.locator('.campus_sidebar nav .campus_nav_link').allTextContents();
-        // 13 base modules, plus Accounts and the optional AI Pack.
+        // 13 base modules, plus Accounts, Complaints and the optional AI Pack.
         const aiPack=modules.some(label=>label.trim()==='AI insights');
-        if(modules.length!==14+(aiPack?1:0) || !modules.some(label=>label.trim()==='Accounts')) throw Error('Owner sidebar is missing the Accounts module');
+        if(modules.length!==15+(aiPack?1:0) || !modules.some(label=>label.trim()==='Accounts') || !modules.some(label=>label.trim()==='Complaints')) throw Error('Owner sidebar is missing Accounts or Complaints');
         const overview=await rpc(page,'campus.dashboard','get_overview');
         let checkedViews=0;
         for(const module of overview.faculty_modules) {
