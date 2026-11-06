@@ -47,7 +47,8 @@ async function diagnosticMarkup(page) {
         const tabs = ['My Teaching Subjects','Timetable','Student Attendance','My Mentorship Class','My Tasks & e-Diary',
             'Examinations & Marks','Assignments','Alternate Hour','Lesson Plans','Circulars & Announcements'];
         for (const label of tabs) await taskNav.getByRole('button',{name:label,exact:true}).waitFor();
-        if (await taskNav.getByRole('button').count() !== tabs.length + 2) throw Error('Unexpected My Task List tabs');
+        // Count only the task tabs: the bar also holds scroll buttons and, with navigation customization, a customize button.
+        if (await taskNav.locator('button:not(.campus_subnav_scroll):not(.campus_customize_navigation)').count() !== tabs.length) throw Error('Unexpected My Task List tabs');
         if(await page.locator('.campus_sidebar').getByRole('button',{name:'Subject-wise Attendance',exact:true}).count()) throw Error('Faculty attendance must stay under My Task List');
         await assertSopTheme(teachingTitle);
         await page.screenshot({path:path.join(out,'faculty-module-1440.png')});
