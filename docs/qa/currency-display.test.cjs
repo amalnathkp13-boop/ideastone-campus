@@ -11,7 +11,7 @@ function page(file, name, values = {}) {
     const Type = vm.runInNewContext(source + '\n' + name, {
         Component: stub, Dialog: stub, OwnerStaffDirectory: stub, FacultyHome: stub,
         FacultyDepartments: stub, FacultyCommunication: stub, FacultyCampusServices: stub,
-        OwnerSettings: stub, registry: {category: () => ({add() {}})},
+        OwnerSettings: stub, HodDashboard: stub, registry: {category: () => ({add() {}})},
     });
     return Object.assign(Object.create(Type.prototype), values);
 }
