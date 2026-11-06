@@ -130,6 +130,7 @@ async function diagnosticMarkup(page) {
             await page.getByRole('heading',{name:label,exact:true,level:1}).waitFor();
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'My profile & payroll',exact:true}).click();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My staff profile',exact:true}).click();
         await page.getByRole('heading',{name:'My staff profile',exact:true,level:1}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'My task list',exact:true}).click();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Internal mark generation',exact:true}).waitFor();
