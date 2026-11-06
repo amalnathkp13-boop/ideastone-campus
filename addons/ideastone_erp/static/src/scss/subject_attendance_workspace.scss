@@ -24,7 +24,7 @@
   .swa_stat_icon.blue { color: #0665fa; background: #ebf5ff; }
   .swa_stat_icon.green { color: #00a459; background: #e6faf0; }
   .swa_stat_icon.orange { color: #fa7100; background: #fff6e9; }
-  .swa_stat_icon.purple { color: #6827f3; background: #f4efff; }
+  .swa_stat_icon.purple { color: #117c87; background: #f1f9f9; }
   .swa_stat h2 { margin: 0 0 5px; color: #102459; font-size: 13px; font-weight: 600; }
   .swa_stat strong { display: block; color: #081c68; font-size: 27px; font-weight: 750; line-height: 1; }
   .swa_stat small { display: block; margin-top: 5px; color: #556fba; font-size: 12px; }
@@ -75,7 +75,7 @@
   .swa_subject_name { min-width: 170px; font-weight: 600; }
   .swa_count { color: #df2b35; font-weight: 700; }
   .swa_badge { display: inline-block; min-width: 63px; padding: 3px 6px; border-radius: 4px; text-align: center; color: #045adc; background: #e1f1ff; font-size: 10px; font-weight: 700; text-transform: uppercase; }
-  .swa_badge.elective { color: #7829d5; background: #f1e6ff; }
+  .swa_badge.elective { color: #117c87; background: #f1f9f9; }
   .swa_outline { width: 100%; min-width: 55px; padding: 2px 8px; border: 1px solid #87b4ff; border-radius: 4px; color: #0758f7; background: #f5faff; font-weight: 600; }
   .swa_outline:hover { background: #e6f1ff; }
   .swa_status { width: 100%; min-width: 84px; border: 0; border-radius: 4px; padding: 4px; text-align: center; font-weight: 600; appearance: none; cursor: pointer; }
@@ -124,7 +124,7 @@
   .swa_insight_cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; flex: 1; }
   .swa_insight_cards article { display: flex; align-items: flex-start; gap: 8px; min-width: 0; padding: 7px 6px; border-radius: 6px; }
   .swa_insight_cards article.low { color: #c41c29; background: #fff1f1; }
-  .swa_insight_cards article.suggestion { color: #ad7500; background: #f7f5ff; }
+  .swa_insight_cards article.suggestion { color: #ad7500; background: #f8fbfb; }
   .swa_insight_cards article.high { color: #088844; background: #ebfaf1; }
   .swa_insight_cards article > i { font-size: 19px; }
   .swa_insight_cards strong, .swa_insight_cards span, .swa_insight_cards b { display: block; line-height: 1.2; }

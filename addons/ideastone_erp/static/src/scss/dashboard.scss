@@ -1,5 +1,5 @@
 .campus_sidebar {
-    position: fixed; inset: 0 auto 0 0; z-index: 100; width: 242px;
+    position: fixed; inset: 0 auto 0 0; z-index: 100; width: 250px;
     background: linear-gradient(175deg, #092f50, #06233b); color: #eef5ff;
     display: flex; flex-direction: column; padding: 24px 15px; gap: 14px;
     nav { flex: 1; overflow-y: auto; min-height: 0; }
@@ -8,14 +8,14 @@
 .campus_nav_heading { color: #b3ccdf; font-size: 10px; letter-spacing: 1.4px; padding: 10px; font-weight: 750; }
 .campus_nav_link { width: 100%; border: 0; background: transparent; color: #e2edf7; text-align: left; padding: 13px 12px; border-radius: 8px; font-size: 13px; min-height: 46px; display: flex; gap: 12px; align-items: center; margin-bottom: 4px; i { width: 20px; text-align: center; font-size: 17px; } &:hover, &:focus-visible { background: #17445f; } }
 .campus_side_bottom { display: grid; gap: 8px; border-top: 1px solid #315672; padding: 18px 10px 0; font-size: 11px; color: #c1d5e5; a { color: #eff7ff; padding: 9px 0; } }
-.o_web_client { > .o_main_navbar, > .o_action_manager { margin-left: 242px; } }
-.campus_dashboard { padding: 26px 32px 32px; width: 100%; height: 100%; overflow-y: auto; background: #f4f7fb; color: #15263a; }
-.campus_crumb { color: #61748c; font-size: 12px; margin-bottom: 26px; display: flex; justify-content: space-between; gap: 15px; flex-wrap: wrap; }
-.campus_page_heading, .campus_module_heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 24px; h1 { color: #082b4b; font-size: 28px; letter-spacing: -.65px; margin-bottom: 7px; } p { color: #61748c; margin: 0; } }
-.campus_stats { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; margin-bottom: 20px; }
-.campus_stat, .campus_panel { background: #fff; border: 1px solid #e2e8f1; border-radius: 13px; box-shadow: 0 10px 30px rgba(9,33,65,.055); padding: 22px; }
+.o_web_client:has(.campus_navigation) { > .o_main_navbar, > .o_action_manager { margin-left: 250px; } }
+.campus_dashboard { box-sizing: border-box; padding: 24px; width: 100%; height: 100%; overflow-y: auto; background: #f4f7fb; color: #132a44; }
+.campus_crumb { color: #556b82; font-size: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.campus_page_heading, .campus_module_heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; h1 { color: #132a44; font-size: 26px; letter-spacing: -.6px; margin-bottom: 4px; } p { color: #556b82; margin: 0; } }
+.campus_stats { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; margin-bottom: 16px; }
+.campus_stat, .campus_panel { background: #fff; border: 1px solid #e1e9f2; border-radius: 15px; box-shadow: 0 3px 18px rgba(21,54,91,.045); padding: 16px; }
 .campus_stat { display: flex; justify-content: space-between; gap: 10px; span { font-size: 12px; color: #52677f; } strong { display: block; font-size: 31px; color: #15263a; margin: 10px 0 4px; } small { color: #61748c; font-size: 11px; } > i { display: grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0; background: #eaf3ff; color: #1768e5; border-radius: 9px; } }
-.campus_overview_grid { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); gap: 18px; }
+.campus_overview_grid { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); gap: 12px; }
 .campus_panel { h2 { font-size: 17px; color: #143455; margin: 0 0 9px; } p { line-height: 1.6; } .table { font-size: 12px; th { color: #52677f; white-space: nowrap; } td { vertical-align: middle; } } }
 .campus_muted { color: #61748c; font-size: 12px; }
 .campus_queue { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 10px; padding: 16px; border: 1px solid #e2e8f1; background: #fff; border-radius: 9px; margin: 18px 0; text-align: left; small { display: block; color: #61748c; margin-top: 6px; } b { background: #fff5df; color: #7b5100; padding: 7px 12px; border-radius: 20px; } }
@@ -35,16 +35,16 @@
 @media(max-width: 1200px) { .campus_modules { grid-template-columns: repeat(2,minmax(0,1fr)); } .campus_stats { grid-template-columns: repeat(2,minmax(0,1fr)); } .campus_overview_grid { grid-template-columns: 1fr; } }
 @media(max-width: 1023px) {
     .campus_sidebar { visibility: hidden; transform: translateX(-100%); &.is-open { visibility: visible; transform: translateX(0); } }
-    .o_web_client { > .o_main_navbar, > .o_action_manager { margin-left: 0; } > .o_navbar .o_main_navbar { padding-left: 48px; } }
+    .o_web_client:has(.campus_navigation) { > .o_main_navbar, > .o_action_manager { margin-left: 0; } > .o_navbar .o_main_navbar { padding-left: 48px; } }
     .campus_mobile_toggle { display: block; position: fixed; left: 5px; top: 2px; z-index: 101; width: 44px; height: 44px; background: #082b4b; color: white; border: 0; border-radius: 7px; }
-    .campus_dashboard { padding: 20px 14px; }
+    .campus_dashboard { padding: 16px 12px; }
     .campus_page_heading, .campus_module_heading, .campus_library_fields, .campus_library_search { align-items: stretch; flex-direction: column; }
     .campus_module_search { min-width: 0; width: 100%; }
     .campus_modules, .campus_quick { grid-template-columns: 1fr; }
     .campus_panel, .campus_stat { padding: 17px; }
 }
 @media(max-width: 390px) { .campus_stats { grid-template-columns: 1fr; } }
-@media print { .campus_sidebar, .campus_mobile_toggle { display: none; } .o_web_client > .o_action_manager { margin-left: 0; } }
+@media print { .campus_sidebar, .campus_mobile_toggle { display: none; } .o_web_client:has(.campus_navigation) > .o_action_manager { margin-left: 0; } }
 .campus_nav_link.active { background: #edf5ff; color: #0f3c70; font-weight: 750; }
 /* Keep Odoo's utility-menu spacing; wide tables scroll inside their own wrapper. */
 .campus_quick .campus_module small { margin-top: 0; }

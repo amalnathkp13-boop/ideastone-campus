@@ -73,7 +73,7 @@ export class AccountantTransport extends Component {
         ];
     }
     get breakdown() {
-        const categories = [["fuel", "Fuel", "#1769d2"], ["maintenance", "Maintenance", "#6840bf"],
+        const categories = [["fuel", "Fuel", "#1769e8"], ["maintenance", "Maintenance", "#117c87"],
             ["salary", "Driver salaries", "#08784c"], ["insurance", "Insurance & permits", "#d99a27"], ["other", "Other", "#627a96"]];
         const max = Math.max(1, ...Object.values(this.data.expenses));
         return categories.filter(([key]) => key !== "other" || this.data.expenses.other).map(([key, label, color]) => ({

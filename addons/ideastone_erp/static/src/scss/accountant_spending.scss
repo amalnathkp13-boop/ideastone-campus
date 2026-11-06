@@ -20,8 +20,8 @@
         --amberbg: #fff4e3;
         --red: #bd3737;
         --redbg: #fff0ef;
-        --violet: #6840bf;
-        --violetbg: #f2edff;
+        --violet: #117c87;
+        --violetbg: #f1f9f9;
         --shadow: 0 5px 18px rgba(16,44,70,.05);
     }
     * {
@@ -488,7 +488,7 @@
     .toolbar > button {flex:0 0 auto}
     .kpi,.layout > *, .kpis > * {min-width:0}
     .kpi strong {font-size:clamp(19px,2vw,26px);overflow-wrap:anywhere}
-    .kpiicon.green {background:#e8f7ef}.kpiicon.amber {background:#fff4e3}.kpiicon.violet {background:#f2edff}
+    .kpiicon.green {background:#e8f7ef}.kpiicon.amber {background:#fff4e3}.kpiicon.violet {background:#f1f9f9}
     .chart {overflow-x:auto;gap:12px}.barcol {min-width:30px}.bar {max-width:22px;min-width:5px;width:45%}
     .spend-error {border:1px solid #edbbbb;background:#fff0ef;color:#a52b2b;padding:12px;border-radius:9px}
     .spend-overlay {position:fixed;inset:0;z-index:1200;background:#102c4666;display:grid;place-items:center;padding:20px}

@@ -24,7 +24,7 @@ body.campus_faculty_workspace {
         h1 {font-size:26px;line-height:1.25;margin:0 0 4px;color:#132a44}
         p {font-size:14px;line-height:1.45;margin:0;color:#556b82}
     }
-    .campus_dashboard { padding: 26px 30px; background: #f4f7fb; }
+    .campus_dashboard { padding: 24px; background: #f4f7fb; }
     .campus_dashboard:has(.campus_module_overview) > .campus_page_heading { display: none; }
     .campus_faculty_welcome { display: flex; justify-content: space-between; align-items: center; gap: 20px;
         padding: 30px; margin-bottom: 24px; border-radius: 16px; color: #fff;
@@ -49,11 +49,11 @@ body.campus_faculty_workspace {
         h1 { margin: 0 0 5px; font-size: 29px; }
         h3 { margin: 0 0 4px; font-size: 18px; }
         p { margin: 0; color: #627b94; }
-        .campus_module_overview_stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
-        .campus_module_overview_stats article, .campus_module_overview_panels section { background: #fff; border: 1px solid #dfe8f2; border-radius: 14px; padding: 20px; box-shadow: 0 9px 25px #14375a0d; }
+        .campus_module_overview_stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+        .campus_module_overview_stats article, .campus_module_overview_panels section { background: #fff; border: 1px solid #e1e9f2; border-radius: 15px; padding: 16px; box-shadow: 0 3px 18px rgba(21,54,91,.045); }
         .campus_module_overview_stats small, .campus_module_overview_stats span { display: block; color: #627b94; }
         .campus_module_overview_stats strong { display: block; font-size: 28px; margin: 8px 0 2px; }
-        .campus_module_overview_panels { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .campus_module_overview_panels { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .campus_module_overview_links, .campus_module_overview_rows { margin-top: 16px; display: grid; gap: 8px; }
         .campus_module_overview_links button, .campus_module_overview_rows > div { display: flex; justify-content: space-between; gap: 14px; align-items: center; width: 100%; padding: 11px 12px; border: 1px solid #e5edf6; border-radius: 9px; background: #f8faff; color: #173b60; }
         .campus_module_overview_links button span { display: flex; align-items: center; gap: 11px; }
@@ -68,7 +68,7 @@ body.campus_faculty_workspace {
     @media(max-width: 1023px) {
         &.o_web_client > .o_navbar, &.o_web_client > .o_main_navbar, &.o_web_client > .o_action_manager { margin-left: 0; }
         .campus_faculty_subnav { left: 0; padding: 0 12px; gap: 10px; > strong { display: none; } }
-        .campus_dashboard { padding: 20px 14px; }
+        .campus_dashboard { padding: 16px 12px; }
         .campus_faculty_welcome { padding: 24px; > i { display: none; } h2 { font-size: 23px; } }
         .campus_faculty_module_intro { flex-wrap: wrap; > span { margin-left: 0; } }
     }

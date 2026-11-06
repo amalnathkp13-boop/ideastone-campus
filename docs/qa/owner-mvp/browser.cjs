@@ -61,8 +61,8 @@ async function markup(page) {
         await page.screenshot({path:path.join(out,'owner-charts-1440.png')});
         if(await page.locator('.admin_overview .kpi').count()!==8) throw Error('Admin overview does not show eight indicators');
         if(await page.locator('.event-card').count()!==3) throw Error('Admin event cards do not reflect the four saved events');
-        if(await page.locator('.admin_overview .kpi-value').first().evaluate(el=>getComputedStyle(el).color)!=='rgb(16, 45, 73)') throw Error('Saved KPI text does not use the reference color');
-        if(await page.locator('.event-category').first().evaluate(el=>getComputedStyle(el).color)!=='rgb(115, 85, 199)') throw Error('Saved event category does not use the reference color');
+        if(await page.locator('.admin_overview .kpi-value').first().evaluate(el=>getComputedStyle(el).color)!=='rgb(19, 42, 68)') throw Error('Saved KPI text does not use the SOP color');
+        if(await page.locator('.event-category').first().evaluate(el=>getComputedStyle(el).color)!=='rgb(17, 124, 135)') throw Error('Saved event category does not use the SOP color');
         for(const width of [320,390,768,1440]) {
             await page.setViewportSize({width,height:1000});
             if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)) throw Error(`Admin overview overflows at ${width}`);

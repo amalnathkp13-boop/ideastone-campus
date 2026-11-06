@@ -135,7 +135,7 @@ export class AcademicsWorkspace extends Component {
             groups.get(id).rows.push(row);
         }
         const filtered = this.state.query.trim() || Object.values(this.state.filters).some(Boolean);
-        const palette = [["#f0eaff", "#6a1fd2"], ["#eaf3ff", "#1769e8"], ["#eaf5ef", "#579477"], ["#fff4e2", "#b8832d"]];
+        const palette = [["#e7f8f8", "#117c87"], ["#eaf3ff", "#1769e8"], ["#eaf5ef", "#579477"], ["#fff4e2", "#b8832d"]];
         return [...groups.values()].filter(group => !filtered || group.rows.length)
             .sort((a, b) => !a.id - !b.id || a.name.localeCompare(b.name))
             .map(group => ({...group, colors: palette[Math.max(0, group.id - 1) % palette.length]}));
@@ -159,7 +159,7 @@ export class AcademicsWorkspace extends Component {
     get stats() {
         return [{name: "Active programmes", value: this.number(this.c.programmes), icon: "fa-graduation-cap", tint: "#e7f0ff", accent: "#1769e8"},
             {name: "Active departments", value: this.number(this.c.departments), icon: "fa-university", tint: "#e6f5f0", accent: "#16866c"},
-            {name: "Active class sections", value: this.number(this.c.sections), icon: "fa-users", tint: "#efeaff", accent: "#7652cc"},
+            {name: "Active class sections", value: this.number(this.c.sections), icon: "fa-users", tint: "#e7f8f8", accent: "#117c87"},
             {name: "Items needing attention", value: this.number(this.c.checks), icon: "fa-exclamation-triangle", tint: "#fff2dc", accent: "#c28219"}];
     }
     get structure() {

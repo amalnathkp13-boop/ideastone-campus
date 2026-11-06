@@ -29,7 +29,7 @@
   .os_ico { width: 35px; height: 35px; border-radius: 10px; display: grid; place-items: center; font-size: 17px; background: #eaf2ff; color: var(--os-blue); }
   .os_stat:nth-child(2) .os_ico { background: #e7f6ee; color: #13835b; }
   .os_stat:nth-child(3) .os_ico { background: #fff5dc; color: #986707; }
-  .os_stat:nth-child(4) .os_ico { background: #f0eaff; color: #7252b9; }
+  .os_stat:nth-child(4) .os_ico { background: #f1f9f9; color: #117c87; }
   .os_num { color: var(--os-ink); font-size: 24px; font-weight: 750; margin: 12px 0 4px; overflow-wrap: anywhere; }
   .os_hint, .os_desc { font-size: 12px; color: var(--os-muted); }
   .os_panel { padding: 20px; }
@@ -42,7 +42,7 @@
   .os_green { background: #e7f6ee; color: #13835b; }
   .os_amber { background: #fff5dc; color: #986707; }
   .os_blue { background: #eaf2ff; color: var(--os-blue); }
-  .os_purple { background: #f0eaff; color: #7252b9; }
+  .os_purple { background: #f1f9f9; color: #117c87; }
   .os_row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 0; border-bottom: 1px solid #edf1f5;
     &:last-child { border-bottom: 0; }
   }
@@ -50,7 +50,7 @@
   .os_rowicon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; background: #f0f5fb; color: #416b8e; flex-shrink: 0; }
   .os_rt { font-size: 13px; font-weight: 650; }
   .os_rd { font-size: 12px; color: var(--os-muted); margin-top: 4px; }
-  .os_security { background: linear-gradient(135deg, #f2f7ff, #f7f5ff); border-color: #d9e5f8;
+  .os_security { background: linear-gradient(135deg, #f2f7ff, #f8fbfb); border-color: #d9e5f8;
     .os_rowicon { background: #e5edff; color: #315ec4; }
   }
   .os_notice { font-size: 12px; color: #5a7085; background: #f8fafc; border: 1px solid var(--os-line); padding: 12px 14px; border-radius: 10px; margin-top: 15px; line-height: 1.6; }

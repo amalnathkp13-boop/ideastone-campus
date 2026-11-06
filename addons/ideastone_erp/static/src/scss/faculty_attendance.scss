@@ -49,7 +49,7 @@
     span:not(.attendance_metric_icon) { color: #6c82da; font-size: 11px; display: block; text-align: right; }
   }
   .attendance_metric_icon { width: 48px; height: 48px; flex: 0 0 48px; border-radius: 11px; display: grid; place-items: center; font-size: 25px;
-    &.blue { background: #eef7ff; color: #0562e9; } &.purple { background: #f4efff; color: #8233fc; }
+    &.blue { background: #eef7ff; color: #0562e9; } &.purple { background: #f1f9f9; color: #117c87; }
     &.red { background: #fff2f2; color: #ee2727; } &.green { background: #edfcf2; color: #09a34c; }
   }
   .attendance_main_grid { display: grid; grid-template-columns: 1.05fr 1.05fr .63fr; gap: 12px; margin-bottom: 11px; }
@@ -94,7 +94,7 @@
     header h2 { color: #001dae; }
     header p { color: #667dde; font-size: 11px; }
   }
-  .attendance_insight_star { font-size: 30px; color: #8243ff; width: 52px; text-align: center; }
+  .attendance_insight_star { font-size: 30px; color: #117c87; width: 52px; text-align: center; }
   .attendance_insight_cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
     article { min-height: 62px; border: 1px solid #e6eefb; border-radius: 5px; padding: 8px 12px; display: flex; align-items: flex-start; gap: 10px; }
     article > i { color: var(--att-blue); background: #eff7ff; padding: 10px; border-radius: 6px; font-size: 18px; }
