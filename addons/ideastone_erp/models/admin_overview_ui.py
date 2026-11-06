@@ -303,7 +303,7 @@ class AdminOverviewUI(models.AbstractModel):
             ("term_start_date", "<=", today), ("term_end_date", ">=", today)] + ([("academic_year_id", "=", f["year_id"])] if f["year_id"] else []))
         term_ranges = {(term.term_start_date, term.term_end_date) for term in current_terms}
         semester = next(iter(term_ranges)) if len(term_ranges) == 1 else None
-        stats = {card["kind"]: card for card in data["stats"]}
+        stats = {card["kind"]: dict(card) for card in data["stats"]}
         routes = self._mvp_records(*self._admin_source("fleet", f))
         fleet_allowed = self.env["campus.transport.route"].check_access_rights("read", raise_exception=False)
         def vehicles(records):
