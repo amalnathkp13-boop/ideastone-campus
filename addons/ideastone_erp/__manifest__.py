@@ -30,7 +30,7 @@
         "views/academics_ui.xml", "views/owner_communication.xml", "data/owner_communication.xml",
         "views/owner_staff_ui.xml", "views/owner_attendance.xml",
         "views/academics_ui.xml",
-        "security/college_calendar.xml", "views/college_calendar.xml", "views/owner_fees.xml", "views/faculty_library.xml",
+        "security/college_calendar.xml", "views/college_calendar.xml", "views/owner_fees.xml", "views/faculty_library.xml", "views/hod_directory.xml",
     ],
     "demo": ["demo/college_calendar.xml"],
     "assets": {
@@ -82,6 +82,9 @@
             "ideastone_erp/static/src/js/faculty_campus_services.js",
             "ideastone_erp/static/src/js/owner_fees.js",
             "ideastone_erp/static/src/js/faculty_library.js",
+            "ideastone_erp/static/src/js/hod_directory.js",
+            "ideastone_erp/static/src/xml/hod_directory.xml",
+            "ideastone_erp/static/src/scss/hod_directory.scss",
             "ideastone_erp/static/src/xml/faculty_home.xml",
             "ideastone_erp/static/src/scss/faculty_home.scss",
             "ideastone_erp/static/src/js/faculty_communication.js",

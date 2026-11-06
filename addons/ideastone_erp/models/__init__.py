@@ -80,4 +80,5 @@ from . import accountant_transport
 from . import accountant_circulars
 from . import accountant_directory
 from . import accountant_spending
+from . import hod_directory
 from . import fleet_management
