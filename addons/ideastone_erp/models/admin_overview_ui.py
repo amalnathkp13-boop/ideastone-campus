@@ -196,10 +196,17 @@ class AdminOverviewUI(models.AbstractModel):
                  ("dues", "Outstanding fees", "inr", "amber"), ("staff_present", "Present staff", "users", "green"),
                  ("fleet", "Fleet (buses)", "bus", "blue")]
         kpis = [dict(stats[kind], label=label, icon=icon, tone=tone) for kind, label, icon, tone in specs]
+        fleet = None
+        user = self.env.user
+        if user.has_group("ideastone_erp.group_mvp_owner") or user.has_group("base.group_system"):
+            fleet = self.env["campus.fleet.ui"]._snapshot()["totals"]
+            fleet_card = next(card for card in kpis if card["kind"] == "fleet")
+            fleet_card.update(label=_("Active buses"), value=fleet["active"], allowed=True,
+                              detail=_("Operating buses · View active routes"))
         # The requested overview uses rupee labels; retain the recorded amounts.
         for card in kpis:
             if card["kind"] in {"collection", "dues"} and card["allowed"]:
-                amount = card["value"].removeprefix(f"{self.env.company.currency_id.symbol} ")
+                amount = card["value"].removeprefix("₹ ")
                 card["value"] = f"₹ {amount}"
         service_allowed = self.env["campus.service.request"].check_access_rights("read", raise_exception=False)
         kpis.append({"kind": "services", "label": "Open service requests", "value": len(services) if service_allowed else "—",
@@ -217,7 +224,7 @@ class AdminOverviewUI(models.AbstractModel):
         watches = [{"kind": "overdue_services", "label": _("Service requests past requested date"), "count": len(overdue_services), "detail": _("Open requests with a requested end date before today"), "icon": "flag-o", "tone": "red", "allowed": service_allowed},
             {"kind": "overdue_dues", "label": _("Overdue fee invoices"), "count": len(overdue_dues), "detail": _("Outstanding invoices past due in the selected academic scope"), "icon": "inr", "tone": "amber", "allowed": stats["dues"]["allowed"]},
             {"kind": "attendance_pending", "label": _("Attendance not submitted"), "count": len(pending), "detail": _("Elapsed sessions in this period without completed attendance"), "icon": "check", "tone": "blue", "allowed": self.env["op.attendance.sheet"].check_access_rights("read", raise_exception=False)}]
-        data["overview_ui"] = {"kpis": kpis, "activity": activity, "departments": department_rows, "threshold": threshold, "currency_symbol": "₹",
+        data["overview_ui"] = {"kpis": kpis, "fleet": fleet, "activity": activity, "departments": department_rows, "threshold": threshold, "currency_symbol": "₹",
             "fee_months": fee_rows, "fee_allowed": self.env["account.move"].check_access_rights("read", raise_exception=False),
             "fee_percent": round(sum(row["collected"] for row in fee_rows) * 100 / billed) if billed else None,
             "decisions": decision_rows, "decision_count": len(decisions), "decision_budget": sum(decisions.mapped("amount")),

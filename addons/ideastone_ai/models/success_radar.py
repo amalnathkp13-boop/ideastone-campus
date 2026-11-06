@@ -268,7 +268,7 @@ class SuccessRadar(models.AbstractModel):
         return {
             "role": role, "today": fields.Date.to_string(today), "company": self.env.company.name,
             "threshold": pct(self.env.company.campus_attendance_threshold),
-            "currency_symbol": self.env.company.currency_id.symbol, "currency_code": self.env.company.currency_id.name,
+            "currency_symbol": "₹", "currency_code": self.env.company.currency_id.name,
             "summary": {"students": len(all_rows), "high": bands["high"], "watch": bands["watch"], "low": bands["low"],
                         "top_factors": [{"key": key, "count": count} for key, count in top_factors.most_common()]},
             "departments": [{"id": d, "name": n} for d, n in departments],

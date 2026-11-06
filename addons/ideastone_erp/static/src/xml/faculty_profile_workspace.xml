@@ -794,14 +794,14 @@
                           <th>#</th>
                           <th>Month</th>
                           <th>Year</th>
-                          <th t-if="state.report !== 'Deductions only' &amp;&amp; state.report !== 'Contributions only'">Net Salary (<t t-esc="d.currency"/>)</th>
+                          <th t-if="state.report !== 'Deductions only' &amp;&amp; state.report !== 'Contributions only'">Net Salary (<t t-esc="'₹'"/>)</th>
                           <t t-if="state.report !== 'Salary only' &amp;&amp; state.report !== 'Contributions only'">
                             <th>Late Days</th>
-                            <th>Late Deduction (<t t-esc="d.currency"/>)</th>
+                            <th>Late Deduction (<t t-esc="'₹'"/>)</th>
                           </t>
                           <t t-if="state.report !== 'Salary only' &amp;&amp; state.report !== 'Deductions only'">
-                            <th>P.F (<t t-esc="d.currency"/>)</th>
-                            <th>T.D.S (<t t-esc="d.currency"/>)</th>
+                            <th>P.F (<t t-esc="'₹'"/>)</th>
+                            <th>T.D.S (<t t-esc="'₹'"/>)</th>
                           </t>
                           <th/>
                         </tr>
