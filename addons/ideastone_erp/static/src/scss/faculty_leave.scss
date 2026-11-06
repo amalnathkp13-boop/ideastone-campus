@@ -81,6 +81,28 @@
         label { padding-top: 9px; }
         textarea { min-height: 74px; resize: vertical; }
     }
+    .leave_coverage {
+        min-width: 0; margin: 15px 0; padding: 13px; border: 1px solid #d7e6fb;
+        border-radius: 9px; background: #f6faff; color: #24436e;
+        legend { float: none; width: auto; margin: 0; padding: 0 5px; color: #153a71; font-size: 14px; font-weight: 700; }
+        i { color: var(--leave-blue); margin-right: 4px; }
+        p { margin: 0 0 8px; font-size: 12px; }
+    }
+    .leave_coverage_tools { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 10px 0;
+        span { margin-left: auto; color: #345d94; font-size: 12px; }
+    }
+    .leave_coverage_row {
+        display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 5px 10px;
+        align-items: center; margin-bottom: 7px; padding: 9px; border: 1px solid #dde8f8; border-radius: 7px; background: #fff;
+        label small { display: block; }
+        select { width: 100%; min-width: 0; padding: 6px; border: 1px solid #ccd9eb; border-radius: 5px; color: #153a71; }
+        > small { grid-column: 1 / -1; color: #516e95; }
+    }
+    .leave_coverage_summary { padding-top: 5px; }
+    .leave_duty_counts { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
+        span { padding: 8px 13px; border-radius: 7px; background: #eef5fd; color: #224e84; }
+        strong { margin-left: 4px; }
+    }
     .leave_balance { display: flex; align-items: center; gap: 8px; margin: 13px 0 16px; padding: 11px 13px; border-radius: 7px; background: #eaf2fe; color: #315e9a;
         i { color: #0966ee; }
         strong { color: #123d8a; }

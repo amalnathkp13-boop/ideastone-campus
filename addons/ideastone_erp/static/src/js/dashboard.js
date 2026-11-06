@@ -139,7 +139,7 @@ class CampusBase extends Component {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
-        if (((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library", "grievances"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics", "fees", "calendar", "staff", "communication"].includes(module.key))) && module.items?.[0]?.action) {
+        if (((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library", "grievances", "hod-directory"].includes(module.key) || (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics", "fees", "calendar", "staff", "communication"].includes(module.key))) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
@@ -298,8 +298,7 @@ class CampusBase extends Component {
         return [...new Set((this.state.collectionRecords.rows || []).map(row => row.status).filter(Boolean))];
     }
     collectionFullMoney(value) {
-        const currency = this.state.collectionRecords.currency || "₹";
-        return `${currency}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(Number(value) || 0)}`;
+        return `₹${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(Number(value) || 0)}`;
     }
     async collectionOpenEditor() {
         const screen = this.collectionScreen;
@@ -360,7 +359,7 @@ class CampusBase extends Component {
         const divisor = currency === "₹" ? (absolute >= 10000000 ? 10000000 : absolute >= 100000 ? 100000 : 1) :
             (absolute >= 1000000 ? 1000000 : absolute >= 1000 ? 1000 : 1);
         const suffix = divisor === 1 ? "" : currency === "₹" ? (divisor === 10000000 ? "Cr" : "L") : (divisor === 1000000 ? "M" : "K");
-        return `${currency}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: divisor === 1 ? 0 : 1}).format(amount / divisor)}${suffix}`;
+        return `₹${new Intl.NumberFormat("en-IN", {maximumFractionDigits: divisor === 1 ? 0 : 1}).format(amount / divisor)}${suffix}`;
     }
     collectionRate(value, total) {
         return total ? Math.max(0, Math.min(100, Math.round(value / total * 100))) : 0;
@@ -399,7 +398,7 @@ class CampusBase extends Component {
         if (item) return this.open(item);
     }
     accountantMoney(value) {
-        return `${this.state.accountantMetrics.currency || ""}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(value || 0)}`;
+        return `₹${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(value || 0)}`;
     }
     accountantCompactMoney(value) {
         const amount = Number(value) || 0;
@@ -408,7 +407,7 @@ class CampusBase extends Component {
         const divisor = indian ? (absolute >= 10000000 ? 10000000 : absolute >= 100000 ? 100000 : 1) :
             (absolute >= 1000000 ? 1000000 : absolute >= 1000 ? 1000 : 1);
         const suffix = divisor === 1 ? "" : indian ? (divisor === 10000000 ? "Cr" : "L") : (divisor === 1000000 ? "M" : "K");
-        return `${this.state.accountantMetrics.currency || ""}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(amount / divisor)}${suffix}`;
+        return `₹${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(amount / divisor)}${suffix}`;
     }
     get accountantTrendRows() {
         const rows = this.state.accountantMetrics.trend || [];
@@ -445,7 +444,7 @@ class CampusBase extends Component {
         return this.number(value / divisor);
     }
     get accountantChartUnit() {
-        return `${this.state.accountantMetrics.currency || ""} ${this.state.accountantMetrics.currency === "₹" ? "lakh" : this.accountantChartMax >= 10000 ? "thousand" : "units"}`;
+        return `₹ ${this.state.accountantMetrics.currency === "₹" ? "lakh" : this.accountantChartMax >= 10000 ? "thousand" : "units"}`;
     }
     get accountantTrendChange() {
         const rows = this.accountantTrendRows;
@@ -492,12 +491,16 @@ class CampusBase extends Component {
     async ownerSource(card) {
         if (!card.allowed) return;
         try {
+            if (card.kind === "fleet" && this.ownerUI.fleet) return this.openOwnerFleet("active");
             if (["services", "attendance_pending", "overdue_services", "overdue_dues", "staff_present", "staff_delayed", "fleet"].includes(card.kind)) return this.ownerOverviewAction(card.kind);
             const action = await this.orm.call("campus.dashboard", "get_owner_source_action", [card.kind, this.state.ownerAppliedFilters]);
             if (!action.views) action.views = (action.view_mode || "tree,form").split(",").map(mode => [false, mode]);
             if (action.help) action.help = markup(action.help);
             await this.action.doAction(action);
         } catch (error) { this.notification.add(error.data?.message || "The source register is unavailable.", {type: "danger"}); }
+    }
+    openOwnerFleet(filter = "all") {
+        return this.action.doAction("ideastone_erp.action_fleet_management", {props: {initialFilter: filter}});
     }
     chartWidth(value, rows, field = "value") {
         const keys = Array.isArray(field) ? field : [field];
@@ -531,10 +534,10 @@ class CampusBase extends Component {
     }
     ownerCanOpen(xmlid) { return this.state.navigation.some(row => row.action === xmlid); }
     ownerPrint() { window.print(); }
-    ownerMoney(value) { return `${this.ownerUI.currency_symbol || ""} ${this.number(value)}`.trim(); }
+    ownerMoney(value) { return `₹ ${this.number(value)}`; }
     ownerCompactMoney(value) {
         const magnitude = Math.abs(value);
-        return `${this.ownerUI.currency_symbol || ""}${this.number(value / (magnitude >= 10000000 ? 10000000 : magnitude >= 100000 ? 100000 : 1))}${magnitude >= 10000000 ? "Cr" : magnitude >= 100000 ? "L" : ""}`;
+        return `₹${this.number(value / (magnitude >= 10000000 ? 10000000 : magnitude >= 100000 ? 100000 : 1))}${magnitude >= 10000000 ? "Cr" : magnitude >= 100000 ? "L" : ""}`;
     }
     ownerMonth(value) { return new Date(`${value.slice(0, 7)}-15T12:00:00Z`).toLocaleDateString(undefined, {month: "short", year: "2-digit", timeZone: "UTC"}); }
     ownerDay(value) { return value.slice(8, 10); }
