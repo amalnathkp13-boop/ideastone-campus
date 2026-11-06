@@ -2,10 +2,10 @@ import base64
 import binascii
 from pathlib import PurePath
 
-from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, ValidationError
 from odoo.osv import expression
 
+from odoo import _, api, fields, models
 
 CATEGORIES = [
     ("infrastructure", "Infrastructure / maintenance"),
