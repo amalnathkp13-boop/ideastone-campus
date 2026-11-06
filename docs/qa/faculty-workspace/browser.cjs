@@ -33,6 +33,7 @@ async function diagnosticMarkup(page) {
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'faculty-overview-1440.png')});
         await page.locator('.campus_sidebar').getByRole('button',{name:'My task list',exact:true}).click();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My Mentorship Class',exact:true}).click();
         await page.getByRole('heading',{name:'My Mentorship Class',exact:true,level:1}).waitFor();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My Teaching Subjects',exact:true}).waitFor();
         if(await page.locator('.campus_sidebar').getByRole('button',{name:'Subject-wise Attendance',exact:true}).count()) throw Error('Faculty attendance must stay under My Task List');
@@ -89,6 +90,7 @@ async function diagnosticMarkup(page) {
         await page.reload();
         await page.getByRole('button',{name:'Reopen calculation',exact:true}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'My profile & payroll',exact:true}).click();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My staff profile',exact:true}).click();
         await page.getByRole('heading',{name:'My staff profile',exact:true,level:1}).waitFor();
         if(await page.locator('.campus_faculty_subnav').getByRole('button').count() !== 9) throw Error('Expected seven profile submodules and two scroll controls');
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Leave requests',exact:true}).click();
@@ -128,6 +130,7 @@ async function diagnosticMarkup(page) {
             await page.getByRole('heading',{name:label,exact:true,level:1}).waitFor();
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'My profile & payroll',exact:true}).click();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My staff profile',exact:true}).click();
         await page.getByRole('heading',{name:'My staff profile',exact:true,level:1}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'My task list',exact:true}).click();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Internal mark generation',exact:true}).waitFor();
