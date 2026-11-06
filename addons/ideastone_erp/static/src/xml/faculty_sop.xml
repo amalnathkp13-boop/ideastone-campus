@@ -1,0 +1,871 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.FacultySop">
+    <main class="campus_faculty_sop">
+      <div class="notice" t-if="state.loading" role="status">Loading your assigned records…</div>
+      <div class="notice warn between" t-if="state.error" role="alert">
+        <span t-esc="state.error"/><button type="button" class="btn" t-on-click="() => this.load(!d)">Retry</button>
+      </div>
+      <t t-if="d">
+        <t t-call="ideastone_erp.FacultySopHeader"/>
+        <t t-if="page === 'attendance'" t-call="ideastone_erp.FacultySopAttendanceIntro"/>
+        <t t-call="ideastone_erp.FacultySopKpis"><t t-set="metrics" t-value="kpis"/></t>
+        <t t-if="page === 'timetable'" t-call="ideastone_erp.FacultySopTimetable"/>
+        <t t-elif="page === 'attendance'" t-call="ideastone_erp.FacultySopAttendance"/>
+        <t t-elif="page === 'tasks'" t-call="ideastone_erp.FacultySopTasks"/>
+        <t t-elif="page === 'exams'" t-call="ideastone_erp.FacultySopExams"/>
+        <t t-elif="page === 'assignments'" t-call="ideastone_erp.FacultySopAssignments"/>
+        <t t-elif="page === 'alternate'" t-call="ideastone_erp.FacultySopAlternate"/>
+        <t t-elif="page === 'lessons'" t-call="ideastone_erp.FacultySopLessons"/>
+        <t t-elif="page === 'circulars'" t-call="ideastone_erp.FacultySopCirculars"/>
+        <p class="footer-note">VCET Faculty Workspace · <t t-esc="d.demo ? 'Sample college records' : 'Saved campus records'"/></p>
+        <t t-if="state.modal" t-call="ideastone_erp.FacultySopDrawer"/>
+      </t>
+    </main>
+  </t>
+
+  <t t-name="ideastone_erp.FacultySopHeader">
+    <header class="pagehead">
+      <div>
+        <div class="crumb">VCET Campus <span>/</span> My Task List <span>/</span> <t t-esc="title"/></div>
+        <h1 t-esc="title"/><p class="subtitle" t-esc="description"/>
+      </div>
+      <div class="faculty-card">
+        <t t-call="ideastone_erp.FacultySopIcon"><t t-set="iconName" t-value="'user'"/></t>
+        <div><strong t-esc="d.user"/><small>Faculty Workspace</small></div>
+      </div>
+    </header>
+  </t>
+
+  <t t-name="ideastone_erp.FacultySopKpis">
+    <div class="kpis">
+      <article class="kpi" t-foreach="metrics" t-as="metric" t-key="metric[0]">
+        <div class="kpi-top"><span class="kpi-label" t-esc="metric[0]"/>
+          <span class="kpi-icon"><t t-call="ideastone_erp.FacultySopIcon"><t t-set="iconName" t-value="metric[3]"/></t></span>
+        </div>
+        <div class="kpi-value" t-esc="metric[1]"/><div class="kpi-foot" t-esc="metric[2]"/>
+      </article>
+    </div>
+  </t>
+
+  <t t-name="ideastone_erp.FacultySopPanel">
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="heading-with-icon">
+            <t t-call="ideastone_erp.FacultySopIcon"><t t-set="iconName" t-value="panelIcon || 'book'"/></t>
+            <h2 t-esc="panelTitle"/>
+          </div>
+          <p class="helper" t-esc="panelHelp"/>
+        </div>
+        <t t-if="panelAction" t-out="panelAction"/>
+      </div>
+      <t t-out="0"/>
+    </section>
+  </t>
+
+  <t t-name="ideastone_erp.FacultySopTableHead">
+    <thead><tr><th scope="col" t-foreach="columns" t-as="column" t-key="column" t-esc="column"/></tr></thead>
+  </t>
+
+  <t t-name="ideastone_erp.FacultySopAllocation">
+    <select t-model="state.allocation" t-att-aria-label="allocationLabel || 'Assigned Subject'" required="required">
+      <option t-if="!d.allocations.length" value="">No assigned subjects</option>
+      <option t-foreach="d.allocations" t-as="item" t-key="item.id" t-att-value="item.id + ''">
+        <t t-esc="item.code"/> · <t t-esc="item.subject"/> · <t t-esc="item.class"/>
+      </option>
+    </select>
+  </t>
+
+  <t t-name="ideastone_erp.FacultySopTimetable">
+    <div class="grid wide">
+      <t t-call="ideastone_erp.FacultySopPanel">
+        <t t-set="panelTitle" t-value="'My Weekly Timetable'"/>
+        <t t-set="panelHelp" t-value="'Select a weekday to view your scheduled teaching periods.'"/>
+        <div class="week-days" aria-label="Weekdays">
+          <button t-foreach="weekdays" t-as="day" t-key="day" type="button"
+                  t-att-class="{weekday: true, active: state.day === day_index}"
+                  t-att-aria-pressed="state.day === day_index ? 'true' : 'false'"
+                  t-on-click="() => this.state.day = day_index" t-esc="day"/>
+        </div>
+        <div class="tablewrap" tabindex="0" aria-label="Weekly timetable">
+          <table>
+            <t t-call="ideastone_erp.FacultySopTableHead">
+              <t t-set="columns" t-value="['Period','Time','Subject','Class / Section','Venue','Action']"/>
+            </t>
+            <tbody>
+              <tr t-foreach="dayRows" t-as="row" t-key="row.id">
+                <td><strong>Period <t t-esc="row_index + 1"/></strong></td>
+                <td t-esc="row.time"/><td t-esc="row.subject"/><td t-esc="row.class"/><td t-esc="row.room"/>
+                <td>
+                  <button t-if="row.term_id" type="button" class="btn sm" t-on-click="() => this.openTeaching(row)">Open register</button>
+                  <span t-else="" class="status blue" t-esc="row.status"/>
+                </td>
+              </tr>
+              <tr t-if="!dayRows.length"><td colspan="6" class="empty">No assigned classes on this day.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="caption">Showing <t t-esc="dayRows.length"/> records · Week of <t t-esc="date(d.week)"/></p>
+      </t>
+      <aside class="stack">
+        <t t-call="ideastone_erp.FacultySopPanel">
+          <t t-set="panelTitle" t-value="'Today’s Priorities'"/><t t-set="panelHelp" t-value="date(d.today)"/>
+          <div class="item-list">
+            <article class="item" t-foreach="todayRows" t-as="row" t-key="row.id">
+              <div class="between"><strong t-esc="row.subject"/><span class="status blue" t-esc="row.time"/></div>
+              <p><t t-esc="row.class"/> · <t t-esc="row.room"/><br/><t t-esc="row.status"/></p>
+            </article>
+            <p class="empty" t-if="!todayRows.length">No assigned periods today.</p>
+            <article class="item" t-if="d.mentorship">
+              <div class="between"><strong>Mentorship Class</strong><span class="status blue">Assigned</span></div>
+              <p t-esc="d.mentorship"/>
+              <button class="btn sm" type="button" t-on-click="goMentorship">View mentees</button>
+            </article>
+          </div>
+        </t>
+        <t t-call="ideastone_erp.FacultySopPanel">
+          <t t-set="panelTitle" t-value="'Substitution Coverage'"/><t t-set="panelHelp" t-value="'Confirmed alternate teaching periods'"/>
+          <div class="item-list">
+            <article class="item" t-foreach="d.coverage" t-as="row" t-key="row.id">
+              <strong><t t-esc="date(row.date)"/> · <t t-esc="row.time"/></strong>
+              <p><t t-esc="row.class"/> · <t t-esc="row.covering ? 'Covering for ' + row.original : 'Covered by ' + row.substitute"/></p>
+              <span class="status green">Confirmed</span>
+            </article>
+            <p class="empty" t-if="!d.coverage.length">No confirmed alternate hours.</p>
+          </div>
+          <div class="sop-actions"><button class="btn" type="button" t-on-click="goAlternate">Open Alternate Hour</button></div>
+        </t>
+      </aside>
+    </div>
+  </t>
+
+  <t t-name="ideastone_erp.FacultySopAttendanceIntro">
+    <div class="intro">
+      <div class="intro-line">
+        <div><div class="eyebrow">Class teacher attendance</div>
+          <strong t-esc="d.classes.find(row => row.key === state.classKey)?.label || 'No mentorship class assigned'"/>
+          <p>Daily mentor register is separate from subject-wise teaching-hour attendance.</p>
+        </div><span class="status blue">Class Mentor</span>
+      </div>
+    </div>
+  </t>
+
+  <t t-name="ideastone_erp.FacultySopAttendance">
+    <div class="grid wide">
+      <t t-call="ideastone_erp.FacultySopPanel">
+        <t t-set="panelTitle" t-value="'Daily Class Attendance'"/>
+        <t t-set="panelHelp" t-value="'Choose date and session, then mark attendance.'"/>
+        <label class="field sop-field" t-if="d.classes.length &gt; 1"><span>Mentorship Class</span>
+          <select t-att-value="state.classKey" t-on-change="event => this.chooseDaily(event, 'classKey')">
+            <option t-foreach="d.classes" t-as="item" t-key="item.key" t-att-value="item.key" t-esc="item.label"/>
+          </select>
+        </label>
+        <div class="fields two">
+          <label class="field"><span>Attendance Date</span>
+            <input type="date" t-att-value="state.date" t-att-max="d.today" t-on-change="event => this.chooseDaily(event, 'date')"/>
+          </label>
+          <label class="field"><span>Session</span>
+            <select t-att-value="state.period" t-on-change="event => this.chooseDaily(event, 'period')">
+              <option value="FN">Forenoon (FN)</option><option value="AN">Afternoon (AN)</option><option value="FULL">Full day</option>
+            </select>
+          </label>
+        </div>
+        <div class="divider"/>
+        <div class="searchbar">
+          <input type="search" placeholder="Search student name or roll number..." aria-label="Search daily attendance" t-model="state.search"/>
+          <select aria-label="Daily attendance filter" t-model="state.filter">
+            <option value="All">All Students</option><option value="absent">Absent</option><option value="unmarked">Unmarked</option>
+          </select>
+        </div>
+        <div class="row sop-toolbar">
+          <button type="button" class="btn primary" t-att-disabled="!dailyEditable" t-on-click="markAll">Mark All Present</button>
+          <button type="button" class="btn" t-att-disabled="!state.dirty || state.busy" t-on-click="() => this.load()">Clear Unsaved</button>
+          <button type="button" class="btn" t-att-disabled="!dailyEditable" t-on-click="() => this.saveDaily(false)">Save Draft</button>
+        </div>
+        <div class="tablewrap" tabindex="0" aria-label="Daily attendance register">
+          <table>
+            <t t-call="ideastone_erp.FacultySopTableHead">
+              <t t-set="columns" t-value="['Roll No.','Student','Current Status','Mark Daily Attendance','Remarks / Performance']"/>
+            </t>
+            <tbody>
+              <tr t-foreach="dailyRows" t-as="row" t-key="row.id">
+                <td t-esc="row.roll"/><td><strong t-esc="row.name"/></td>
+                <td><span t-att-class="'status ' + ({present:'green',absent:'red',late:'amber',excused:'blue'}[row.status] || '')" t-esc="attendanceStatus(row.status)"/></td>
+                <td>
+                  <span t-if="row.protected || d.locked" class="fine"><i class="fa fa-lock"/> <t t-esc="row.protected ? 'Approved exception' : 'Submitted'"/></span>
+                  <div t-else="" class="mini-actions">
+                    <button t-foreach="markOptions" t-as="option" t-key="option" type="button"
+                            t-att-class="{tinybtn:true, active:row.status === option}"
+                            t-att-disabled="!dailyEditable" t-att-aria-pressed="row.status === option ? 'true' : 'false'"
+                            t-on-click="() => this.mark(row, option)" t-esc="attendanceStatus(option)"/>
+                  </div>
+                </td>
+                <td>
+                  <input class="sop-remark" t-att-aria-label="'Remarks for ' + row.name" placeholder="Optional note" maxlength="500"
+                         t-att-value="row.remark" t-att-readonly="row.protected || d.locked" t-on-input="event => this.dailyRemark(row, event)"/>
+                  <button class="btn sm sop-inline" type="button" t-on-click="() => this.performance(row)">Performance</button>
+                </td>
+              </tr>
+              <tr t-if="!dailyRows.length"><td colspan="5" class="empty">No students match the current filter.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="caption">Showing <t t-esc="dailyRows.length"/> records</p>
+        <div class="between sop-actions">
+          <span class="fine" t-esc="d.locked ? 'Submitted · Locked' : 'Approved OD / Leave records are protected.'"/>
+          <button class="btn primary" type="button" t-att-disabled="!dailyEditable || dailyCounts.unmarked"
+                  t-on-click="() => this.open('dailyConfirm', 'Submit Daily Attendance')">Submit Daily Attendance</button>
+        </div>
+      </t>
+      <aside class="stack">
+        <t t-call="ideastone_erp.FacultySopPanel">
+          <t t-set="panelTitle" t-value="'Daily Attendance Summary'"/><t t-set="panelHelp" t-value="'Live counts for the selected date and session.'"/>
+          <div class="summary-list">
+            <div class="summary-item softgreen"><span>Present</span><strong t-esc="dailyCounts.present + dailyCounts.late"/></div>
+            <div class="summary-item"><span>Late Arrivals</span><strong t-esc="dailyCounts.late"/></div>
+            <div class="summary-item softred"><span>Absent</span><strong t-esc="dailyCounts.absent"/></div>
+            <div class="summary-item"><span>Approved OD / Leave</span><strong t-esc="dailyCounts.excused"/></div>
+            <div class="summary-item"><span>Unmarked</span><strong t-esc="dailyCounts.unmarked"/></div>
+          </div>
+          <div class="notice sop-actions">Subject-teaching and daily attendance are recorded separately. Submitted registers are locked.</div>
+        </t>
+        <t t-call="ideastone_erp.FacultySopPanel">
+          <t t-set="panelTitle" t-value="'Recorded Daily Sessions'"/><t t-set="panelHelp" t-value="'Submitted class-teacher registers'"/>
+          <div class="item-list">
+            <article class="item" t-foreach="d.history" t-as="row" t-key="row.id">
+              <strong><t t-esc="date(row.date)"/> · <t t-esc="row.period"/></strong>
+              <div class="item-meta"><t t-esc="row.present + row.late"/> present · <t t-esc="row.late"/> late · <t t-esc="row.absent"/> absent · <t t-esc="row.excused"/> approved exceptions</div>
+              <span class="status green">Submitted</span>
+            </article>
+            <p class="empty" t-if="!d.history.length">No daily attendance submitted yet.</p>
+          </div>
+          <div class="sop-actions"><button class="btn" type="button" t-on-click="() => this.csv('daily')"><i class="fa fa-download"/> Export History</button></div>
+        </t>
+      </aside>
+    </div>
+  </t>
+
+  <t t-name="ideastone_erp.FacultySopTasks">
+    <div class="grid wide">
+      <t t-call="ideastone_erp.FacultySopPanel">
+        <t t-set="panelTitle" t-value="'My Assigned Tasks'"/><t t-set="panelHelp" t-value="'Use status filters to manage outstanding academic work.'"/>
+        <div class="between sop-toolbar">
+          <div class="subnav-pill" aria-label="Task status">
+            <button t-foreach="['All','Pending','Completed']" t-as="filter" t-key="filter" type="button"
+                    t-att-class="{periodbtn:true,active:state.filter === filter}" t-on-click="() => this.state.filter = filter" t-esc="filter"/>
+          </div>
+          <button class="btn primary" type="button" t-on-click="newTask"><i class="fa fa-plus" aria-hidden="true"/> New Task</button>
+        </div>
+        <div class="tablewrap" tabindex="0" aria-label="Assigned faculty tasks">
+          <table>
+            <t t-call="ideastone_erp.FacultySopTableHead"><t t-set="columns" t-value="['Task','Assigned Area','Due Date','Priority','Status','Action']"/></t>
+            <tbody>
+              <tr t-foreach="taskRows" t-as="row" t-key="row.id">
+                <td><strong t-esc="row.title"/></td><td t-esc="row.area"/><td t-esc="date(row.date)"/>
+                <td><span t-att-class="'status ' + ({High:'red',Medium:'amber'}[row.priority] || '')" t-esc="row.priority"/></td>
+                <td><span t-att-class="'status ' + (row.done ? 'green' : 'amber')" t-esc="row.done ? 'Completed' : 'Pending'"/></td>
+                <td><button class="btn sm" type="button" t-att-disabled="state.busy" t-on-click="() => this.toggleTask(row)" t-esc="row.done ? 'Reopen' : 'Mark Complete'"/></td>
+              </tr>
+              <tr t-if="!taskRows.length"><td colspan="6" class="empty">No tasks for this filter.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="caption">Showing <t t-esc="taskRows.length"/> records</p>
+      </t>
+      <aside class="stack">
+        <t t-call="ideastone_erp.FacultySopPanel">
+          <t t-set="panelTitle" t-value="'Daily e-Diary'"/><t t-set="panelHelp" t-value="'Record topics taught, class activities and academic follow-ups.'"/>
+          <form t-on-submit.prevent="saveDiary">
+            <label class="field sop-field"><span>Entry Date</span><input type="date" t-model="state.diaryDate" t-att-max="d.today" required="required"/></label>
+            <label class="field sop-field"><span>Teaching / Activity Notes</span>
+              <textarea t-model="state.diary" maxlength="5000" placeholder="Session notes, meeting summary, student follow-up or task completed..." required="required"/>
+            </label>
+            <div class="right"><button class="btn primary" type="submit" t-att-disabled="state.busy">Save Diary Entry</button></div>
+          </form>
+        </t>
+        <t t-call="ideastone_erp.FacultySopPanel">
+          <t t-set="panelTitle" t-value="'Recent Diary Entries'"/><t t-set="panelHelp" t-value="'Your saved faculty activity notes.'"/>
+          <div class="item-list">
+            <article class="item" t-foreach="d.diary" t-as="row" t-key="row.id">
+              <div class="between"><strong t-esc="date(row.date)"/><span class="status green">Saved</span></div><p t-esc="row.note"/>
+            </article>
+            <p t-if="!d.diary.length" class="empty">No diary entries added yet.</p>
+          </div>
+        </t>
+      </aside>
+    </div>
+  </t>
+
+  <t t-name="ideastone_erp.FacultySopExams">
+    <div class="intro"><div class="intro-line">
+      <div><div class="eyebrow">Assessment control</div><strong>Draft → Validate → Submit for approval</strong>
+        <p>Faculty may enter allocated marks. Locked records require authorized corrections.</p>
+      </div>
+      <span t-att-class="'status ' + (marksOpen ? 'green' : 'blue')" t-esc="marksOpen ? 'Assessment window open' : assessmentStatus(state.register?.status) || 'No assessment selected'"/>
+    </div></div>
+    <div class="grid wide">
+      <t t-call="ideastone_erp.FacultySopPanel">
+        <t t-set="panelTitle" t-value="'Internal Marks Register'"/>
+        <t t-set="panelHelp" t-value="state.register ? 'Enter a score from 0 to ' + state.register.maximum + ' for each enrolled student.' : 'Select an assigned assessment.'"/>
+        <t t-set="panelAction">
+          <button class="btn" type="button" t-att-disabled="!state.register" t-on-click="() => this.csv('marks')"><i class="fa fa-download"/> Export</button>
+        </t>
+        <div class="fields two">
+          <label class="field"><span>Assigned Subject</span>
+            <select t-att-value="state.subjectId" t-on-change="event => this.chooseMarks(event, true)" t-att-disabled="state.busy">
+              <option t-if="!assessmentSubjects.length" value="">No assigned subjects</option>
+              <option t-foreach="assessmentSubjects" t-as="item" t-key="item.subject_id" t-att-value="item.subject_id + ''">
+                <t t-esc="item.code"/> · <t t-esc="item.subject"/>
+              </option>
+            </select>
+          </label>
+          <label class="field"><span>Assessment</span>
+            <select t-att-value="state.examId" t-on-change="event => this.chooseMarks(event, false)" t-att-disabled="state.busy">
+              <option t-if="!assessments.length" value="">No assigned assessments</option>
+              <option t-foreach="assessments" t-as="item" t-key="item.id" t-att-value="item.id + ''">
+                <t t-esc="item.name"/> · <t t-esc="item.class"/>
+              </option>
+            </select>
+          </label>
+        </div>
+        <div class="divider"/>
+        <form t-if="state.register" t-on-submit.prevent="() => this.open('marksConfirm', 'Submit Assessment Marks')">
+          <div class="tablewrap" tabindex="0" aria-label="Internal marks register">
+            <table>
+              <t t-call="ideastone_erp.FacultySopTableHead">
+                <t t-set="columns" t-value="['Roll No.','Student','Previous IA' + (state.register.previous_maximum ? ' /' + state.register.previous_maximum : ''),'Selected Assessment /' + state.register.maximum,'Enter Marks','Status']"/>
+              </t>
+              <tbody>
+                <tr t-foreach="state.register.rows" t-as="row" t-key="row.id">
+                  <td t-esc="row.roll"/><td><strong t-esc="row.name"/></td>
+                  <td t-esc="row.previous === null ? '—' : row.previous"/><td t-esc="row.marks === null ? '—' : row.marks"/>
+                  <td><input class="mark-input" type="number" min="0" t-att-max="state.register.maximum" step="any"
+                             t-att-value="state.values[row.id]" t-att-aria-label="'Marks for ' + row.name"
+                             t-att-readonly="!marksOpen || state.busy" t-on-input="event => this.enterMark(row, event)"/></td>
+                  <td><span t-att-class="'status ' + (row.marks === null ? '' : 'blue')"
+                            t-esc="row.marks === null ? 'Not entered' : marksOpen ? 'Draft' : assessmentStatus(state.register.status)"/></td>
+                </tr>
+                <tr t-if="!state.register.rows.length"><td colspan="6" class="empty">No enrolled students in the assessment roster.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="caption">Showing <t t-esc="state.register.rows.length"/> records</p>
+          <div class="between sop-actions">
+            <span class="fine" t-esc="marksOpen ? 'Save drafts before submitting marks for approval.' : 'Submitted marks are locked.'"/>
+            <div class="row">
+              <button class="btn text" t-if="state.dirty" type="button" t-att-disabled="state.busy" t-on-click="() => this.load()">Discard Changes</button>
+              <button class="btn" type="button" t-att-disabled="!marksOpen || state.busy" t-on-click="() => this.saveMarks(false)">Save Marks Draft</button>
+              <button class="btn primary" type="submit" t-att-disabled="!marksOpen || state.busy || !enteredMarks || enteredMarks !== state.register.rows.length">Validate &amp; Submit</button>
+            </div>
+          </div>
+        </form>
+        <p class="empty" t-else="">No assessment is available for mark entry.</p>
+      </t>
+      <aside class="stack">
+        <t t-call="ideastone_erp.FacultySopPanel">
+          <t t-set="panelTitle" t-value="'Assessment Deadlines'"/><t t-set="panelHelp" t-value="'Important milestones this semester.'"/>
+          <div class="item-list">
+            <article class="item" t-foreach="rows.filter(row => row.date >= d.today).slice().reverse()" t-as="row" t-key="row.id">
+              <div class="between"><strong t-esc="row.name"/><span class="status amber">Upcoming</span></div>
+              <p><t t-esc="row.subject"/> · <t t-esc="date(row.date)"/></p>
+            </article>
+            <p t-if="!rows.some(row => row.date >= d.today)" class="empty">No upcoming assigned assessments.</p>
+          </div>
+        </t>
+        <t t-call="ideastone_erp.FacultySopPanel">
+          <t t-set="panelTitle" t-value="'Review &amp; Corrections'"/><t t-set="panelHelp" t-value="'Only authorized changes after submission.'"/>
+          <ul class="bullet-list"><li>Review every student’s score before final confirmation.</li><li>Missing marks must be resolved before submission.</li><li>Additional or corrected marks require approval.</li><li>Practical external marks are visible only to authorized evaluators.</li></ul>
+        </t>
+      </aside>
+    </div>
+    <FacultySopPapers embedded="true"/>
+  </t>
+  <t t-name="ideastone_erp.FacultySopAssignments">
+    <div class="grid wide">
+      <t t-call="ideastone_erp.FacultySopPanel">
+        <t t-set="panelTitle" t-value="'Assignment Overview'"/><t t-set="panelHelp" t-value="'Select an assignment to review student submissions.'"/>
+        <t t-set="panelAction"><button class="btn" type="button" t-on-click="() => this.csv('assignments')"><i class="fa fa-download"/> Export</button></t>
+        <div class="tablewrap" tabindex="0" aria-label="Assignments">
+          <table>
+            <t t-call="ideastone_erp.FacultySopTableHead"><t t-set="columns" t-value="['Assignment','Subject','Due Date','Submissions','Max Marks','Status','Action']"/></t>
+            <tbody>
+              <tr t-foreach="rows" t-as="row" t-key="row.id">
+                <td><strong t-esc="row.title"/></td><td><t t-esc="row.subject"/><div class="fine" t-esc="row.class"/></td>
+                <td t-esc="date(row.date)"/><td><t t-esc="row.submitted"/> / <t t-esc="row.students"/></td><td t-esc="row.maximum"/>
+                <td><span t-att-class="'status ' + (row.status === 'publish' ? 'green' : '')" t-esc="assignmentStatus(row.status)"/></td>
+                <td><button class="btn sm" type="button" t-on-click="() => this.review(row)">Review</button></td>
+              </tr>
+              <tr t-if="!rows.length"><td colspan="7" class="empty">No assignments for your teaching allocations.</td></tr>
+            </tbody>
+          </table>
+        </div><p class="caption">Showing <t t-esc="rows.length"/> records</p>
+      </t>
+      <aside class="stack">
+        <t t-call="ideastone_erp.FacultySopPanel">
+          <t t-set="panelTitle" t-value="'Create Assignment'"/><t t-set="panelHelp" t-value="'New class activity for an allocated subject.'"/>
+          <form t-on-submit.prevent="saveAssignment">
+            <label class="field sop-field"><span>Assignment Title</span>
+              <input placeholder="e.g. Tree traversal worksheet" maxlength="200" t-model="state.form.title" required="required"/>
+            </label>
+            <div class="fields two sop-field">
+              <label class="field"><span>Teaching Subject</span>
+                <t t-call="ideastone_erp.FacultySopAllocation"><t t-set="allocationLabel" t-value="'Teaching Subject'"/></t>
+              </label>
+              <label class="field"><span>Due Date</span><input type="date" t-model="state.form.date" t-att-min="d.today" required="required"/></label>
+            </div>
+            <div class="fields two sop-field">
+              <label class="field"><span>Maximum Marks</span><input type="number" min="1" max="100" step="any" t-model="state.form.maximum" required="required"/></label>
+              <label class="field"><span>Submission Type</span>
+                <select t-model="state.form.type" required="required">
+                  <option t-if="!d.types.length" value="">No assignment types configured</option>
+                  <option t-foreach="d.types" t-as="item" t-key="item.id" t-att-value="item.id + ''" t-esc="item.name"/>
+                </select>
+              </label>
+            </div>
+            <div class="right"><button class="btn primary" type="submit" t-att-disabled="state.busy || !state.allocation || !state.form.type"><i class="fa fa-plus"/> Create Assignment</button></div>
+          </form>
+        </t>
+        <t t-call="ideastone_erp.FacultySopPanel">
+          <t t-set="panelTitle" t-value="'Submission Review Rules'"/><t t-set="panelHelp" t-value="'Required before awarding marks.'"/>
+          <ul class="bullet-list"><li>Assess only submissions from allocated classes.</li><li>Record marks and concise feedback.</li><li>Track not submitted, submitted and reviewed work separately.</li><li>Reopen assessments only with authorized permission.</li></ul>
+        </t>
+      </aside>
+    </div>
+  </t>
+
+  <t t-name="ideastone_erp.FacultySopAlternate">
+    <div class="intro"><div class="intro-line">
+      <div><div class="eyebrow">Substitute teaching workflow</div><strong>Identify a period → select substitute → request confirmation</strong>
+        <p>The proposed substitute accepts the hour before an authorized manager approves coverage.</p>
+      </div><span class="status amber">Approval required</span>
+    </div></div>
+    <div class="grid wide">
+      <t t-call="ideastone_erp.FacultySopPanel">
+        <t t-set="panelTitle" t-value="'Alternate Teaching Register'"/><t t-set="panelHelp" t-value="'Monitor scheduled substitute periods and approval status.'"/>
+        <div class="tablewrap" tabindex="0" aria-label="Alternate teaching register">
+          <table>
+            <t t-call="ideastone_erp.FacultySopTableHead"><t t-set="columns" t-value="['Date','Period','Assigned Class','Original Faculty','Substitute','Status','Action']"/></t>
+            <tbody>
+              <tr t-foreach="rows" t-as="row" t-key="row.id">
+                <td t-esc="date(row.date)"/><td t-esc="row.time"/><td t-esc="row.class"/>
+                <td t-esc="row.faculty"/><td t-esc="row.substitute"/>
+                <td><span t-att-class="'status ' + (alternateStatus(row) === 'Confirmed' ? 'green' : 'amber')" t-esc="alternateStatus(row)"/></td>
+                <td><button class="btn sm" type="button" t-on-click="() => this.open('alternate', 'Alternate Hour Request', {row})">View Request</button></td>
+              </tr>
+              <tr t-if="!rows.length"><td colspan="7" class="empty">No substitute hours scheduled.</td></tr>
+            </tbody>
+          </table>
+        </div><p class="caption">Showing <t t-esc="rows.length"/> records</p>
+      </t>
+      <aside class="stack">
+        <t t-call="ideastone_erp.FacultySopPanel">
+          <t t-set="panelTitle" t-value="'Request Alternate Faculty'"/><t t-set="panelHelp" t-value="'Create a substitute arrangement for your teaching hour.'"/>
+          <form t-on-submit.prevent="saveAlternate">
+            <div class="fields two sop-field">
+              <label class="field"><span>Date of Absence</span>
+                <input type="date" t-att-min="d.today" t-model="state.alternateDate" t-on-change="selectAlternate" required="required"/>
+              </label>
+              <label class="field"><span>Class / Subject</span>
+                <select t-model="state.alternateClass" t-on-change="changeAlternateClass" required="required">
+                  <option t-if="!alternateClasses.length" value="">No assigned classes</option>
+                  <option t-foreach="alternateClasses" t-as="item" t-key="item" t-att-value="item" t-esc="item"/>
+                </select>
+              </label>
+            </div>
+            <div class="fields two sop-field">
+              <label class="field"><span>Hour / Session</span>
+                <select t-model="state.alternateSession" required="required">
+                  <option t-if="!alternateHours.length" value="">No available hours</option>
+                  <option t-foreach="alternateHours" t-as="row" t-key="row.id" t-att-value="row.id + ''">
+                    <t t-esc="row.time"/> · <t t-esc="row.subject"/>
+                  </option>
+                </select>
+              </label>
+              <label class="field"><span>Proposed Substitute</span>
+                <select t-model="state.replacement" required="required"><option value="">Select faculty member</option>
+                  <option t-foreach="d.substitutes" t-as="row" t-key="row.id" t-att-value="row.id + ''" t-esc="row.name"/>
+                </select>
+              </label>
+            </div>
+            <label class="field sop-field"><span>Reason / Leave Reference</span>
+              <textarea t-model="state.reason" maxlength="5000" required="required" placeholder="Describe the duty or leave that requires class coverage"/>
+            </label>
+            <div class="right"><button type="submit" class="btn primary" t-att-disabled="state.busy || !state.alternateSession">Submit for Confirmation</button></div>
+          </form>
+        </t>
+        <t t-call="ideastone_erp.FacultySopPanel">
+          <t t-set="panelTitle" t-value="'Coverage Rules'"/><t t-set="panelHelp" t-value="'Faculty leave must not create unattended periods.'"/>
+          <ul class="bullet-list"><li>Manual alternate selection is permitted.</li><li>Timetable conflicts are checked before confirmation.</li><li>Coverage counts after consent and approval.</li><li>Responses and approvals are recorded for review.</li></ul>
+        </t>
+      </aside>
+    </div>
+  </t>
+
+  <t t-name="ideastone_erp.FacultySopLessons">
+    <div class="grid wide">
+      <t t-call="ideastone_erp.FacultySopPanel">
+        <t t-set="panelTitle" t-value="'Syllabus &amp; Weekly Plan'"/><t t-set="panelHelp" t-value="'Choose an assigned subject to update lesson progress.'"/>
+        <div class="fields two">
+          <label class="field"><span>Assigned Subject</span><t t-call="ideastone_erp.FacultySopAllocation"/></label>
+          <label class="field"><span>Academic Semester</span><input readonly="readonly" t-att-value="lessonAllocation?.semester || d.year"/></label>
+        </div>
+        <div class="sop-field sop-actions">
+          <div class="between"><span class="fine">Completion against plan</span><strong><t t-esc="lessonProgress"/>%</strong></div>
+          <div class="meter" role="progressbar" aria-label="Syllabus progress" aria-valuemin="0" aria-valuemax="100" t-att-aria-valuenow="lessonProgress">
+            <span t-att-style="'width:' + lessonProgress + '%'"/>
+          </div>
+        </div>
+        <div class="tablewrap" tabindex="0" aria-label="Lesson plans">
+          <table>
+            <t t-call="ideastone_erp.FacultySopTableHead"><t t-set="columns" t-value="['Week','Topic / Unit','Target Date','Learning Outcome','Progress','Action']"/></t>
+            <tbody>
+              <tr t-foreach="lessonRows" t-as="row" t-key="row.id">
+                <td t-esc="typeof row.week === 'number' ? 'Week ' + row.week : row.week"/>
+                <td><strong t-esc="row.topic"/></td><td t-esc="date(row.date)"/><td t-esc="row.outcome"/>
+                <td><span t-att-class="'status ' + (row.done ? 'green' : 'blue')" t-esc="row.done ? 'Completed' : 'Planned'"/></td>
+                <td><button class="btn sm" type="button" t-att-disabled="state.busy" t-on-click="() => this.toggleLesson(row)" t-esc="row.done ? 'Reopen Topic' : 'Mark Completed'"/></td>
+              </tr>
+              <tr t-if="!lessonRows.length"><td colspan="6" class="empty">No lesson plan recorded for this subject.</td></tr>
+            </tbody>
+          </table>
+        </div><p class="caption">Showing <t t-esc="lessonRows.length"/> records</p>
+      </t>
+      <aside class="stack">
+        <t t-call="ideastone_erp.FacultySopPanel">
+          <t t-set="panelTitle" t-value="'Add Lesson Topic'"/><t t-set="panelHelp" t-value="'Record the next instructional activity.'"/>
+          <form t-on-submit.prevent="saveLesson">
+            <label class="field sop-field"><span>Topic / Unit</span><input t-model="state.form.title" placeholder="e.g. Binary search trees" maxlength="200" required="required"/></label>
+            <div class="fields two sop-field">
+              <label class="field"><span>Week</span><input type="number" min="1" max="26" t-model="state.form.week" required="required"/></label>
+              <label class="field"><span>Target Date</span><input type="date" t-model="state.form.date" required="required"/></label>
+            </div>
+            <label class="field sop-field"><span>Expected Learning Outcome</span>
+              <textarea t-model="state.form.outcome" maxlength="5000" placeholder="Students will be able to..." required="required"/>
+            </label>
+            <div class="right"><button class="btn primary" type="submit" t-att-disabled="state.busy || !state.allocation">Add Topic</button></div>
+          </form>
+        </t>
+        <t t-call="ideastone_erp.FacultySopPanel">
+          <t t-set="panelTitle" t-value="'Instructional Tracking'"/><t t-set="panelHelp" t-value="'Connect plans to class teaching.'"/>
+          <ul class="bullet-list"><li>Maintain topics by subject and week.</li><li>Track planned and completed coverage.</li><li>Use session lesson notes as evidence of teaching.</li><li>Lesson progress is recorded separately from attendance.</li></ul>
+        </t>
+      </aside>
+    </div>
+  </t>
+
+  <t t-name="ideastone_erp.FacultySopCirculars">
+    <div class="grid wide">
+      <t t-call="ideastone_erp.FacultySopPanel">
+        <t t-set="panelTitle" t-value="'Official Circulars'"/><t t-set="panelHelp" t-value="'Select a notice to read its details.'"/>
+        <div class="subnav-pill sop-toolbar" aria-label="Circular category">
+          <button t-foreach="circularCategories" t-as="category" t-key="category" type="button"
+                  t-att-class="{periodbtn:true,active:state.filter === category}" t-on-click="() => this.state.filter = category" t-esc="category"/>
+        </div>
+        <div class="item-list">
+          <article class="item between" t-foreach="circularRows" t-as="row" t-key="row.id">
+            <div>
+              <div class="row">
+                <span class="status blue" t-if="row.pinned">Pinned</span>
+                <span t-att-class="'status ' + (row.read ? 'green' : 'amber')" t-esc="row.read ? 'Read' : 'Unread'"/>
+              </div>
+              <div class="item-title sop-item-title" t-esc="row.title"/>
+              <div class="item-meta"><t t-esc="row.issuer"/> · <t t-esc="date(row.date)"/> · <t t-esc="row.category"/></div>
+            </div>
+            <button class="btn sm" type="button" t-on-click="() => this.state.selected = row.id">Read Circular</button>
+          </article>
+          <p class="empty" t-if="!circularRows.length">No circulars match this filter.</p>
+        </div>
+      </t>
+      <aside class="stack">
+        <t t-call="ideastone_erp.FacultySopPanel">
+          <t t-set="panelTitle" t-value="'Selected Announcement'"/><t t-set="panelHelp" t-value="'Official communication · faculty reference'"/>
+          <t t-if="circular">
+            <div class="eyebrow" t-esc="circular.issuer"/><h3 class="sop-notice-title" t-esc="circular.title"/>
+            <div class="row"><span class="status blue" t-esc="circular.category"/><span class="fine" t-esc="date(circular.date)"/></div>
+            <p class="sop-notice-body" t-esc="circular.body"/>
+            <button class="btn primary" type="button" t-on-click="acknowledge" t-att-disabled="state.busy || circular.read"
+                    t-esc="circular.read ? 'Acknowledged' : 'Mark as Read / Acknowledge'"/>
+          </t>
+          <p class="empty" t-else="">No published circulars for your account.</p>
+        </t>
+        <t t-call="ideastone_erp.FacultySopPanel">
+          <t t-set="panelTitle" t-value="'Faculty Communication Rules'"/><t t-set="panelHelp" t-value="'Avoid missing important institutional notices.'"/>
+          <ul class="bullet-list"><li>Use category and unread filters to prioritize notices.</li><li>Check pinned institution or department instructions first.</li><li>Your acknowledgement is saved to your account.</li><li>Track operational work in My Tasks &amp; e-Diary.</li></ul>
+        </t>
+      </aside>
+    </div>
+  </t>
+
+  <t t-name="ideastone_erp.FacultySopDrawer">
+    <div class="drawer-backdrop" t-on-click.self="close" t-on-keydown="modalKey">
+      <aside class="drawer" t-ref="drawer" role="dialog" aria-modal="true" t-att-aria-label="state.modal.title">
+        <div class="between sop-toolbar"><h2 t-esc="state.modal.title"/>
+          <button type="button" class="btn sm" aria-label="Close dialog" t-on-click="close">×</button>
+        </div>
+        <t t-if="state.modal.kind === 'task'">
+          <form t-on-submit.prevent="saveTask">
+            <label class="field sop-field"><span>Task Title</span><input t-model="state.form.title" placeholder="Describe a faculty task" maxlength="200" required="required"/></label>
+            <label class="field sop-field"><span>Assigned Area</span><input t-model="state.form.area" placeholder="e.g. II CSE – A" maxlength="200"/></label>
+            <div class="fields two sop-field">
+              <label class="field"><span>Due Date</span><input type="date" t-model="state.form.date" t-att-min="d.today" required="required"/></label>
+              <label class="field"><span>Priority</span><select t-model="state.form.priority"><option value="0">Normal</option><option value="0m">Medium</option><option value="1">High</option></select></label>
+            </div>
+            <button type="submit" class="btn primary" t-att-disabled="state.busy">Add Task</button>
+          </form>
+        </t>
+        <t t-elif="state.modal.kind === 'dailyConfirm' || state.modal.kind === 'marksConfirm'">
+          <p class="notice" t-esc="state.modal.kind === 'dailyConfirm' ? 'Submit the daily register for this class, date and session. Submission locks these entries.' : 'Submit all entered marks to the examination officer for approval. Submission locks the register.'"/>
+          <div class="row sop-actions">
+            <button class="btn" type="button" t-on-click="close">Cancel</button>
+            <button class="btn primary" type="button" t-att-disabled="state.busy"
+                    t-on-click="() => this.state.modal.kind === 'dailyConfirm' ? this.saveDaily(true) : this.saveMarks(true)">Confirm Submission</button>
+          </div>
+        </t>
+        <t t-elif="state.modal.kind === 'review'">
+          <div class="eyebrow"><t t-esc="state.modal.row.subject"/> · <t t-esc="date(state.modal.row.date)"/></div>
+          <h3 t-esc="state.modal.row.title"/>
+          <p class="helper"><t t-esc="state.modal.row.submitted"/> / <t t-esc="state.modal.row.students"/> submitted · Maximum <t t-esc="state.modal.row.maximum"/> marks</p>
+          <div class="tablewrap sop-actions" tabindex="0" aria-label="Assignment submissions">
+            <table class="sop-compact-table">
+              <t t-call="ideastone_erp.FacultySopTableHead"><t t-set="columns" t-value="['Student','Submission','Review']"/></t>
+              <tbody>
+                <tr t-foreach="state.modal.students" t-as="student" t-key="student.id">
+                  <td><strong t-esc="student.name"/><div class="fine" t-esc="student.roll"/></td>
+                  <td>
+                    <span t-att-class="'status ' + (student.submission ? 'green' : 'amber')"
+                          t-esc="({missing:'Missing',submit:'Submitted',accept:'Reviewed',change:'Returned',reject:'Rejected'}[student.state] || student.state)"/>
+                    <a t-if="student.file" class="sop-inline" t-att-href="'/web/content/op.assignment.sub.line/' + student.submission + '/campus_file?download=true&amp;filename_field=campus_filename'" t-esc="student.file"/>
+                  </td>
+                  <td>
+                    <button t-if="student.state === 'submit'" type="button" class="btn sm" t-on-click="() => this.grade(student)">Grade / Feedback</button>
+                    <span t-elif="student.marks !== null" t-esc="student.marks + ' / ' + state.modal.row.maximum"/>
+                    <span t-else="" class="fine">Awaiting file</span>
+                    <div t-if="student.feedback" class="fine sop-notice-body" t-esc="student.feedback"/>
+                  </td>
+                </tr>
+                <tr t-if="!state.modal.students.length"><td colspan="3" class="empty">No allocated students.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </t>
+        <t t-elif="state.modal.kind === 'grade'">
+          <div class="eyebrow" t-esc="state.modal.row.title"/><h3 t-esc="state.modal.student.name"/>
+          <form t-on-submit.prevent="saveGrade">
+            <label class="field sop-field"><span>Marks Awarded (0–<t t-esc="state.modal.row.maximum"/>)</span>
+              <input type="number" min="0" step="any" t-att-max="state.modal.row.maximum" t-model="state.gradeForm.marks" required="required"/>
+            </label>
+            <label class="field sop-field"><span>Faculty Feedback</span><textarea t-model="state.gradeForm.feedback" required="required" maxlength="5000"/></label>
+            <div class="row"><button class="btn" type="button" t-on-click="() => this.review(state.modal.row)">Back to Submissions</button>
+              <button class="btn primary" type="submit" t-att-disabled="state.busy">Save Review</button>
+            </div>
+          </form>
+        </t>
+        <t t-elif="state.modal.kind === 'alternate'">
+          <t t-set="row" t-value="state.modal.row"/>
+          <div class="read-lines"><span>Date</span><strong t-esc="date(row.date)"/></div>
+          <div class="read-lines"><span>Hour</span><strong t-esc="row.time"/></div>
+          <div class="read-lines"><span>Class</span><strong t-esc="row.class"/></div>
+          <div class="read-lines"><span>Substitute Faculty</span><strong t-esc="row.substitute"/></div>
+          <div class="read-lines"><span>Approval status</span><strong t-esc="alternateStatus(row)"/></div>
+          <p class="notice sop-actions" t-esc="row.reason"/>
+          <div class="row" t-if="row.can_reply">
+            <button class="btn primary" type="button" t-att-disabled="state.busy" t-on-click="() => this.replyAlternate('accepted')">Accept Coverage</button>
+            <button class="btn" type="button" t-att-disabled="state.busy" t-on-click="() => this.replyAlternate('declined')">Decline</button>
+          </div>
+        </t>
+        <t t-elif="state.modal.kind === 'performance'">
+          <t t-set="row" t-value="state.modal.row"/>
+          <div class="eyebrow">Individual attendance review</div><h3 t-esc="row.name"/><p class="helper" t-esc="row.roll"/>
+          <div class="stat-trio sop-actions">
+            <div class="stat-tile"><strong t-esc="row.present"/><small>Attended</small></div>
+            <div class="stat-tile"><strong t-esc="row.held"/><small>Held</small></div>
+            <div class="stat-tile"><strong t-esc="row.rate === null ? '—' : row.rate + '%'"/><small>Overall</small></div>
+          </div>
+          <div class="tablewrap sop-actions" tabindex="0" aria-label="Student attendance by subject">
+            <table class="sop-compact-table">
+              <t t-call="ideastone_erp.FacultySopTableHead"><t t-set="columns" t-value="['Subject','Attended / Held','Attendance']"/></t>
+              <tbody>
+                <tr t-foreach="row.subjects" t-as="subject" t-key="subject_index">
+                  <td t-esc="subject.subject"/><td><t t-esc="subject.present"/> / <t t-esc="subject.sessions"/></td>
+                  <td t-esc="subject.rate === null ? '—' : subject.rate + '%'"/>
+                </tr>
+                <tr t-if="!row.subjects.length"><td colspan="3" class="empty">No submitted teaching attendance yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </t>
+      </aside>
+    </div>
+  </t>
+  <t t-name="ideastone_erp.FacultySopPapers">
+    <div class="exam-paper-workflow">
+      <p class="notice warn" t-if="state.error" role="alert"><t t-esc="state.error"/> <button class="btn sm" type="button" t-on-click="load">Retry</button></p>
+      <t t-if="state.data">
+        <div class="section-heading">
+          <div><div class="eyebrow">Question paper submission</div><h2>Submit question-paper set to HOD</h2>
+            <p>Upload the exam paper for the assigned subject. The HOD reviews one set and either approves it or returns it for revision.</p>
+          </div><span class="pill pill-blue">Staff workspace</span>
+        </div>
+        <div class="paper-layout">
+          <form class="paper-form" t-ref="paperForm" t-on-submit.prevent="() => this.save(true)">
+            <div class="paper-fields">
+              <label class="field"><span>Department</span>
+                <select t-model="state.form.department_id" t-on-change="departmentChanged" required="required">
+                  <option value="">Select department</option>
+                  <option t-foreach="state.data.departments" t-as="department" t-key="department.id" t-att-value="department.id + ''" t-esc="department.name"/>
+                </select>
+              </label>
+              <label class="field"><span>Assigned subject</span>
+                <select t-model="state.form.subject_id" t-on-change="subjectChanged" required="required">
+                  <option value="">Select subject</option>
+                  <option t-foreach="subjects" t-as="subject" t-key="subject.id" t-att-value="subject.id + ''"><t t-esc="subject.code"/> · <t t-esc="subject.name"/></option>
+                </select>
+              </label>
+              <label class="field"><span>Year of study</span>
+                <select t-model="state.form.study_year" t-on-change="yearChanged" required="required">
+                  <option value="">Select year</option><option value="1">I Year</option><option value="2">II Year</option><option value="3">III Year</option><option value="4">IV Year</option>
+                </select>
+              </label>
+              <label class="field"><span>Semester</span>
+                <select t-model="state.form.semester" required="required"><option value="">Select semester</option>
+                  <option t-foreach="semesters" t-as="semester" t-key="semester" t-att-value="semester" t-esc="semester"/>
+                </select>
+              </label>
+              <label class="field"><span>Examination type</span>
+                <select t-model="state.form.exam_type" required="required"><option value="">Select examination</option>
+                  <option t-foreach="examTypes" t-as="exam" t-key="exam" t-esc="exam"/>
+                </select>
+              </label>
+              <label class="field"><span>Upcoming exam date</span><input type="date" t-model="state.form.exam_date" required="required"/></label>
+              <label class="field"><span>Paper / course code</span><input placeholder="e.g. CS204" t-model="state.form.paper_code" maxlength="60" required="required"/></label>
+              <label class="field"><span>Duration</span><select t-model="state.form.duration"><option>3 hours</option><option>2 hours</option><option value="90 minutes">1.5 hours</option><option>1 hour</option></select></label>
+            </div>
+            <fieldset class="field difficulty-field">
+              <legend>Question-paper difficulty sets</legend>
+              <div class="difficulty-options">
+                <label t-foreach="levels" t-as="level" t-key="level.key">
+                  <input type="checkbox" class="difficulty-choice" t-model="state.levels[level.key]"/>
+                  <span><b t-esc="level.label"/><small t-esc="level.hint"/></span>
+                </label>
+              </div>
+              <small class="helper">Upload one PDF for each selected set. The HOD chooses one set for approval.</small>
+            </fieldset>
+            <div class="difficulty-upload-list" aria-live="polite">
+              <div class="field difficulty-upload" t-foreach="levels.filter(level => state.levels[level.key])" t-as="level" t-key="level.key">
+                <span>Question paper PDF · <t t-esc="level.label"/></span>
+                <label class="upload-drop" t-on-dragover.prevent="() => {}" t-on-drop="event => this.drop(level.key, event)">
+                  <input type="file" accept=".pdf,application/pdf" class="paper-file" t-att-aria-label="'Question paper PDF · ' + level.label"
+                         t-on-change="event => this.upload(level.key, event)"/>
+                  <span class="upload-icon">↑</span>
+                  <span><b class="file-label" t-esc="state.files[level.key]?.filename || existing(level.key)?.filename || 'Choose PDF or drag it here'"/>
+                    <small>PDF only · maximum 20 MB per file · use a clear version name</small>
+                  </span>
+                </label>
+              </div>
+            </div>
+            <label class="field"><span>Notes for HOD <small>(optional)</small></span>
+              <textarea rows="3" maxlength="4000" placeholder="Add syllabus coverage, blueprint notes, or anything the HOD should know." t-model="state.form.notes"/>
+            </label>
+            <div class="paper-actions">
+              <span class="confidential-note"><i class="fa fa-lock"/> Question papers are confidential and visible only to authorised reviewers.</span>
+              <div class="row">
+                <button type="button" class="btn" t-att-disabled="state.busy" t-on-click="() => this.save(false)">Save draft</button>
+                <button type="submit" class="btn primary" t-att-disabled="state.busy">Submit to HOD →</button>
+              </div>
+            </div>
+            <p class="paper-feedback" t-if="state.id">Editing a saved question-paper draft.</p>
+          </form>
+          <aside class="paper-aside">
+            <div class="readiness-card">
+              <div class="aside-title"><span class="spark">✦</span><b>AI paper readiness check</b><span class="pill">Assisted</span></div>
+              <p>Run PDF validation before submitting. Academic checks require HOD review.</p>
+              <ul class="readiness-list">
+                <li><i>✓</i><span><b>Syllabus coverage</b><small>Check questions against the selected syllabus and learning outcomes.</small></span></li>
+                <li><i>✓</i><span><b>Marks &amp; blueprint</b><small>Check total marks and required sections.</small></span></li>
+                <li><i>✓</i><span><b>Difficulty balance</b><small>Review the mix of basic, moderate and advanced questions.</small></span></li>
+                <li><i>✓</i><span><b>Duplicate &amp; PDF quality</b><small>Review repeated questions and unreadable or blank pages.</small></span></li>
+              </ul>
+              <button type="button" class="btn primary readiness-run" t-att-disabled="state.busy" t-on-click="() => this.save(false, true)">Run readiness check</button>
+              <div class="note-warn">PDF format, size, encryption and page count are checked. Syllabus, marks and difficulty are reviewed by the HOD.</div>
+            </div>
+            <div class="workflow-card">
+              <h3>Submission workflow</h3><p>What happens after you submit</p>
+              <ol>
+                <li><b>1. Staff submits PDF set</b><small>Upload the question paper and select the examination details.</small></li>
+                <li><b>2. Department HOD reviews</b><small>HOD approves one set or returns it with revision comments.</small></li>
+                <li><b>3. Approved set is forwarded</b><small>The selected paper is sent to COE / Exam Control and the main admin workflow.</small></li>
+              </ol>
+              <div class="note-info">ⓘ <b>Keep the paper confidential.</b> Share files only through the approved workflow.</div>
+            </div>
+          </aside>
+        </div>
+        <section class="paper-submissions">
+          <div class="section-heading">
+            <div><h2>My question-paper submissions</h2><p>Track the status of your current and previous submissions.</p></div>
+            <div class="submission-tools">
+              <input type="search" placeholder="Search subject or exam..." aria-label="Search question papers" t-model="state.search"/>
+              <select aria-label="Question paper status" t-model="state.filter">
+                <option value="">All statuses</option><option value="draft">Draft</option><option value="submitted">Awaiting HOD review</option>
+                <option value="approved">Approved</option><option value="returned">Needs revision</option><option value="forwarded">Forwarded to COE</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap" tabindex="0" aria-label="Question paper submissions">
+            <table class="paper-status-table">
+              <t t-call="ideastone_erp.FacultySopTableHead"><t t-set="columns" t-value="['Examination / Subject','Exam date','Difficulty set','Updated','Status','Action']"/></t>
+              <tbody>
+                <tr t-foreach="rows" t-as="row" t-key="row.id">
+                  <td><strong t-esc="row.subject"/><div class="fine" t-esc="row.exam_type"/></td>
+                  <td t-esc="date(row.exam_date)"/><td t-esc="row.sets.map(set => set.label).join(', ') || '—'"/>
+                  <td t-esc="date(row.updated, true)"/>
+                  <td><span t-att-class="'status ' + ({approved:'green',forwarded:'green',submitted:'blue',returned:'amber'}[row.state] || '')" t-esc="row.status"/></td>
+                  <td><button type="button" class="btn sm" t-on-click="() => this.view(row)">View</button></td>
+                </tr>
+                <tr t-if="!rows.length"><td colspan="6" class="empty-paper">No submissions match this view. Start a new question paper above.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="paper-footer">Showing <t t-esc="rows.length"/> submissions <span>Saved records · authorised access only</span></div>
+        </section>
+        <div t-if="state.modal" class="drawer-backdrop" t-on-click.self="closeModal" t-on-keydown="modalKey">
+          <aside class="drawer" t-ref="paperDialog" role="dialog" aria-modal="true" aria-label="Question-paper submission">
+            <div class="between sop-toolbar"><h2 t-esc="state.modal.subject"/><button class="btn sm" type="button" aria-label="Close submission" t-on-click="closeModal">×</button></div>
+            <p><t t-esc="state.modal.status"/> · Revision <t t-esc="state.modal.revision"/> · <t t-esc="cohort(state.modal)"/></p>
+            <p t-if="state.modal.review_note"><b>HOD feedback:</b> <t t-esc="state.modal.review_note"/></p><p t-esc="state.modal.notes"/>
+            <div class="row">
+              <button class="btn" type="button" t-foreach="state.modal.sets" t-as="set" t-key="set.id" t-on-click="() => this.download(set)">PDF · <t t-esc="set.label"/> · <t t-esc="set.pages"/> pages ↗</button>
+            </div>
+            <div class="divider"/>
+            <div class="item-list">
+              <article class="item" t-foreach="state.modal.history" t-as="event" t-key="event_index">
+                <strong t-esc="event.action"/><p><t t-esc="event.by"/> · <t t-esc="date(event.at,true)"/></p><p t-esc="event.note"/>
+              </article>
+            </div>
+            <button t-if="['draft','returned'].includes(state.modal.state)" type="button" class="btn primary sop-actions" t-on-click="() => this.edit(state.modal)">Continue editing</button>
+          </aside>
+        </div>
+      </t>
+    </div>
+  </t>
+  <t t-name="ideastone_erp.FacultySopIcon">
+    <svg class="icon" t-att-class="iconSize" viewBox="0 0 24 24" aria-hidden="true">
+      <t t-if="iconName === 'book'"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6 2h14v20H6.5A2.5 2.5 0 0 1 4 19.5V4a2 2 0 0 1 2-2z"/></t>
+      <t t-if="iconName === 'user'"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></t>
+      <t t-if="iconName === 'users'"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></t>
+      <t t-if="iconName === 'calendar'"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></t>
+      <t t-if="iconName === 'file'"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h8"/></t>
+      <t t-if="iconName === 'bell'"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></t>
+      <t t-if="iconName === 'clock'"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></t>
+      <t t-if="iconName === 'check'"><path d="m5 12 4 4L19 6"/></t>
+      <t t-if="iconName === 'alert'"><path d="m10.3 3.8-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3.2l-8-14a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></t>
+      <t t-if="iconName === 'clipboard'"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></t>
+      <t t-if="iconName === 'trend'"><path d="m3 17 6-6 4 4 8-8M15 7h6v6"/></t>
+      <t t-if="iconName === 'shield'"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4"/></t>
+      <t t-if="iconName === 'refresh'"><path d="M21 12a9 9 0 1 1-3-7M21 3v6h-6"/></t>
+      <t t-if="iconName === 'chart'"><path d="M4 20V4M4 20h17M8 16v-5M13 16V7M18 16V3"/></t>
+      <t t-if="iconName === 'download'"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></t>
+      <t t-if="iconName === 'plus'"><path d="M12 5v14M5 12h14"/></t>
+      <t t-if="iconName === 'x'"><path d="M5 5l14 14M19 5 5 19"/></t>
+    </svg>
+  </t>
+</templates>

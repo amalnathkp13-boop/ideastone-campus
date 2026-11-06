@@ -74,6 +74,7 @@ from . import owner_fees
 from . import faculty_profile_workspace
 from . import faculty_library
 from . import faculty_task_list
+from . import faculty_sop
 from . import green_card
 from . import owner_attendance_ui
 from . import accountant_ui
