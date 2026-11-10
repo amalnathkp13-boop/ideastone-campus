@@ -104,7 +104,7 @@ async function markup(page) {
         }
         for (const module of overview.faculty_modules.filter(module=>module.key!=='home')) {
             await page.locator('.campus_sidebar').getByRole('button',{name:module.label,exact:true}).click();
-            await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory',accounts:'Accountant overview'})[module.key]||module.label,exact:true,level:1}).waitFor();
+            await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory',staff:'Staff Directory',calendar:'College Calendar',attendance:'Attendance Overview',accounts:'Accountant overview'})[module.key]||module.label,exact:true,level:1}).waitFor();
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Attendance',exact:true}).click();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Attendance overview',exact:true}).click();
