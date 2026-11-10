@@ -43,7 +43,7 @@
     .payroll_metric strong { color: #061f71; font-size: clamp(21px, 2.1vw, 28px); line-height: 1.2; margin: 5px 0 3px; white-space: nowrap; }
     .payroll_metric small { color: #5d7aaa; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .payroll_metric_green .payroll_metric_icon { color: #079844; background: #eaf9ef; }
-    .payroll_metric_purple .payroll_metric_icon { color: #793aff; background: #f0edff; }
+    .payroll_metric_purple .payroll_metric_icon { color: #117c87; background: #f0edff; }
     .payroll_metric_red .payroll_metric_icon { color: #ec3547; background: #fff0f2; }
     .payroll_metric_blue .payroll_metric_icon { color: #1261ea; background: #eaf3ff; }
     .payroll_dashboard_grid { display: grid; grid-template-columns: minmax(0, 1.03fr) minmax(0, 1fr); gap: 13px; align-items: start; }
@@ -125,7 +125,7 @@
     .payroll_bar_group span, .payroll_bar_group small { display: block; line-height: 1.1; white-space: nowrap; }
     .payroll_bar_group small { font-size: 9px; color: #7990b2; }
     .payroll_insights header { margin-bottom: 14px; }
-    .payroll_panel_icon.sparkle { background: #f0edff; color: #6333ea; }
+    .payroll_panel_icon.sparkle { background: #f0edff; color: #117c87; }
     .payroll_insight { display: flex; align-items: center; gap: 16px; min-height: 83px; padding: 13px 16px; margin-top: 9px;
         border: 1px solid #e1ecf7; border-radius: 7px; }
     .payroll_insight_icon { display: grid; place-items: center; width: 51px; height: 51px; flex: none; border-radius: 50%; font-size: 23px; }

@@ -43,23 +43,34 @@ async function markup(page) {
         if(studentCard.value!==3) throw Error('Owner demo does not reconcile with its saved students');
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-dashboard-1440.png'),fullPage:true});
-        const annual = firstMetrics.overview_ui.annual_fees;
-        if(annual.billed!==500 || annual.collected!==300 || annual.balance!==200 || annual.rate!==60)
-            throw Error('Annual fee summary does not reconcile with posted student charges');
-        await page.locator('.owner-annual-fees .owner-fee-headline strong').first().waitFor();
+        await page.locator('.collection-panel').evaluate(element=>element.scrollIntoView({block:'start'}));
+        const annual=firstMetrics.overview_ui.annual_fees;
+        const progress=page.getByRole('progressbar',{name:'Annual fee collection rate'});
+        await progress.waitFor();
+        const shownRate=Number(await progress.getAttribute('aria-valuenow'));
+        const barWidth=await progress.locator('.bar-fill').evaluate(el=>parseFloat(el.style.width));
+        if(!annual.allowed || Math.abs(annual.billed-annual.collected-annual.balance)>0.01
+            || Math.abs(annual.collected-annual.cohorts.reduce((sum,row)=>sum+row.collected,0))>0.01
+            || shownRate!==(annual.rate||0) || barWidth!==shownRate)
+            throw Error('Annual fee display does not reconcile with posted student invoices');
+        const panelHeights=await page.locator('.collection-panel,.ai-panel').evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().height));
+        if(Math.abs(panelHeights[0]-panelHeights[1])>1) throw Error('Fee and insights cards are not balanced on desktop');
         await page.getByRole('heading',{name:'Decision Overview',exact:true}).waitFor();
-        if(await page.locator('.admin_overview .kpi').count()!==8) throw Error('Admin overview does not show eight indicators');
-        if(await page.locator('.owner-calendar-panel .deadline').count()!==firstMetrics.overview_ui.calendar.rows.length)
-            throw Error('Calendar highlights do not reconcile with saved events');
+        const decisionWidth=await page.locator('.decision-grid').evaluate(el=>el.getBoundingClientRect().width);
+        const deadlinesWidth=await page.locator('.deadlines-panel').evaluate(el=>el.getBoundingClientRect().width);
+        if(Math.abs(decisionWidth-deadlinesWidth)>1) throw Error('Dashboard deadlines do not span the full row');
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-charts-1440.png')});
+        if(await page.locator('.admin_overview .kpi').count()!==8) throw Error('Admin overview does not show eight indicators');
+        if(await page.locator('.owner-calendar-panel .deadline').count()!==firstMetrics.overview_ui.calendar.rows.length)
+            throw Error('Owner calendar rows do not match saved upcoming events');
+        if(await page.locator('.admin_overview .kpi-value').first().evaluate(el=>getComputedStyle(el).color)!=='rgb(19, 42, 68)') throw Error('Saved KPI text does not use the SOP color');
         for(const width of [320,390,768,1440]) {
             await page.setViewportSize({width,height:1000});
             if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)) throw Error(`Admin overview overflows at ${width}`);
         }
-        await page.locator('.admin_overview').evaluate(element=>element.scrollIntoView({block:'start'}));
-        await page.locator('.owner-calendar-panel').getByRole('button',{name:'View events',exact:false}).click();
-        await page.getByRole('heading',{name:'College Calendar',exact:true,level:1}).waitFor();
+        await page.locator('.owner-calendar-panel').getByRole('button',{name:'View events ↗',exact:true}).click();
+        await page.locator('.campus_college_calendar').waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Dashboard',exact:true}).click();
         await page.locator('.admin_overview .kpi').first().waitFor();
         if(await page.locator('.campus_dashboard').innerText().then(text=>/Â·|â€”|â†/.test(text))) throw Error('Owner template contains incorrectly decoded UTF-8 punctuation');

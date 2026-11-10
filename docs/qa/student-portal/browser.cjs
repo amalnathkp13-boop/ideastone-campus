@@ -61,7 +61,7 @@ async function save(page, control) {
         assert.equal(initial.attendance.rate,100); assert.equal(initial.results.length,1); assert.equal(initial.results[0].marks,75);
         assert.equal(await page.locator('.student_dashboard .student_stat').count(),4);
         assert.equal(await page.locator('.student_filters').count(),0);
-        assert.equal(await page.locator('.student_page_heading h1').evaluate(element=>getComputedStyle(element).fontWeight),'760');
+        assert.equal(await page.locator('.student_page_heading h1').evaluate(element=>getComputedStyle(element).fontWeight),'780');
         assert.equal(await page.locator('.student_dashboard .student_chart_row .student_progress span').first().evaluate(element=>getComputedStyle(element).backgroundColor),'rgb(54, 183, 120)');
         assert.equal(await page.locator('.student_dashboard .student_notice_tag.event').first().evaluate(element=>getComputedStyle(element).backgroundColor),'rgb(232, 248, 239)');
         assert.equal(await page.locator('.student_dashboard .student_notice_row .student_dot.red').first().evaluate(element=>getComputedStyle(element).backgroundColor),'rgb(227, 92, 80)');
@@ -79,8 +79,8 @@ async function save(page, control) {
         for(const route of routes) await visit(page,route);
         await page.locator('.account_view').waitFor();
         assert.equal(await page.getByRole('switch').count(),3);
-        assert.equal(await page.locator('.account_view h1').evaluate(el=>getComputedStyle(el).fontSize),'31px');
-        assert.match(await page.locator('.account_view h1').evaluate(el=>getComputedStyle(el).fontFamily),/Roboto/);
+        assert.equal(await page.locator('.account_view h1').evaluate(el=>getComputedStyle(el).fontSize),'26px');
+        assert.match(await page.locator('.account_view h1').evaluate(el=>getComputedStyle(el).fontFamily),/Inter/);
         assert.equal(await page.locator('.account_view h2').first().evaluate(el=>getComputedStyle(el).fontSize),'17px');
         assert.equal(await page.locator('#student_account_security a[href="/my/security"]').count(),1);
         for(const width of [320,390,768,1440]) {
@@ -95,7 +95,7 @@ async function save(page, control) {
         await page.locator('.account_view').waitFor();
         assert.equal(await page.locator('#student_preferences_form input:checked').count(),1);
         assert.equal(await page.locator('#student_main').getAttribute('data-compact'),'true');
-        assert.equal(await page.locator('.account_view .panel').first().evaluate(el=>getComputedStyle(el).paddingTop),'15px');
+        assert.equal(await page.locator('.account_view .panel').first().evaluate(el=>getComputedStyle(el).paddingTop),'16px');
         await visit(page,'dashboard');
         assert.equal(await page.locator('.student_assistant').count(),0);
         assert.equal(await page.getByRole('heading',{name:'Upcoming examinations',exact:true}).count(),0);
@@ -111,7 +111,7 @@ async function save(page, control) {
         await page.locator('.student_subnav').getByRole('link',{name:'My results',exact:true}).click();
         assert(await page.locator('#student_results').isVisible());
         assert.equal(await page.locator('.exam_result_row:visible').count(),initial.results.length);
-        assert.equal(await page.locator('.exam_grade.good').first().evaluate(element=>getComputedStyle(element).color),'rgb(22, 131, 93)');
+        assert.equal(await page.locator('.exam_grade.good').first().evaluate(element=>getComputedStyle(element).color),'rgb(14, 134, 100)');
         await page.locator('[data-exam-filter="subject"]').selectOption(initial.results[0].code);
         await page.locator('[data-exam-apply]').click();
         assert.equal(await page.locator('.exam_result_row:visible').count(),1);
@@ -130,7 +130,7 @@ async function save(page, control) {
         assert.equal(await page.locator('.academic_subject_detail:visible').count(),1);
         await page.locator('.student_subnav').getByRole('link',{name:'Learning materials',exact:true}).click();
         assert.equal(await page.locator('.academic_resources .academic_resource:visible').count(),initial.materials.length);
-        assert.equal(await page.locator('.academic_resources .academic_status.good').first().evaluate(element=>getComputedStyle(element).color),'rgb(22, 131, 93)');
+        assert.equal(await page.locator('.academic_resources .academic_status.good').first().evaluate(element=>getComputedStyle(element).color),'rgb(14, 134, 100)');
         await visit(page,'timetable');
         assert.equal(await page.locator('.timetable_stat:visible').count(),4);
         assert.equal(await page.locator('.timetable_class:visible').count(),initial.timetable.week.length);
@@ -144,7 +144,7 @@ async function save(page, control) {
         await visit(page,'attendance');
         assert.equal(await page.locator('.attendance_kpi:visible').count(),4);
         assert.equal(await page.locator('.attendance_register_row').count(),initial.attendance.rows.length);
-        assert.equal(await page.locator('.attendance_status.present').first().evaluate(element=>getComputedStyle(element).color),'rgb(22, 131, 93)');
+        assert.equal(await page.locator('.attendance_status.present').first().evaluate(element=>getComputedStyle(element).color),'rgb(14, 134, 100)');
         assert.equal(await page.locator('.attendance_tabs').count(),0);
         assert.equal(await page.locator('.student_subnav a').count(),6);
         assert.equal(await page.locator('.student_subnav').getByRole('link',{name:'Green Card',exact:true}).count(),1);
@@ -158,9 +158,9 @@ async function save(page, control) {
         assert.equal(await hourly.locator('.attendance_hourly_row:visible').count(),initial.attendance.rows.length);
         assert.equal(await hourly.locator('[data-attendance-hourly-count=recorded]').innerText(),String(initial.attendance.rows.length));
         assert.equal(await hourly.getByLabel('Student',{exact:true}).getAttribute('readonly'),'readonly');
-        assert.equal(await hourly.locator('h1').evaluate(el=>getComputedStyle(el).fontSize),'31px');
-        assert.equal(await hourly.locator('h1').evaluate(el=>getComputedStyle(el).fontWeight),'760');
-        assert.equal(await hourly.locator('.attendance_kpi strong').first().evaluate(el=>getComputedStyle(el).fontWeight),'760');
+        assert.equal(await hourly.locator('h1').evaluate(el=>getComputedStyle(el).fontSize),'26px');
+        assert.equal(await hourly.locator('h1').evaluate(el=>getComputedStyle(el).fontWeight),'780');
+        assert.equal(await hourly.locator('.attendance_kpi strong').first().evaluate(el=>getComputedStyle(el).fontWeight),'780');
         const slotCounts=await hourly.locator('[data-attendance-hourly-slots] tr').evaluateAll(rows=>rows.map(row=>Number(row.cells[1]?.textContent || 0)));
         assert.equal(slotCounts.reduce((sum,value)=>sum+value,0),initial.attendance.rows.length);
         await hourly.getByLabel('Attendance status',{exact:true}).selectOption('absent');
@@ -185,7 +185,7 @@ async function save(page, control) {
         await visit(page,'profile');
         assert.equal(await page.locator('.profile_metric').count(),3);
         assert.match(await page.locator('.profile_completeness').innerText(),new RegExp(`${initial.profile.percent}%`));
-        assert.equal(await page.locator('.profile_status.good').first().evaluate(element=>getComputedStyle(element).color),'rgb(22, 131, 93)');
+        assert.equal(await page.locator('.profile_status.good').first().evaluate(element=>getComputedStyle(element).color),'rgb(14, 134, 100)');
         await page.locator('.student_subnav').getByRole('link',{name:'Documents',exact:true}).click();
         assert(await page.locator('#student_documents').isVisible());
         assert(await page.locator('#student_documents').evaluate(element=>element.getBoundingClientRect().top>=128),'Sticky header obscures the document anchor');
@@ -220,10 +220,10 @@ async function save(page, control) {
         await visit(page,'notices');
         assert(await page.locator('#student_main h1:visible').evaluate(element=>element.getBoundingClientRect().top>=120),'Navigation did not reset the native portal scroll container');
         await page.locator('.student_subnav').getByRole('link',{name:'Notices & Circulars',exact:true}).click();
-        assert.equal(await page.locator('[data-notice-record] .badge.urgent').first().evaluate(element=>getComputedStyle(element).color),'rgb(179, 49, 64)');
+        assert.equal(await page.locator('[data-notice-record] .badge.urgent').first().evaluate(element=>getComputedStyle(element).color),'rgb(180, 71, 58)');
         const noticeTypography=await page.locator('[data-notice-record] .notice-body span').first().evaluate(element=>({color:getComputedStyle(element).color,size:getComputedStyle(element).fontSize,font:getComputedStyle(element).fontFamily}));
-        // Saved rich text inherits the shared paragraph size, rather than metadata sizing.
-        assert.equal(noticeTypography.color,'rgb(97, 123, 150)'); assert.equal(noticeTypography.size,'13px'); assert.match(noticeTypography.font,/^Roboto,/);
+        // Saved notice rich text uses the shared body size and SOP palette.
+        assert.equal(noticeTypography.color,'rgb(85, 107, 130)'); assert.equal(noticeTypography.size,'14px'); assert.match(noticeTypography.font,/^Inter,/);
         await page.locator('[data-notices-filter="search"]').fill('no-such-published-notice');
         await page.locator('[data-notices-apply="notices"]').click();
         assert.equal(await page.locator('[data-notice-record]:visible').count(),0);
@@ -233,7 +233,7 @@ async function save(page, control) {
         assert.equal(new URL(page.url()).hash,'#student_notice_list');
         await page.locator('.student_subnav').getByRole('link',{name:'College Events',exact:true}).click();
         assert.equal(await page.locator('[data-event-record]:visible').count(),1);
-        assert.equal(await page.locator('[data-event-record] h3').first().evaluate(element=>getComputedStyle(element).color),'rgb(16, 45, 73)');
+        assert.equal(await page.locator('[data-event-record] h3').first().evaluate(element=>getComputedStyle(element).color),'rgb(19, 42, 68)');
         assert(!await page.locator('#student_main').textContent().then(text=>text.includes('PRIVATE DRAFT EVENT QA')));
         const [calendarDownload]=await Promise.all([page.waitForEvent('download'),page.locator('[data-event-ics]').first().click()]);
         const calendarText=await fs.readFile(await calendarDownload.path(),'utf8');
@@ -273,7 +273,7 @@ async function save(page, control) {
         assert.equal(new URL(page.url()).hash,'#student_request_history');
         assert.equal(data.request_ui.rows[0].office,'Academic office');
         assert.equal(data.request_ui.rows[0].priority,'Deadline approaching');
-        assert.equal(await page.locator('[data-request-row] .status').first().evaluate(element=>getComputedStyle(element).color),'rgb(97, 123, 150)');
+        assert.equal(await page.locator('[data-request-row] .status').first().evaluate(element=>getComputedStyle(element).color),'rgb(85, 107, 130)');
         await page.locator('[data-request-filter="search"]').fill('no-such-student-request');
         assert.equal(await page.locator('[data-request-row]:visible').count(),0);
         await page.locator('[data-request-reset]').click();
@@ -327,7 +327,7 @@ async function save(page, control) {
         const libraryLoan=library.current.find(row=>row.code==='STUDENT-LIB-1');
         assert(libraryLoan.overdue);
         await page.locator('.student_subnav').getByRole('link',{name:'My loans',exact:true}).click();
-        assert.equal(await page.locator('#student_library_loans .status.overdue').first().evaluate(element=>getComputedStyle(element).color),'rgb(179, 49, 64)');
+        assert.equal(await page.locator('#student_library_loans .status.overdue').first().evaluate(element=>getComputedStyle(element).color),'rgb(180, 71, 58)');
         await page.getByRole('button',{name:'Request renewal',exact:true}).click();
         assert.equal(await page.locator('#library_request_loan').inputValue(),String(libraryLoan.id));
         await page.locator('#library_request_note').fill('Synthetic renewal enquiry for library staff review.');
@@ -348,8 +348,8 @@ async function save(page, control) {
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'student-library-1440.png'),fullPage:true});
         await visit(page,'help');
-        assert.match(await page.locator('.help_view h1').evaluate(element=>getComputedStyle(element).fontFamily),/Roboto/);
-        assert.equal(await page.locator('.help_view h1').evaluate(element=>getComputedStyle(element).fontSize),'31px');
+        assert.match(await page.locator('.help_view h1').evaluate(element=>getComputedStyle(element).fontFamily),/Inter/);
+        assert.equal(await page.locator('.help_view h1').evaluate(element=>getComputedStyle(element).fontSize),'26px');
         await page.locator('.help_view .faq summary').first().click();
         assert(await page.locator('.help_view .faq .answer').first().isVisible());
         for(const width of [320,390,768,1440]) {
@@ -363,7 +363,7 @@ async function save(page, control) {
         assert.equal((await snapshot(page)).help_ui.feedback.category,'Student services');
         await page.reload();
         await page.locator('.feedback-receipt').waitFor();
-        assert.equal(await page.locator('.feedback-receipt .saved-comments').evaluate(element=>getComputedStyle(element).color),'rgb(22, 131, 93)');
+        assert.equal(await page.locator('.feedback-receipt .saved-comments').evaluate(element=>getComputedStyle(element).color),'rgb(14, 134, 100)');
         assert.equal(await page.locator('#student_help_feedback_form').count(),0);
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'student-help-feedback-1440.png'),fullPage:true});
@@ -379,7 +379,7 @@ async function save(page, control) {
         await page.locator('[data-fee-reset="details"]').click();
         await page.locator('.student_subnav').getByRole('link',{name:'Payment history & receipts',exact:true}).click();
         assert.equal(await page.locator('.fee_receipt_row:visible').count(),receipts.length);
-        assert.equal(await page.locator('.fee_receipt_row .badge.done').first().evaluate(element=>getComputedStyle(element).color),'rgb(22, 131, 93)');
+        assert.equal(await page.locator('.fee_receipt_row .badge.done').first().evaluate(element=>getComputedStyle(element).color),'rgb(14, 134, 100)');
         await page.locator('[data-fee-filter="search"]').fill('no-such-receipt');
         await page.locator('[data-fee-apply="history"]').click();
         assert.equal(await page.locator('.fee_receipt_row:visible').count(),0);

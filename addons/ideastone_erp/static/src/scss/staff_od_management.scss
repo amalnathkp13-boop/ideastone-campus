@@ -46,8 +46,8 @@
     .mentor_kpi.students > span { color: #049a55; background: #d7f4e7; }
     .mentor_kpi.pending { background: #fff7e9; }
     .mentor_kpi.pending > span { color: #f39b0b; background: #fff0ce; }
-    .mentor_kpi.approved { background: #f4f0ff; }
-    .mentor_kpi.approved > span { color: #7e3bef; background: #ebe2ff; }
+    .mentor_kpi.approved { background: #f8fbfb; }
+    .mentor_kpi.approved > span { color: #117c87; background: #f1f9f9; }
     .mentor_kpi.on_duty { background: #eaf8f8; }
     .mentor_kpi.on_duty > span { color: #0a9a99; background: #d7f2ef; }
 
@@ -73,7 +73,7 @@
     .mentor_status.pending_hod { background: #e9f3ff; color: #0755ce; }
     .mentor_status.withheld, .mentor_status.proof_review { background: #fff4df; color: #9d6200; }
     .mentor_status.completed { background: #e6f8ef; color: #078553; }
-    .mentor_status.returned { background: #f1eeff; color: #6b47c2; }
+    .mentor_status.returned { background: #f1f9f9; color: #117c87; }
     .mentor_status.rejected, .mentor_status.invalid { background: #ffeded; color: #bc303c; }
     .mentor_status.draft, .mentor_status.cancelled { background: #eef2f8; color: #5c6d88; }
     .mentor_row_actions { display: flex; gap: 5px; white-space: nowrap; }
@@ -112,10 +112,10 @@
     .mentor_workflow > p i { color: var(--mentor-blue); font-size: 15px; }
 
     .mentor_insight_grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin-top: 12px; }
-    .mentor_insight_grid article { display: flex; min-width: 0; gap: 7px; padding: 9px 7px; border-radius: 6px; background: #f5f2ff; }
+    .mentor_insight_grid article { display: flex; min-width: 0; gap: 7px; padding: 9px 7px; border-radius: 6px; background: #f8fbfb; }
     .mentor_insight_grid article:nth-child(2) { background: #fff8ed; }
     .mentor_insight_grid article:nth-child(3) { background: #edf8fb; }
-    .mentor_insight_grid article > i { color: #8743ec; font-size: 20px; }
+    .mentor_insight_grid article > i { color: #117c87; font-size: 20px; }
     .mentor_insight_grid article:nth-child(2) > i { color: #eaa018; }
     .mentor_insight_grid article:nth-child(3) > i { color: #0a93a8; }
     .mentor_insight_grid strong, .mentor_insight_grid b, .mentor_insight_grid small { display: block; }
@@ -183,11 +183,11 @@
     .hod_reject, .hod_outline { border: 1px solid #dce8f6; background: #f7fbff; color: #3b6498; }
     .hod_reject { border: 0; background: #fff0f0; color: #b62f3d; }
     .hod_insight_grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 20px; }
-    .hod_insight_grid article { display: flex; align-items: flex-start; gap: 12px; min-height: 108px; padding: 18px 14px; border-radius: 8px; background: #f5f2ff; }
+    .hod_insight_grid article { display: flex; align-items: flex-start; gap: 12px; min-height: 108px; padding: 18px 14px; border-radius: 8px; background: #f8fbfb; }
     .hod_insight_grid article:nth-child(2) { background: #fff8ed; }
     .hod_insight_grid article:nth-child(3) { background: #eef7ff; }
     .hod_insight_grid article:nth-child(4) { background: #edf7fc; }
-    .hod_insight_grid article > i { flex: none; color: #7742e8; font-size: 25px; }
+    .hod_insight_grid article > i { flex: none; color: #117c87; font-size: 25px; }
     .hod_insight_grid article:nth-child(2) > i { color: #ea9519; }
     .hod_insight_grid article:nth-child(3) > i, .hod_insight_grid article:nth-child(4) > i { color: #075cf5; }
     .hod_insight_grid strong, .hod_insight_grid b, .hod_insight_grid small { display: block; }
@@ -245,7 +245,7 @@
     .od-stat-icon { flex: 0 0 42px; width: 42px; height: 42px; display: grid; place-items: center; border-radius: 10px; background: #eaf2ff; color: var(--od-blue); font-size: 20px; }
     .od-stat:nth-child(2) .od-stat-icon { background: #e6f7ef; color: #078858; }
     .od-stat:nth-child(3) .od-stat-icon { background: #fff3df; color: #d88900; }
-    .od-stat:nth-child(4) .od-stat-icon { background: #f0eaff; color: #7542d8; }
+    .od-stat:nth-child(4) .od-stat-icon { background: #f1f9f9; color: #117c87; }
     .od-stat:nth-child(5) .od-stat-icon { background: #e2f7f6; color: #0d9696; }
     .od-stat-label { font-size: 12px; color: #55718e; font-weight: 600; margin-bottom: 4px; line-height: 1.35; }
     .od-stat strong { display: block; font-size: 27px; font-weight: 760; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
@@ -289,18 +289,18 @@
     .od-workflow small { color: var(--od-muted); margin-top: 3px; }
     .od-info { display: flex; align-items: flex-start; gap: 7px; background: #edf5ff; border-radius: 8px; padding: 10px 12px; font-size: 12px; }
     .od-info i { color: var(--od-blue); margin-top: 3px; }
-    .od-ai-panel { background: linear-gradient(145deg,#f4efff 0%,#fbfaff 70%,#fff 100%); border-color: #e2d7ff; padding: 20px 18px; }
-    .od-ai-banner { padding: 0 2px 14px; border-bottom: 1px solid #e0d5ff; }
-    .od-ai-badge { display: inline-flex; align-items: center; padding: 6px 11px; border-radius: 99px; background: #e8ddff; color: #6240b5; font-size: 11px; font-weight: 800; letter-spacing: .25px; }
+    .od-ai-panel { background: linear-gradient(145deg,#f1f9f9 0%,#f8fbfb 70%,#fff 100%); border-color: #e7f8f8; padding: 20px 18px; }
+    .od-ai-banner { padding: 0 2px 14px; border-bottom: 1px solid #e7f8f8; }
+    .od-ai-badge { display: inline-flex; align-items: center; padding: 6px 11px; border-radius: 99px; background: #f1f9f9; color: #117c87; font-size: 11px; font-weight: 800; letter-spacing: .25px; }
     .od-ai-banner h2 { margin: 13px 0 7px; line-height: 1.3; }
     .od-ai-banner p { font-size: 13px; line-height: 1.65; color: #4e6480; }
-    .od-ai-item { padding: 14px 2px 13px; border-bottom: 1px solid #e0d5ff; }
+    .od-ai-item { padding: 14px 2px 13px; border-bottom: 1px solid #e7f8f8; }
     .od-ai-item:last-child { border-bottom: 0; padding-bottom: 2px; }
     .od-ai-item-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
-    .od-ai-item-title strong { flex: 1; font-size: 13px; color: #35256f; line-height: 1.4; }
+    .od-ai-item-title strong { flex: 1; font-size: 13px; color: #117c87; line-height: 1.4; }
     .od-ai-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
-    .od-ai-dot.violet { background: #7542d8; } .od-ai-dot.amber { background: #d88900; } .od-ai-dot.teal { background: #0d9696; }
-    .od-ai-value { font-size: 13px; font-weight: 800; color: var(--od-ink); background: #fff; border: 1px solid #e3dcf6; border-radius: 8px; padding: 3px 9px; min-width: 31px; text-align: center; }
+    .od-ai-dot.violet { background: #117c87; } .od-ai-dot.amber { background: #d88900; } .od-ai-dot.teal { background: #0d9696; }
+    .od-ai-value { font-size: 13px; font-weight: 800; color: var(--od-ink); background: #fff; border: 1px solid #e7f8f8; border-radius: 8px; padding: 3px 9px; min-width: 31px; text-align: center; }
     .od-ai-item p { font-size: 12.5px; line-height: 1.6; color: #4e6480; margin: 4px 0 0 17px; }
     .od-analytics .od-panel-head { flex-wrap: wrap; }
     .od-chart-controls { display: flex; gap: 4px; }
@@ -348,9 +348,9 @@
         .od-hero { background: linear-gradient(112deg,#123b5b 0%,#17609a 100%) !important; border-radius: 14px !important; }
         .od-hero h2 { color: #fff !important; font-size: 21px !important; }
         .od-hero p { color: #e0edf9 !important; }
-        .od-ai-panel { background: linear-gradient(145deg,#f4efff 0%,#fbfaff 70%,#fff 100%) !important; border-color: #e2d7ff !important; }
+        .od-ai-panel { background: linear-gradient(145deg,#f1f9f9 0%,#f8fbfb 70%,#fff 100%) !important; border-color: #e7f8f8 !important; }
         .od-ai-banner p, .od-ai-item p { color: #4e6480 !important; }
-        .od-ai-item-title strong { color: #35256f !important; }
+        .od-ai-item-title strong { color: #117c87 !important; }
         .od-btn.primary { background: #1769e8 !important; border-color: #1769e8 !important; color: #fff !important; }
         .status.pending { background-color: #fff4df !important; color: #956000 !important; }
         .status.completed { background-color: #e6f7ef !important; color: #08764a !important; }
