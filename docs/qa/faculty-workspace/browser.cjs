@@ -44,7 +44,7 @@ async function diagnosticMarkup(page) {
         const taskNav = page.locator('.campus_faculty_subnav');
         const teachingTitle = page.getByRole('heading',{name:'My Teaching Subjects',exact:true,level:1});
         await teachingTitle.waitFor();
-        const tabs = ['My Teaching Subjects','Timetable','Student Attendance','My Mentorship Class','My Tasks & e-Diary',
+        const tabs = ['Overview','My Teaching Subjects','Timetable','Student Attendance','My Mentorship Class','My Tasks & e-Diary',
             'Examinations & Marks','Assignments','Alternate Hour','Lesson Plans','Circulars & Announcements'];
         for (const label of tabs) await taskNav.getByRole('button',{name:label,exact:true}).waitFor();
         // Count only the task tabs: the bar also holds scroll buttons and, with navigation customization, a customize button.
@@ -107,10 +107,11 @@ async function diagnosticMarkup(page) {
         await page.reload();
         await page.getByRole('button',{name:'Reopen calculation',exact:true}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'My profile & payroll',exact:true}).click();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My staff profile',exact:true}).click();
         await page.getByRole('heading',{name:'My staff profile',exact:true,level:1}).waitFor();
         const profileNav = page.locator('.campus_faculty_subnav');
-        if (await profileNav.locator(':scope > div').getByRole('button').count() !== 7) {
-            throw Error('Expected seven profile submodules');
+        if (await profileNav.locator(':scope > div').getByRole('button').count() !== 8) {
+            throw Error('Expected overview and seven profile submodules');
         }
         for (const name of ['Previous submodules', 'Next submodules', 'Customize top navigation']) {
             await profileNav.getByRole('button', {name, exact:true}).waitFor();
@@ -153,6 +154,7 @@ async function diagnosticMarkup(page) {
             await page.getByRole('heading',{name:label,exact:true,level:1}).waitFor();
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'My profile & payroll',exact:true}).click();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'My staff profile',exact:true}).click();
         await page.getByRole('heading',{name:'My staff profile',exact:true,level:1}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'My task list',exact:true}).click();
         await taskNav.getByRole('button',{name:'Examinations & Marks',exact:true}).waitFor();

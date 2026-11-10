@@ -29,20 +29,32 @@
   </t>
   <t t-name="ideastone_erp.AcademicFilterIcon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 6h16M7 12h10m-7 6h4"/><path d="M4 6l3 6v6m13-12-3 6v6"/></svg></t>
   <t t-name="ideastone_erp.AcademicOverview">
-    <section class="overview-grid"><article class="metric" t-foreach="stats" t-as="metric" t-key="metric.name" t-att-style="'--tint:' + metric.tint + ';--accent:' + metric.accent"><div class="metric-top"><span class="metric-name" t-esc="metric.name"/><span class="metric-icon" t-esc="metric.icon"/></div><div class="metric-value" t-esc="metric.value"/><div class="metric-foot" t-esc="metric.foot"/></article></section>
-    <section class="mid-grid">
-      <article class="panel"><div class="panel-head"><div><h2 class="panel-title">Academic delivery trend</h2><p class="panel-sub">Syllabus progress by month · current academic year</p></div><select class="select-mini" aria-label="Trend view" t-model="state.trend"><option value="progress">Syllabus progress</option><option value="classes">Classes completed</option></select></div>
-        <div class="trend-content"><div class="chart-legend"><span><i class="legend-dot" style="background:#1769e8"/>Current year</span><span><i class="legend-dot" style="background:#b9d5ff"/><t t-esc="state.trend === 'classes' ? 'Scheduled classes' : 'Target pace'"/></span></div>
-          <div class="chart" role="img" aria-label="Academic delivery by month"><div t-foreach="chart" t-as="month" t-key="month.month" class="bar-group" t-att-title="month.month + ': ' + (state.trend === 'classes' ? month.classes + ' completed / ' + month.scheduled + ' scheduled' : percent(month.progress) + ' delivered / ' + percent(month.target) + ' planned')"><div class="bar primary" t-att-style="'height:' + width(month.actual)"/><div class="bar secondary" t-att-style="'height:' + width(month.planned)"/></div><p t-if="!chart.length" class="academic-empty">Set a current academic year to view the delivery trend.</p></div>
-          <div class="chart-labels"><span t-foreach="chart" t-as="month" t-key="month.month" t-esc="month.month"/></div>
-          <div class="trend-note"><strong>Delivery pace: </strong><t t-if="c.coverage === null">No lesson hours are recorded as due. Save teaching plans and execution details to measure progress.</t><t t-else="">Recorded completion is <t t-esc="percent(c.coverage)"/> of lesson hours due. Use department reviews to identify where teaching plans need support.</t></div>
-        </div>
-      </article>
-      <article class="panel ai-panel"><div class="ai-head"><div class="ai-symbol">✧</div><div><h2 class="ai-title">AI academic insights</h2><div class="ai-kicker">Signals to review · based on saved academic records</div></div></div><div class="ai-body"><div class="insight" t-foreach="insights" t-as="insight" t-key="insight.title"><div class="insight-mark" t-att-style="'--tint:' + insight.tint + ';--accent:' + insight.accent" t-esc="insight.icon"/><div><h3 t-esc="insight.title"/><p t-esc="insight.text"/><span class="insight-tag" t-att-style="'background:' + insight.tint + ';color:' + insight.accent" t-esc="insight.tag"/></div></div></div></article>
-    </section>
-    <section class="lower-grid"><article class="panel"><div class="panel-head"><div><h2 class="panel-title">Academic calendar &amp; milestones</h2><p class="panel-sub">Upcoming dates that may affect academic delivery</p></div><span class="pill">Next 30 days</span></div><div class="calendar-list"><div class="calendar-item" t-foreach="d.milestones" t-as="event" t-key="event_index"><div class="date-chip"><strong t-esc="event.date.slice(8)"/><span t-esc="month(event.date)"/></div><div><div class="event-name" t-esc="event.name"/><div class="event-meta" t-esc="event.detail"/></div><span class="status scheduled" t-esc="event.status"/></div><p t-if="!d.milestones.length" class="academic-empty">No saved semester milestones or examinations in the next 30 days.</p></div></article>
-      <article class="panel"><div class="panel-head"><div><h2 class="panel-title">Curriculum readiness</h2><p class="panel-sub">Completion of key academic setup areas</p></div><span class="pill">4 areas</span></div><div class="program-body"><div class="program-row" t-foreach="d.readiness" t-as="area" t-key="area.name"><div class="program-top"><span class="program-name" t-esc="area.name"/><span class="program-percent" t-esc="percent(area.percent)"/></div><div class="track"><div class="fill" t-att-style="'width:' + width(area.percent)"/></div><div class="program-note" t-esc="area.percent === null ? 'No source records yet' : area.note"/></div></div></article>
-    </section>
+    <div class="academic-owner-overview">
+      <section class="overview-grid" aria-label="Academic key figures">
+        <article class="metric" t-foreach="stats" t-as="metric" t-key="metric.name" t-att-style="'--tint:' + metric.tint + ';--accent:' + metric.accent">
+          <span class="metric-icon"><i t-att-class="'fa ' + metric.icon" aria-hidden="true"/></span>
+          <div><div class="metric-name" t-esc="metric.name"/><div class="metric-value" t-esc="metric.value"/></div>
+        </article>
+      </section>
+      <section class="academic-overview-panels" aria-label="Academic overview details">
+        <article class="panel academic-overview-panel">
+          <div class="academic-overview-heading"><i class="fa fa-clone" aria-hidden="true"/><div><h2>Academic structure snapshot</h2><p>Current academic structure at a glance.</p></div></div>
+          <div class="academic-structure-grid"><div t-foreach="structure" t-as="item" t-key="item[0]"><span t-esc="item[0]"/><strong t-esc="number(item[1])"/></div></div>
+        </article>
+        <article class="panel academic-overview-panel">
+          <div class="academic-overview-heading"><i class="fa fa-bar-chart" aria-hidden="true"/><div><h2>Curriculum / syllabus progress</h2><p>Progress of curriculum setup and recorded teaching in the current academic year.</p></div></div>
+          <div class="academic-progress-list"><div class="academic-progress-row" t-foreach="progress" t-as="item" t-key="item.name"><span t-esc="item.name"/><div class="academic-progress-track"><div t-att-style="'width:' + width(item.value)"/></div><strong t-esc="percent(item.value)"/></div></div>
+        </article>
+        <article class="panel academic-overview-panel">
+          <div class="academic-overview-heading"><i class="fa fa-exclamation-triangle" aria-hidden="true"/><div><h2>Academic alerts</h2><p>Key items that need owner attention.</p></div></div>
+          <div class="academic-alert-list"><div class="academic-alert-row" t-foreach="alerts" t-as="item" t-key="item.name"><span class="academic-alert-dot"/><span t-esc="item.name"/><strong t-esc="number(item.value)"/></div></div>
+        </article>
+        <article class="panel academic-overview-panel">
+          <div class="academic-overview-heading"><i class="fa fa-signal" aria-hidden="true"/><div><h2>Quick academic status</h2><p>Key academic completion and pending status.</p></div></div>
+          <div class="academic-status-list"><div t-foreach="alerts" t-as="item" t-key="item.name"><span t-esc="item.name"/><strong t-esc="number(item.value)"/></div></div>
+        </article>
+      </section>
+    </div>
   </t>
   <t t-name="ideastone_erp.AcademicYears">
     <section class="year-metrics"><article class="year-stat current-stat"><div class="year-stat-top"><span>Current academic year</span><span class="stat-icon">✓</span></div><div class="year-stat-value" t-esc="current?.name || 'Not set'"/><div class="year-stat-foot"><span class="current-pill"><i/><t t-esc="current ? 'Active now' : 'Setup required'"/></span><span t-if="current"><t t-esc="date(current.start)"/> – <t t-esc="date(current.end)"/></span></div><div class="year-progress"><div t-att-style="'width:' + width(current?.progress)"/></div><div class="progress-caption"><span>Year progress</span><strong t-esc="percent(current?.progress)"/></div></article><article class="year-stat"><div class="year-stat-top"><span>Academic years recorded</span><span class="stat-icon blue-icon">▤</span></div><div class="year-stat-value" t-esc="number(d.rows.years.length)"/><div class="year-stat-foot">Including the current year</div><div class="year-stat-note">Historical records available</div></article><article class="year-stat"><div class="year-stat-top"><span>Next year setup</span><span class="stat-icon amber-icon">◷</span></div><div class="year-stat-value" t-esc="nextYear?.name || 'Not started'"/><div class="year-stat-foot" t-esc="nextYear ? date(nextYear.start) : 'Upcoming academic planning'"/><div class="year-stat-note">Create the next year when dates are approved</div></article></section>

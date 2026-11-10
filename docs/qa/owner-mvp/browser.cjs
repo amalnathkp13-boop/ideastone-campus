@@ -183,9 +183,11 @@ async function markup(page) {
         await page.getByText('Personal reminder saved. Find it in your Activities menu.',{exact:true}).waitFor();
         await page.screenshot({path:path.join(out,'owner-calendar-1440.png')});
         await page.locator('.campus_sidebar').getByRole('button',{name:'Fees & Payments',exact:true}).click();
+        await page.locator('.campus_owner_fees_workspace').waitFor();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Fee heads',exact:true}).click();
         await page.getByRole('cell',{name:'Tuition installment',exact:true}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Communication',exact:true}).click();
+        await page.getByRole('heading',{name:'Communication',exact:true,level:1}).waitFor();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Student requests & support',exact:true}).click();
         await page.locator('.owner-communication').getByRole('heading',{name:'Student requests & support',exact:true,level:1}).waitFor();
         await page.locator('.owner-communication .oc-table').waitFor();
@@ -196,7 +198,7 @@ async function markup(page) {
         await assertCampusTheme(page);
         const staffTabs=await page.locator('.campus_faculty_subnav button:not(.campus_subnav_scroll)').allTextContents();
         const staffTabNames=staffTabs.map(t=>t.trim()).filter(t=>!['','',''].includes(t));
-        if(staffTabNames.join('|')!=='Staff directory|Leave Management|Payroll History|Staff Profile|OD Management|OD Staffs')
+        if(staffTabNames.join('|')!=='Overview|Staff directory|Leave Management|Payroll History|Staff Profile|OD Management|OD Staffs')
             throw Error('Owner staff tabs do not match the approved navigation');
         await page.locator('.campus_owner_staff .dept-actions').first().click();
         await page.getByRole('button',{name:'View teaching staff',exact:true}).click();
@@ -234,7 +236,7 @@ async function markup(page) {
         await page.locator('.appraisal_entry button[type=submit]').click();
         await page.getByRole('cell',{name:'Owner QA portfolio entry',exact:true}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Faculty & Staff',exact:true}).click();
-        await page.locator('.campus_owner_staff').waitFor({state:'visible'});
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Staff directory',exact:true}).waitFor();
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Leave Management',exact:true}).click();
         await page.getByRole('heading',{name:'Online Leave Apply & Status',exact:true}).waitFor();
         await page.locator('.leave_loading').waitFor({state:'hidden'});
