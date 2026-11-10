@@ -63,6 +63,30 @@ class CampusBase extends Component {
             if (event.key === "Escape" && this.state.open && !document.querySelector(".campus_nav_dialog[open]")) { this.closeNav(); event.stopPropagation(); }
         }, { capture: true });
         useBus(this.env.bus, "CAMPUS:PAGE", (event) => { this.state.page = event.detail; });
+        useBus(this.env.bus, "CAMPUS:ROUTE", async (event) => {
+            const {page, module} = event.detail;
+            this.state.module = module;
+            this.state.page = page;
+            this.state.activeAction = 0;
+            this.state.activeTool = "";
+            if (this.props.action) {
+                try {
+                    if (page === "faculty-module") {
+                        this.state.moduleOverview = await this.orm.call("campus.dashboard", "get_module_overview", [module]);
+                    } else if (page === "owner-overview") {
+                        await this.loadOwnerMetrics();
+                    } else if (page === "accountant-overview") {
+                        await this.loadAccountantMetrics();
+                    } else if (page === "accountant-collections-overview") {
+                        await this.loadCollectionOverview();
+                    } else if (page.startsWith("accountant-collections-")) {
+                        await this.loadCollectionRecords();
+                    }
+                } catch {
+                    this.notification.add("This module could not be loaded. Please retry.", {type: "danger"});
+                }
+            }
+        });
         onWillStart(() => this.load());
     }
     async load() {
@@ -141,6 +165,10 @@ class CampusBase extends Component {
             this.state.module = "home";
             return this.go({key: "overview"});
         }
+        if (module.key === "students" && this.state.is_owner_workspace && !this.state.is_accountant_workspace) {
+            this.state.module = module.key;
+            return this.open({action: "ideastone_erp.action_students_directory"});
+        }
         if (this.state.is_principal_workspace && ["home", "decisions", "principal_notices"].includes(module.key) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
@@ -157,7 +185,7 @@ class CampusBase extends Component {
             this.state.module = "settings";
             return this.settingsPage("overview");
         }
-        if ((this.state.is_coe_workspace || (this.state.is_accountant_workspace && module.key === "spending")) && module.items?.[0]?.action) {
+        if ((this.state.is_coe_workspace || (this.state.is_accountant_workspace && ["students", "spending"].includes(module.key))) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
@@ -171,11 +199,7 @@ class CampusBase extends Component {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
-        await this.action.doAction("ideastone_erp.action_dashboard", {
-            additionalContext: { campus_page: module.key === "home" ? (this.state.is_accountant_workspace ? "accountant-overview" : this.state.is_owner_workspace ? "owner-overview" : "overview") : "faculty-module", campus_module: module.key },
-        });
-        this.state.module = module.key;
-        this.state.open = false;
+        await this.routeDashboard(module.key === "home" ? (this.state.is_accountant_workspace ? "accountant-overview" : this.state.is_owner_workspace ? "owner-overview" : "overview") : "faculty-module", module.key);
     }
     async facultyGo(item) {
         if (this.state.is_owner_workspace && this.state.module === "settings" && item.page?.startsWith("settings-")) {
@@ -186,10 +210,7 @@ class CampusBase extends Component {
     }
     async settingsPage(screen) {
         this.state.module = "settings";
-        this.state.open = false;
-        await this.action.doAction("ideastone_erp.action_dashboard", {
-            additionalContext: {campus_page: `settings-${screen}`, campus_module: "settings"},
-        });
+        await this.routeDashboard(`settings-${screen}`, "settings");
     }
     async open(item) {
         if (item.allowed === false) return;
@@ -225,9 +246,21 @@ class CampusBase extends Component {
     }
     async go(item) {
         if (item.action || item.profile_id) return this.open(item);
-        this.state.open = false;
         const module = this.state.faculty_modules.length && ["reports", "analytics", "help"].includes(item.key) ? item.key : this.state.module;
-        await this.action.doAction("ideastone_erp.action_dashboard", { additionalContext: { campus_page: item.key, campus_module: module } });
+        await this.routeDashboard(item.key, module);
+    }
+    async routeDashboard(page, module) {
+        this.state.open = false;
+        const current = this.action.currentController?.action;
+        if (current?.tag === "ideastone_erp.dashboard") {
+            current.context = {...current.context, campus_page: page, campus_module: module};
+            this.env.bus.trigger("CAMPUS:ROUTE", {page, module});
+            this.router.pushState({campus_page: page, campus_module: module});
+        } else {
+            await this.action.doAction("ideastone_erp.action_dashboard", {
+                additionalContext: {campus_page: page, campus_module: module},
+            });
+        }
     }
     async home() {
         if (this.state.faculty_modules.length) return this.chooseModule(this.state.faculty_modules[0]);
