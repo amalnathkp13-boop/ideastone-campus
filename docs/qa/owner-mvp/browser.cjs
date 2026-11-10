@@ -165,7 +165,6 @@ async function markup(page) {
         await page.getByRole('heading',{name:'Enrolments & Transfers',exact:true,level:1}).waitFor();
         if(await page.locator('.campus_students_workspace .alert-danger').count()) throw Error('Enrolments workspace failed to load');
         await page.locator('.campus_sidebar').getByRole('button',{name:'Calendar',exact:true}).click();
-        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'College calendar',exact:true}).click();
         await page.getByRole('heading',{name:'College Calendar',exact:true,level:1}).waitFor();
         if(await page.locator('.campus_sidebar').getByRole('button',{name:'Timetable',exact:true}).count()) throw Error('Owner timetable module was not replaced');
         const filterFonts=await page.locator('.campus_college_calendar .filters select,.campus_college_calendar .filters input,.campus_college_calendar .viewtoggle button').evaluateAll(nodes=>nodes.map(node=>getComputedStyle(node).fontSize));
