@@ -9,7 +9,7 @@
           <div class="od-breadcrumb">Campus home / My task list / OD Management</div>
           <header class="od-page-heading">
             <div><h1>On Duty (OD) Management</h1><p>Review and manage student OD requests for your assigned mentorship class.</p></div>
-            <button type="button" class="od-btn" t-on-click="load" t-att-disabled="state.saving"><i class="fa fa-refresh" aria-hidden="true"/> Refresh</button>
+            <div class="d-flex gap-2"><button type="button" class="od-btn" t-on-click="openStaffOD">My Staff On Duty</button><button type="button" class="od-btn" t-on-click="load" t-att-disabled="state.saving"><i class="fa fa-refresh" aria-hidden="true"/> Refresh</button></div>
           </header>
           <section class="od-stats" aria-label="Mentorship OD summary">
             <article class="od-stat"><span class="od-stat-icon"><i class="fa fa-users" aria-hidden="true"/></span><div><div class="od-stat-label">My Mentorship Class</div><strong class="od-class-value" t-att-title="state.data.class_label + ' · ' + state.data.semester" t-esc="state.data.class_label"/><p>Assigned mentorship class</p></div></article>

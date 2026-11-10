@@ -17,18 +17,20 @@ export class FacultyQuestionPapers extends Component {
         this.dialogRef = useRef("paperDialog");
         this.state = useState({ data: null, busy: false, error: "", form: emptyForm(), id: null,
             levels: { balanced: true, moderate: false, advanced: false }, files: {}, search: "", filter: "",
-            department: "", examType: "", modal: null, selectedSet: "", note: "", history: false });
+            department: "", examType: "", modal: null, selectedSet: "", officialLevel: "", note: "", history: false });
         this.levels = [{ key: "balanced", label: "Balanced", hint: "Mixed difficulty" },
             { key: "moderate", label: "Moderate", hint: "Core concepts" }, { key: "advanced", label: "Advanced", hint: "Higher-order problems" }];
         this.examTypes = ["Internal Assessment — CAT I", "Internal Assessment — CAT II", "Internal Assessment — CAT III",
             "University Semester Examination", "Model Examination", "Campus / Certification Examination"];
         onWillStart(() => this.load());
-        onMounted(() => document.body.classList.add("campus_question_paper_shell"));
-        onWillUnmount(() => document.body.classList.remove("campus_question_paper_shell"));
+        if (!this.props.embedded) {
+            onMounted(() => document.body.classList.add("campus_question_paper_shell"));
+            onWillUnmount(() => document.body.classList.remove("campus_question_paper_shell"));
+        }
         useEffect(() => { if(this.state.modal || this.state.history) this.dialogRef.el?.querySelector('button')?.focus(); }, () => [this.state.modal, this.state.history]);
     }
     async load() {
-        try { this.state.data = await this.orm.call("campus.question.paper", "get_workspace", [this.constructor.role]); this.state.error = ""; }
+        try { this.state.data = await this.orm.call("campus.question.paper", "get_workspace", [this.props.direct ? "hod_author" : this.constructor.role]); this.state.error = ""; }
         catch (error) { this.state.error = error.data?.message || "The question-paper workspace could not be loaded. Retry."; }
     }
     get rows() {
@@ -52,7 +54,7 @@ export class FacultyQuestionPapers extends Component {
     }
     notice(text, type="info") { this.notification.add(text,{type}); }
     guide() { this.notice("Select your assigned department and subject. Upload one PDF per difficulty set, save a draft or submit to your HOD. Returned papers can be revised; approved papers are locked."); }
-    newPaper() { this.state.form=emptyForm(); this.state.id=null; this.state.files={}; this.state.levels={balanced:true,moderate:false,advanced:false}; this.state.modal=null; this.formRef.el?.scrollIntoView({behavior:"smooth",block:"start"}); }
+    newPaper() { this.state.form=emptyForm(); this.state.id=null; this.state.files={}; this.state.levels={balanced:true,moderate:false,advanced:false}; this.state.officialLevel=""; this.state.modal=null; this.formRef.el?.scrollIntoView({behavior:"smooth",block:"start"}); }
     departmentChanged() { this.state.form.subject_id=""; this.state.form.paper_code=""; }
     subjectChanged() { const s=this.state.data.subjects.find(s=>s.id===Number(this.state.form.subject_id)); if(s) { this.state.form.paper_code=s.code || ""; this.state.form.department_id=String(s.department_id); } }
     async upload(level, event) {
@@ -72,14 +74,20 @@ export class FacultyQuestionPapers extends Component {
         const files=this.levels.filter(l=>this.state.levels[l.key]).map(l=>this.state.files[l.key]).filter(Boolean);
         const missing=this.levels.filter(l=>this.state.levels[l.key] && !this.state.files[l.key] && !this.existing(l.key));
         if ((submit || readiness) && missing.length) { this.notice(`Attach a PDF for: ${missing.map(l=>l.label).join(", ")}.`,"warning"); return; }
+        const levels = this.levels.filter(level => this.state.levels[level.key]).map(level => level.key);
+        const direct = this.props.direct && submit;
+        if (direct && !levels.includes(this.state.officialLevel)) {
+            this.notice("Select the official set to send to COE.", "warning");
+            return;
+        }
         this.state.busy=true;
         try {
             const values={...this.state.form,department_id:Number(this.state.form.department_id),subject_id:Number(this.state.form.subject_id)};
-            this.state.id=await this.orm.call("campus.question.paper","save_submission",[values,files,this.state.id,submit,this.levels.filter(l=>this.state.levels[l.key]).map(l=>l.key)]);
+            this.state.id=await this.orm.call("campus.question.paper","save_submission",[values,files,this.state.id,submit,levels,direct ? this.state.officialLevel : null]);
             this.state.files={};
             await this.load();
             if(readiness) this.notice("Draft saved. PDF format, size, encryption and page count passed. Syllabus coverage, marks, difficulty and duplicates still require academic review.","success");
-            else this.notice(submit?"Question-paper sets submitted to your department HOD.":"Draft saved.","success");
+            else this.notice(direct ? "Official question paper sent to COE." : submit ? "Question-paper sets submitted to your department HOD." : "Draft saved.", "success");
             if(submit) this.newPaper();
         } catch(error) { this.notice(error.data?.message || "The submission could not be saved. Please retry.","danger"); }
         finally {this.state.busy=false;}
@@ -89,7 +97,7 @@ export class FacultyQuestionPapers extends Component {
     modalKey(event) {
         if(event.key === "Escape") { event.stopPropagation(); this.closeModal(); }
         if(event.key !== "Tab") return;
-        const nodes=[...(this.dialogRef.el?.querySelectorAll('button:not(:disabled),input,textarea,a[href],select') || [])];
+        const nodes=[...(this.dialogRef.el?.querySelectorAll('button:not(:disabled),input:not(:disabled),textarea,a[href],select') || [])];
         const first=nodes[0], last=nodes[nodes.length-1];
         if(event.shiftKey && document.activeElement===first) { event.preventDefault(); last?.focus(); }
         else if(!event.shiftKey && document.activeElement===last) { event.preventDefault(); first?.focus(); }
@@ -98,7 +106,7 @@ export class FacultyQuestionPapers extends Component {
         this.state.form=Object.fromEntries(Object.keys(emptyForm()).map(k=>[k,row[k] ?? ""]));
         this.state.form.department_id=String(row.department_id);
         this.state.form.subject_id=String(row.subject_id);
-        this.state.id=row.id; this.state.files={}; this.state.modal=null;
+        this.state.id=row.id; this.state.files={}; this.state.officialLevel=""; this.state.modal=null;
         for(const l of this.levels) this.state.levels[l.key]=row.sets.some(s=>s.level===l.key);
         if(!row.sets.length) this.state.levels.balanced=true;
         this.formRef.el?.scrollIntoView({behavior:"smooth",block:"start"});
@@ -126,5 +134,8 @@ export class FacultyQuestionPapers extends Component {
         const csv=[["Subject","Staff","Department","Year / semester","Examination","Exam date","Status"],...this.rows.map(r=>[r.subject,r.staff,r.department,this.cohort(r),r.exam_type,r.exam_date,r.status])].map(r=>r.map(quote).join(",")).join("\r\n");
         const url=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"})); const a=document.createElement("a"); a.href=url;a.download="question-paper-status.csv";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
     }
+}
+export class FacultySopPapers extends FacultyQuestionPapers {
+    static template = "ideastone_erp.FacultySopPapers";
 }
 registry.category("actions").add("ideastone_erp.faculty_question_papers",FacultyQuestionPapers);

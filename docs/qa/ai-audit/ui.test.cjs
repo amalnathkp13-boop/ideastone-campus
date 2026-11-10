@@ -72,7 +72,7 @@ test('failed provider attempts refresh the visible usage count', async () => {
     assert.equal(page.state.status.used, 1);
 });
 
-test('CSV quotes formula-like names and labels money with the college currency', async () => {
+test('CSV quotes formula-like names and displays rupees without changing overdue amounts', async () => {
     let blob;
     const Radar = component('success_radar.js', 'SuccessRadarPage', {
         Blob, URL: { createObjectURL: value => { blob = value; return 'blob:test'; }, revokeObjectURL() {} },
@@ -88,5 +88,7 @@ test('CSV quotes formula-like names and labels money with the college currency',
     const csv = await blob.text();
     assert(csv.includes("\"'=HYPERLINK"));
     assert(csv.includes("\"'+123\""));
-    assert(csv.includes('Overdue fees (USD)'));
+    assert(csv.includes('Overdue fees (₹)'));
+    assert.equal(page.state.data.currency_code, 'USD');
+    assert.equal(page.state.data.rows[0].fees.overdue, 10);
 });

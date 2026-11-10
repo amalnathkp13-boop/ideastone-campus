@@ -21,9 +21,6 @@
         @media (max-width: 760px) { h1 { font-size: 25px !important; } }
     }
 }
-body.campus_faculty_workspace:has(.campus_fee_circulars) {
-    .o_navbar, .o_main_navbar { height: 52px !important; min-height: 52px !important; }
-}
 .campus_fee_circulars {
     --navy: #0b2e49; --blue: #1769e8; --blue2: #0f5fd5; --blue-pale: #eaf2ff; --bg: #f3f7fc;
     --ink: #102c46; --muted: #63809f; --border: #dbe6f3; --green: #16845b; --amber: #a96608;

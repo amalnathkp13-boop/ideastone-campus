@@ -81,8 +81,8 @@ export class PrincipalWorkspace extends Component {
     date(value) { return value ? new Date(`${value.slice(0,10)}T12:00:00`).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}) : "—"; }
     timestamp(value) { return new Date(`${value.replace(" ","T")}Z`).toLocaleString("en-GB"); }
     initials(name) { return name.split(/\s+/).filter(Boolean).slice(0,2).map(word=>word[0]).join("").toUpperCase(); }
-    money(value) { return `${this.allRows.find(row=>row.kind === "event")?.currency || "₹"}${Number(value || 0).toLocaleString("en-IN",{maximumFractionDigits:0})}`; }
-    compactMoney(value) { return value >= 100000 ? `${this.allRows.find(row=>row.kind === "event")?.currency || "₹"}${(value/100000).toFixed(1)}L` : this.money(value); }
+    money(value) { return `₹${Number(value || 0).toLocaleString("en-IN",{maximumFractionDigits:0})}`; }
+    compactMoney(value) { return value >= 100000 ? `₹${(value/100000).toFixed(1)}L` : this.money(value); }
     async go(view) { return this.action.doAction(`ideastone_principal.${{overview:"action_principal_overview",decisions:"action_principal_decisions",staff:"action_principal_staff_leave",student:"action_principal_student_leave",events:"action_principal_events"}[view]}`); }
     async related(key) {
         try { await this.action.doAction(await this.orm.call("ideastone.principal.decisions","related_action",[key])); }

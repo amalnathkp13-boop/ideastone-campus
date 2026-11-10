@@ -1,6 +1,6 @@
 <templates xml:space="preserve">
   <t t-name="ideastone_erp.FacultyProfileWorkspace">
-    <main class="campus_faculty_profile_workspace" tabindex="0">
+    <main class="campus_faculty_profile_workspace" t-att-class="d?.hod ? 'campus_hod_staff_workspace' : ''" tabindex="0">
       <div class="content">
         <p t-if="state.loading" role="status">Refreshing your staff records…</p>
         <div t-if="state.error" class="error" role="alert">
@@ -9,21 +9,20 @@
         </div>
         <t t-if="d">
           <div class="breadcrumb">
-            <span>VCET Campus</span>
-            <span>›</span>
-            <span>My profile &amp; payroll</span>
+            <span t-if="d.hod">HOD workspace</span>
+            <t t-else=""><span>VCET Campus</span><span>›</span><span>My profile &amp; payroll</span></t>
             <span>›</span>
             <span t-esc="title"/>
           </div>
           <section class="submodule active" t-att-id="'tab-'+page">
             <div class="page-heading">
               <div>
-                <h1 t-esc="page === 'leave' ? 'Online Leave Apply &amp; Status' : title"/>
-                <p t-esc="subtitles[page]"/>
+                <h1 t-esc="heading"/>
+                <p t-if="subtitle" t-esc="subtitle"/>
               </div>
               <div class="heading-actions">
                 <t t-if="page === 'myprofile'">
-                  <button class="btn" t-on-click="() =&gt; this.exportData('myprofile')">↗ Preview profile</button>
+                  <button class="btn" t-on-click="previewProfile">↗ Preview profile</button>
                   <button class="btn primary" t-att-disabled="!state.editing || state.busy" t-on-click="saveProfile">Save changes</button>
                 </t>
                 <t t-elif="page === 'qualifications'">
@@ -36,7 +35,8 @@
                 </t>
                 <t t-elif="page === 'agreements'">
                   <button class="btn" t-on-click="() =&gt; this.exportData()">↓ Download summary</button>
-                  <button class="btn primary" t-on-click="() =&gt; notification.add('Contact your reporting authority or HR to request a review of salary terms.',{type:'info'})">＋ Request review</button>
+                  <button t-if="d.hod" class="btn primary" t-att-disabled="!agreement || state.busy" t-on-click="requestAgreementReview">＋ Request review</button>
+                  <button t-else="" class="btn primary" t-on-click="() =&gt; notification.add('Contact your reporting authority or HR to request a review of salary terms.',{type:'info'})">＋ Request review</button>
                 </t>
                 <t t-elif="page === 'monthly'">
                   <select class="filter" aria-label="Payroll month" t-model="state.slip">
@@ -53,36 +53,22 @@
               </div>
             </div>
             <t t-if="page === 'history'">
-              <div class="panel" style="margin-bottom:14px">
+              <div t-if="d.hod" class="payroll-filter-toolbar" t-ref="payrollFilters" t-on-keydown="filterKey">
+                <div class="filter-toolbar-label"><span class="eyebrow">Payroll records</span><span>Filter payslips by report type, year and month.</span></div>
+                <div class="filter-toolbar-actions">
+                  <button type="button" class="filter-icon-btn" t-ref="payrollToggle" aria-label="Show payroll filters" aria-controls="payrollFilterPanel" t-att-aria-expanded="state.payrollFilters ? 'true' : 'false'" t-on-click="togglePayrollFilters">☷</button>
+                  <button class="btn primary" t-on-click="() =&gt; this.exportData('history')">↓ Download / Export</button>
+                </div>
+                <div id="payrollFilterPanel" class="payroll-filter-panel" t-att-hidden="!state.payrollFilters"><t t-call="ideastone_erp.StaffPayrollFilters"/></div>
+              </div>
+              <div t-else="" class="panel" style="margin-bottom:14px">
                 <div class="filters" style="grid-template-columns:1fr 1fr 1fr auto;margin-bottom:0">
-                  <div class="field">
-                    <label for="historyReport">Report options</label>
-                    <select id="historyReport" t-model="state.report">
-                      <option>Complete History</option>
-                      <option>Salary only</option>
-                      <option>Deductions only</option>
-                      <option>Contributions only</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="historyYear">Year</label>
-                    <select id="historyYear" t-model="state.year">
-                      <option value="">All</option>
-                      <option t-foreach="years" t-as="year" t-key="year" t-att-value="year" t-esc="year"/>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="historyMonth">Month</label>
-                    <select id="historyMonth" t-model="state.month">
-                      <option value="">All</option>
-                      <option t-foreach="months" t-as="month" t-key="month" t-att-value="month_index+1" t-esc="month"/>
-                    </select>
-                  </div>
+                  <t t-call="ideastone_erp.StaffPayrollFilters"/>
                   <button class="btn primary" t-on-click="() =&gt; this.exportData('history')">↓ Download / Export</button>
                 </div>
               </div>
             </t>
-            <t t-if="page !== 'development' &amp;&amp; page !== 'leave'" t-call="ideastone_erp.StaffStats"/>
+            <t t-if="!['development','leave','monthly'].includes(page)" t-call="ideastone_erp.StaffStats"/>
             <t t-if="page === 'myprofile'">
               <div class="grid cols">
                 <div class="panel">
@@ -128,10 +114,10 @@
               <div class="panel">
                 <div class="panel-head">
                   <div>
-                    <h2 class="panel-title">Items requiring attention</h2>
-                    <p class="panel-desc">Complete these to keep your staff record current.</p>
+                    <h2 class="panel-title" t-esc="d.hod ? 'My profile actions' : 'Items requiring attention'"/>
+                    <p class="panel-desc" t-esc="d.hod ? 'A short list of personal record updates.' : 'Complete these to keep your staff record current.'"/>
                   </div>
-                  <button class="link-btn" t-on-click="() =&gt; this.go('qualifications')">View documents →</button>
+                  <button class="link-btn" t-on-click="() =&gt; this.go('qualifications')" t-esc="d.hod ? 'View my documents →' : 'View documents →'"/>
                 </div>
                 <div class="action-list">
                   <div class="action-row">
@@ -192,6 +178,7 @@
                         <tr t-foreach="documents" t-as="row" t-key="row.id">
                           <td>
                             <strong t-esc="row.name"/>
+                            <div t-if="row.peer" class="table-sub" t-esc="row.faculty"/>
                           </td>
                           <td t-esc="documentCategory(row.campus_category || row.kind)"/>
                           <td t-esc="date(row.create_date)"/>
@@ -199,7 +186,7 @@
                             <span class="pill" t-att-class="['Expired','Expiring soon'].includes(row.status) ? 'red' : tone(row.status)" t-esc="row.status === 'Pending' ? 'Pending review' : row.status"/>
                           </td>
                           <td>
-                            <button class="link-btn" t-on-click="() =&gt; this.edit('document',row)">View / edit</button>
+                            <button class="link-btn" t-on-click="() =&gt; this.documentDetails(row)" t-esc="row.peer ? 'View' : 'View / edit'"/>
                             <button t-if="row.filename" class="link-btn" t-on-click="() =&gt; this.recordAction('document',row.id)">Download</button>
                           </td>
                         </tr>
@@ -220,7 +207,7 @@
                     <h2 class="panel-title">Portfolio filters</h2>
                     <p class="panel-desc">Review records by institution, department and staff member where your role permits.</p>
                   </div>
-                  <span class="pill blue">Staff portfolio</span>
+                  <span class="pill blue" t-esc="d.hod ? 'Department portfolio' : 'Staff portfolio'"/>
                 </div>
                 <div class="filters" style="grid-template-columns:1.2fr 1.2fr 1.2fr auto;margin-bottom:0">
                   <div class="field">
@@ -232,12 +219,16 @@
                   <div class="field">
                     <label for="appDepartment">Department</label>
                     <select id="appDepartment">
-                      <option t-esc="relation(p.main_department_id)"/>
+                      <option t-esc="d.hod?.department || relation(p.main_department_id)"/>
                     </select>
                   </div>
                   <div class="field">
                     <label for="appStaff">Staff</label>
-                    <select id="appStaff">
+                    <select t-if="d.hod" id="appStaff" t-model="state.staff">
+                      <option value="">All department staff</option>
+                      <option t-foreach="d.hod.staff" t-as="staff" t-key="staff.id" t-att-value="staff.id" t-esc="staff.name"/>
+                    </select>
+                    <select t-else="" id="appStaff">
                       <option t-esc="p.name"/>
                     </select>
                   </div>
@@ -298,20 +289,20 @@
                         <tr t-foreach="activities" t-as="row" t-key="row.id">
                           <td>
                             <strong t-esc="row.name"/>
-                            <div class="table-sub" t-esc="row.description"/>
+                            <div class="table-sub" t-esc="row.faculty_id ? row.faculty_id[1] : row.description"/>
                           </td>
                           <td>
                             <span class="pill" t-att-class="activityCategory(row.kind).color" t-esc="activityCategory(row.kind).label"/>
                           </td>
                           <td t-esc="date(row.date_from)"/>
                           <td>
-                            <span class="pill" t-att-class="!row.filename ? 'red' : ['approved','done'].includes(row.state) ? 'green' : 'amber'" t-esc="!row.filename ? 'Missing' : ['approved','done'].includes(row.state) ? 'Verified' : 'Pending'"/>
+                            <span class="pill" t-att-class="!(row.filename || row.has_evidence) ? 'red' : ['approved','done'].includes(row.state) ? 'green' : 'amber'" t-esc="!(row.filename || row.has_evidence) ? 'Missing' : ['approved','done'].includes(row.state) ? 'Verified' : 'Pending'"/>
                           </td>
                           <td>
-                            <span class="pill" t-att-class="['approved','done'].includes(row.state) ? 'blue' : 'amber'" t-esc="['approved','done'].includes(row.state) ? 'Mapped' : !row.filename ? 'Needs evidence' : 'Needs review'"/>
+                            <span class="pill" t-att-class="['approved','done'].includes(row.state) ? 'blue' : 'amber'" t-esc="['approved','done'].includes(row.state) ? 'Mapped' : !(row.filename || row.has_evidence) ? 'Needs evidence' : 'Needs review'"/>
                           </td>
                           <td>
-                            <button class="link-btn" t-on-click="() =&gt; this.edit('activity',row)" t-esc="row.state === 'draft' &amp;&amp; !row.filename ? 'Add file' : ['approved','done'].includes(row.state) ? 'View' : 'Review'"/>
+                            <button class="link-btn" t-on-click="() =&gt; this.activityDetails(row)" t-esc="row.state === 'draft' &amp;&amp; !row.filename ? 'Add file' : ['approved','done'].includes(row.state) ? 'View' : 'Review'"/>
                             <button t-if="row.state === 'draft'" class="link-btn" t-on-click="() =&gt; this.recordAction('submit',row.id)">Submit for review</button>
                             <button t-if="row.filename" class="link-btn" t-on-click="() =&gt; this.recordAction('activity',row.id)">File</button>
                           </td>
@@ -594,7 +585,8 @@
                         <t t-esc="agreement.name"/> · Approved <t t-esc="date(agreement.approved_on)"/>
                       </span>
                     </div>
-                    <button class="btn" t-on-click="() =&gt; this.edit('agreement',agreement)">View record</button>
+                    <button t-if="d.hod" class="btn" t-on-click="() =&gt; this.recordAction('agreement',agreement.id)">View PDF</button>
+                    <button t-else="" class="btn" t-on-click="() =&gt; this.edit('agreement',agreement)">View record</button>
                   </div>
                 </div>
                 <t t-call="ideastone_erp.StaffGuidance"/>
@@ -690,7 +682,6 @@
                       <tbody>
                         <tr t-foreach="breakdown" t-as="row" t-key="row[0]">
                           <td>
-                            <strong t-esc="row[0]"/>
                             <strong t-esc="row[0]"/>
                           </td>
                           <td t-esc="row[1]"/>
@@ -803,14 +794,14 @@
                           <th>#</th>
                           <th>Month</th>
                           <th>Year</th>
-                          <th t-if="state.report !== 'Deductions only' &amp;&amp; state.report !== 'Contributions only'">Net Salary (<t t-esc="d.currency"/>)</th>
+                          <th t-if="state.report !== 'Deductions only' &amp;&amp; state.report !== 'Contributions only'">Net Salary (<t t-esc="'₹'"/>)</th>
                           <t t-if="state.report !== 'Salary only' &amp;&amp; state.report !== 'Contributions only'">
                             <th>Late Days</th>
-                            <th>Late Deduction (<t t-esc="d.currency"/>)</th>
+                            <th>Late Deduction (<t t-esc="'₹'"/>)</th>
                           </t>
                           <t t-if="state.report !== 'Salary only' &amp;&amp; state.report !== 'Deductions only'">
-                            <th>P.F (<t t-esc="d.currency"/>)</th>
-                            <th>T.D.S (<t t-esc="d.currency"/>)</th>
+                            <th>P.F (<t t-esc="'₹'"/>)</th>
+                            <th>T.D.S (<t t-esc="'₹'"/>)</th>
                           </t>
                           <th/>
                         </tr>
@@ -900,15 +891,16 @@
             </t>
             <t t-elif="page === 'leave'">
               <div class="leave-tabs">
-                <button type="button" t-on-click="() =&gt; state.leaveView = 'apply'" t-att-class="state.leaveView === 'apply' ? 'active' : ''">Online Leave Process</button>
-                <button type="button" t-on-click="() =&gt; state.leaveView = 'approval'" t-att-class="state.leaveView === 'approval' ? 'active' : ''">Online Leave Application Approval By HoD</button>
+                <button type="button" t-on-click="() =&gt; state.leaveView = 'apply'" t-att-class="state.leaveView === 'apply' ? 'active' : ''" t-esc="d.hod ? 'Leave overview' : 'Online Leave Process'"/>
+                <button type="button" t-on-click="() =&gt; state.leaveView = 'approval'" t-att-class="state.leaveView === 'approval' ? 'active' : ''" t-esc="d.hod ? 'HOD approval queue' : 'Online Leave Application Approval By HoD'"/>
               </div>
               <t t-call="ideastone_erp.StaffStats"/>
-              <div class="leave-layout" t-att-style="state.leaveView === 'approval' ? 'grid-template-columns:minmax(0,1fr)' : ''">
-                <section class="panel" t-if="state.leaveView === 'apply'">
+              <div class="leave-layout" t-att-style="state.leaveView === 'approval' &amp;&amp; !departmentLeave ? 'grid-template-columns:minmax(0,1fr)' : ''">
+                <section class="panel" t-if="state.leaveView === 'apply' || departmentLeave">
                   <div class="panel-head">
-                    <h2 class="panel-title">▤ Apply for Leave</h2>
+                    <h2 class="panel-title" t-esc="d.hod ? '▤ Department leave overview' : '▤ Apply for Leave'"/>
                   </div>
+                  <div class="leave-alert" t-if="departmentLeave">Review staff leave requests against department workload, timetable coverage and leave eligibility before taking an approval decision.</div>
                   <div class="leave-alert" t-esc="d.leave.can_apply ? 'Requests are submitted through the existing leave approval workflow.' : 'A linked employee and an available leave type are required to apply.'"/>
                   <form t-on-submit="submitLeave">
                     <div class="leave-field-row">
@@ -968,10 +960,10 @@
                 <div class="grid leave-right">
                   <section class="panel">
                     <div class="panel-head">
-                      <h2 class="panel-title">▤ Leave Application History</h2>
+                      <h2 class="panel-title" t-esc="departmentLeave ? '▤ Staff leave requests' : '▤ Leave Application History'"/>
                       <div>
                         <button class="btn" aria-label="Export leave history" t-on-click="() =&gt; this.exportData('leave')">▣</button>
-                        <button class="link-btn" t-on-click="() =&gt; this.exportData('leave')">View all ➜</button>
+                        <button class="link-btn" t-on-click="showLeaveHistory">View all ➜</button>
                       </div>
                     </div>
                     <div class="table-wrap">
@@ -987,8 +979,8 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <tr t-foreach="d.leave.history" t-as="row" t-key="row.id">
-                            <td t-esc="row.type"/>
+                          <tr t-foreach="leaveRows" t-as="row" t-key="row.id">
+                            <td><strong t-esc="row.type"/><div t-if="row.staff" class="table-sub" t-esc="row.staff"/></td>
                             <td>
                               <t t-esc="date(row.from)"/> – <t t-esc="date(row.to)"/>
                             </td>
@@ -997,9 +989,13 @@
                             <td>
                               <span class="pill" t-att-class="tone(row.status)" t-esc="row.status"/>
                             </td>
-                            <td><button class="link-btn" t-on-click="() =&gt; this.edit('leave',row)">View</button></td>
+                            <td>
+                              <button class="link-btn" t-on-click="() =&gt; this.edit('leave',row)">View</button>
+                              <button t-if="row.can_review" class="link-btn" t-att-disabled="state.busy" t-on-click="() =&gt; this.reviewLeave(row.id,'approve')">Approve</button>
+                              <button t-if="row.can_review" class="link-btn" t-att-disabled="state.busy" t-on-click="() =&gt; this.reviewLeave(row.id,'refuse')">Refuse</button>
+                            </td>
                           </tr>
-                          <tr t-if="!d.leave.history.length">
+                          <tr t-if="!leaveRows.length">
                             <td colspan="6" class="leave-empty">No leave requests recorded</td>
                           </tr>
                         </tbody>
@@ -1008,7 +1004,7 @@
                   </section>
                   <section class="panel">
                     <div class="panel-head">
-                      <h2 class="panel-title">▦ Payroll Attendance Entry</h2>
+                      <h2 class="panel-title" t-esc="departmentLeave ? '▦ Department attendance exceptions' : '▦ Payroll Attendance Entry'"/>
                     </div>
                     <div class="table-wrap">
                       <table>
@@ -1021,13 +1017,13 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <tr t-foreach="d.leave.attendance" t-as="row" t-key="row.date">
-                            <td t-esc="date(row.date)"/>
+                          <tr t-foreach="leaveExceptions" t-as="row" t-key="row_index">
+                            <td><t t-esc="date(row.date)"/><div t-if="row.staff" class="table-sub" t-esc="row.staff"/></td>
                             <td t-esc="row.day"/>
-                            <td t-esc="row.fn"/>
-                            <td t-esc="row.an"/>
+                            <td t-esc="row.staff ? 'Late punch' : row.fn"/>
+                            <td t-esc="row.staff ? '—' : row.an"/>
                           </tr>
-                          <tr t-if="!d.leave.attendance.length">
+                          <tr t-if="!leaveExceptions.length">
                             <td colspan="4" class="leave-empty">No attendance entries recorded</td>
                           </tr>
                         </tbody>
@@ -1036,13 +1032,13 @@
                   </section>
                   <section class="panel">
                     <div class="panel-head">
-                      <h2 class="panel-title">✧ AI Insights for Leave Management</h2>
-                      <button class="link-btn" t-on-click="() =&gt; notification.add('These insights summarise your saved leave records and configured leave policy.',{type:'info'})">View AI Insights ➜</button>
+                      <h2 class="panel-title" t-esc="d.hod ? '✧ HOD leave management insights' : '✧ AI Insights for Leave Management'"/>
+                      <button class="link-btn" t-on-click="showLeaveInsights">View AI Insights ➜</button>
                     </div>
                     <div class="leave-insights">
-                      <div>↗ Approval Trend<strong t-esc="d.leave.approval_percent === null ? '—' : d.leave.approval_percent+'%'"/>
+                      <div>↗ Approval Trend<strong t-esc="leaveTrend"/>
                       </div>
-                      <div>◕ Most Common Leave<strong t-esc="d.leave.most_common_leave"/>
+                      <div>◕ Most Common Leave<strong t-esc="departmentLeave?.most_common || d.leave.most_common_leave"/>
                       </div>
                       <div>⚠ Leave Balance<strong t-esc="d.leave.balance === null ? '—' : d.leave.balance"/>
                       </div>
@@ -1055,19 +1051,44 @@
             </t>
           </section>
           <div class="footer">
-            <t t-esc="d.company"/> · Faculty workspace · <t t-esc="d.demo ? 'Sample records' : 'Saved staff records'"/>
+            <t t-esc="d.hod ? 'VCET Campus ERP · HOD workspace' : d.company + ' · Faculty workspace'"/> · <t t-esc="d.demo ? 'Sample records' : 'Saved staff records'"/>
           </div>
         </t>
       </div>
     </main>
+  </t>
+  <t t-name="ideastone_erp.StaffPayrollFilters">
+    <div class="field">
+      <label for="historyReport">Report options</label>
+      <select id="historyReport" t-model="state.report">
+        <option>Complete History</option>
+        <option>Salary only</option>
+        <option>Deductions only</option>
+        <option>Contributions only</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="historyYear">Year</label>
+      <select id="historyYear" t-model="state.year">
+        <option value="">All</option>
+        <option t-foreach="years" t-as="year" t-key="year" t-att-value="year" t-esc="year"/>
+      </select>
+    </div>
+    <div class="field">
+      <label for="historyMonth">Month</label>
+      <select id="historyMonth" t-model="state.month">
+        <option value="">All</option>
+        <option t-foreach="months" t-as="month" t-key="month" t-att-value="month_index+1" t-esc="month"/>
+      </select>
+    </div>
   </t>
   <t t-name="ideastone_erp.StaffGuidance">
     <aside class="ai-card" t-if="page === 'myprofile'">
       <div class="ai-head">
         <div class="ai-mark">✧</div>
         <div>
-          <div class="ai-title">AI profile assistant</div>
-          <div class="ai-label">Personalised checklist</div>
+          <div class="ai-title" t-esc="d.hod ? 'Profile checklist' : 'AI profile assistant'"/>
+          <div class="ai-label" t-esc="d.hod ? 'Personal account review' : 'Personalised checklist'"/>
         </div>
       </div>
       <p t-esc="p.missing ? p.missing+' profile details need attention. These checks can reduce delays during appraisal, payroll processing and compliance review.' : 'Your profile is complete. Review these details regularly to keep your staff record current.'"/>
@@ -1177,7 +1198,13 @@
     <Dialog title="title" size="'lg'" contentClass="'campus_faculty_profile_workspace'">
       <div class="content">
         <div t-if="state.error" class="error" role="alert" t-esc="state.error"/>
-        <t t-if="props.kind === 'leave'">
+        <div t-if="props.details" class="detail-grid">
+          <div t-foreach="props.details" t-as="detail" t-key="detail_index">
+            <div class="detail-label" t-esc="detail[0]"/>
+            <div class="detail-value" t-esc="detail[1] ?? 'Not recorded'"/>
+          </div>
+        </div>
+        <t t-elif="props.kind === 'leave'">
           <div class="detail-grid">
             <div t-foreach="[['Leave type',props.record.type],['From date',props.record.from],['To date',props.record.to],['Days',props.record.days],['Reason',props.record.reason],['Status',props.record.status]]" t-as="detail" t-key="detail[0]">
               <div class="detail-label" t-esc="detail[0]"/>

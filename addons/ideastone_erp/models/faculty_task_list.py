@@ -12,6 +12,7 @@ class TaskListNavigation(models.AbstractModel):
 
     def _faculty_modules(self, visible, faculty, pages):
         is_hod = self.env.user.has_group("ideastone_erp.group_od_hod_approver")
+        hod_task_list = self.env["campus.faculty.task.list"]._is_task_list_hod()
         if not is_hod:
             visible[:] = [item for item in visible if item.get("action") != "ideastone_erp.action_subject_attendance_workspace"]
         modules = super()._faculty_modules(visible, faculty, pages)
@@ -19,12 +20,24 @@ class TaskListNavigation(models.AbstractModel):
             modules = [module for module in modules if module["key"] != "attendance"]
         teaching = next((module for module in modules if module["key"] == "teaching"), None)
         if teaching:
-            entries = [("My Teaching Subjects", "action_my_teaching_subjects")]
-            if not is_hod:
-                entries.insert(0, ("My Mentorship Class", "action_my_mentorship_class"))
+            entries = [
+                ("My Teaching Subjects", "action_my_teaching_subjects"),
+                ("Timetable", "action_faculty_sop_timetable"),
+                ("My Tasks & e-Diary", "action_faculty_sop_tasks"),
+                ("Examinations & Marks", "action_faculty_sop_exams"),
+                ("Assignments", "action_faculty_sop_assignments"),
+                ("Alternate Hour", "action_faculty_sop_alternate"),
+                ("Lesson Plans", "action_faculty_sop_lessons"),
+                ("Circulars & Announcements", "action_faculty_sop_circulars"),
+            ]
+            if not hod_task_list:
+                entries[2:2] = [
+                    ("Student Attendance", "action_faculty_sop_attendance"),
+                    ("My Mentorship Class", "action_my_mentorship_class"),
+                ]
             teaching["items"] = [{"label": title, "action": "ideastone_erp." + name,
                 "action_id": self.env.ref("ideastone_erp." + name).id, "allowed": True}
-                for title, name in entries] + [item for item in teaching["items"] if item.get("tool") != "subject_attendance"]
+                for title, name in entries]
         return modules
 
 
@@ -35,11 +48,22 @@ class FacultyTaskList(models.AbstractModel):
     def _faculty(self):
         return self.env["campus.question.paper"]._faculty()
 
+    def _is_task_list_hod(self):
+        return any(self.env.user.has_group("ideastone_erp." + group) for group in (
+            "group_mvp_hod", "group_od_hod_approver", "group_exam_paper_hod",
+        ))
+
+    def _task_list_writer(self, records):
+        # Only use after checking the logged-in faculty's ownership or teaching allocation.
+        if self._is_task_list_hod() and not self.env.user.has_group("ideastone_erp.group_mvp_readonly"):
+            return records.with_context({}, allowed_company_ids=[self.env.company.id], tz=self.env.user.tz).sudo()
+        return records
+
     def _mentor_context(self, class_key=None):
         if class_key and not isinstance(class_key, str):
             raise ValidationError(_("Choose a valid mentorship class."))
         faculty = self._faculty()
-        if self.env.user.has_group("ideastone_erp.group_od_hod_approver"):
+        if self._is_task_list_hod():
             raise AccessError(_("HOD accounts use My Teaching Subjects; mentorship monitoring is a staff workspace."))
         mentor = self.env["campus.staff.od.ui"]
         routes = mentor._assigned_routes()
@@ -75,6 +99,7 @@ class FacultyTaskList(models.AbstractModel):
             result.append({"id": sheet.id, "date": str(sheet.attendance_date),
                 "subject": sheet.campus_subject_id.name or sheet.campus_manual_subject_id.name,
                 "class": sheet.batch_id.name, "hour": fields.Datetime.context_timestamp(self, session.start_datetime).strftime("%H:%M") if session else "—",
+                "period": session.timing_id.sequence,
                 "present": len(scoped.filtered(lambda r: r.present or r.late)),
                 "absent": len(scoped.filtered("absent")), "status": "Submitted"})
         return result
@@ -86,7 +111,8 @@ class FacultyTaskList(models.AbstractModel):
             "classes": [{"key": item["key"], "label": item["label"], "semester": item["semester"]} for item in classes.values()],
             "class_key": selected["key"] if selected else "", "class_label": selected["label"] if selected else _("No mentorship class assigned"),
             "semester": selected["semester"] if selected else "", "threshold": self.env.company.campus_attendance_threshold,
-            "students": [], "subjects": [], "history": [], "followups": []}
+            "today": str(fields.Date.context_today(self)), "demo": self.env.company.campus_demo,
+            "students": [], "subjects": [], "history": [], "followups": [], "open_followups": 0}
         if not selected:
             return result
         batch_id, term_id = (int(value) for value in selected["key"].split(":"))
@@ -95,41 +121,78 @@ class FacultyTaskList(models.AbstractModel):
         lines = self._lines([("student_id", "in", list(selected["student_ids"])), ("batch_id", "=", batch_id),
             ("attendance_date", ">=", term.term_start_date), ("attendance_date", "<=", term.term_end_date)], sudo=True) if term else self.env["op.attendance.line"]
         students = self.env["op.student"].sudo().browse(list(selected["student_ids"])).filtered("active")
-        followups = self.env["campus.counseling"].search([("mentor_id", "=", faculty.id),
-            ("student_id", "in", students.ids), ("company_id", "=", self.env.company.id)], order="date desc, id desc", limit=100)
-        result["students"] = [{"id": student.id, "name": student.name, "roll": student.gr_no or "—",
-            "followup": student in followups.filtered(lambda r: r.follow_up_date and r.follow_up_date >= fields.Date.context_today(self)).student_id,
-            **self._summary(lines.filtered(lambda row, student=student: row.student_id == student))}
-            for student in students.sorted("name")]
+        counseling = self.env["campus.counseling"]
+        domain = [("mentor_id", "=", faculty.id), ("student_id", "in", students.ids),
+                  ("company_id", "=", self.env.company.id), ("follow_up_date", "!=", False)]
+        followups = counseling.search(domain, order="date desc, id desc", limit=100)
+        result["open_followups"] = counseling.search_count(domain + [("follow_up_completed", "=", False)])
+        for student in students.sorted("name"):
+            attendance = lines.filtered(lambda row, student=student: row.student_id == student)
+            result["students"].append({"id": student.id, "name": student.name, "roll": student.gr_no or "—",
+                "excused": len(attendance.filtered("excused")), **self._summary(attendance)})
         result["subjects"] = [{"id": subject.id, "name": subject.name,
             **self._summary(lines.filtered(lambda r, subject=subject: r.attendance_id.campus_subject_id == subject))}
             for subject in lines.attendance_id.campus_subject_id.sorted("name")]
         result["history"] = self._history(lines)
         result["followups"] = [{"id": row.id, "student_id": row.student_id.id, "student": row.student_id.name,
-            "note": row.discussion, "date": str(row.date), "due": str(row.follow_up_date) if row.follow_up_date else ""} for row in followups]
+            "note": row.discussion, "due": str(row.follow_up_date), "completed": row.follow_up_completed} for row in followups]
         return result
 
     @api.model
-    def save_followup(self, student_id, note, class_key=None):
+    def save_followup(self, student_id, note, class_key=None, follow_up_date=None):
         faculty, _classes, selected = self._mentor_context(class_key)
         if type(student_id) is not int or not selected or student_id not in selected["student_ids"]:
             raise AccessError(_("Choose a student from your assigned mentorship class."))
         if not isinstance(note, str) or not 1 <= len(note.strip()) <= 2000:
             raise ValidationError(_("Enter a follow-up note of 1–2,000 characters."))
+        today = fields.Date.context_today(self)
+        due = self._sop_date(follow_up_date) if follow_up_date is not None else today + timedelta(days=7)
         self.env["campus.counseling"].create({"name": _("Attendance follow-up"), "student_id": student_id,
             "mentor_id": faculty.id, "company_id": self.env.company.id, "discussion": note.strip(),
-            "follow_up_date": fields.Date.context_today(self) + timedelta(days=7)})
+            "date": today, "follow_up_date": due})
+        return True
+
+    @api.model
+    def resolve_followup(self, followup_id, class_key=None):
+        faculty, _classes, selected = self._mentor_context(class_key)
+        if type(followup_id) is not int or not selected:
+            raise AccessError(_("Choose a follow-up from your assigned mentorship class."))
+        followup = self.env["campus.counseling"].search([
+            ("id", "=", followup_id), ("mentor_id", "=", faculty.id),
+            ("student_id", "in", list(selected["student_ids"])),
+            ("company_id", "=", self.env.company.id), ("follow_up_date", "!=", False),
+        ], limit=1)
+        if not followup:
+            raise AccessError(_("Choose a follow-up from your assigned mentorship class."))
+        followup.follow_up_completed = True
         return True
 
     @api.model
     def get_teaching_data(self, term_id=None, attendance_date=None, subject_key=None, session_id=None):
         faculty = self._faculty()
+        is_hod = self._is_task_list_hod()
+        if is_hod and not term_id and not subject_key and not session_id:
+            day = fields.Date.to_date(attendance_date) if attendance_date else fields.Date.context_today(self)
+            allocated = self.env["op.session"].search([
+                ("company_id", "=", self.env.company.id), ("faculty_id", "=", faculty.id),
+                ("batch_id.campus_term_id", "!=", False), ("state", "in", ("confirm", "done")),
+            ], order="start_datetime desc, id desc")
+            today = allocated.filtered(lambda row: fields.Datetime.context_timestamp(self, row.start_datetime).date() == day)
+            active = allocated.filtered(lambda row:
+                day and row.batch_id.campus_term_id.term_start_date <= day <= row.batch_id.campus_term_id.term_end_date)
+            default = (today or active or allocated)[:1]
+            if default:
+                term_id = default.batch_id.campus_term_id.id
+                subject_key = f"{default.subject_id.id}:{default.batch_id.id}"
         data = self.env["campus.subject.attendance.ui"].get_dashboard(term_id, faculty.id, attendance_date, subject_key, session_id)
         sessions = self.env["op.session"].search([("company_id", "=", self.env.company.id),
             ("faculty_id", "=", faculty.id), ("batch_id.campus_term_id", "=", data["term_id"]), ("state", "!=", "cancel")])
         lines = self._lines([("attendance_id.session_id", "in", sessions.ids)])
-        data.update(user=self.env.user.name, is_hod=self.env.user.has_group("ideastone_erp.group_od_hod_approver"),
+        data.update(user=self.env.user.name, is_hod=is_hod,
             history=self._history(lines), threshold=self.env.company.campus_attendance_threshold)
+        if data["is_hod"] and self._task_list_writer(self).env.su:
+            selected = sessions.filtered(lambda row: row.id == data["session_id"])
+            data["can_save"] = bool(selected.state in ("confirm", "done") and data["sheet_state"] not in ("done", "cancel"))
         for row in data["students"]:
             row["performance"] = self._summary(lines.filtered(lambda line, row=row: line.student_id.id == row["id"]))
         return data
@@ -142,9 +205,13 @@ class FacultyTaskList(models.AbstractModel):
         if submit and not notes.strip():
             raise ValidationError(_("Enter the lesson notes before submitting attendance."))
         session = self.env["op.session"].browse(session_id).exists()
-        if not session or session.company_id != self.env.company or session.faculty_id != faculty:
+        if not session or not session.active or session.company_id != self.env.company or session.faculty_id != faculty:
             raise AccessError(_("You may mark only your own assigned teaching sessions."))
         self.env.cr.execute("SELECT id FROM op_session WHERE id=%s FOR UPDATE", [session.id])
+        session.invalidate_recordset()
+        if (session.company_id != self.env.company or session.faculty_id != faculty or not session.active
+                or session.state not in ("confirm", "done")):
+            raise AccessError(_("Choose one of your confirmed teaching sessions."))
         sheet = self.env["op.attendance.sheet"].search([("session_id", "=", session.id), ("state", "!=", "cancel")], limit=1)
         sheet.invalidate_recordset()
         if sheet.state == "done":
@@ -152,8 +219,13 @@ class FacultyTaskList(models.AbstractModel):
         protected = sheet.attendance_line.filtered("excused")
         if any(statuses.get(str(line.student_id.id), statuses.get(line.student_id.id)) != "excused" for line in protected):
             raise ValidationError(_("Keep approved OD / leave entries unchanged."))
-        result = self.env["campus.subject.attendance.ui"].save_attendance(session.id, statuses, notes)
+        attendance = self._task_list_writer(self.env["campus.subject.attendance.ui"])
+        if attendance.env.su and not self.env.su:
+            protected_ids = {str(line.student_id.id) for line in protected}
+            if any(status == "excused" and str(student_id) not in protected_ids for student_id, status in statuses.items()):
+                raise AccessError(_("Only an already approved OD or leave can be marked excused."))
+        result = attendance.save_attendance(session.id, statuses, notes)
         if submit:
-            self.env["op.attendance.sheet"].browse(result["sheet_id"]).attendance_done()
+            attendance.env["op.attendance.sheet"].browse(result["sheet_id"]).attendance_done()
             result["message"] = _("Attendance submitted successfully.")
         return result

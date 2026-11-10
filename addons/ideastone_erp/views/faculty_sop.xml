@@ -1,0 +1,64 @@
+<odoo>
+  <record id="faculty_sop_assignment_file" model="grading.assignment.type">
+    <field name="name">File upload</field><field name="code">SOP-FILE</field>
+  </record>
+  <record id="faculty_sop_assignment_written" model="grading.assignment.type">
+    <field name="name">Written submission</field><field name="code">SOP-WRITTEN</field>
+  </record>
+  <record id="faculty_sop_assignment_practical" model="grading.assignment.type">
+    <field name="name">Practical work</field><field name="code">SOP-PRACTICAL</field>
+  </record>
+  <record id="action_faculty_sop_timetable" model="ir.actions.client">
+    <field name="name">Timetable</field><field name="tag">ideastone_erp.faculty_sop</field>
+    <field name="params" eval="{'page': 'timetable'}"/><field name="context">{'campus_module': 'teaching'}</field>
+  </record>
+  <record id="action_faculty_sop_attendance" model="ir.actions.client">
+    <field name="name">Student Attendance</field><field name="tag">ideastone_erp.faculty_sop</field>
+    <field name="params" eval="{'page': 'attendance'}"/><field name="context">{'campus_module': 'teaching'}</field>
+  </record>
+  <record id="action_faculty_sop_tasks" model="ir.actions.client">
+    <field name="name">My Tasks &amp; e-Diary</field><field name="tag">ideastone_erp.faculty_sop</field>
+    <field name="params" eval="{'page': 'tasks'}"/><field name="context">{'campus_module': 'teaching'}</field>
+  </record>
+  <record id="action_faculty_sop_exams" model="ir.actions.client">
+    <field name="name">Examinations &amp; Marks</field><field name="tag">ideastone_erp.faculty_sop</field>
+    <field name="params" eval="{'page': 'exams'}"/><field name="context">{'campus_module': 'teaching'}</field>
+  </record>
+  <record id="action_faculty_sop_assignments" model="ir.actions.client">
+    <field name="name">Assignments</field><field name="tag">ideastone_erp.faculty_sop</field>
+    <field name="params" eval="{'page': 'assignments'}"/><field name="context">{'campus_module': 'teaching'}</field>
+  </record>
+  <record id="action_faculty_sop_alternate" model="ir.actions.client">
+    <field name="name">Alternate Hour</field><field name="tag">ideastone_erp.faculty_sop</field>
+    <field name="params" eval="{'page': 'alternate'}"/><field name="context">{'campus_module': 'teaching'}</field>
+  </record>
+  <record id="action_faculty_sop_lessons" model="ir.actions.client">
+    <field name="name">Lesson Plans</field><field name="tag">ideastone_erp.faculty_sop</field>
+    <field name="params" eval="{'page': 'lessons'}"/><field name="context">{'campus_module': 'teaching'}</field>
+  </record>
+  <record id="action_faculty_sop_circulars" model="ir.actions.client">
+    <field name="name">Circulars &amp; Announcements</field><field name="tag">ideastone_erp.faculty_sop</field>
+    <field name="params" eval="{'page': 'circulars'}"/><field name="context">{'campus_module': 'teaching'}</field>
+  </record>
+
+  <record id="view_faculty_sop_alternate" model="ir.ui.view">
+    <field name="name">campus.service.request.alternate.sop</field>
+    <field name="model">campus.service.request</field>
+    <field name="inherit_id" ref="view_service_request_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='replacement_id']" position="after">
+        <field name="campus_alternate_session_id" readonly="True" invisible="kind != 'alternate'"/>
+        <field name="campus_substitute_consent" readonly="True" invisible="not campus_alternate_session_id"/>
+      </xpath>
+    </field>
+  </record>
+  <record id="view_faculty_sop_circular_pin" model="ir.ui.view">
+    <field name="name">campus.circular.faculty.pin</field><field name="model">campus.circular</field>
+    <field name="inherit_id" ref="view_circular_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='audience']" position="after">
+        <field name="campus_faculty_pinned" readonly="state in ('approved', 'done')" invisible="audience not in ('all','faculty')"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>
