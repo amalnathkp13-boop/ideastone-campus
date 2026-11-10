@@ -36,7 +36,7 @@ async function markup(page) {
         // Wait for the login POST to finish before navigating elsewhere; navigating early cancels it.
         await Promise.all([page.waitForURL(url=>!url.pathname.startsWith('/web/login')), page.locator('button[type=submit]').click()]);
         await page.goto(base+'/web#action=ideastone_erp.action_dashboard');
-        await page.getByRole('heading',{name:'Admin overview',exact:true}).waitFor();
+        await page.locator('.admin_overview .hero h1').waitFor();
         await page.locator('.campus_owner_stat').first().waitFor();
         const firstMetrics = await rpc(page,'campus.dashboard','get_owner_metrics');
         const studentCard = firstMetrics.stats.find(s=>s.kind==='active_students');
