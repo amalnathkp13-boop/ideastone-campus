@@ -200,6 +200,8 @@ async function markup(page) {
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Fee heads',exact:true}).click();
         await page.getByRole('cell',{name:'Tuition installment',exact:true}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Communication',exact:true}).click();
+        await page.getByRole('heading',{name:'Communication',exact:true,level:1}).waitFor();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Student requests & support',exact:true}).click();
         await page.locator('.owner-communication').getByRole('heading',{name:'Student requests & support',exact:true,level:1}).waitFor();
         await page.locator('.owner-communication .oc-table').waitFor();
         await page.locator('.owner-communication').getByRole('button',{name:'Log request',exact:true}).waitFor();
