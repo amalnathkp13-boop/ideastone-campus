@@ -60,19 +60,15 @@ async function markup(page) {
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-charts-1440.png')});
         if(await page.locator('.admin_overview .kpi').count()!==8) throw Error('Admin overview does not show eight indicators');
-        if(await page.locator('.event-card').count()!==3) throw Error('Admin event cards do not reflect the four saved events');
+        if(await page.locator('.owner-calendar-panel .deadline').count()!==firstMetrics.overview_ui.calendar.rows.length)
+            throw Error('Owner calendar rows do not match saved upcoming events');
         if(await page.locator('.admin_overview .kpi-value').first().evaluate(el=>getComputedStyle(el).color)!=='rgb(19, 42, 68)') throw Error('Saved KPI text does not use the SOP color');
-        if(await page.locator('.event-category').first().evaluate(el=>getComputedStyle(el).color)!=='rgb(17, 124, 135)') throw Error('Saved event category does not use the SOP color');
         for(const width of [320,390,768,1440]) {
             await page.setViewportSize({width,height:1000});
             if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)) throw Error(`Admin overview overflows at ${width}`);
         }
-        await page.locator('.feature-open').click();
-        await page.locator('.o_form_view').waitFor();
-        await page.locator('.campus_sidebar').getByRole('button',{name:'Dashboard',exact:true}).click();
-        await page.locator('.admin_overview .kpi').first().waitFor();
-        await page.getByRole('button',{name:'Event calendar',exact:true}).click();
-        await page.locator('.o_calendar_view').waitFor();
+        await page.locator('.owner-calendar-panel').getByRole('button',{name:'View events ↗',exact:true}).click();
+        await page.locator('.campus_college_calendar').waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Dashboard',exact:true}).click();
         await page.locator('.admin_overview .kpi').first().waitFor();
         if(await page.locator('.campus_dashboard').innerText().then(text=>/Â·|â€”|â†/.test(text))) throw Error('Owner template contains incorrectly decoded UTF-8 punctuation');
