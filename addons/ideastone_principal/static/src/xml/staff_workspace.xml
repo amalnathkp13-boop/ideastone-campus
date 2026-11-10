@@ -3,7 +3,7 @@
     <xpath expr="//main" position="attributes"><attribute name="class">campus_principal_staff</attribute></xpath>
     <xpath expr="//div[hasclass('crumbrow')]/span[2]" position="replace"><span><t t-esc="state.data?.today"/> · <strong>Principal</strong></span></xpath>
     <xpath expr="//header[hasclass('sectionhead')]/button" position="replace"><span class="countpill" t-esc="state.data.demo ? 'Sample directory data' : 'Saved directory data'"/></xpath>
-    <xpath expr="//div[hasclass('hero-stat')]/span" position="replace"><span t-esc="state.data.demo ? 'sample staff records' : 'staff records'"/></xpath>
+
     <xpath expr="//section[hasclass('kpis')]/article[1]//span[hasclass('kpi-icon')]" position="replace"><span class="kpi-icon">♟</span></xpath>
     <xpath expr="//section[hasclass('kpis')]/article[2]//span[hasclass('kpi-icon')]" position="replace"><span class="kpi-icon">▤</span></xpath>
     <xpath expr="//section[hasclass('kpis')]/article[3]//span[hasclass('kpi-icon')]" position="replace"><span class="kpi-icon">▣</span></xpath>

@@ -1,0 +1,89 @@
+<odoo>
+  <record id="view_placement_drive_student_listing" model="ir.ui.view">
+    <field name="name">campus.placement.drive.student.listing</field>
+    <field name="model">campus.placement.drive</field>
+    <field name="inherit_id" ref="view_placement_drive_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='candidate_ids']" position="before">
+        <separator string="Student placement listing"/>
+        <field name="portal_published" readonly="state in ('approved', 'done')"/>
+        <field name="application_deadline" required="portal_published" readonly="state in ('approved', 'done')"/>
+        <field name="sector" readonly="state in ('approved', 'done')"/>
+        <field name="expected_ctc_lpa" readonly="state in ('approved', 'done')"/>
+        <field name="batch_ids" widget="many2many_tags" readonly="state in ('approved', 'done')"/>
+        <field name="recruitment_process" readonly="state in ('approved', 'done')"/>
+      </xpath>
+    </field>
+  </record>
+  <record id="view_placement_candidate_student_updates" model="ir.ui.view">
+    <field name="name">campus.placement.candidate.student.updates</field>
+    <field name="model">campus.placement.candidate</field>
+    <field name="inherit_id" ref="view_placement_candidate_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='interview_notes']" position="before">
+        <field name="profile_id" readonly="1"/>
+        <field name="portal_enrolment_id" readonly="1"/>
+        <field name="portal_applied_on" readonly="1"/>
+      </xpath>
+      <xpath expr="//sheet" position="inside">
+        <separator string="Interview journey shared with the student"/>
+        <field name="milestone_ids">
+          <tree editable="bottom">
+            <field name="name"/><field name="status"/><field name="event_at"/><field name="detail"/>
+          </tree>
+        </field>
+      </xpath>
+    </field>
+  </record>
+  <record id="view_placement_profile_tree" model="ir.ui.view">
+    <field name="name">campus.placement.profile.tree</field>
+    <field name="model">campus.placement.profile</field>
+    <field name="arch" type="xml">
+      <tree><field name="student_id"/><field name="company_id" groups="base.group_multi_company"/><field name="consent"/><field name="resume_filename"/><field name="resume_verified"/></tree>
+    </field>
+  </record>
+  <record id="view_placement_profile_form" model="ir.ui.view">
+    <field name="name">campus.placement.profile.form</field>
+    <field name="model">campus.placement.profile</field>
+    <field name="arch" type="xml">
+      <form><sheet>
+        <group>
+          <group string="Placement profile">
+            <field name="student_id" readonly="id"/><field name="company_id" groups="base.group_multi_company"/>
+            <field name="consent"/><field name="skills"/><field name="preferred_roles"/><field name="preferred_locations"/><field name="experience"/>
+          </group>
+          <group string="Resume and practice assessments">
+            <field name="resume" filename="resume_filename" readonly="1"/><field name="resume_filename" invisible="1"/>
+            <field name="resume_uploaded"/><field name="resume_verified"/>
+            <field name="readiness_recorded"/><field name="quantitative"/><field name="reasoning"/><field name="verbal"/>
+          </group>
+        </group>
+      </sheet></form>
+    </field>
+  </record>
+  <record id="action_placement_profile" model="ir.actions.act_window">
+    <field name="name">Placement profiles</field><field name="res_model">campus.placement.profile</field><field name="view_mode">tree,form</field>
+  </record>
+  <record id="view_placement_resource_tree" model="ir.ui.view">
+    <field name="name">campus.placement.resource.tree</field>
+    <field name="model">campus.placement.resource</field>
+    <field name="arch" type="xml">
+      <tree><field name="sequence" widget="handle"/><field name="name"/><field name="description"/><field name="published"/><field name="company_id" groups="base.group_multi_company"/></tree>
+    </field>
+  </record>
+  <record id="view_placement_resource_form" model="ir.ui.view">
+    <field name="name">campus.placement.resource.form</field>
+    <field name="model">campus.placement.resource</field>
+    <field name="arch" type="xml">
+      <form><sheet><group>
+        <field name="name"/><field name="description"/><field name="icon"/><field name="company_id"/>
+        <field name="published"/><field name="document" filename="filename"/><field name="filename" invisible="1"/>
+      </group></sheet></form>
+    </field>
+  </record>
+  <record id="action_placement_resource" model="ir.actions.act_window">
+    <field name="name">Placement study materials</field><field name="res_model">campus.placement.resource</field><field name="view_mode">tree,form</field>
+  </record>
+  <menuitem id="menu_placement_profiles" name="Placement profiles" parent="menu_category_3" action="action_placement_profile" groups="group_outreach"/>
+  <menuitem id="menu_placement_study_materials" name="Placement study materials" parent="menu_category_3" action="action_placement_resource" groups="group_outreach"/>
+</odoo>

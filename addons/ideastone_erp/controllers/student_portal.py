@@ -3,9 +3,9 @@ from datetime import timedelta
 from urllib.parse import urlencode
 
 from markupsafe import Markup
+from odoo.addons.ideastone_campus.currency_display import format_amount
 from odoo.exceptions import AccessError, UserError
 from odoo.http import content_disposition, request
-from odoo.tools.misc import format_amount
 
 from odoo import fields, http
 
@@ -35,7 +35,7 @@ class StudentWorkspace(CampusPortal):
             monday = today - timedelta(days=today.weekday())
             kw["date_from"] = str(monday)
             kw["date_to"] = str(monday + timedelta(days=6))
-        data, error = None, ""
+        data, error, placements = None, "", None
         status = 200
         try:
             data = service.snapshot(kw.get("enrolment"), kw.get("date_from"), kw.get("date_to"))
@@ -43,9 +43,13 @@ class StudentWorkspace(CampusPortal):
                 return request.not_found()
             if section == "complaints":
                 data["complaints"] = request.env["campus.complaints.ui"].get_page_data()
+            if section == "placements":
+                placements = service._placement_overview(kw.get("enrolment"))
         except AccessError as exc:
+            data = None
             error, status = str(exc), 403 if request.httprequest.path != "/my/campus" else 200
         except UserError as exc:
+            data = None
             error, status = str(exc), 400
         filters = data["filters"] if data else {}
         suffix = "?" + urlencode(filters) if filters else ""
@@ -57,6 +61,7 @@ class StudentWorkspace(CampusPortal):
             return "/my/campus/student/" + page + suffix
         response = request.render("ideastone_erp.student_workspace", {
             "portal_data": data, "portal_error": error, "section": section,
+            "placement_data": placements,
             "saved": bool(kw.get("saved")), "form_error": str(kw.get("form_error") or "")[:500],
             "student_url_for": student_url_for,
             "money": lambda amount: format_amount(request.env, amount, company.currency_id),
@@ -66,7 +71,10 @@ class StudentWorkspace(CampusPortal):
 
     @http.route("/my/campus/student/action", type="http", auth="user", website=True, methods=["POST"], csrf=True)
     def student_action(self, operation="", return_to="dashboard", **kw):
-        allowed = {"dashboard", "profile", "academics", "timetable", "attendance", "exams", "fees", "notices", "requests", "complaints", "on-duty", "library", "help", "account"}
+        placement_operation = operation in ("placement_apply", "placement_profile", "placement_consent")
+        allowed = {"dashboard", "profile", "academics", "timetable", "attendance", "exams", "fees", "notices", "requests", "complaints", "on-duty", "library", "help", "account", "placements"}
+        if placement_operation:
+            return_to = "placements"
         return_to = return_to if return_to in allowed else "dashboard"
         service = request.env["campus.student.portal"]
         try:
@@ -93,6 +101,8 @@ class StudentWorkspace(CampusPortal):
                 request.env["campus.complaints.ui"].submit(payload)
             elif operation == "complaint_act":
                 request.env["campus.complaints.ui"].act(payload.get("case_id"), payload.get("case_action"), payload)
+            elif placement_operation:
+                service.with_company(student.company_id)._save_placement(operation, payload, kw.get("enrolment"))
             else:
                 service.with_company(student.company_id).act(operation, payload)
             query = {"saved": "1"}

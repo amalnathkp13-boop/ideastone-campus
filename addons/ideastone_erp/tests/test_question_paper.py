@@ -353,15 +353,56 @@ class TestQuestionPapers(TransactionCase):
         with self.assertRaises(ValidationError):
             self.api.save_submission(self.values, [], submit=True, levels=['moderate'])
 
-    def test_hod_and_faculty_navigation_use_separate_actions(self):
+    def test_hod_and_faculty_navigation_use_role_aware_exams_action(self):
         self.env['op.faculty'].create({'first_name': 'Question paper', 'last_name': 'HOD QA', 'gender': 'male', 'birth_date': '1980-01-01',
             'partner_id': self.env['res.partner'].create({'name': 'HOD QA', 'user_id': self.hod.id, 'company_id': self.env.company.id}).id,
             'main_department_id': self.dept.id})
-        for account, expected in [(self.teacher,'ideastone_erp.action_faculty_question_papers'), (self.hod,'ideastone_erp.action_hod_question_papers')]:
+        for account, label, expected in [
+            (self.teacher, "Examinations & Marks", "ideastone_erp.action_faculty_sop_exams"),
+            (self.hod, "Examinations & Marks", "ideastone_erp.action_faculty_sop_exams"),
+        ]:
             data=self.env['campus.dashboard'].with_user(account).get_overview()
             teaching=next(m for m in data['faculty_modules'] if m['key']=='teaching')
-            action=next(i for i in teaching['items'] if i['label']=='Examinations')
+            action=next(i for i in teaching['items'] if i['label']==label)
             self.assertEqual(action['action'], expected)
+
+    def test_hod_can_send_only_the_official_set_for_an_assigned_subject(self):
+        staff_id = self.submit()
+        hod = self.api.with_user(self.hod)
+        faculty = self.env['op.faculty'].create({
+            'first_name': 'Paper', 'last_name': 'HOD', 'gender': 'male', 'birth_date': '1980-01-01',
+            'partner_id': self.hod.partner_id.id, 'user_id': self.hod.id,
+            'main_department_id': self.dept.id, 'company_id': self.env.company.id,
+        })
+        with self.assertRaises(AccessError):
+            self.api.save_submission(self.values, [self.file], submit=True, official_level='balanced')
+        with self.assertRaises(AccessError):
+            hod.save_submission(self.values, [self.file], submit=True, official_level='balanced')
+        faculty.faculty_subject_ids = self.subject
+        self.assertEqual([row['id'] for row in hod.get_workspace('hod_author')['subjects']], self.subject.ids)
+        with self.assertRaises(ValidationError):
+            hod.save_submission(self.values, [self.file], submit=True)
+        with self.assertRaises(ValidationError):
+            hod.save_submission(self.values, [self.file], submit=True, official_level='moderate')
+        alternate = dict(self.file, level='advanced', filename='official.pdf')
+        draft_id = hod.save_submission(self.values, [self.file, alternate])
+        paper_id = hod.save_submission(self.values, record_id=draft_id, submit=True,
+                                       levels=['balanced', 'advanced'], official_level='advanced')
+        self.assertEqual(paper_id, draft_id)
+        self.assertEqual([row['id'] for row in hod.get_workspace('hod')['rows']], [staff_id])
+        row = hod.get_workspace('hod_author')['rows'][0]
+        self.assertEqual(row['state'], 'forwarded')
+        self.assertNotIn('Submitted to HOD', [event['action'] for event in row['history']])
+        self.assertTrue(self.api.sudo().browse(paper_id).approved_at)
+        self.assertTrue(self.api.sudo().browse(paper_id).forwarded_at)
+        coe = self.api.with_user(self.coe)
+        receipt = coe.get_workspace('coe')['rows'][0]
+        self.assertEqual(receipt['id'], paper_id)
+        self.assertEqual([item['level'] for item in receipt['sets']], ['advanced'])
+        self.assertEqual(coe.download_set(receipt['selected_set_id'])['filename'], 'official.pdf')
+        other_set = next(item for item in row['sets'] if item['level'] == 'balanced')
+        with self.assertRaises(AccessError):
+            coe.download_set(other_set['id'])
 
     def test_revoked_hod_and_past_exam_submission_are_rejected(self):
         record_id=self.submit()

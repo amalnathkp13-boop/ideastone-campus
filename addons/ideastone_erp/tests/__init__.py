@@ -28,3 +28,4 @@ from . import test_accountant_ui
 from . import test_accountant_transport
 from . import test_accountant_circulars
 from . import test_complaints
+from . import test_currency_display

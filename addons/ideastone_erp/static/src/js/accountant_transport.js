@@ -37,7 +37,7 @@ export class AccountantTransport extends Component {
         const value = Number(amount) || 0, abs = Math.abs(value), indian = this.data.currency === "₹";
         const divisor = compact ? (indian ? (abs >= 1e7 ? 1e7 : abs >= 1e5 ? 1e5 : 1) : (abs >= 1e6 ? 1e6 : abs >= 1e3 ? 1e3 : 1)) : 1;
         const suffix = divisor === 1 ? "" : indian ? (divisor === 1e7 ? "Cr" : "L") : divisor === 1e6 ? "M" : "K";
-        return (value < 0 ? "-" : "") + (this.data.currency || "") + new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(abs / divisor) + suffix;
+        return (value < 0 ? "-" : "") + "₹" + new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(abs / divisor) + suffix;
     }
     number(value) { return new Intl.NumberFormat("en-IN", {maximumFractionDigits: 0}).format(value || 0); }
     date(value) { return new Intl.DateTimeFormat("en-GB", {day: "2-digit", month: "short", year: "numeric"}).format(new Date(value + "T12:00:00Z")); }

@@ -21,6 +21,7 @@ export class StaffODManagement extends Component {
         this.orm = useService("orm");
         this.notification = useService("notification");
         this.dialog = useService("dialog");
+        this.action = useService("action");
         this.state = useState({
             loading: true, saving: false, error: "", data: null, classKey: "",
             search: "", page: 1, period: "week", note: "", selectedId: null,
@@ -28,6 +29,11 @@ export class StaffODManagement extends Component {
             pendingAll: false,
         });
         onWillStart(() => this.load());
+    }
+
+    openStaffOD() {
+        return this.action.doAction("ideastone_erp.action_faculty_leave_page",
+            {props: {staffOnDuty: true}});
     }
 
     async load() {

@@ -50,6 +50,20 @@ class TestNavigationPreferences(TransactionCase):
             self.assertEqual(saved["revision"], 1)
             self.assertEqual(saved["items"][0]["label"], f"{scope} Home")
 
+    def test_top_navigation_is_independent_of_sidebar_and_other_modules(self):
+        self.users.campus_save_navigation("student", self.rows, 0)
+        renamed = [{**self.rows[0], "label": "My attendance"}]
+        self.users.campus_save_navigation("student", renamed, 0, "attendance")
+        self.assertEqual(self.users.campus_get_navigation("student")["items"][0]["label"], "My home")
+        self.assertEqual(self.users.campus_get_navigation("student", "attendance")["items"][0]["label"], "My attendance")
+        self.assertFalse(self.users.campus_get_navigation("student", "academics")["items"])
+        self.assertFalse(self.users.campus_get_navigation("parent", "attendance")["items"])
+        self.assertFalse(self.users.with_user(self.second).campus_get_navigation("student", "attendance")["items"])
+        with self.assertRaises(UserError):
+            self.users.campus_save_navigation("student", self.rows, 0, "attendance")
+        with self.assertRaises(ValidationError):
+            self.users.campus_get_navigation("student", "attendance:top:academics")
+
     def test_conflicting_saves_preserve_other_workspaces(self):
         self.users.campus_save_navigation("student", self.rows, 0)
         self.users.campus_save_navigation("parent", self.rows, 0)
