@@ -11,7 +11,8 @@ CATEGORIES = [("fee", "Transport fee"), ("fuel", "Diesel / Fuel"), ("maintenance
 class TransportFleet(models.Model):
     _inherit = "campus.transport.route"
 
-    fleet_status = fields.Selection([("operational", "Operational"), ("maintenance", "Maintenance"),
+    fleet_status = fields.Selection([("operational", "Operational"), ("delayed", "Delayed"),
+                                    ("breakdown", "Breakdown"), ("maintenance", "Maintenance"),
                                     ("reserve", "Inactive / reserve")], required=True, default="operational")
     staff_riders = fields.Integer(default=0)
     service_due = fields.Date()

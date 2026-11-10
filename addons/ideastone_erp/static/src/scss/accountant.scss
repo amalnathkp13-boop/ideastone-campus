@@ -1,5 +1,4 @@
 body.campus_faculty_workspace:has(.campus_accountant_page) {
-    > .o_navbar, > .o_main_navbar { display: none !important; }
     .campus_dashboard.campus_accountant_page { padding: 0; }
 }
 .campus_dashboard.campus_accountant_page {

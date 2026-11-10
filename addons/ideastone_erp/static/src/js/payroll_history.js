@@ -16,7 +16,7 @@ export class PayrollHistoryPage extends Component {
         this.user = useService("user");
         this.state = useState({loading: true, error: "", records: [], mode: "history", year: "all", month: "all",
             isAdmin: false, staff: [], employeeId: "", employeeName: "", entries: [], entryError: "",
-            currencySymbol: "₹", currencyCode: "INR", currencyPosition: "before"});
+            currencySymbol: "₹", currencyCode: "₹", currencyPosition: "before"});
         this.months = MONTHS;
         onWillStart(() => this.load());
     }
@@ -31,8 +31,8 @@ export class PayrollHistoryPage extends Component {
             this.state.staff = data.staff;
             this.state.employeeId = String(data.employee_id || "");
             this.state.employeeName = data.employee_name;
-            this.state.currencySymbol = data.currency_symbol;
-            this.state.currencyCode = data.currency_code;
+            this.state.currencySymbol = "₹";
+            this.state.currencyCode = "₹";
             this.state.currencyPosition = data.currency_position;
             await this.loadEntries();
         } catch (error) {

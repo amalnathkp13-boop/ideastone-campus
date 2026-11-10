@@ -22,16 +22,19 @@ class TestFacultyTaskList(OwnerMVPFixture, TransactionCase):
         attendance_action = self.env["campus.faculty.home"].with_user(self.teacher).get_action("attendance")
         self.assertEqual(attendance_action["tag"], "ideastone_erp.my_teaching_subjects")
         self.assertEqual(attendance_action["context"]["campus_module"], "teaching")
-        for user, expected in [(self.teacher, ["My Mentorship Class", "My Teaching Subjects"]),
-                               (self.hod, ["My Teaching Subjects"])]:
+        faculty_tabs = ["My Teaching Subjects", "Timetable", "Student Attendance", "My Mentorship Class",
+                        "My Tasks & e-Diary", "Examinations & Marks", "Assignments", "Alternate Hour",
+                        "Lesson Plans", "Circulars & Announcements"]
+        for user in (self.teacher, self.hod):
             data = self.env["campus.dashboard"].with_user(user).get_overview()
             task = next(module for module in data["faculty_modules"] if module["key"] == "teaching")
-            self.assertEqual([row["label"] for row in task["items"][:len(expected)]], expected)
+            labels = [row["label"] for row in task["items"]]
             if user == self.hod:
-                self.assertNotIn("My Mentorship Class", [row["label"] for row in task["items"]])
+                self.assertEqual(labels, faculty_tabs[:2] + faculty_tabs[4:])
                 attendance = next(module for module in data["faculty_modules"] if module["key"] == "attendance")
                 self.assertIn("ideastone_erp.action_green_card_hod", [row.get("action") for row in attendance["items"]])
             else:
+                self.assertEqual(labels, faculty_tabs)
                 attendance = next(module for module in data["faculty_modules"] if module["key"] == "attendance")
                 self.assertEqual([row["action"] for row in attendance["items"]], ["ideastone_erp.action_green_card_mentor"])
                 self.assertFalse(any(item.get("action") == "ideastone_erp.action_subject_attendance_workspace" for item in data["navigation"]))
@@ -39,6 +42,25 @@ class TestFacultyTaskList(OwnerMVPFixture, TransactionCase):
             self.env["campus.faculty.task.list"].with_user(self.hod).get_mentor_data()
         with self.assertRaises(AccessError):
             self.env["campus.faculty.task.list"].with_user(self.outsider).get_teaching_data()
+
+    def test_daily_register_cannot_be_overwritten_or_accessed_outside_mentorship(self):
+        day = str(self.today)
+        data = self.ui.get_sop_daily(False, day, "FN")
+        self.assertEqual([row["id"] for row in data["rows"]], self.student.ids)
+        key = data["class_key"]
+        with self.assertRaises(AccessError):
+            self.ui.save_sop_daily(key, day, "FN", {"999999": {"status": "present"}})
+        values = {str(self.student.id): {"status": "late", "remark": "Arrived after roll call"}}
+        self.ui.save_sop_daily(key, day, "FN", values, submit=True)
+        saved = self.ui.get_sop_daily(key, day, "FN")
+        self.assertTrue(saved["locked"])
+        self.assertEqual(saved["rows"][0]["status"], "late")
+        with self.assertRaises(ValidationError):
+            self.ui.save_sop_daily(key, day, "FN", values)
+        with self.assertRaises(ValidationError):
+            self.ui.save_sop_daily(key, day, "FULL", values, submit=True)
+        with self.assertRaises(AccessError):
+            self.ui.with_user(self.hod).get_sop_daily(key, day, "FN")
 
     def test_mentor_monitors_only_assigned_students_and_saves_real_followups(self):
         other_student = self.enrolled().student_id
@@ -51,9 +73,22 @@ class TestFacultyTaskList(OwnerMVPFixture, TransactionCase):
         self.assertEqual([row["id"] for row in data["students"]], self.student.ids)
         self.assertEqual((data["students"][0]["present"], data["students"][0]["held"], data["students"][0]["shortage"]), (0, 1, True))
         self.assertEqual((data["history"][0]["present"], data["history"][0]["absent"]), (0, 1))
-        self.ui.save_followup(self.student.id, "Review attendance with the student", data["class_key"])
-        saved = self.ui.get_mentor_data()["followups"]
+        class_key = data["class_key"]
+        self.ui.save_followup(self.student.id, "Review attendance with the student", class_key, str(self.today))
+        data = self.ui.get_mentor_data()
+        saved = data["followups"]
         self.assertEqual((saved[0]["student_id"], saved[0]["note"]), (self.student.id, "Review attendance with the student"))
+        self.assertEqual((saved[0]["due"], saved[0]["completed"], data["open_followups"]), (str(self.today), False, 1))
+        self.ui.resolve_followup(saved[0]["id"], class_key)
+        resolved = self.ui.get_mentor_data()
+        self.assertTrue(resolved["followups"][0]["completed"])
+        self.assertEqual(resolved["open_followups"], 0)
+        foreign = self.env["campus.counseling"].create({
+            "name": "Outside the selected class", "student_id": other_student.id, "mentor_id": self.faculty.id,
+            "discussion": "Private follow-up", "follow_up_date": self.today,
+        })
+        with self.assertRaises(AccessError):
+            self.ui.resolve_followup(foreign.id, class_key)
         self.assertEqual(sheet.state, "done")
         with self.assertRaises(AccessError):
             self.ui.save_followup(other_student.id, "Not assigned")
@@ -63,13 +98,23 @@ class TestFacultyTaskList(OwnerMVPFixture, TransactionCase):
     def test_teaching_uses_own_allocations_and_existing_submission_lock(self):
         own = self.session()
         hod_session = self.session(hour=12, faculty_id=self.hod_faculty.id)
+        sheet = self.sheet(own)
         data = self.ui.get_teaching_data(self.term.id, str(self.today))
         self.assertEqual(data["session_id"], own.id)
         hod_ui = self.env["campus.faculty.task.list"].with_user(self.hod)
-        self.assertEqual(hod_ui.get_teaching_data(self.term.id, str(self.today))["session_id"], hod_session.id)
+        hod_data = hod_ui.get_teaching_data()
+        self.assertEqual(hod_data["session_id"], hod_session.id)
+        self.assertTrue(hod_data["can_save"])
+        with self.assertRaises(AccessError):
+            hod_ui.save_teaching_attendance(own.id, {str(self.student.id): "present"}, "Another teacher's class")
+        with self.assertRaises(AccessError):
+            hod_ui.save_teaching_attendance(hod_session.id, {str(self.student.id): "excused"}, "Unapproved exemption")
+        hod_result = hod_ui.save_teaching_attendance(hod_session.id, {str(self.student.id): "present"}, "Assigned class", submit=True)
+        hod_sheet = self.env["op.attendance.sheet"].browse(hod_result["sheet_id"])
+        self.assertEqual(hod_sheet.campus_submitted_by, self.hod)
+        self.assertEqual(hod_sheet.state, "done")
         with self.assertRaises(AccessError):
             self.ui.save_teaching_attendance(hod_session.id, {str(self.student.id): "present"}, "Foreign class")
-        sheet = self.sheet(own)
         sheet.action_campus_roster()
         sheet.attendance_line.campus_status = "excused"
         with self.assertRaises(ValidationError):
@@ -80,3 +125,15 @@ class TestFacultyTaskList(OwnerMVPFixture, TransactionCase):
         with self.assertRaisesRegex(ValidationError, "already submitted"):
             self.ui.save_teaching_attendance(own.id, {str(self.student.id): "excused"}, "Duplicate", submit=True)
         self.assertEqual(self.env["op.attendance.sheet"].search_count([("session_id", "=", own.id)]), 1)
+
+    def test_hod_can_update_own_task_without_college_reporting_write_access(self):
+        hod_ui = self.ui.with_user(self.hod)
+        staff_task = self.ui.save_sop_task("Staff task", "Teaching", str(self.today), "0")
+        task_id = hod_ui.save_sop_task("Department review", "Teaching", str(self.today), "1")
+        with self.assertRaises(AccessError):
+            hod_ui.toggle_sop_task(staff_task, True)
+        hod_ui.toggle_sop_task(task_id, True)
+        task = self.env["campus.faculty.task"].browse(task_id)
+        self.assertEqual((task.user_id, task.state), (self.hod, "done"))
+        with self.assertRaises(AccessError):
+            self.department.with_user(self.hod).write({"name": "Changed from reporting login"})

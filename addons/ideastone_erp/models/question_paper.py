@@ -122,7 +122,8 @@ class QuestionPaper(models.Model):
         self.env['campus.mvp.audit']._log(self, action, note, {'revision': self.revision, 'selected_set_id': self.selected_set_id.id})
 
     @api.model
-    def save_submission(self, values, files=None, record_id=None, submit=False, levels=None):
+    def save_submission(self, values, files=None, record_id=None, submit=False, levels=None, official_level=None):
+        self = self.with_context({}, allowed_company_ids=[self.env.company.id], tz=self.env.user.tz)
         faculty = self._faculty()
         allowed = {'subject_id', 'department_id', 'exam_type', 'exam_date', 'paper_code', 'duration', 'notes', 'study_year', 'semester'}
         if not isinstance(values, dict) or set(values) - allowed or not isinstance(submit, bool):
@@ -132,6 +133,13 @@ class QuestionPaper(models.Model):
         subject = self._subjects(faculty).filtered(lambda s: s.id == values.get('subject_id'))
         if len(subject) != 1 or values.get('department_id') != subject.department_id.id:
             raise AccessError(_('Choose a subject and department assigned to your faculty account.'))
+        direct = official_level is not None
+        if direct:
+            if (not self.env.user.has_group('ideastone_erp.group_exam_paper_hod')
+                    or subject.department_id != self.env.user.dept_id):
+                raise AccessError(_('Only a department HOD may send their own assigned subject paper directly to exam control.'))
+            if not submit or not isinstance(official_level, str) or official_level not in dict(LEVELS):
+                raise ValidationError(_('Select one official difficulty set to send to exam control.'))
         vals = dict(values)
         if any(not isinstance(vals.get(key), str) or vals[key] not in dict(self._fields[key].selection)
                for key in ('study_year', 'semester')):
@@ -160,7 +168,9 @@ class QuestionPaper(models.Model):
             if not route:
                 raise ValidationError(_('Ask the administrator to configure the department HOD and exam-control route.'))
             route._check_reviewers()
-            if route.hod_id == self.env.user or route.coe_id == self.env.user:
+            if direct and route.hod_id != self.env.user:
+                raise AccessError(_('Only the HOD assigned to this department review route can send their own paper directly.'))
+            if not direct and (route.hod_id == self.env.user or route.coe_id == self.env.user):
                 raise ValidationError(_('The author, HOD and exam-control recipient must be separate people.'))
             vals.update(hod_id=route.hod_id.id, coe_id=route.coe_id.id)
         prepared = []
@@ -193,6 +203,8 @@ class QuestionPaper(models.Model):
         available = {p['level'] for p in prepared} | set(rec.set_ids.mapped('level') if rec else [])
         if any(p['level'] not in levels for p in prepared) or (submit and (not levels or set(levels) - available)):
             raise ValidationError(_('Attach at least one question-paper PDF before submitting.'))
+        if direct and official_level not in levels:
+            raise ValidationError(_('Select an attached PDF as the official set.'))
         if rec:
             if rec.state == 'returned':
                 vals.update(revision=rec.revision + 1, state='draft')
@@ -205,7 +217,13 @@ class QuestionPaper(models.Model):
             previous.sudo().write({'active': False})
             self.env['campus.question.paper.set'].sudo().create(dict(item, paper_id=rec.id, revision=rec.revision))
         rec._event('Draft saved')
-        if submit:
+        if direct:
+            selected = rec.set_ids.filtered(lambda item: item.level == official_level)
+            now = fields.Datetime.now()
+            rec.sudo().write({'state': 'forwarded', 'selected_set_id': selected.id, 'approved_at': now, 'forwarded_at': now})
+            rec._event('HOD approved own ' + dict(LEVELS)[official_level] + ' set')
+            rec._event('Forwarded to COE')
+        elif submit:
             rec.sudo().write({'state': 'submitted'})
             rec._event('Submitted to HOD')
         return rec.id
@@ -255,18 +273,26 @@ class QuestionPaper(models.Model):
 
     @api.model
     def get_workspace(self, role='faculty'):
-        if role not in ('faculty', 'hod', 'coe'):
+        if role not in ('faculty', 'hod', 'hod_author', 'coe'):
             raise AccessError(_('Choose your assigned workspace.'))
-        if role == 'faculty':
+        if role in ('faculty', 'hod_author'):
             faculty = self._faculty()
             subjects = self._subjects(faculty)
             domain = [('faculty_id', '=', faculty.id)]
+            if role == 'hod_author':
+                if not self.env.user.has_group('ideastone_erp.group_exam_paper_hod'):
+                    raise AccessError(_('This workspace is reserved for department HODs.'))
+                subjects = subjects.filtered(lambda subject: subject.department_id == self.env.user.dept_id)
+                domain.append(('department_id', '=', self.env.user.dept_id.id))
         else:
             if not self.env.user.has_group('ideastone_erp.group_exam_paper_' + role):
                 raise AccessError(_('This reviewer workspace is not assigned to your login.'))
             subjects = self.env['op.subject']
             domain = [(role + '_id', '=', self.env.uid), ('state', 'in', ['approved', 'forwarded'])] if role == 'coe' else [
                 ('hod_id', '=', self.env.uid), ('department_id', '=', self.env.user.dept_id.id), ('state', '!=', 'draft')]
+            if role == 'hod':
+                own_faculty = self.env['op.faculty'].sudo().with_context(active_test=False).search([('user_id', '=', self.env.uid)])
+                domain.append(('faculty_id', 'not in', own_faculty.ids))
         records = self.search(domain + [('company_id', '=', self.env.company.id)])
         rows = []
         for visible in records:
@@ -283,9 +309,12 @@ class QuestionPaper(models.Model):
                 'state': rec.state, 'status': dict(STATES)[rec.state], 'updated': fields.Datetime.to_string(rec.write_date),
                 'review_note': rec.review_note or '', 'history': rec.history or [], 'selected_set_id': rec.selected_set_id.id,
                 'sets': [{'id': s.id, 'level': s.level, 'label': dict(LEVELS)[s.level], 'filename': s.filename, 'pages': s.page_count} for s in sets]})
+        departments = subjects.department_id | records.department_id
+        if role == 'hod':
+            departments |= self.env.user.dept_id
         return {'role': role, 'company': self.env.company.name, 'user': self.env.user.name, 'rows': rows,
             'subjects': [{'id': s.id, 'name': s.name, 'code': s.code, 'department_id': s.department_id.id} for s in subjects],
-            'departments': [{'id': d.id, 'name': d.name, 'code': d.code} for d in (subjects.department_id | records.department_id)],
+            'departments': [{'id': d.id, 'name': d.name, 'code': d.code} for d in departments],
             'counts': {'upcoming': len({r['subject_id'] for r in rows if r['exam_date'] >= str(fields.Date.context_today(self))}),
                 **{state: sum(r['state'] == state for r in rows) for state, label in STATES}, 'received': len(rows)}}
 

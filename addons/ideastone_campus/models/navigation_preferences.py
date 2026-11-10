@@ -13,21 +13,26 @@ class NavigationPreferences(models.Model):
 
     campus_navigation_preferences = fields.Json(copy=False, groups="base.group_system")
 
-    def _campus_navigation_key(self, scope):
+    def _campus_navigation_key(self, scope, module=None):
         if self.env.user._is_public():
             raise AccessError(_("Sign in to customize navigation."))
         if not isinstance(scope, str) or scope not in SCOPES:
             raise ValidationError(_("Unknown navigation workspace."))
-        return f"{self.env.company.id}:{scope}"
+        key = f"{self.env.company.id}:{scope}"
+        if module is None:
+            return key
+        if not isinstance(module, str) or not re.fullmatch(r"[a-zA-Z0-9_-]{1,80}", module):
+            raise ValidationError(_("Unknown navigation module."))
+        return f"{key}:top:{module}"
 
     @api.model
-    def campus_get_navigation(self, scope):
-        key = self._campus_navigation_key(scope)
+    def campus_get_navigation(self, scope, module=None):
+        key = self._campus_navigation_key(scope, module)
         return (self.env.user.sudo().campus_navigation_preferences or {}).get(key, {"revision": 0, "items": []})
 
     @api.model
-    def campus_save_navigation(self, scope, items, revision):
-        key = self._campus_navigation_key(scope)
+    def campus_save_navigation(self, scope, items, revision, module=None):
+        key = self._campus_navigation_key(scope, module)
         if type(revision) is not int or revision < 0 or not isinstance(items, list) or len(items) > 100:
             raise ValidationError(_("Invalid navigation preferences."))
         clean, ids = [], set()
