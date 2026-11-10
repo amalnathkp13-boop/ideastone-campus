@@ -14,7 +14,6 @@
         <t t-if="state.data &amp;&amp; !state.error">
           <div class="crumb"><span>VCET Campus / <b>Calendar</b></span><span><t t-esc="state.data.today"/> · <b t-esc="props.action.context?.campus_workspace_role || 'Owner / Admin'"/></span></div>
           <div class="heading"><div><h1>College Calendar</h1><p>One place for campus events, academic milestones, celebrations, examinations and event planning.</p></div><div class="actions"><button class="btn refresh" t-on-click="load" t-att-disabled="state.loading" aria-label="Refresh calendar"><i class="fa fa-refresh"/></button><button t-if="state.data.can_create" class="btn" t-on-click="() => this.edit()" t-att-disabled="state.loading">＋ Add event</button></div></div>
-          <div class="hero"><div><div class="eyebrow">ONE CAMPUS · EVERY IMPORTANT DATE</div><h2>Plan the month. See the whole campus.</h2><p>Explore current events, past activities and upcoming plans. Open any event to view its organizer, venue, audience, schedule and related activities.</p></div><div class="hero-stat"><strong t-esc="monthEvents.length"/><span>events in this view</span></div></div>
           <div class="stats"><article t-foreach="stats" t-as="stat" t-key="stat.label" class="stat"><div class="stathead"><t t-esc="stat.label"/><span class="staticon" t-att-class="stat.tone" aria-hidden="true" t-esc="stat.icon"/></div><strong t-esc="stat.value"/><small t-esc="stat.help"/></article></div>
           <div class="toolbar">
             <div class="filters">

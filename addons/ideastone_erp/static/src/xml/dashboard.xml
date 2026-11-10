@@ -12,7 +12,7 @@
         <button type="button" class="campus_customize_navigation" title="Customize Navigation" t-on-click="customizeNavigation"><i class="fa fa-sliders" aria-hidden="true"/><span>Customize Navigation</span></button>
         <div class="campus_side_bottom"><strong t-esc="state.company"/><span t-esc="state.workspace_role"/><a href="/my/campus" title="My campus self-service"><span>My campus self-service</span> <i class="fa fa-external-link" aria-hidden="true"/></a></div>
       </aside>
-      <nav t-if="topCatalog.length" class="campus_faculty_subnav" t-att-class="{'hod-directory-subnav': state.module === 'hod-directory'}" aria-label="Campus submodules">
+      <nav t-if="topCatalog.length &amp;&amp; state.module !== 'home'" class="campus_faculty_subnav" t-att-class="{'hod-directory-subnav': state.module === 'hod-directory'}" aria-label="Campus submodules">
         <strong t-esc="facultyModule?.label || 'Campus'"/>
         <button t-if="state.module !== 'admissions'" class="campus_subnav_scroll" t-on-click="() => this.scrollSubmodules(-1)" aria-label="Previous submodules"><i class="fa fa-angle-left" aria-hidden="true"/></button>
         <div t-ref="subnavStrip"><t t-foreach="topItems" t-as="item" t-key="item.id"><button t-att-class="{active: item.active}" t-att-aria-current="item.active ? 'page' : undefined" t-on-click="() => this.openTopItem(item.target)" t-esc="item.label"/></t></div>
