@@ -45,7 +45,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "20" }
       - name: Campus session navigation checks
-        run: node --test docs/qa/session-sync/session-sync.test.cjs docs/qa/faculty-od/ui.test.cjs
+        run: node --test docs/qa/session-sync/session-sync.test.cjs docs/qa/faculty-od/ui.test.cjs docs/qa/currency-display.test.cjs
 
   install:
     name: install
@@ -103,7 +103,7 @@ jobs:
             if curl -fsS http://127.0.0.1:18069/web/login >/dev/null; then break; fi
             sleep 2
           done
-          npm install --prefix "$RUNNER_TEMP/faculty-ui-tools" playwright
+          npm install --prefix "$RUNNER_TEMP/faculty-ui-tools" playwright@1.64.0
           "$RUNNER_TEMP/faculty-ui-tools/node_modules/.bin/playwright" install --with-deps chromium
           export NODE_PATH="$RUNNER_TEMP/faculty-ui-tools/node_modules"
           node --test docs/qa/ai-audit/ui.test.cjs

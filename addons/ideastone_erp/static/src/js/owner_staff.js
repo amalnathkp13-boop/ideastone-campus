@@ -13,7 +13,8 @@ export class OwnerStaffDirectory extends Component {
         this.action = useService("action");
         this.company = useService("company");
         this.state = useState({loading: true, error: "", data: null, screen: "overview", department: "",
-            category: "teaching", person: "", query: "", designation: "", status: ""});
+            category: "teaching", person: "", query: "", designation: "", status: "",
+            profile: null, profileLoading: false, profileError: ""});
         onWillStart(() => this.load());
     }
     async load() {
@@ -45,7 +46,13 @@ export class OwnerStaffDirectory extends Component {
     selectCategory(category) {
         Object.assign(this.state, {category, screen: "list", query: "", designation: "", status: ""});
     }
-    openProfile(person) { this.state.person = person.key; this.state.screen = "profile"; }
+    async openProfile(person) {
+        this.state.person = person.key; this.state.screen = "profile";
+        this.state.profile = null; this.state.profileError = ""; this.state.profileLoading = true;
+        try { this.state.profile = await this.orm.call("campus.owner.staff.ui", "get_profile", [person.id]); }
+        catch (error) { this.state.profileError = error.data?.message || "Detailed staff information could not be loaded."; }
+        finally { this.state.profileLoading = false; }
+    }
     initials(name) { return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase(); }
     percent(department) { return department.total ? Math.round(100 * department.teaching / department.total) : 0; }
     departmentIcon(department) {
@@ -70,6 +77,34 @@ export class OwnerStaffDirectory extends Component {
     openRecord() {
         return this.action.doAction({type: "ir.actions.act_window", name: this.selectedPerson.name, res_model: this.selectedPerson.model,
             res_id: this.selectedPerson.id, views: [[false, "form"]], context: {campus_module: "staff"}});
+    }
+}
+
+export class OwnerStaffOD extends Component {
+    static template = "ideastone_erp.OwnerStaffOD";
+    static props = ["*"];
+    setup() {
+        this.orm = useService("orm");
+        this.action = useService("action");
+        this.state = useState({loading: true, error: "", data: null, query: "", status: ""});
+        onWillStart(() => this.load());
+    }
+    async load() {
+        this.state.loading = true; this.state.error = "";
+        try { this.state.data = await this.orm.call("campus.owner.staff.ui", "get_od_staff", []); }
+        catch (error) { this.state.error = error.data?.message || "Staff On Duty records could not be loaded."; }
+        finally { this.state.loading = false; }
+    }
+    get rows() {
+        const query = this.state.query.trim().toLowerCase();
+        return (this.state.data?.rows || []).filter(row =>
+            (!this.state.status || row.state === this.state.status) &&
+            (!query || [row.name, row.department, row.reason].some(value => value.toLowerCase().includes(query))));
+    }
+    openRecord(row) {
+        return this.action.doAction({type: "ir.actions.act_window", name: "Staff On Duty request",
+            res_model: "hr.leave", res_id: row.id, views: [[false, "form"]],
+            context: {campus_module: "staff"}});
     }
 }
 
@@ -126,3 +161,4 @@ export class OwnerStaffPayroll extends PayrollHistoryPage {
 registry.category("actions").add("ideastone_erp.owner_staff_directory", OwnerStaffDirectory);
 registry.category("actions").add("ideastone_erp.owner_staff_leave", OwnerStaffLeave);
 registry.category("actions").add("ideastone_erp.owner_staff_payroll", OwnerStaffPayroll);
+registry.category("actions").add("ideastone_erp.owner_staff_od", OwnerStaffOD);

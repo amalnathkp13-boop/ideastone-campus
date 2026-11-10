@@ -69,7 +69,7 @@ export class SuccessRadarPage extends Component {
         await this.action.doAction({ type: "ir.actions.act_window", res_model: "op.student", res_id: row.id, views: [[false, "form"]], target: "current" });
     }
     exportCsv() {
-        const rows = [["Student", "Number", "Programme", "Class", "Semester", "Mentor", "Score", "Band", "Attendance %", "Results %", `Overdue fees (${this.state.data?.currency_code || ''})`, "Top factor", "Suggested action"],
+        const rows = [["Student", "Number", "Programme", "Class", "Semester", "Mentor", "Score", "Band", "Attendance %", "Results %", "Overdue fees (₹)", "Top factor", "Suggested action"],
             ...(this.state.data?.rows || []).map((row) => [row.name, row.number, row.programme, row.batch, row.semester, row.mentor, row.score,
                 BAND_LABELS[row.band], row.attendance.rate ?? "", row.academics.average ?? "", row.fees.overdue,
                 row.factors[0] ? FACTOR_LABELS[row.factors[0].key] : "", row.action])];

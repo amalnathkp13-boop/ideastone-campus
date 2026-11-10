@@ -25,7 +25,8 @@ class TestFacultyHome(OwnerMVPFixture, TransactionCase):
         self.assertFalse(self.env["campus.dashboard"].with_user(self.owner).get_overview().get("faculty_home_enabled"))
         with self.assertRaises(AccessError):
             self.env["campus.faculty.home"].with_user(self.outsider).get_home()
-        self.assertEqual(self.ui.get_home()["counts"]["classes"], 0)
+        counts = self.ui.get_home()["counts"]
+        self.assertEqual((counts["classes"], counts["assigned_classes"]), (0, 0))
         self.assertEqual(self.ui.get_directory()["students"], [])
 
     def test_new_allocations_and_enrolments_refresh_in_the_same_directory(self):
@@ -44,6 +45,9 @@ class TestFacultyHome(OwnerMVPFixture, TransactionCase):
         self.assertEqual(roster["students"][0]["name"], app.student_id.name)
         self.session(hour=12, state="cancel")
         self.assertEqual(self.ui.get_home()["counts"]["classes"], 1)
+        self.session(hour=14)
+        counts = self.ui.get_home()["counts"]
+        self.assertEqual((counts["classes"], counts["assigned_classes"]), (2, 1))
         app.student_id.write({"active": False, "campus_status_reason": "Synthetic archive check"})
         self.assertEqual(self.ui.get_directory(self.department.id, 1, self.section.id)["students"], [])
 

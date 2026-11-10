@@ -63,3 +63,6 @@ access_biometric_event_people,campus.biometric.event people,model_campus_biometr
 access_exam_review_manager,campus.exam.review manager,model_campus_exam_review,ideastone_erp.group_manager,1,1,1,1
 access_exam_review_academic,campus.exam.review academic,model_campus_exam_review,ideastone_erp.group_academic,1,1,1,1
 access_exam_review_faculty,campus.exam.review faculty,model_campus_exam_review,openeducat_core.group_op_faculty,1,1,1,0
+access_placement_profile_outreach,Placement profiles outreach,model_campus_placement_profile,ideastone_erp.group_outreach,1,1,1,0
+access_placement_resource_outreach,Placement study materials outreach,model_campus_placement_resource,ideastone_erp.group_outreach,1,1,1,1
+access_placement_milestone_outreach,Placement milestones outreach,model_campus_placement_milestone,ideastone_erp.group_outreach,1,1,1,1
