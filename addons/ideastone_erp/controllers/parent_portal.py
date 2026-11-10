@@ -33,6 +33,8 @@ class ParentWorkspace(StudentWorkspace):
             data = service.snapshot(kw.get("child"), kw.get("enrolment"), kw.get("date_from"), kw.get("date_to"))
             if section not in {item[0] for item in data["navigation"]}:
                 return self._private(request.make_response("Page not available.", status=404))
+            if section == "complaints":
+                data["complaints"] = request.env["campus.complaints.ui"].get_page_data(child=kw.get("child"))
         except (AccessError, UserError) as exc:
             error, status = str(exc), 403 if isinstance(exc, AccessError) else 400
         suffix = "?" + urlencode(data["filters"]) if data else ""
@@ -47,7 +49,7 @@ class ParentWorkspace(StudentWorkspace):
 
     @http.route("/my/campus/parent/action", type="http", auth="user", website=True, methods=["POST"], csrf=True)
     def parent_action(self, operation="", return_to="dashboard", **kw):
-        allowed = {"dashboard", "profile", "attendance", "learning", "timetable", "exams", "fees", "notices", "requests", "documents", "account"}
+        allowed = {"dashboard", "profile", "attendance", "learning", "timetable", "exams", "fees", "notices", "requests", "complaints", "documents", "account"}
         return_to = return_to if return_to in allowed else "dashboard"
         try:
             if not kw.get("child"):
@@ -60,7 +62,14 @@ class ParentWorkspace(StudentWorkspace):
             upload = request.httprequest.files.get("file")
             if upload and upload.filename:
                 payload.update(file=base64.b64encode(upload.read(10 * 1024 * 1024 + 1)), filename=upload.filename)
-            request.env["campus.parent.portal"].act(operation, kw["child"], payload)
+            if operation == "complaint_submit":
+                payload["evidence"] = payload.pop("file", False)
+                payload["evidence_filename"] = payload.pop("filename", False)
+                request.env["campus.complaints.ui"].submit(payload, child=kw["child"])
+            elif operation == "complaint_act":
+                request.env["campus.complaints.ui"].act(payload.get("case_id"), payload.get("case_action"), payload, child=kw["child"])
+            else:
+                request.env["campus.parent.portal"].act(operation, kw["child"], payload)
             query = {"saved": "1"}
         except (UserError, ValueError, TypeError) as exc:
             query = {"form_error": str(exc)}
