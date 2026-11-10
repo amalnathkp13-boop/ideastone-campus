@@ -44,15 +44,15 @@ async function markup(page) {
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-dashboard-1440.png'),fullPage:true});
         await page.locator('.collection-panel').evaluate(element=>element.scrollIntoView({block:'start'}));
-        const feeMonths=firstMetrics.overview_ui.fee_months;
-        const collectionBars=await page.locator('.collection-panel .fee-bar-fill').evaluateAll(nodes=>nodes.map(node=>parseFloat(node.style.height)));
-        // Each vertical bar compares the amount collected with the billed fees for
-        // that same due-month invoice cohort; empty months must remain at zero.
-        if(feeMonths.length!==6 || collectionBars.length!==6
-            || feeMonths.reduce((sum,row)=>sum+row.target,0)!==500
-            || feeMonths.reduce((sum,row)=>sum+row.collected,0)!==300
-            || firstMetrics.overview_ui.fee_percent!==60
-            || collectionBars.some((height,index)=>Math.abs(height-(feeMonths[index].target ? feeMonths[index].collected/feeMonths[index].target*100 : 0))>0.1)) throw Error('Monthly fee bars do not reconcile with the billed and collected amounts');
+        const annual=firstMetrics.overview_ui.annual_fees;
+        const progress=page.getByRole('progressbar',{name:'Annual fee collection rate'});
+        await progress.waitFor();
+        const shownRate=Number(await progress.getAttribute('aria-valuenow'));
+        const barWidth=await progress.locator('.bar-fill').evaluate(el=>parseFloat(el.style.width));
+        if(!annual.allowed || Math.abs(annual.billed-annual.collected-annual.balance)>0.01
+            || Math.abs(annual.collected-annual.cohorts.reduce((sum,row)=>sum+row.collected,0))>0.01
+            || shownRate!==(annual.rate||0) || barWidth!==shownRate)
+            throw Error('Annual fee display does not reconcile with posted student invoices');
         const panelHeights=await page.locator('.collection-panel,.ai-panel').evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().height));
         if(Math.abs(panelHeights[0]-panelHeights[1])>1) throw Error('Fee and insights cards are not balanced on desktop');
         await page.getByRole('heading',{name:'Decision Overview',exact:true}).waitFor();
