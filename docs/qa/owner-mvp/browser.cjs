@@ -196,6 +196,8 @@ async function markup(page) {
         await page.getByText('Personal reminder saved. Find it in your Activities menu.',{exact:true}).waitFor();
         await page.screenshot({path:path.join(out,'owner-calendar-1440.png')});
         await page.locator('.campus_sidebar').getByRole('button',{name:'Fees & Payments',exact:true}).click();
+        await page.locator('.campus_owner_fees_workspace').waitFor();
+        await page.locator('.campus_faculty_subnav').getByRole('button',{name:'Fee heads',exact:true}).click();
         await page.getByRole('cell',{name:'Tuition installment',exact:true}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Communication',exact:true}).click();
         await page.locator('.owner-communication').getByRole('heading',{name:'Student requests & support',exact:true,level:1}).waitFor();
