@@ -150,7 +150,7 @@ class FacultyHome(models.AbstractModel):
         return {"user": self.env.user.name, "company": self.env.company.name, "demo": self.env.company.campus_demo,
             "today": str(today), "academic_year": year.name or _("Assigned classes"), "department": faculty.main_department_id.code or faculty.main_department_id.name or _("Not recorded"),
             "semesters": sorted(set(batches.campus_term_id.mapped("name"))), "schedule": schedule,
-            "counts": {"classes": len(day_sessions), "completed": completed, "remaining": len(day_sessions) - completed,
+            "counts": {"classes": len(day_sessions), "assigned_classes": len(batches), "completed": completed, "remaining": len(day_sessions) - completed,
                 "students": len(enrolments.student_id), "subjects": len(sessions.subject_id | faculty.faculty_subject_ids), "pending": len(pending),
                 "tasks": len(tasks), "due_today": len(tasks.filtered(lambda r: r.deadline == today)), "overdue": len(tasks.filtered(lambda r: r.deadline < today)),
                 "upcoming": len(tasks.filtered(lambda r: r.deadline > today)), "papers": len(papers.filtered(lambda r: r.state in {"draft", "returned"})),
@@ -161,7 +161,7 @@ class FacultyHome(models.AbstractModel):
 
     @api.model
     def get_action(self, kind, record_id=0):
-        faculty, year, sessions, batches, enrolments = self._scope()
+        sessions = self._scope()[2]
         if not isinstance(kind, str):
             raise ValidationError(_("Choose a valid faculty workspace action."))
         if type(record_id) is not int or not 0 <= record_id <= 2147483647:
@@ -172,16 +172,11 @@ class FacultyHome(models.AbstractModel):
                 raise AccessError(_("This class is outside your confirmed teaching allocations."))
             return session.action_campus_attendance()
         actions = {"attendance": "ideastone_erp.action_my_teaching_subjects",
-            "tasks": "ideastone_erp.action_faculty_task", "papers": "ideastone_erp.action_faculty_question_papers"}
+            **{key: "ideastone_erp.action_faculty_sop_" + page for key, page in
+               [("tasks", "tasks"), ("papers", "exams"), ("results", "exams"),
+                ("timetable", "timetable"), ("notices", "circulars")]}}
         if kind in actions:
             action = self.env["ir.actions.actions"]._for_xml_id(actions[kind])
             action["context"] = dict(self.env.context, campus_module="teaching")
             return action
-        if kind in {"timetable", "results"}:
-            model = "op.session" if kind == "timetable" else "op.exam"
-            self.env[model].check_access_rights("read")
-            domain = [("faculty_id", "=", faculty.id), ("id", "in", sessions.ids)] if kind == "timetable" else [("responsible_id", "in", faculty.ids), ("batch_id", "in", batches.ids)]
-            return {"type": "ir.actions.act_window", "name": _("My timetable") if kind == "timetable" else _("My assessments"),
-                "res_model": model, "views": [(False, "tree"), (False, "form")], "domain": [("company_id", "=", self.env.company.id)] + domain,
-                "context": dict(self.env.context, campus_module="teaching")}
         raise ValidationError(_("Choose a valid faculty workspace action."))

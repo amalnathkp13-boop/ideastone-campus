@@ -56,6 +56,44 @@ font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif
 }
 @media(max-width:760px){.campus_dashboard:has(.admin_overview){padding:17px 13px}}
 
+/* Compact owner overview, with independent annual finance and chart controls. */
+.admin_overview {
+  .hero {min-height:104px;padding:17px 22px;margin-bottom:11px;align-items:center}
+  .hero h1 {font-size:22px;letter-spacing:-.5px;color:#fff;margin:4px 0}
+  .hero p {font-size:12px}
+  .hero .ai-status {padding:9px 12px}
+  .owner-performance-head {margin:9px 0 11px;gap:12px}
+  .owner-performance-head .actions {justify-content:flex-end}
+  .owner-performance-head .btn {padding:6px 9px}
+  .kpi {min-height:111px;padding:12px 14px}
+  .kpi-value {margin:5px 0 2px;font-size:25px}
+  .owner-year-select,.owner-chart-range {display:flex;align-items:center;gap:7px;color:#64788d;font-size:11px;font-weight:650}
+  .owner-year-select select,.owner-chart-range select {border:1px solid var(--line);border-radius:7px;padding:6px 8px;background:#fff;color:#35516d;max-width:190px}
+  .owner-fee-headline {display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px 0 14px}
+  .owner-fee-headline>div {display:grid;gap:3px;min-width:0}
+  .owner-fee-headline small,.owner-performance-metrics small {font-size:10px;color:var(--muted)}
+  .owner-fee-headline strong {font-size:22px;letter-spacing:-.5px;overflow-wrap:anywhere}
+  .owner-fee-headline span {font-size:11px;color:#56728c}
+  .owner-annual-fees>.bar-track {height:10px;margin-bottom:13px}
+  .owner-annual-fees .data-table {min-width:390px}
+  .owner-fee-foot {display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:#526d86}
+  .owner-event-counts {display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+  .owner-event-counts>div {display:grid;gap:2px;padding:9px;background:#f4f8ff;border:1px solid #e4edf8;border-radius:9px}
+  .owner-event-counts strong {font-size:21px;color:var(--blue)}
+  .owner-event-counts small {font-size:10px;color:var(--muted)}
+  .owner-performance-panel {margin-top:14px}
+  .owner-performance-metrics {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:13px 0 17px}
+  .owner-performance-metrics>div {display:grid;gap:4px;padding:12px;background:#f5f9ff;border:1px solid #e5edf7;border-radius:10px}
+  .owner-performance-metrics strong {font-size:20px}
+  .ai-panel {background:#f8fbff;border-color:#dfeafb}
+  .ai-icon,.insight-symbol {background:#eaf3ff;color:#1769e8}
+  .ai-tag,.insight .tag {background:#eaf3ff;color:#1769e8}
+  .insight {border-color:#dfeafb}
+  >.deadlines-panel {margin-top:14px}
+}
+@media(max-width:760px){.admin_overview{.owner-performance-head{align-items:flex-start;flex-direction:column}.owner-performance-head .actions{justify-content:flex-start}.owner-performance-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.owner-fee-headline{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.hero-right{display:none}}}
+@media(max-width:440px){.admin_overview{.owner-performance-metrics{grid-template-columns:1fr}.owner-event-counts{grid-template-columns:repeat(3,minmax(0,1fr))}.owner-event-counts small{font-size:9px}}}
+
 .admin_overview {
   .decision-list{display:grid;gap:0}
   .decision-item{display:grid;grid-template-columns:38px minmax(0,1fr) auto;align-items:start;gap:10px;padding:13px 0;border-bottom:1px solid #edf1f6}

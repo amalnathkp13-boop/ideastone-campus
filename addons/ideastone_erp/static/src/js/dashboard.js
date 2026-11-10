@@ -1,5 +1,6 @@
 /** @odoo-module **/
 import { Component, onWillStart, onWillUnmount, useEffect, useExternalListener, useRef, useState, markup } from "@odoo/owl";
+import { session } from "@web/session";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -7,8 +8,9 @@ import { FacultyHome, FacultyDepartments } from "./faculty_home";
 import { FacultyCommunication } from "./faculty_communication";
 import { FacultyCampusServices } from "./faculty_campus_services";
 import { NavigationCustomizer } from "@ideastone_campus/js/navigation_customizer";
-import { navigationItems } from "@ideastone_campus/js/navigation_state";
+import { navigationItems, sidebarCollapsed, saveSidebarCollapsed } from "@ideastone_campus/js/navigation_state";
 import { OwnerSettings } from "./owner_settings";
+import { HodDashboard } from "./hod_dashboard";
 
 class OwnerReportFilters extends Component {
     static template = "ideastone_erp.OwnerReportFilters";
@@ -52,6 +54,7 @@ class CampusBase extends Component {
             collectionRecords: {columns: [], rows: [], years: [], metrics: [], money_columns: [], date_columns: []},
             collectionYearId: "", collectionSearch: "", collectionStatusFilter: "",
             ownerFilters: {date_from: "", date_to: "", year_id: ""}, ownerAppliedFilters: {}, ownerError: "", ownerLoading: false,
+            ownerFeeYearId: 0, ownerChartMonths: 8,
             faculty_modules: [], faculty_tasks: [], faculty_schedule: [], faculty_surveys: [], module: route.module, activeAction: 0, activeTool: "",
             moduleOverview: {rows: []},
             busy: false, query: "", cardQuery: "", unit: "", card: "", loanPage: 0, desk: { units: [], cards: [], loans: [], next: false } });
@@ -158,6 +161,10 @@ class CampusBase extends Component {
         return this.state.page === "library" ? "Library circulation desk" : "Reports & exports";
     }
     async chooseModule(module) {
+        if (this.state.hod_dashboard_enabled && module.key === "home") {
+            this.state.module = "home";
+            return this.go({key: "overview"});
+        }
         if (module.key === "students" && this.state.is_owner_workspace && !this.state.is_accountant_workspace) {
             this.state.module = module.key;
             return this.open({action: "ideastone_erp.action_students_directory"});
@@ -186,7 +193,9 @@ class CampusBase extends Component {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
-        if (module.items?.[0]?.label === "Overview" && module.items[0].action) {
+        if ((module.items?.[0]?.label === "Overview" ||
+            ((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library", "grievances", "hod-directory"].includes(module.key) ||
+             (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics", "fees", "calendar", "staff", "communication"].includes(module.key)))) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
         }
@@ -279,7 +288,9 @@ class CampusBase extends Component {
         this.state.ownerLoading = true;
         this.state.ownerError = "";
         try {
-            this.state.ownerMetrics = await this.orm.call("campus.dashboard", "get_owner_metrics", [this.state.ownerFilters]);
+            this.state.ownerMetrics = await this.orm.call("campus.dashboard", "get_owner_metrics",
+                [this.state.ownerFilters, Number(this.state.ownerFeeYearId) || 0, this.state.ownerChartMonths]);
+            this.state.ownerFeeYearId = this.state.ownerMetrics.overview_ui?.annual_fees?.year_id || 0;
             this.state.ownerAppliedFilters = {...this.state.ownerFilters};
             this.router.pushState({owner_from: this.state.ownerFilters.date_from, owner_to: this.state.ownerFilters.date_to, owner_year: this.state.ownerFilters.year_id});
         } catch (error) {
@@ -350,8 +361,7 @@ class CampusBase extends Component {
         return [...new Set((this.state.collectionRecords.rows || []).map(row => row.status).filter(Boolean))];
     }
     collectionFullMoney(value) {
-        const currency = this.state.collectionRecords.currency || "₹";
-        return `${currency}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(Number(value) || 0)}`;
+        return `₹${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(Number(value) || 0)}`;
     }
     async collectionOpenEditor() {
         const screen = this.collectionScreen;
@@ -412,7 +422,7 @@ class CampusBase extends Component {
         const divisor = currency === "₹" ? (absolute >= 10000000 ? 10000000 : absolute >= 100000 ? 100000 : 1) :
             (absolute >= 1000000 ? 1000000 : absolute >= 1000 ? 1000 : 1);
         const suffix = divisor === 1 ? "" : currency === "₹" ? (divisor === 10000000 ? "Cr" : "L") : (divisor === 1000000 ? "M" : "K");
-        return `${currency}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: divisor === 1 ? 0 : 1}).format(amount / divisor)}${suffix}`;
+        return `₹${new Intl.NumberFormat("en-IN", {maximumFractionDigits: divisor === 1 ? 0 : 1}).format(amount / divisor)}${suffix}`;
     }
     collectionRate(value, total) {
         return total ? Math.max(0, Math.min(100, Math.round(value / total * 100))) : 0;
@@ -451,7 +461,7 @@ class CampusBase extends Component {
         if (item) return this.open(item);
     }
     accountantMoney(value) {
-        return `${this.state.accountantMetrics.currency || ""}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(value || 0)}`;
+        return `₹${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(value || 0)}`;
     }
     accountantCompactMoney(value) {
         const amount = Number(value) || 0;
@@ -460,7 +470,7 @@ class CampusBase extends Component {
         const divisor = indian ? (absolute >= 10000000 ? 10000000 : absolute >= 100000 ? 100000 : 1) :
             (absolute >= 1000000 ? 1000000 : absolute >= 1000 ? 1000 : 1);
         const suffix = divisor === 1 ? "" : indian ? (divisor === 10000000 ? "Cr" : "L") : (divisor === 1000000 ? "M" : "K");
-        return `${this.state.accountantMetrics.currency || ""}${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(amount / divisor)}${suffix}`;
+        return `₹${new Intl.NumberFormat("en-IN", {maximumFractionDigits: 2}).format(amount / divisor)}${suffix}`;
     }
     get accountantTrendRows() {
         const rows = this.state.accountantMetrics.trend || [];
@@ -497,7 +507,7 @@ class CampusBase extends Component {
         return this.number(value / divisor);
     }
     get accountantChartUnit() {
-        return `${this.state.accountantMetrics.currency || ""} ${this.state.accountantMetrics.currency === "₹" ? "lakh" : this.accountantChartMax >= 10000 ? "thousand" : "units"}`;
+        return `₹ ${this.state.accountantMetrics.currency === "₹" ? "lakh" : this.accountantChartMax >= 10000 ? "thousand" : "units"}`;
     }
     get accountantTrendChange() {
         const rows = this.accountantTrendRows;
@@ -544,12 +554,19 @@ class CampusBase extends Component {
     async ownerSource(card) {
         if (!card.allowed) return;
         try {
-            if (["services", "attendance_pending", "overdue_services", "overdue_dues", "staff_present", "staff_delayed", "fleet"].includes(card.kind)) return this.ownerOverviewAction(card.kind);
-            const action = await this.orm.call("campus.dashboard", "get_owner_source_action", [card.kind, this.state.ownerAppliedFilters]);
+            if (card.kind === "fleet" && this.ownerUI.fleet) return this.openOwnerFleet("active");
+            if (["complaints", "overdue_complaints", "attendance_pending", "overdue_dues", "fleet_delayed", "services", "overdue_services", "staff_present", "staff_delayed", "fleet"].includes(card.kind)) return this.ownerOverviewAction(card.kind);
+            const filters = card.kind === "attendance_today" ? {...this.state.ownerAppliedFilters,
+                date_from: this.state.today, date_to: this.state.today} : this.state.ownerAppliedFilters;
+            const action = await this.orm.call("campus.dashboard", "get_owner_source_action",
+                [card.kind === "attendance_today" ? "attendance" : card.kind, filters]);
             if (!action.views) action.views = (action.view_mode || "tree,form").split(",").map(mode => [false, mode]);
             if (action.help) action.help = markup(action.help);
             await this.action.doAction(action);
         } catch (error) { this.notification.add(error.data?.message || "The source register is unavailable.", {type: "danger"}); }
+    }
+    openOwnerFleet(filter = "all") {
+        return this.action.doAction("ideastone_erp.action_fleet_management", {props: {initialFilter: filter}});
     }
     chartWidth(value, rows, field = "value") {
         const keys = Array.isArray(field) ? field : [field];
@@ -583,10 +600,12 @@ class CampusBase extends Component {
     }
     ownerCanOpen(xmlid) { return this.state.navigation.some(row => row.action === xmlid); }
     ownerPrint() { window.print(); }
+    ownerFeeYear(event) { this.state.ownerFeeYearId = Number(event.target.value) || 0; this.loadOwnerMetrics(); }
+    ownerChartRange(event) { this.state.ownerChartMonths = Number(event.target.value); this.loadOwnerMetrics(); }
     ownerMoney(value) { return `${this.ownerUI.currency_symbol || ""} ${this.number(value)}`.trim(); }
     ownerCompactMoney(value) {
         const magnitude = Math.abs(value);
-        return `${this.ownerUI.currency_symbol || ""}${this.number(value / (magnitude >= 10000000 ? 10000000 : magnitude >= 100000 ? 100000 : 1))}${magnitude >= 10000000 ? "Cr" : magnitude >= 100000 ? "L" : ""}`;
+        return `₹${this.number(value / (magnitude >= 10000000 ? 10000000 : magnitude >= 100000 ? 100000 : 1))}${magnitude >= 10000000 ? "Cr" : magnitude >= 100000 ? "L" : ""}`;
     }
     ownerMonth(value) { return new Date(`${value.slice(0, 7)}-15T12:00:00Z`).toLocaleDateString(undefined, {month: "short", year: "2-digit", timeZone: "UTC"}); }
     ownerDay(value) { return value.slice(8, 10); }
@@ -603,14 +622,14 @@ class CampusBase extends Component {
             .reduce((parts, point) => { if (point === null) parts.push([]); else parts[parts.length - 1].push(point); return parts; }, [[]]).filter(part => part.length).map(part => part.join(" "));
     }
     get ownerQuickActions() {
-        return [{label: "Review admissions", detail: "Applications & decisions", icon: "envelope-o", action: "ideastone_erp.mvp_applications"},
-            {label: "Record a payment", detail: "Student fee accounts", icon: "inr", action: "ideastone_erp.action_owner_fees_overview"},
-            {label: "Track attendance", detail: "Completed class registers", icon: "check", action: "ideastone_erp.mvp_attendance"},
-            {label: "College calendar", detail: "Plan campus activities", icon: "calendar", action: "ideastone_erp.action_college_calendar"},
-            {label: "Plan examinations", detail: "Schedules & marks", icon: "file-text-o", action: "ideastone_erp.mvp_exams"},
-            {label: "Manage staff", detail: "Faculty directory", icon: "users", action: "ideastone_erp.action_owner_staff_directory"},
-            {label: "Service desk", detail: "Open campus requests", icon: "flag-o", kind: "services", allowed: this.ownerUI.kpis.some(card => card.kind === "services" && card.allowed)},
-            {label: "Build a report", detail: "Reports & analytics", icon: "bar-chart", module: "reports"}]
+        return [{label: "Admissions", detail: "Applications & decisions", icon: "envelope-o", action: "ideastone_erp.mvp_applications"},
+            {label: "Fee collections", detail: "Student fee accounts", icon: "inr", action: "ideastone_erp.action_owner_fees_overview"},
+            {label: "Attendance", detail: "Completed class registers", icon: "check", action: "ideastone_erp.mvp_attendance"},
+            {label: "College calendar", detail: "Campus activities", icon: "calendar", action: "ideastone_erp.action_college_calendar"},
+            {label: "Exams", detail: "Schedules & results", icon: "file-text-o", action: "ideastone_erp.mvp_exams"},
+            {label: "Faculty", detail: "Staff directory", icon: "users", action: "ideastone_erp.action_owner_staff_directory"},
+            {label: "Fleet", detail: "Bus routes", icon: "bus", kind: "fleet", allowed: this.ownerUI.kpis.some(card => card.kind === "fleet_delayed" && card.allowed)},
+            {label: "Reports", detail: "Campus analytics", icon: "bar-chart", module: "reports"}]
             .filter(item => item.action ? this.ownerCanOpen(item.action) : item.module ? this.state.faculty_modules.some(module => module.key === item.module) : item.allowed);
     }
     ownerQuick(item) { return item.action ? this.ownerOpenAction(item.action) : item.kind ? this.ownerOverviewAction(item.kind) : this.chooseModule({key: item.module}); }
@@ -649,7 +668,7 @@ class CampusBase extends Component {
 export class CampusDashboard extends CampusBase {
     static template = "ideastone_erp.Dashboard";
     static props = ["*"];
-    static components = { FacultyHome, FacultyDepartments, FacultyCommunication, FacultyCampusServices, OwnerSettings };
+    static components = { FacultyHome, FacultyDepartments, FacultyCommunication, FacultyCampusServices, OwnerSettings, HodDashboard };
 }
 export class CampusNavigation extends CampusBase {
     static template = "ideastone_erp.Navigation";
@@ -657,6 +676,15 @@ export class CampusNavigation extends CampusBase {
     setup() {
         super.setup();
         this.navPreferences = useState({revision: 0, items: []});
+        this.topPreferences = useState({});
+        this.sidebar = useState({collapsed: false});
+        useEffect(() => {
+            document.body.classList.toggle("campus_sidebar_collapsed", this.sidebar.collapsed);
+            return () => document.body.classList.remove("campus_sidebar_collapsed");
+        }, () => [this.sidebar.collapsed]);
+        useEffect(() => {
+            if (this.topModule) this.loadTopNavigation(this.navigationScope, this.topModule);
+        }, () => [this.navigationScope, this.topModule]);
         useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", () => this.syncFacultyRoute());
         useEffect(() => {
             this.subnavRef.el?.querySelector("button.active")?.scrollIntoView({block: "nearest", inline: "nearest"});
@@ -667,6 +695,7 @@ export class CampusNavigation extends CampusBase {
         await super.load();
         document.body.classList.toggle("campus_faculty_workspace", this.state.faculty_modules.length > 0);
         this.syncFacultyRoute();
+        this.sidebar.collapsed = sidebarCollapsed(this.sidebarStorageKey);
         try { Object.assign(this.navPreferences, await this.orm.call("res.users", "campus_get_navigation", [this.navigationScope])); }
         catch { /* Default navigation remains usable if preferences cannot load. */ }
     }
@@ -692,6 +721,46 @@ export class CampusNavigation extends CampusBase {
         }
         return [...new Map(catalog.map(item => [item.id, item])).values()];
     }
+    get sidebarStorageKey() { return [session.uid, this.navigationScope].join(":"); }
+    toggleDesktopSidebar() {
+        this.sidebar.collapsed = !this.sidebar.collapsed;
+        saveSidebarCollapsed(this.sidebarStorageKey, this.sidebar.collapsed);
+    }
+    get topModule() {
+        return this.facultyModule?.key || (this.state.pages.length ? "campus" : null);
+    }
+    get topCatalog() {
+        const module = this.facultyModule;
+        return this.navigationCatalog.filter(item => module ? item.module === module.key : item.kind === "page")
+            .map(item => ({...item, main: true}));
+    }
+    get topItems() {
+        const catalog = this.topCatalog;
+        const items = this.topPreferences[this.topModule]?.items;
+        return navigationItems(catalog, items).filter(row => row.visible && !row.removed).map(row => {
+            const target = catalog.find(item => item.id === row.target);
+            const item = target.data;
+            const active = target.kind === "page" ? this.state.page === item.key :
+                item.page?.startsWith("settings-") ? this.state.page === item.page :
+                item.tool ? this.state.activeTool === item.tool :
+                item.action_id ? this.state.activeAction === item.action_id : this.state.page === item.page;
+            return {...row, active, target};
+        });
+    }
+    applyTopNavigation(module, preferences) {
+        if (preferences.revision >= (this.topPreferences[module]?.revision ?? -1)) {
+            this.topPreferences[module] = preferences;
+        }
+    }
+    async loadTopNavigation(scope, module) {
+        try {
+            const preferences = await this.orm.call("res.users", "campus_get_navigation", [scope, module]);
+            if (scope === this.navigationScope) this.applyTopNavigation(module, preferences);
+        } catch { /* Keep the default module destinations usable. */ }
+    }
+    openTopItem(target) {
+        return target.kind === "page" ? this.go(target.data) : this.facultyGo(target.data);
+    }
     get sidebarItems() {
         const catalog = this.navigationCatalog;
         return navigationItems(catalog, this.navPreferences.items).filter(row => row.visible && !row.removed).map(row => {
@@ -710,16 +779,21 @@ export class CampusNavigation extends CampusBase {
         this.state.module = target.module;
         return this.facultyGo(target.data);
     }
-    async customizeNavigation() {
+    async customizeNavigation(event, top = false) {
+        const trigger = event.currentTarget;
+        const scope = this.navigationScope;
+        const module = top ? this.topModule : null;
+        const catalog = top ? this.topCatalog : this.navigationCatalog;
         try {
-            const scope = this.navigationScope;
-            const preferences = await this.orm.call("res.users", "campus_get_navigation", [scope]);
-            Object.assign(this.navPreferences, preferences);
+            const preferences = await this.orm.call("res.users", "campus_get_navigation", [scope, module]);
+            if (!trigger.isConnected || (top && this.topModule !== module)) return;
+            const apply = saved => top ? this.applyTopNavigation(module, saved) : Object.assign(this.navPreferences, saved);
+            apply(preferences);
             this.navCustomizer?.close();
-            this.navCustomizer = new NavigationCustomizer({catalog: this.navigationCatalog, preferences,
-                save: (items, revision) => this.orm.call("res.users", "campus_save_navigation", [scope, items, revision]),
-                apply: saved => Object.assign(this.navPreferences, saved)});
-            this.navCustomizer.open();
+            this.navCustomizer = new NavigationCustomizer({catalog, preferences, top,
+                save: (items, revision) => this.orm.call("res.users", "campus_save_navigation", [scope, items, revision, module]),
+                apply});
+            this.navCustomizer.open(trigger);
         } catch {
             this.notification.add("Navigation customization could not be loaded. Please retry.", {type: "danger"});
         }

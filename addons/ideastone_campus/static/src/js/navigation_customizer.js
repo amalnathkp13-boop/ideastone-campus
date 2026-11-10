@@ -14,24 +14,26 @@ function icon(name) {
 }
 
 export class NavigationCustomizer {
-    constructor({catalog, preferences, save, apply}) {
+    constructor({catalog, preferences, save, apply, top = false}) {
         this.catalog = catalog;
         this.preferences = preferences;
         this.save = save;
         this.apply = apply;
+        this.top = top;
         this.draft = navigationItems(catalog, preferences.items);
     }
     open(trigger = document.activeElement) {
         this.trigger = trigger;
         this.dialog = element("dialog", "campus_nav_dialog");
+        this.dialog.classList.toggle("is-top-navigation", this.top);
         this.dialog.setAttribute("aria-labelledby", "campus_nav_dialog_title");
         this.dialog.innerHTML = `
             <div class="campus_nav_dialog_frame">
               <header class="campus_nav_dialog_header"><div><h2 id="campus_nav_dialog_title">Customize Navigation</h2>
-                <p>Arrange, rename and choose the sidebar buttons for your workspace.</p></div>
+                <p>${this.top ? "Arrange, rename and choose the top navigation buttons for this module." : "Arrange, rename and choose the sidebar buttons for your workspace."}</p></div>
                 <button type="button" class="campus_nav_icon" data-command="close" aria-label="Close customization">×</button></header>
               <div class="campus_nav_dialog_body"><div class="campus_nav_editor">
-                <div class="campus_nav_section_head"><h3>Sidebar buttons</h3><span>Drag or use ↑ ↓ to reorder</span></div>
+                <div class="campus_nav_section_head"><h3>${this.top ? "Top navigation buttons" : "Sidebar buttons"}</h3><span>Drag or use ↑ ↓ to reorder</span></div>
                 <div class="campus_nav_edit_list" aria-label="Navigation items"></div>
                 <form class="campus_nav_rename" hidden><label>Button name<input maxlength="40" required name="rename"/></label>
                   <button class="btn btn-primary" type="submit">Save name</button><button class="btn btn-outline-primary" type="button" data-command="cancel-name">Cancel rename</button></form>
@@ -41,7 +43,7 @@ export class NavigationCustomizer {
                   <button class="btn btn-primary" type="submit">Add button</button></form>
                 <p class="campus_nav_hint">Choose an existing destination available to your account. Removing a button only removes your shortcut; Reset restores the default menu.</p>
               </div><section class="campus_nav_preview"><h3>Live preview</h3><p>Review the order and visibility before saving.</p><nav aria-label="Navigation preview"></nav>
-                <p>Your actual sidebar updates only after Save changes.</p></section></div>
+                <p>${this.top ? "This module’s top bar updates only after Save changes." : "Your sidebar updates only after Save changes."}</p></section></div>
               <div class="campus_nav_message" role="status" aria-live="polite"></div>
               <footer class="campus_nav_dialog_footer"><button class="btn btn-outline-primary" type="button" data-command="reset"><i class="fa fa-undo" aria-hidden="true"></i> Reset to default</button>
                 <div><button class="btn btn-outline-primary" type="button" data-command="close">Cancel</button><button class="btn btn-primary" type="button" data-command="save">Save changes</button></div></footer>

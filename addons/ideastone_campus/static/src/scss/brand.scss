@@ -1,3 +1,6 @@
+// Keep existing currency icons aligned with the rupee values shown in campus screens.
+.fa.fa-dollar::before, .fa.fa-usd::before, .fa.fa-money::before { content: "\f156"; }
+
 // VCET shell tokens stay inside authenticated campus and portal pages.
 $brand-roots: ".o_web_client:has(.campus_navigation), .campus_portal, .vcet_login";
 :is(#{$brand-roots}) {

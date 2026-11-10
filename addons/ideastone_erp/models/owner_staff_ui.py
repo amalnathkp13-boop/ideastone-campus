@@ -8,6 +8,7 @@ STAFF_VIEWS = [
     ("Staff directory", "action_owner_staff_directory", "op.faculty"),
     ("Leave Management", "action_owner_staff_leave", "hr.leave"),
     ("Payroll History", "action_owner_staff_payroll", "campus.payslip"),
+    ("OD Staffs", "action_owner_staff_od", "hr.leave"),
 ]
 
 
@@ -15,10 +16,15 @@ class OwnerStaffNavigation(models.AbstractModel):
     _inherit = "campus.dashboard"
 
     def _owner_modules(self):
-        # The redesigned pages lead the module; the existing staff tools stay reachable after them.
-        redesigned = [(label, action) for label, action, _model in STAFF_VIEWS]
-        return [(key, title, icon, redesigned + [entry for entry in entries if entry[0] not in dict(redesigned)]
-                 if key == "staff" else entries)
+        if not self.env.user.has_group("ideastone_erp.group_mvp_owner"):
+            return super()._owner_modules()
+        tabs = [("Staff directory", "action_owner_staff_directory"),
+                ("Leave Management", "action_owner_staff_leave"),
+                ("Payroll History", "action_owner_staff_payroll"),
+                ("Staff Profile", "action_staff_profile"),
+                ("OD Management", "action_staff_od_management"),
+                ("OD Staffs", "action_owner_staff_od")]
+        return [(key, title, icon, tabs if key == "staff" else entries)
                 for key, title, icon, entries in super()._owner_modules()]
 
     def _client_action_models(self):
@@ -101,7 +107,62 @@ class OwnerStaffUI(models.AbstractModel):
             "from": str(leave.request_date_from), "to": str(leave.request_date_to),
             "days": leave.number_of_days_display, "reason": leave.name or "—",
             "status": "Second approval" if leave.state == "validate1" else "Pending",
-            "can_approve": leave.can_approve} for leave in leaves]
+            "can_approve": leave.can_approve,
+            "coverage": leave.campus_coverage_summary} for leave in leaves]
+
+    @api.model
+    def get_profile(self, faculty_id):
+        self._check_owner()
+        if type(faculty_id) is not int or faculty_id <= 0:
+            raise ValidationError(_("Choose a valid staff member."))
+        faculty = self.env["op.faculty"].search([("id", "=", faculty_id),
+            ("company_id", "in", [False, self.env.company.id])], limit=1)
+        if not faculty or (faculty.main_department_id.company_id and
+                           faculty.main_department_id.company_id != self.env.company):
+            raise AccessError(_("This staff member is outside your college."))
+        detail_model = self.env["campus.faculty.detail"]
+        details = detail_model.search([("faculty_id", "=", faculty.id),
+            ("company_id", "=", self.env.company.id)], order="kind, date_from desc, id desc") \
+            if detail_model.check_access_rights("read", raise_exception=False) else detail_model.browse()
+        kind_labels = dict(details._fields["kind"].selection)
+        return {"fields": [
+            {"title": "Employment details", "items": [["Reporting to", faculty.campus_reporting_id.name or "—"],
+                ["Work location", faculty.campus_work_location or "—"],
+                ["Registration reference", faculty.campus_registration_reference or "—"],
+                ["Profile review date", str(faculty.campus_profile_review_date or "—")]]},
+            {"title": "Contact & background", "items": [["Mobile", faculty.mobile or "—"],
+                ["Alternate email", faculty.campus_alternate_email or "—"],
+                ["Alternate mobile", faculty.campus_alternate_mobile or "—"],
+                ["Emergency phone", faculty.campus_emergency_phone or "—"],
+                ["Communication address", faculty.campus_communication_address or "—"],
+                ["Previous education", faculty.campus_previous_education or "—"]]},
+        ], "records": [{"kind": kind_labels.get(row.kind, row.kind), "name": row.name or "—",
+            "detail": " · ".join(str(value) for value in (row.specialization, row.institution, row.year,
+                row.designation, row.nature) if value),
+            "status": dict(row._fields["verification"].selection).get(row.verification, "—")}
+            for row in details]}
+
+    @api.model
+    def get_od_staff(self):
+        if not self.env.user.has_group("ideastone_erp.group_mvp_owner"):
+            raise AccessError(_("Owner access is required for staff On Duty records."))
+        today = fields.Date.context_today(self)
+        leaves = self.env["hr.leave"].search([("company_id", "=", self.env.company.id)],
+            order="request_date_from desc, id desc")
+        leaves = leaves.filtered(lambda row: "".join(c for c in row.holiday_status_id.name.lower() if c.isalpha())
+            in {"od", "onduty", "officialduty"})
+        state_labels = {"draft": "Draft", "confirm": "Pending", "validate1": "Second approval",
+            "validate": "Approved", "refuse": "Refused", "cancel": "Cancelled"}
+        rows = [{"id": row.id, "name": row.employee_id.name or "—",
+            "department": row.employee_id.department_id.name or "—",
+            "from": str(row.request_date_from or ""), "to": str(row.request_date_to or ""),
+            "days": row.number_of_days_display, "reason": row.name or "—",
+            "state": row.state, "status": state_labels.get(row.state, row.state.title())}
+            for row in leaves]
+        return {"today": str(today), "rows": rows,
+            "active": sum(row["state"] == "validate" and row["from"] <= str(today) <= row["to"] for row in rows),
+            "pending": sum(row["state"] in {"confirm", "validate1"} for row in rows),
+            "approved": sum(row["state"] == "validate" for row in rows)}
 
     @api.model
     def review_leave(self, leave_id, decision):

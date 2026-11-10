@@ -81,3 +81,22 @@
 @layer campus-theme {
  .o_web_client .campus_owner_staff_payroll .payroll_history_panel {background:#f8fbff!important}
 }
+
+/* Owner staff pages use the shared VCET card rhythm and blue actions. */
+.campus_owner_staff {
+ --line:#e1e9f2;--text:#132a44;--muted:#556b82;--shadow:0 3px 18px rgba(21,54,91,.045);
+ .content{padding:24px;max-width:1700px}
+ .headingrow{margin-bottom:16px}.headingrow h1{font-size:26px}
+ .kpis{gap:12px}.kpi,.panel,.dept{border-color:var(--line);border-radius:15px;box-shadow:var(--shadow)}
+ .dept{background:#fff}.dept:before{content:none}.dept:hover{transform:none;border-color:#adcafa;box-shadow:var(--shadow)}
+ .dept-icon,.dept:nth-child(3n+2) .dept-icon,.dept:nth-child(3n) .dept-icon{background:#eaf3ff;color:var(--blue)}
+ .dept-code{background:#eaf3ff;color:var(--blue)}
+ .progress span,.dept:nth-child(3n+2) .progress span,.dept:nth-child(3n) .progress span{background:var(--blue)}
+ .deptgrid{gap:12px}.toolbar .search,.toolbar .select{min-height:40px}
+ .staff_extended_profile{margin-top:12px}.staff_profile_records{grid-column:1/-1}
+ .staff_record_row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid var(--line)}
+ .staff_record_row b,.staff_record_row small{display:block}.staff_record_row small{color:var(--muted);font-size:12px;margin-top:4px}
+ .staff_empty{color:var(--muted);font-size:13px}
+ .staff_od_reason{max-width:250px;overflow:hidden;text-overflow:ellipsis}
+ @media(max-width:760px){.content{padding:16px 12px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.staff_record_row{align-items:flex-start}}
+}
