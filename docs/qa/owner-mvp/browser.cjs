@@ -56,7 +56,9 @@ async function markup(page) {
         const panelHeights=await page.locator('.collection-panel,.ai-panel').evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().height));
         if(Math.abs(panelHeights[0]-panelHeights[1])>1) throw Error('Fee and insights cards are not balanced on desktop');
         await page.getByRole('heading',{name:'Decision Overview',exact:true}).waitFor();
-        if(await page.locator('.decision-grid .deadlines-panel').evaluate(el=>getComputedStyle(el).gridColumn)!=='1 / -1') throw Error('Dashboard deadlines do not span the full row');
+        const decisionWidth=await page.locator('.decision-grid').evaluate(el=>el.getBoundingClientRect().width);
+        const deadlinesWidth=await page.locator('.deadlines-panel').evaluate(el=>el.getBoundingClientRect().width);
+        if(Math.abs(decisionWidth-deadlinesWidth)>1) throw Error('Dashboard deadlines do not span the full row');
         await assertCampusTheme(page);
         await page.screenshot({path:path.join(out,'owner-charts-1440.png')});
         if(await page.locator('.admin_overview .kpi').count()!==8) throw Error('Admin overview does not show eight indicators');
