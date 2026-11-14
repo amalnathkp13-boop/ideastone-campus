@@ -82,7 +82,9 @@ class TestAcademicsUI(OwnerMVPFixture, TransactionCase):
             "subject_id": self.subject.id, "batch_id": self.section.id, "term_id": self.term.id,
             "planned_date": self.today, "unit": "1", "topic": "Recorded topic", "planned_hours": 5,
             "execution_date": self.today, "actual_hours": 2.5, "notes": "Recorded execution"})
-        self.assertEqual(ui.get_workspace()["counts"]["coverage"], 50)
+        counts = ui.get_workspace()["counts"]
+        self.assertEqual(counts["coverage"], 50)
+        self.assertEqual(counts["lagging_departments"], 1)
         with self.assertRaises(ValidationError), self.cr.savepoint():
             ui.save_record("semesters", {"name": "Invalid dates", "academic_year_id": self.year.id, "term_start_date": "1990-01-01", "term_end_date": "1990-12-31"})
         with self.assertRaises(ValidationError):

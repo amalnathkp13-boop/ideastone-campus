@@ -5,7 +5,7 @@ import { useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
 
 const META = {
-    overview: ["Academics", "A clear view of academic delivery, curriculum progress and what needs attention."],
+    overview: ["Academics", "Key academic delivery, curriculum and structure overview."],
     years: ["Academic years", "Manage academic-year timelines and identify the active year at a glance."],
     departments: ["Departments", "Review department strength, capacity and academic structure in one place."],
     programmes: ["Programmes", "Browse the academic programmes offered across departments and review their structure at a glance."],
@@ -89,7 +89,7 @@ export class AcademicsWorkspace extends Component {
         this.orm = useService("orm"); this.dialog = useService("dialog");
         this.user = useService("user");
         this.view = this.props.action.params?.view || "overview";
-        this.state = useState({data: null, loading: false, error: "", query: "", filtersOpen: false, filters: {}, trend: "progress", subjectDepartment: null});
+        this.state = useState({data: null, loading: false, error: "", query: "", filtersOpen: false, filters: {}, subjectDepartment: null});
         this.request = 0;
         this.subjectListHeading = useRef("subjectListHeading");
         useEffect(() => this.subjectListHeading.el?.focus(), () => [this.state.subjectDepartment]);
@@ -157,20 +157,23 @@ export class AcademicsWorkspace extends Component {
     initials(value) { return String(value || "").split(/\s+/).slice(0,2).map(w => w[0]).join("").toUpperCase(); }
     width(value) { return `${Math.min(100, Math.max(0, value || 0))}%`; }
     get stats() {
-        return [{name: "Active programmes", value: this.number(this.c.programmes), icon: "▤", tint: "#eaf3ff", accent: "#1769e8", foot: "Enabled in the academic directory"},
-            {name: "Curriculum coverage", value: this.percent(this.c.coverage), icon: "✓", tint: "#eaf5ef", accent: "#579477", foot: "Recorded delivery / planned lesson hours due"},
-            {name: "Active class sections", value: this.number(this.c.sections), icon: "▦", tint: "#f0edff", accent: "#8172c8", foot: "Across the current academic year"},
-            {name: "Items needing attention", value: this.number(this.c.checks), icon: "!", tint: "#fff4e2", accent: "#b8832d", foot: "Credits, subject, semester and section mapping checks"}];
+        return [{name: "Active programmes", value: this.number(this.c.programmes), icon: "fa-graduation-cap", tint: "#e7f0ff", accent: "#1769e8"},
+            {name: "Active departments", value: this.number(this.c.departments), icon: "fa-university", tint: "#e6f5f0", accent: "#16866c"},
+            {name: "Active class sections", value: this.number(this.c.sections), icon: "fa-users", tint: "#efeaff", accent: "#7652cc"},
+            {name: "Items needing attention", value: this.number(this.c.checks), icon: "fa-exclamation-triangle", tint: "#fff2dc", accent: "#c28219"}];
     }
-    get insights() {
-        return [{title: "Confirm approved curriculum credits", text: `${this.c.missing_credits} active subjects have zero credit values. Confirm approved credits and review applied-learning opportunities with the curriculum committee.`, tag: "Curriculum opportunity", icon: "↗", tint: "#eaf3ff", accent: "#1769e8"},
-            {title: "Review syllabus pacing in mid-semester", text: this.c.coverage === null ? "No lesson hours are recorded as due in the current year. Add teaching plans and execution records to measure delivery pace." : `Recorded delivery covers ${this.percent(this.c.coverage)} of lesson hours due. Review unfinished plans with department coordinators.`, tag: "Needs review", icon: "!", tint: "#fff4e2", accent: "#b8832d"},
-            {title: "Complete academic mappings", text: `${this.c.missing_subjects} active subjects lack semester links; ${this.c.missing_sections} active sections lack year or semester mappings. Verify these before scheduling.`, tag: "Academic setup", icon: "＋", tint: "#eaf5ef", accent: "#579477"}];
+    get structure() {
+        return [["Departments", this.c.departments], ["Programmes", this.c.programmes],
+            ["Semesters", this.d.rows.semesters.length], ["Sections", this.c.sections]];
     }
-    get chart() {
-        const max = Math.max(1, ...this.d.trend.flatMap(r => [r.classes, r.scheduled]));
-        return this.d.trend.map(r => ({...r, actual: this.state.trend === "classes" ? r.classes * 100 / max : r.progress,
-            planned: this.state.trend === "classes" ? r.scheduled * 100 / max : r.target}));
+    get progress() {
+        return [{name: "Curriculum coverage", value: this.d.readiness[0]?.percent},
+            {name: "Syllabus progress", value: this.c.coverage}];
+    }
+    get alerts() {
+        return [{name: "Pending subject/semester mappings", value: this.c.missing_subjects + this.c.missing_terms + this.c.missing_sections},
+            {name: "Subjects with missing credit details", value: this.c.missing_credits},
+            {name: "Departments with syllabus lag", value: this.c.lagging_departments}];
     }
     get distribution() {
         const entries = Object.entries(this.d.distribution).sort((a,b) => b[1] - a[1]);

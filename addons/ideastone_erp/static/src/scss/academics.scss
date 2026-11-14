@@ -248,3 +248,38 @@ h1{font-size:30px;line-height:1.2;letter-spacing:-.7px;margin:0 0 7px;font-weigh
   @media(max-width:1200px) { .curriculum-departments { grid-template-columns:repeat(2,minmax(0,1fr)); } }
   @media(max-width:760px) { .curriculum-departments { grid-template-columns:1fr;padding:0 12px 12px; }.curriculum-list-head { align-items:flex-start; }.curriculum-list-head h3 { flex-basis:100%; } }
 }
+
+/* Owner overview follows the compact academic dashboard layout. */
+.campus_academics_workspace .academic-owner-overview {
+  .overview-grid {gap:12px;margin-bottom:24px}
+  .metric {min-height:96px;padding:18px 22px;display:flex;align-items:center;gap:22px;border-radius:13px}
+  .metric::after {content:none}
+  .metric-icon {flex:0 0 54px;width:54px;height:54px;border-radius:14px;font-size:25px}
+  .metric-name {color:#172d4a;font-size:15px;font-weight:550}
+  .metric-value {margin:5px 0 0;font-size:30px;color:#0b2546}
+  .academic-overview-panels {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  .academic-overview-panel {padding:20px;min-height:173px}
+  .academic-overview-heading {display:flex;align-items:flex-start;gap:18px;margin-bottom:20px}
+  .academic-overview-heading>i {flex:0 0 34px;width:34px;padding-top:2px;font-size:27px;color:#0765ff;text-align:center}
+  .academic-overview-heading h2 {font-size:20px;line-height:1.2;margin:0 0 4px;color:#0b2546}
+  .academic-overview-heading p {font-size:13px;color:#536f95;margin:0}
+  .academic-structure-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));text-align:center}
+  .academic-structure-grid>div {border-right:1px solid #d9e4f3;padding:4px 8px}
+  .academic-structure-grid>div:last-child {border-right:0}
+  .academic-structure-grid span {display:block;color:#486789;font-size:13px}
+  .academic-structure-grid strong {display:block;margin-top:4px;color:#0b2546;font-size:24px}
+  .academic-progress-list {display:grid;gap:18px;padding-top:2px}
+  .academic-progress-row {display:grid;grid-template-columns:minmax(140px,1fr) minmax(120px,1.45fr) 46px;align-items:center;gap:16px;font-size:14px;color:#12294a}
+  .academic-progress-row>strong {text-align:right;font-size:14px}
+  .academic-progress-track {height:14px;background:#e3e9f3;border-radius:20px;overflow:hidden}
+  .academic-progress-track div {height:100%;border-radius:20px;background:#0965f8}
+  .academic-alert-row,.academic-status-list>div {display:grid;align-items:center;border-bottom:1px solid #e2eaf3;min-height:34px;font-size:14px;color:#172d4a}
+  .academic-alert-row {grid-template-columns:10px minmax(0,1fr) auto;gap:12px}
+  .academic-alert-row:last-child,.academic-status-list>div:last-child {border-bottom:0}
+  .academic-alert-dot {width:8px;height:8px;border-radius:50%;background:#0965f8}
+  .academic-alert-row strong {background:#e5ecfb;padding:4px 11px;border-radius:8px;min-width:35px;text-align:center}
+  .academic-status-list>div {grid-template-columns:minmax(0,1fr) auto;padding:0 12px}
+  @media(max-width:1100px) {.overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.academic-overview-panels{grid-template-columns:1fr}}
+  @media(max-width:600px) {.overview-grid{gap:10px}.metric{gap:10px;padding:12px;min-height:82px}.metric-icon{flex-basis:40px;width:40px;height:40px;font-size:19px}.metric-name{font-size:12px}.metric-value{font-size:23px}.academic-overview-panel{padding:16px}.academic-overview-heading h2{font-size:17px}.academic-structure-grid span{font-size:11px}.academic-progress-row{grid-template-columns:1fr 1fr 38px;gap:8px;font-size:11px}}
+  @media(max-width:420px) {.overview-grid{grid-template-columns:1fr}}
+}
