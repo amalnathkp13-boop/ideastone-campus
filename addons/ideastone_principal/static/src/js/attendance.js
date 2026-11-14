@@ -16,6 +16,7 @@ const groupNames = { department_key: "department", category: "category", year: "
 const statusTone = { Present: "green", Absent: "red", Late: "amber", "On Duty": "blue", Leave: "amber" };
 const along = (start, end) => Math.max(1, (Date.parse(end) - Date.parse(start)) / 86400000 + 1);
 const dateKey = date => date.toISOString().slice(0, 10);
+let savedScope;
 
 function counts(rows) {
     return {
@@ -38,6 +39,9 @@ export class PrincipalAttendance extends Component {
 
     setup() {
         this.orm = useService("orm");
+        const user = useService("user");
+        const company = useService("company");
+        this.filterScope = `${user.userId}:${company.currentCompany.id}`;
         this.tab = this.props.action.params?.tab || "overview";
         this.state = useState({ data: null, loading: true, error: "", filterOpen: false, filters: {},
             draft: {}, path: this.readPath(), dialog: "", period: "daily" });
@@ -51,7 +55,7 @@ export class PrincipalAttendance extends Component {
         useExternalListener(document, "pointerdown", event => {
             if (this.state.filterOpen && !this.filterButton.el?.parentNode.contains(event.target)) this.closeFilters();
         });
-        onWillStart(() => this.load());
+        onWillStart(() => this.load(savedScope?.key === this.filterScope ? savedScope.filters : {}));
     }
 
     async load(filters = {}) {
@@ -65,6 +69,7 @@ export class PrincipalAttendance extends Component {
             this.state.data = data;
             this.state.filters = { type: "", search: "", status: "", department: "", quick: "month", ...filters,
                 year_id: data.year_id, date_from: data.date_from, date_to: data.date_to };
+            savedScope = { key: this.filterScope, filters: { ...this.state.filters } };
         } catch (error) {
             this.state.error = error.data?.message || "Attendance could not be loaded. Please retry.";
         } finally {
