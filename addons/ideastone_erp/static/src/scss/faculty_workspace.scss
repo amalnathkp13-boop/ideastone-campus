@@ -10,6 +10,10 @@ body.campus_faculty_workspace {
     &.o_web_client > .o_navbar, &.o_web_client > .o_main_navbar { margin-left: 250px; }
     &.o_web_client > .o_action_manager { margin-left: 250px; margin-top: 56px; min-height: 0; }
     &:not(:has(.campus_faculty_subnav)).o_web_client > .o_action_manager { margin-top: 0; }
+    .appraisal_page_heading { padding: 16px 24px 12px; background: #f4f7fb;
+        h1 { font-size: 26px; line-height: 1.25; margin: 0 0 4px; color: #132a44; }
+        p { font-size: 14px; line-height: 1.45; margin: 0; color: #556b82; }
+    }
     .campus_dashboard { padding: 26px 30px; background: #f4f7fb; }
     .campus_dashboard:has(.campus_module_overview) > .campus_page_heading { display: none; }
     .campus_faculty_welcome { display: flex; justify-content: space-between; align-items: center; gap: 20px;

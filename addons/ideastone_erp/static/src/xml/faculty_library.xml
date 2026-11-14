@@ -7,7 +7,6 @@
         <t t-if="state.data">
           <div class="crumbrow"><span>VCET Campus / Faculty workspace / <strong t-esc="page[0]"/></span><span><t t-esc="date(state.data.today)"/> · <strong>Faculty</strong></span></div>
           <div class="page-heading"><div><h1 t-esc="page[0]"/><p t-esc="page[1]"/></div><button class="btn" t-on-click="refresh" t-att-disabled="state.loading">↻ Refresh</button></div>
-          <section class="banner"><div><h2 t-esc="page[2]"/><p t-esc="page[3]"/></div><div class="banner-badge">Staff access · <t t-esc="state.data.demo ? 'Sample records' : 'College records'"/></div></section>
           <div class="staff-strip"><div class="staff-chip"><span>Staff member</span><strong t-esc="state.data.staff.name"/></div><div class="staff-chip"><span>Staff ID</span><strong t-esc="state.data.staff.code"/></div><div class="staff-chip"><span>Department</span><strong t-esc="state.data.staff.department"/></div><div class="staff-chip"><span>Library access</span><strong><span class="status" t-att-class="state.data.staff.active ? 'available' : 'pending'" t-esc="state.data.staff.active ? 'Active' : 'Registration required'"/></strong></div></div>
 
           <div t-if="view === 'opac' || view === 'circulation'" class="kpis"><article t-foreach="stats" t-as="stat" t-key="stat.label" class="kpi"><div class="kicon" t-att-class="stat.tone" aria-hidden="true" t-esc="stat.icon"/><div><div class="kpi-label" t-esc="stat.label"/><strong t-esc="stat.value"/><small t-esc="stat.detail"/></div></article></div>
