@@ -32,7 +32,7 @@
   .grv_stat_icon { width: 39px; height: 39px; flex: none; display: grid; place-items: center; border-radius: 12px; background: #eaf2ff; color: var(--grv-blue); font-size: 20px; }
   .grv_stat:nth-child(2) .grv_stat_icon { background: #e5f7ef; color: #159264; }
   .grv_stat:nth-child(3) .grv_stat_icon { background: #fff3df; color: #c17a0b; }
-  .grv_stat:nth-child(4) .grv_stat_icon { background: #f0eaff; color: #7852d6; }
+  .grv_stat:nth-child(4) .grv_stat_icon { background: #f1f9f9; color: #117c87; }
   .grv_workspace { display: grid; grid-template-columns: minmax(0,1.65fr) minmax(300px,.9fr); gap: 18px; align-items: start; }
   .grv_panel { min-width: 0; border-radius: 16px; padding: 21px;
     h2 { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 760; color: #0e3151; }
@@ -74,12 +74,12 @@
   }
   .grv_side { display: grid; gap: 18px; }
   .grv_side .grv_panel h2 { margin-bottom: 18px; }
-  .grv_insight { border: 1px solid #e2d9ff; background: linear-gradient(135deg,#f2edff,#fff); border-radius: 13px; padding: 17px;
-    > span { display: inline-block; background: #e5dcff; color: #6342b7; border-radius: 20px; padding: 5px 10px; font-size: 11px; font-weight: 800; }
+  .grv_insight { border: 1px solid #e7f8f8; background: linear-gradient(135deg,#f1f9f9,#fff); border-radius: 13px; padding: 17px;
+    > span { display: inline-block; background: #f1f9f9; color: #117c87; border-radius: 20px; padding: 5px 10px; font-size: 11px; font-weight: 800; }
     h3 { color: #0b2e4b; font-size: 16px; font-weight: 760; margin: 12px 0 7px; }
     p { color: #56718e; font-size: 12px; line-height: 1.6; margin-bottom: 12px; }
-    > div { border-top: 1px solid #ded5ff; padding-top: 11px; margin-top: 10px; font-size: 12px; color: #4c6482; }
-    strong { display: block; color: #48329c; margin-bottom: 3px; }
+    > div { border-top: 1px solid #e7f8f8; padding-top: 11px; margin-top: 10px; font-size: 12px; color: #4c6482; }
+    strong { display: block; color: #117c87; margin-bottom: 3px; }
   }
   .grv_contact { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid #edf1f7; font-size: 12px;
     span { color: var(--grv-muted); } strong { color: #0b2e4b; text-align: right; }

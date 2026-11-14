@@ -4,7 +4,7 @@
   --blue-soft:#eaf3ff; --blue-line:#d8e6f8; --ink:#102f4c; --muted:#68819b;
   --canvas:#f3f7fc; --white:#fff; --line:#e3ebf5; --green:#5b9278;
   --green-soft:#eaf5ef; --amber:#bd8733; --amber-soft:#fff5e4;
-  --violet:#8a7bd1; --violet-soft:#f0edff; --shadow:0 8px 24px rgba(19,55,92,.045);
+  --violet:#117c87; --violet-soft:#f0edff; --shadow:0 8px 24px rgba(19,55,92,.045);
 
 font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;font-size:14px;line-height:1.45;color:var(--ink);
 *, *::before, *::after{box-sizing:border-box}
@@ -70,7 +70,7 @@ h1{font-size:30px;line-height:1.2;letter-spacing:-.7px;margin:0 0 7px;font-weigh
 .event-name{font-size:12px;font-weight:700;color:#254560;margin-bottom:3px}
 .event-meta{font-size:10px;color:#7b8fa3}
 .status{font-size:10px;font-weight:700;border-radius:20px;padding:5px 8px;white-space:nowrap}
-.status.scheduled{background:#eaf5ef;color:#4d8b6d}.status.review{background:#fff4e2;color:#a8792d}.status.draft{background:#f0edff;color:#796bb7}
+.status.scheduled{background:#eaf5ef;color:#4d8b6d}.status.review{background:#fff4e2;color:#a8792d}.status.draft{background:#f0edff;color:#117c87}
 .program-body{padding:2px 20px 20px}
 .program-row{padding:12px 0;border-top:1px solid #eaf0f7}
 .program-top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}
@@ -152,20 +152,20 @@ h1{font-size:30px;line-height:1.2;letter-spacing:-.7px;margin:0 0 7px;font-weigh
 .bar-group:nth-child(even) .bar.secondary{background:#b9d5ff}
 .fill{background:linear-gradient(90deg,#4f9b83,#8bc7ae)}
 .program-row:nth-child(2) .fill{background:linear-gradient(90deg,#d6a044,#f0cb7e)}
-.program-row:nth-child(3) .fill{background:linear-gradient(90deg,#8876c8,#b5a8e8)}
+.program-row:nth-child(3) .fill{background:linear-gradient(90deg,#117c87,#d1e9eb)}
 .program-row:nth-child(4) .fill{background:linear-gradient(90deg,#d97969,#f0aa9d)}
 .year-progress div{background:linear-gradient(90deg,#4f9b83,#8bc7ae)}
 .dept-card:nth-child(4n+1) .dept-progress span{background:linear-gradient(90deg,#4f9b83,#8bc7ae)}
 .dept-card:nth-child(4n+2) .dept-progress span{background:linear-gradient(90deg,#d6a044,#f0cb7e)}
-.dept-card:nth-child(4n+3) .dept-progress span{background:linear-gradient(90deg,#8876c8,#b5a8e8)}
+.dept-card:nth-child(4n+3) .dept-progress span{background:linear-gradient(90deg,#117c87,#d1e9eb)}
 .dept-card:nth-child(4n) .dept-progress span{background:linear-gradient(90deg,#d97969,#f0aa9d)}
 .section-dist-row:nth-child(1) .section-dist-track span{background:linear-gradient(90deg,#4f9b83,#8bc7ae)}
 .section-dist-row:nth-child(2) .section-dist-track span{background:linear-gradient(90deg,#d6a044,#f0cb7e)}
-.section-dist-row:nth-child(3) .section-dist-track span{background:linear-gradient(90deg,#8876c8,#b5a8e8)}
+.section-dist-row:nth-child(3) .section-dist-track span{background:linear-gradient(90deg,#117c87,#d1e9eb)}
 .section-dist-row:nth-child(4) .section-dist-track span{background:linear-gradient(90deg,#d97969,#f0aa9d)}
 .curriculum-bar-row:nth-child(1) .curriculum-track span{background:#4f9b83}
 .curriculum-bar-row:nth-child(2) .curriculum-track span{background:#d6a044}
-.curriculum-bar-row:nth-child(3) .curriculum-track span{background:#8876c8}
+.curriculum-bar-row:nth-child(3) .curriculum-track span{background:#117c87}
 .curriculum-bar-row:nth-child(4) .curriculum-track span{background:#d97969}
 .curriculum-bar-row:nth-child(5) .curriculum-track span{background:#42999d}
 .cycle-step.done{background:#6eaa91}

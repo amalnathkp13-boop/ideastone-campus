@@ -23,7 +23,7 @@
   .od_token_icon { width: 36px; height: 36px; flex: 0 0 36px; display: grid; place-items: center; color: white; background: #0870ef; border-radius: 10px; font-size: 19px; }
   .od_used { background: #ebfaf3; .od_token_icon { background: #05b563; border-radius: 50%; } }
   .od_pending { background: #fff7e9; .od_token_icon { background: #fba104; border-radius: 50%; } }
-  .od_remaining { background: #f5f0ff; .od_token_icon { background: #9a50f7; border-radius: 50%; } }
+  .od_remaining { background: #f8fbfb; .od_token_icon { background: #117c87; border-radius: 50%; } }
   .od_alert { background: #fff5df; color: #785012; border: 1px solid #f6dfaa; padding: 10px 12px; border-radius: 7px; font-size: 12px; }
   .od_upper_grid { display: grid; grid-template-columns: 1.17fr 1fr; gap: 12px; }
   .od_right_column { display: grid; grid-template-rows: auto 1fr; gap: 12px; min-width: 0; }
@@ -54,7 +54,7 @@
   .od_primary_button:hover:not(:disabled) { background: #034edb; color: white; }
   .od_outline_button:hover:not(:disabled) { background: #f1f6ff; text-decoration: none; }
   button:disabled { opacity: .55; cursor: not-allowed; }
-  .od_form_hint { color: #7d5972; font-size: 11px; margin: 0; }
+  .od_form_hint { color: #117c87; font-size: 11px; margin: 0; }
   .od_assistant_body { background: #eff7ff; border-radius: 6px; padding: 15px 12px; font-size: 11px; color: #4d638b;
     strong { color: #111b38; font-size: 11px; } strong i, li::marker { color: #00a65b; }
     ul { margin: 14px 0 14px 21px; padding: 0; line-height: 1.65; } li { margin-bottom: 6px; }

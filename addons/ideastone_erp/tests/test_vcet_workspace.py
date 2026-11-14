@@ -174,6 +174,7 @@ class TestVcetWorkspace(TransactionCase):
         self.assertNotIn("access", [p["key"] for p in overview["pages"]])
         self.assertFalse(overview["library_allowed"])
         self.assertIn("teaching", [module["key"] for module in overview["faculty_modules"]])
+        self.assertTrue(self.env["campus.dashboard"].with_user(self.teacher).get_module_overview("teaching")["rows"])
         for module in overview["faculty_modules"]:
             for item in module["items"]:
                 if item.get("action"):

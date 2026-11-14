@@ -1,38 +1,43 @@
-/* Shared visual contract, taken from Student Dashboard and Academics.
- * Loaded in both Odoo bundles so portals, client actions and native record views
- * use the same tokens. Important declarations intentionally beat older, scoped
- * module skins; geometry, workflow states and icon fonts stay with each module.
- * A named layer makes this contract's important rules outrank unlayered legacy
- * important rules without escalating selector specificity in every new module.
+/* VCET UI SOP v1.0. This layer is shared by backend actions and portal pages.
+ * Keep it within the campus shell so other Odoo applications retain their
+ * native appearance. Individual workflows own their layout and data states.
  */
 @layer campus-theme {
-:root {
-    --ui-font: Roboto, "Odoo Unicode Support Noto", Arial, sans-serif;
-    --ui-ink: #102d49;
-    --ui-title: #0e3151;
-    --ui-muted: #617b96;
-    --ui-blue: #1769d2;
+$ui-roots: ".o_web_client:has(.campus_navigation), .campus_portal, .student_workspace, .parent_workspace, .vcet_login, .qp-faculty, .qp-hod, .coe-workspace";
+$ui-pages: ".campus_dashboard, .admin_overview, .student_main, .parent_main, .student_profile_view, .student_academics_view, .student_timetable_view, .student_od_view, .account_view, .attendance_view, .exam_view, .fee_view, .help_view, .library_view, .notices_view, .requests_view, .campus_admissions_workspace, .campus_students_workspace, .campus_exams_workspace, .campus_appraisal, .campus_attendance_page, .campus_leave_page, .campus_staff_profile, .campus_payroll_history, .campus_staff_od_management, .campus_student_attendance, .campus_subject_attendance, .campus_ai_page, .coe-workspace, .qp-faculty, .qp-hod, .qp-faculty .content, .qp-hod .content, .o_ideastone_lms_frame, .campus_academics_workspace, .campus_academics_record, .campus_accountant_overview, .campus_accountant_collections, .accountant_spending, .campus_fee_circulars, .campus_transport_workspace, .campus_college_calendar, .campus_faculty_grievances, .campus_faculty_library, .campus_faculty_profile_workspace, .campus_task_list, .campus_owner_fees_workspace, .campus_owner_staff, .campus_faculty_home, .campus_services_dashboard, .campus_communication_dashboard, .owner_attendance, .owner-communication, .green_card";
+:is(#{$ui-roots}) {
+    --ui-font: Inter, "Segoe UI", Arial, sans-serif;
+    --ui-ink: #132a44;
+    --ui-title: #132a44;
+    --ui-muted: #556b82;
+    --ui-blue: #1769e8;
+    --ui-primary: var(--ui-blue);
+    --ui-secondary: var(--ui-muted);
     --ui-blue-soft: #eaf3ff;
     --ui-canvas: #f4f7fb;
     --ui-surface: #fff;
-    --ui-line: #dfe8f2;
+    --ui-line: #e1e9f2;
+    --ui-border: var(--ui-line);
     --ui-table-head: #f3f7fb;
-    --ui-green: #16835d;
+    --ui-green: #0e8664;
     --ui-green-soft: #eaf8f1;
-    --ui-amber: #9b620d;
+    --ui-amber: #9a6015;
     --ui-amber-soft: #fff5e5;
-    --ui-red: #b33140;
+    --ui-red: #b4473a;
     --ui-red-soft: #ffeded;
-    --ui-purple: #7355c7;
-    --ui-purple-soft: #f1edff;
+    --ui-purple: #117c87;
+    --ui-purple-soft: #e7f8f8;
     --ui-teal: #117c87;
     --ui-teal-soft: #e7f8f8;
     --ui-radius: 15px;
-    --ui-shadow: 0 5px 18px rgba(19, 48, 78, .035);
+    --ui-shadow: 0 3px 18px rgba(21, 54, 91, .045);
     --ui-hero: linear-gradient(110deg, #103958, #1c5b91);
-    --ui-sidebar: linear-gradient(180deg, #092f50, #06233b);
+    --ui-sidebar: linear-gradient(180deg, #092c47, #06233b);
+    --ui-space-1: 4px; --ui-space-2: 8px; --ui-space-3: 12px;
+    --ui-space-4: 16px; --ui-space-5: 20px; --ui-space-6: 24px;
+    --ui-control-radius: 8px;
 
-    --campus-navy: #06233b !important;
+    --campus-navy: #092c47 !important;
     --campus-navy-secondary: #103958 !important;
     --campus-ink: var(--ui-ink) !important;
     --campus-muted: var(--ui-muted) !important;
@@ -47,16 +52,11 @@
     --campus-radius: var(--ui-radius) !important;
 }
 
-/* Include the independently previewed faculty/HOD/COE workspaces as well as
- * the common Odoo shell. No role-specific template needs to duplicate tokens. */
-$ui-roots: ".o_web_client, .campus_portal, .student_workspace, .parent_workspace, .vcet_login, .qp-faculty, .qp-hod, .coe-workspace";
-$ui-pages: ".campus_dashboard, .admin_overview, .student_main, .parent_main, .student_profile_view, .student_academics_view, .student_timetable_view, .student_od_view, .account_view, .attendance_view, .exam_view, .fee_view, .help_view, .library_view, .notices_view, .requests_view, .campus_admissions_workspace, .campus_students_workspace, .campus_exams_workspace, .campus_appraisal, .campus_attendance_page, .campus_leave_page, .campus_staff_profile, .campus_payroll_history, .campus_staff_od_management, .campus_student_attendance, .campus_subject_attendance, .campus_ai_page, .coe-workspace, .qp-faculty, .qp-hod, .qp-faculty .content, .qp-hod .content, .o_ideastone_lms_frame";
-
 :is(#{$ui-roots}) {
     font-family: var(--ui-font) !important;
     font-size: 14px !important;
     font-weight: 400;
-    line-height: 1.5;
+    line-height: 1.45;
     color: var(--ui-ink);
     background-color: var(--ui-canvas);
 
@@ -68,27 +68,27 @@ $ui-pages: ".campus_dashboard, .admin_overview, .student_main, .parent_main, .st
         font-family: var(--ui-font) !important;
     }
 
-    h1 { font-size: 31px !important; font-weight: 760 !important; line-height: 1.2 !important; letter-spacing: -.8px !important; color: var(--ui-title) !important; overflow-wrap: anywhere; }
+    h1 { font-size: 26px !important; font-weight: 780 !important; line-height: 1.2 !important; letter-spacing: -.6px !important; color: var(--ui-title) !important; overflow-wrap: anywhere; }
     h2 { font-size: 17px !important; font-weight: 760 !important; line-height: 1.2 !important; letter-spacing: -.25px !important; color: var(--ui-ink) !important; }
     h3 { font-size: 15px !important; font-weight: 650 !important; line-height: 1.3 !important; letter-spacing: -.15px !important; color: var(--ui-ink) !important; }
     h4 { font-size: 14px !important; font-weight: 650 !important; line-height: 1.35 !important; color: var(--ui-ink) !important; }
     h5 { font-size: 13px !important; font-weight: 650 !important; color: var(--ui-ink) !important; }
     h6 { font-size: 12px !important; font-weight: 650 !important; color: var(--ui-ink) !important; }
-    p { font-size: 13px !important; line-height: 1.55 !important; color: var(--ui-muted) !important; }
+    p { font-size: 14px !important; line-height: 1.45 !important; color: var(--ui-muted) !important; }
     strong, b { font-weight: 600 !important; }
     :is(h1, h2, h3, h4, h5, h6) :is(strong, b) { font-weight: inherit !important; }
     small, .small, .text-muted { font-size: 12px !important; color: var(--ui-muted) !important; }
     a:not(.btn):not([role="button"]) { text-underline-offset: 3px; }
-    dt { font-size: 12px !important; font-weight: 400 !important; color: var(--ui-muted) !important; }
-    dd { font-size: 12px !important; font-weight: 600 !important; color: var(--ui-ink) !important; }
-    label, .o_form_label { font-size: 12px !important; font-weight: 650 !important; color: var(--ui-muted) !important; }
+    dt { font-size: 12px !important; font-weight: 500 !important; color: var(--ui-muted) !important; }
+    dd { font-size: 14px !important; font-weight: 600 !important; color: var(--ui-ink) !important; }
+    label, .o_form_label { font-size: 12px !important; font-weight: 600 !important; color: var(--ui-muted) !important; }
     :is(input, select, textarea, .o_input):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]) {
-        font-size: 12px !important; font-weight: 400 !important; color: var(--ui-ink) !important;
-        border-color: var(--ui-line) !important; border-radius: 9px !important;
+        font-size: 14px !important; font-weight: 400 !important; color: var(--ui-ink) !important;
+        border-color: var(--ui-line) !important; border-radius: var(--ui-control-radius) !important;
         max-width: 100%; min-width: 0;
     }
     input::placeholder, textarea::placeholder { color: var(--ui-muted) !important; opacity: 1; }
-    button, .btn, [role="button"] { font-size: 12px !important; font-weight: 650 !important; }
+    button, .btn, [role="button"] { font-size: 14px !important; font-weight: 600 !important; }
     .btn-primary, .o_form_button_save, .o_list_button_add {
         color: white !important; background: var(--ui-blue) !important; border-color: var(--ui-blue) !important;
         font-weight: 750 !important;
@@ -98,8 +98,8 @@ $ui-pages: ".campus_dashboard, .admin_overview, .student_main, .parent_main, .st
     :is(button, a, input, select, textarea, summary):focus-visible { outline: 3px solid #9bc5f8; outline-offset: 2px; }
 
     table:not(.o_calendar_widget table) {
-        th { font-size: 12px !important; font-weight: 750 !important; color: #526f8f !important; background-color: var(--ui-table-head) !important; border-color: var(--ui-line) !important; }
-        td { font-size: 12px !important; color: var(--ui-ink); border-color: var(--ui-line) !important; }
+        th { font-size: 12px !important; font-weight: 600 !important; color: var(--ui-muted) !important; background-color: var(--ui-table-head) !important; border-color: var(--ui-line) !important; }
+        td { font-size: 13px !important; color: var(--ui-ink); border-color: var(--ui-line) !important; }
     }
     .modal-content, .o_dialog .modal-content, .o_form_sheet {
         background: var(--ui-surface) !important; border-color: var(--ui-line) !important;
@@ -122,16 +122,26 @@ $ui-pages: ".campus_dashboard, .admin_overview, .student_main, .parent_main, .st
 :is(#{$ui-pages}) {
     // Bridge existing local variables to the common palette, including the
     // independently maintained exam workspaces. Values are semantic, not data.
-    --navy: var(--ui-title) !important; --navy-2: #103958 !important;
+    --ui-font: Inter, "Segoe UI", Arial, sans-serif !important;
+    --ui-ink: #132a44 !important; --ui-title: #132a44 !important;
+    --ui-muted: #556b82 !important; --ui-blue: #1769e8 !important;
+    --ui-primary: var(--ui-blue) !important; --ui-secondary: var(--ui-muted) !important;
+    --ui-canvas: #f4f7fb !important; --ui-surface: #fff !important;
+    --ui-line: #e1e9f2 !important; --ui-border: var(--ui-line) !important;
+    --navy: var(--ui-title) !important; --navy-2: #103958 !important; --navy2: #103958 !important;
     --text: var(--ui-ink) !important; --ink: var(--ui-ink) !important;
-    --muted: var(--ui-muted) !important; --line: var(--ui-line) !important;
-    --blue: var(--ui-blue) !important; --blue-2: #1153a8 !important;
-    --blue-soft: var(--ui-blue-soft) !important; --page: var(--ui-canvas) !important;
-    --white: var(--ui-surface) !important; --shadow: var(--ui-shadow) !important;
-    --green: var(--ui-green) !important; --green-soft: var(--ui-green-soft) !important;
-    --amber: var(--ui-amber) !important; --amber-soft: var(--ui-amber-soft) !important;
-    --red: var(--ui-red) !important; --red-soft: var(--ui-red-soft) !important;
-    @each $namespace in academic, profile, timetable, tt, attendance, sa, swa, exam, fee, help, library, notices, requests, account, od, parent, staff, leave, mentor, payroll, app, dash, ai, coe {
+    --muted: var(--ui-muted) !important; --line: var(--ui-line) !important; --border: var(--ui-line) !important;
+    --blue: var(--ui-blue) !important; --blue-2: #1153a8 !important; --blue2: #1153a8 !important;
+    --purple: var(--ui-teal) !important; --violet: var(--ui-teal) !important;
+    --lav: var(--ui-teal-soft) !important; --purplebg: var(--ui-teal-soft) !important;
+    --brand-violet: var(--ui-teal) !important; --brand-lavender: var(--ui-teal-soft) !important;
+    --blue-soft: var(--ui-blue-soft) !important; --pale: var(--ui-blue-soft) !important;
+    --page: var(--ui-canvas) !important; --bg: var(--ui-canvas) !important; --canvas: var(--ui-canvas) !important;
+    --white: var(--ui-surface) !important; --shadow: var(--ui-shadow) !important; --radius: var(--ui-radius) !important;
+    --green: var(--ui-green) !important; --green-soft: var(--ui-green-soft) !important; --greenbg: var(--ui-green-soft) !important;
+    --amber: var(--ui-amber) !important; --amber-soft: var(--ui-amber-soft) !important; --amberbg: var(--ui-amber-soft) !important;
+    --red: var(--ui-red) !important; --red-soft: var(--ui-red-soft) !important; --redbg: var(--ui-red-soft) !important;
+    @each $namespace in academic, profile, timetable, tt, attendance, att, sa, swa, exam, fee, help, library, notices, requests, account, accountant, col, oc, fs, grv, os, od, parent, staff, leave, mentor, payroll, app, dash, ai, coe {
         --#{$namespace}-blue: var(--ui-blue) !important;
         --#{$namespace}-ink: var(--ui-ink) !important;
         --#{$namespace}-text: var(--ui-ink) !important;
@@ -141,13 +151,64 @@ $ui-pages: ".campus_dashboard, .admin_overview, .student_main, .parent_main, .st
         --#{$namespace}-green: var(--ui-green) !important;
         --#{$namespace}-green-bg: var(--ui-green-soft) !important;
     }
+    --oc-bg: var(--ui-canvas) !important; --oc-navy: var(--ui-title) !important;
+    --att-navy: var(--ui-title) !important;
+    --attendance-purple: var(--ui-teal) !important;
+    --dash-violet: var(--ui-teal-soft) !important;
     --ai-navy: var(--ui-title) !important;
     --ai-high: var(--ui-red) !important; --ai-high-bg: var(--ui-red-soft) !important;
     --ai-watch: var(--ui-amber) !important; --ai-watch-bg: var(--ui-amber-soft) !important;
     --ai-low: var(--ui-green) !important; --ai-low-bg: var(--ui-green-soft) !important;
     background-color: var(--ui-canvas) !important;
     color: var(--ui-ink) !important;
+    font-family: var(--ui-font) !important;
     font-size: 14px !important;
+    line-height: 1.45;
+    min-width: 0;
+    max-width: 100%;
+
+    :is(.grid, .deptgrid, .workspace-grid, .two-col, .three-col, .overview-grid,
+        .coe-browser-grid, .campus_modules) {
+        gap: var(--ui-space-3) !important;
+    }
+
+    :is(.kpis, .stats, .campus_stats, .student_stats, .metrics, .metric-grid,
+        .stat-grid, .kpi-grid, .coe-stats, .dashboard-grid, .lower-grid,
+        .campus_overview_grid, .student_grid) {
+        gap: var(--ui-space-3) !important;
+    }
+    :is(.panel, .campus_panel, .student_panel, .coe-panel, .attendance_panel,
+        .exam_panel, .payroll_panel, .leave_panel, .staff_profile_panel,
+        .mentor_panel, .sa_panel, .swa_panel, .filter-panel) {
+        padding: var(--ui-space-4) var(--ui-space-5) !important;
+    }
+    :is(.kpi, .campus_stat, .student_stat, .coe-stat, .attendance_kpi,
+        .exam_kpi, .leave_kpi, .payroll_metric) {
+        padding: var(--ui-space-4) !important;
+    }
+    :is([class$="_kpi"], [class$="-kpi"], [class$="_stat"], [class$="-stat"],
+        [class$="_panel"], [class$="-panel"], [class$="_card"], [class$="-card"]) {
+        border-color: var(--ui-line) !important;
+        border-radius: var(--ui-radius) !important;
+        box-shadow: var(--ui-shadow) !important;
+        min-width: 0;
+    }
+    :is(.btn, .academic_button, .academic_outline_button, .profile_outline_button,
+        .timetable_button, .attendance_button, .exam_button, .coe-btn) {
+        min-height: 40px;
+    }
+    :is(input, select, .o_input):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="hidden"]) {
+        min-height: 40px;
+    }
+    table:not(.o_calendar_widget table) :is(th, td) {
+        height: 44px;
+        vertical-align: middle;
+    }
+    :is(.tablewrap, .table-wrap, .student_table_wrap, .coe-table-wrap,
+        .accountant_table_wrap) {
+        max-width: 100%;
+        overflow-x: auto;
+    }
 
     :is(.panel, .card, .kpi, .stat, .metric, .mini-stat, .campus_panel, .campus_stat,
         .student_panel, .student_stat, .staff_profile_hero, .academic_card, .academic_metric, .profile_card, .profile_metric,
@@ -182,7 +243,7 @@ $ui-pages: ".campus_dashboard, .admin_overview, .student_main, .parent_main, .st
     :is(.kpi-value, .kpi .value, .stat-num, .stat-value, .coe-stat > b, .stat > .num, .student_stat strong,
         .attendance_kpi strong, .attendance_metric strong, .staff_profile_metric strong, .payroll_metric strong,
         .sa_metric strong, .academic_metric > strong, .profile_metric strong, .timetable_stat strong) {
-        font-size: 27px !important; line-height: 1.2 !important; font-weight: 760 !important;
+        font-size: 28px !important; line-height: 1.2 !important; font-weight: 780 !important;
         letter-spacing: -.6px !important; color: var(--ui-ink) !important;
     }
     // Long programme/subject names are values, but are not numeric KPIs.
@@ -198,12 +259,12 @@ $ui-pages: ".campus_dashboard, .admin_overview, .student_main, .parent_main, .st
     }
     :is(.btn, .academic_button, .academic_outline_button, .profile_outline_button, .timetable_button,
         .attendance_button, .exam_button, .staff_profile_button, .od_primary_button, .od_outline_button,
-        .coe-btn, .smallbtn) { border-radius: 9px !important; }
+        .coe-btn, .smallbtn) { border-radius: var(--ui-control-radius) !important; }
     :is(button.primary, .btn.primary, .academic_button, .academic_placement_select button, .timetable_button,
         .attendance_button.primary, .exam_button.primary, .staff_profile_button.primary,
         .od_primary_button, .coe-btn.primary, .ai_button, .payroll_export, .sa_primary, .swa_primary) {
         background: var(--ui-blue) !important; border-color: var(--ui-blue) !important; color: white !important;
-        font-weight: 750 !important; border-radius: 9px !important;
+        font-weight: 700 !important; border-radius: var(--ui-control-radius) !important;
     }
     :is(.academic_link, .profile_outline_button, .academic_outline_button, .coe-link) { color: var(--ui-blue) !important; }
     a:not(.btn):not([role="button"]):not([class*="button"]) { color: var(--ui-blue) !important; }
@@ -297,8 +358,79 @@ $ui-pages: ".campus_dashboard, .admin_overview, .student_main, .parent_main, .st
     .text-warning, .alert-warning p { color: var(--ui-amber) !important; }
 }
 
+/* Page gutters are applied at the actual content boundary, not both shell and page. */
+:is(.campus_admissions_workspace, .campus_students_workspace, .coe-workspace,
+    .owner_attendance, .campus_faculty_grievances, .campus_task_list,
+    .campus_accountant_collections, .accountant_spending) {
+    padding: var(--ui-space-6) !important;
+}
+:is(.campus_academics_workspace, .campus_exams_workspace, .campus_college_calendar,
+    .campus_owner_staff, .campus_owner_fees_workspace, .campus_faculty_home,
+    .campus_fee_circulars, .campus_transport_workspace, .campus_faculty_library,
+    .campus_faculty_profile_workspace, .campus_staff_od_management,
+    .campus_attendance_page, .campus_leave_page, .campus_staff_profile,
+    .campus_payroll_history) > .content,
+.campus_accountant_overview > .accountant_content,
+.owner-communication > .oc-content {
+    padding: var(--ui-space-6) !important;
+}
+:is(#{$ui-pages}) :is(.heading, .headingrow, .page-head, .title-row,
+    .collections_head, .coe-heading, .sectionhead, .section-head) {
+    margin-bottom: var(--ui-space-4) !important;
+}
+:is(#{$ui-pages}) :is(.crumb, .crumbrow, .breadcrumb-row, .collections_crumb,
+    .coe-crumb, .oc-crumb) {
+    margin-bottom: var(--ui-space-3) !important;
+}
+.campus_owner_fees_workspace .ai-panel {
+    background: var(--ui-surface) !important;
+    border-color: var(--ui-line) !important;
+}
+.campus_owner_fees_workspace .ai-panel::before { background: var(--ui-blue) !important; }
+.campus_owner_fees_workspace .ai-panel .panel-head h2::before {
+    background: var(--ui-blue-soft) !important; color: var(--ui-blue) !important;
+}
+
+@media (max-width: 930px) {
+    :is(#{$ui-pages}) :is(.kpis, .stats, .campus_stats, .student_stats, .metrics,
+        .metric-grid, .stat-grid, .kpi-grid, .coe-stats) {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    :is(#{$ui-pages}) :is(.dashboard-grid, .lower-grid, .campus_overview_grid,
+        .student_grid) {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+}
+@media (max-width: 620px) {
+    :is(.campus_admissions_workspace, .campus_students_workspace, .coe-workspace,
+        .owner_attendance, .campus_faculty_grievances, .campus_task_list,
+        .campus_accountant_collections, .accountant_spending) {
+        padding: var(--ui-space-4) var(--ui-space-3) !important;
+    }
+    :is(.campus_academics_workspace, .campus_exams_workspace, .campus_college_calendar,
+        .campus_owner_staff, .campus_owner_fees_workspace, .campus_faculty_home,
+        .campus_fee_circulars, .campus_transport_workspace, .campus_faculty_library,
+        .campus_faculty_profile_workspace, .campus_staff_od_management,
+        .campus_attendance_page, .campus_leave_page, .campus_staff_profile,
+        .campus_payroll_history) > .content,
+    .campus_accountant_overview > .accountant_content,
+    .owner-communication > .oc-content {
+        padding: var(--ui-space-4) var(--ui-space-3) !important;
+    }
+    :is(#{$ui-pages}) :is(.panel, .campus_panel, .student_panel, .coe-panel,
+        .attendance_panel, .exam_panel, .payroll_panel, .leave_panel,
+        .staff_profile_panel, .mentor_panel, .sa_panel, .swa_panel, .filter-panel) {
+        padding: var(--ui-space-4) !important;
+    }
+}
+@media (max-width: 420px) {
+    :is(#{$ui-pages}) :is(.kpis, .stats, .campus_stats, .student_stats, .metrics,
+        .metric-grid, .stat-grid, .kpi-grid, .coe-stats) {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+}
 @media (max-width: 767px) {
-    :is(#{$ui-roots}) h1 { font-size: 28px !important; }
+    :is(#{$ui-roots}) h1 { font-size: 24px !important; }
     :is(#{$ui-pages}) :is(.heading, .headingrow, .pagehead, .page-head, .academic_page_head, .coe-heading) { min-width: 0; flex-wrap: wrap; }
     :is(#{$ui-pages}) :is(.btn, .smallbtn, .coe-btn) { max-width: 100%; white-space: normal; }
     :is(#{$ui-pages}) :is(.kpi-value, .stat-num, .stat-value, .coe-stat > b, .stat > .num) { font-size: 24px !important; }

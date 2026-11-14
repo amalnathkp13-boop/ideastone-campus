@@ -1293,7 +1293,7 @@
         <div class="stat" t-if="page !== 'leave'">
           <div class="stat-top">
             <t t-esc="stat[0]"/>
-            <span class="stat-icon" t-esc="stat[3]" t-att-style="page === 'history' ? ['background:#e8f8ef;color:#13835a','background:#f0ebff;color:#7047c6','background:#fff0f1;color:#d7354a',''][stat_index] : ''"/>
+            <span class="stat-icon" t-esc="stat[3]" t-att-style="page === 'history' ? ['background:#e8f8ef;color:#13835a','background:#e7f8f8;color:#117c87','background:#fff0f1;color:#d7354a',''][stat_index] : ''"/>
           </div>
           <div class="stat-value" t-att-style="(page === 'agreements' &amp;&amp; stat_index !== 2) || (page === 'myprofile' &amp;&amp; stat_index === 3) || longStat(stat[1]) ? 'font-size:20px' : ''">
             <t>

@@ -141,24 +141,6 @@ tbody tr:hover{background:#f9fbfe}
 }
 body.campus_question_paper_shell {
  font-family:Inter,"Segoe UI",Arial,sans-serif;
- * {scrollbar-width:thin;scrollbar-color:#cbd5e1 #f6f8fb;}
- .campus_sidebar {width:286px;background:#0b2d47;padding:22px 16px;gap:0;}
- .campus_brand {padding:0 27px 18px;font-size:12px;color:#d3e2f2;}
- .campus_nav_heading {font-size:11px;font-weight:800;letter-spacing:1px;color:#c6d9ec;padding:23px 12px 12px;}
- .campus_side_bottom {font-size:12px;color:#d3e2f2;}
- .campus_nav_link {font-size:14px;font-weight:650;min-height:46px;padding:13px 14px;}
- .campus_brand img {width:190px;height:68px;content:url('/ideastone_campus/static/src/img/vcet-wordmark.png');}
- .o_navbar {height:52px;} .o_main_navbar {min-height:52px;}
- &.o_web_client > .o_navbar, &.o_web_client > .o_main_navbar {margin-left:286px;}
- &.o_web_client > .o_action_manager {margin-left:286px;margin-top:64px;}
- .campus_faculty_subnav {top:52px;left:286px;height:64px;padding:0 22px;gap:14px;
-   > strong {font-size:14px;font-weight:800;color:#17334f;}
-   button {font-size:14px;font-weight:550;color:#405d7b;padding:0 17px;}
-   > div {scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent;}
-   button.active {color:#0866e8;background:#f3f8ff;border-bottom-color:#0866e8;font-weight:700;}
- }
- @media(max-width:1100px) and (min-width:1024px) {.campus_sidebar{width:235px;} &.o_web_client > .o_navbar,&.o_web_client > .o_main_navbar,&.o_web_client > .o_action_manager{margin-left:235px;} .campus_faculty_subnav{left:235px;}}
- @media(max-width:1023px) {&.o_web_client > .o_navbar,&.o_web_client > .o_main_navbar,&.o_web_client > .o_action_manager{margin-left:0;}.campus_faculty_subnav{left:0;}}
- @media(max-width:560px) {.o_navbar{height:48px;}.o_main_navbar{min-height:48px;}.campus_faculty_subnav{top:48px;height:54px;gap:4px;padding:0 10px;button{font-size:12px;padding:0 12px;}} &.o_web_client > .o_action_manager{margin-top:54px;}}
+ .qp-faculty, .qp-hod {scrollbar-width:thin;scrollbar-color:#cbd5e1 #f6f8fb;}
 }
 

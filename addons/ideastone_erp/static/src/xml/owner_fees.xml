@@ -218,7 +218,7 @@
               </div>
               <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:14px">
                 <div class="ai-insight-card">
-                  <div style="font-size:11px;font-weight:800;letter-spacing:.7px;color:#7451d4;text-transform:uppercase;margin-bottom:8px">01 · Collection priority</div>
+                  <div style="font-size:11px;font-weight:800;letter-spacing:.7px;color:#117c87;text-transform:uppercase;margin-bottom:8px">01 · Collection priority</div>
                   <h3 style="font-size:14px;margin:0 0 7px">Start with ageing dues</h3>
                   <p style="font-size:13px;color:#657c91;line-height:1.55;margin:0 0 12px" t-esc="overdueStudents+' student accounts have overdue balances totalling '+compact(d.summary.overdue)+'. Record an owner and next-action date for each account.'"/>
                   <div style="font-size:12px;font-weight:700;color:#152f48">Suggested action: daily 20-minute follow-up queue</div>
@@ -963,7 +963,7 @@
         <div class="panel-desc" style="margin-bottom:18px"><t t-esc="props.record.code"/> · Academic year <t t-esc="w.year?.name || '—'"/></div>
         <div class="grid quota-summary" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
           <div style="padding:17px;border:1px solid #dce8f8;background:#f5f9ff;border-radius:12px"><div style="font-size:11px;color:#1769e8;font-weight:800">GOVERNMENT QUOTA · GQ</div><div style="font-size:24px;font-weight:800;margin:9px 0;color:#152f48" t-esc="w.quotaAmount(props.record.id,'gq')"/><div style="font-size:11px;color:#657c91">Annual fee plans · range when multiple years apply</div></div>
-          <div style="padding:17px;border:1px solid #e2dafa;background:#faf7ff;border-radius:12px"><div style="font-size:11px;color:#7451d4;font-weight:800">MANAGEMENT QUOTA · MQ</div><div style="font-size:24px;font-weight:800;margin:9px 0;color:#152f48" t-esc="w.quotaAmount(props.record.id,'mq')"/><div style="font-size:11px;color:#657c91">Annual fee plans · range when multiple years apply</div></div>
+          <div style="padding:16px;border:1px solid #e1e9f2;background:#fff;border-radius:15px"><div style="font-size:11px;color:#117c87;font-weight:800">MANAGEMENT QUOTA · MQ</div><div style="font-size:24px;font-weight:800;margin:9px 0;color:#152f48" t-esc="w.quotaAmount(props.record.id,'mq')"/><div style="font-size:11px;color:#657c91">Annual fee plans · range when multiple years apply</div></div>
         </div>
         <div class="mini-list" style="margin-top:15px"><div class="mini-row"><span>Academic year</span><strong t-esc="w.year?.name || '—'"/></div><div class="mini-row"><span>Fee frequency</span><strong>Annual / semester schedule as approved</strong></div><div class="mini-row"><span>Saved structures</span><strong t-esc="departmentPlans.length"/></div></div>
         <div class="plan-detail" t-foreach="departmentPlans" t-as="plan" t-key="plan.id">

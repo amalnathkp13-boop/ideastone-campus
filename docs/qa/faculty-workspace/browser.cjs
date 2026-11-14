@@ -11,7 +11,7 @@ async function assertSopTheme(heading) {
         const style = getComputedStyle(el);
         return [style.fontFamily.split(',')[0], style.fontSize, style.fontWeight, style.color];
     });
-    const expected = ['Inter', '27px', '650', 'rgb(16, 44, 73)'];
+    const expected = ['Inter', '27px', '650', 'rgb(19, 42, 68)'];
     if (actual.some((value, i) => value !== expected[i])) throw Error(`Faculty task-list title theme drifted: ${actual}`);
 }
 async function diagnosticMarkup(page) {

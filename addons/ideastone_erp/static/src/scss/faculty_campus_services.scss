@@ -27,14 +27,14 @@
   .fs_stat { background: #fff; border: 1px solid var(--fs-line); border-radius: 14px; padding: 18px 20px; min-width: 0; box-shadow: 0 8px 24px rgba(23,58,96,.045);
     .fs_stat_top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
     .fs_stat_icon { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 19px; background: #eaf2ff; color: var(--fs-blue);
-      &.green { background: #e7f7ef; color: #16845b; } &.amber { background: #fff3e2; color: #b86a00; } &.violet { background: #f1eaff; color: #7650c9; }
+      &.green { background: #e7f7ef; color: #16845b; } &.amber { background: #fff3e2; color: #b86a00; } &.violet { background: #f1f9f9; color: #117c87; }
     }
     .fs_stat_label { color: var(--fs-muted); margin-top: 14px; }
     strong { display: block; font-size: 27px; font-weight: 750; margin: 5px 0; color: #0c2e4e; }
     small { font-size: 12px; color: var(--fs-muted); }
   }
   .fs_pill { display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; border-radius: 99px; font-size: 11px; font-weight: 700; background: #eef3f9; color: #536d87; white-space: nowrap;
-    &.blue { background: #eaf2ff; color: #175fc8; } &.green { background: #e5f7ee; color: #14784f; } &.amber { background: #fff2df; color: #9c5c00; } &.red { background: #fdebed; color: #b83240; } &.violet { background: #f0eaff; color: #6940ba; }
+    &.blue { background: #eaf2ff; color: #175fc8; } &.green { background: #e5f7ee; color: #14784f; } &.amber { background: #fff2df; color: #9c5c00; } &.red { background: #fdebed; color: #b83240; } &.violet { background: #f1f9f9; color: #117c87; }
   }
   .fs_subnav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px;
     button { border: 1px solid var(--fs-line); background: #fff; color: #4d6c8b; border-radius: 9px; padding: 10px 13px; }
@@ -69,7 +69,7 @@
   .fs_track { height: 7px; background: #edf2f8; border-radius: 20px; overflow: hidden;
     i { display: block; height: 100%; background: var(--fs-blue); border-radius: 20px; } &.green i { background: #16845b; }
   }
-  .fs_insight { padding: 12px 0; border-top: 1px solid #e3dafb; line-height: 1.55;
+  .fs_insight { padding: 12px 0; border-top: 1px solid #e7f8f8; line-height: 1.55;
     strong { display: block; color: #382c75; margin-bottom: 3px; }
   }
   .fs_quick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px;

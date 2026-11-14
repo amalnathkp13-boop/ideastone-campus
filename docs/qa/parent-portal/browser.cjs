@@ -40,10 +40,10 @@ async function assertParentTheme(page) {
             selectedText:style('.student_nav_link.active').color,
             primary:primary?getComputedStyle(primary).backgroundColor:null};
     });
-    assert.match(theme.sidebar,/rgb\(9, 47, 80\)/,'Parent sidebar must retain the shared navy surface');
+    assert.match(theme.sidebar,/rgb\(9, 44, 71\)/,'Parent sidebar must retain the shared navy surface');
     assert.equal(theme.selected,'rgb(22, 104, 223)');
     assert.equal(theme.selectedText,'rgb(255, 255, 255)');
-    if(theme.primary) assert(['rgb(23, 105, 210)','rgb(17, 83, 168)'].includes(theme.primary),'Parent primary controls must use the shared blue or its hover shade');
+    if(theme.primary) assert(['rgb(23, 105, 232)','rgb(17, 83, 168)'].includes(theme.primary),'Parent primary controls must use the shared blue or its hover shade');
 }
 async function visit(page,section) {
     // Revisiting the same URL must wait for the new form, not the old heading/URL.

@@ -177,7 +177,7 @@
 .campus_faculty_sop { --navy:#102c49; --navy2:#173e63; --blue:#1769e8; --blue-dark:#0d55bc; --canvas:#f3f6fb; --surface:#fff; --ink:#172f49; --muted:#657b92; --border:#e2eaf3; --green:#16845f; --amber:#a66a16; --red:#b4473a; --radius:12px; --shadow:0 4px 16px rgba(21,54,91,.055); background:var(--canvas); font-family:Inter,"Segoe UI",Arial,sans-serif; }
 .campus_faculty_sop .brand-title { font-size:12px; letter-spacing:.15px; }
 .campus_faculty_sop { padding:25px 26px 45px; max-width:1720px; }
-.campus_faculty_sop h1 { font-size:27px; letter-spacing:-.65px; color:#102c49; }
+.campus_faculty_sop h1 { font-size:27px; letter-spacing:-.65px; color:#132a44; }
 .campus_faculty_sop .subtitle { font-size:12px; color:#647b92; }
 .campus_faculty_sop .panel, .campus_faculty_sop .kpi, .campus_faculty_sop .intro { border-radius:12px; border-color:#e2eaf3; box-shadow:0 4px 16px rgba(21,54,91,.045); }
 .campus_faculty_sop .panel { padding:19px 20px; }
@@ -434,7 +434,7 @@
     .o_web_client :is(.campus_faculty_sop, .campus_task_list.task_sop_layout) {
         --ui-font: Inter, "Segoe UI", Arial, sans-serif;
         --ui-line: #dce6f0;
-        --ui-title: #102c49;
+        --ui-title: #132a44;
         --ui-ink: #172f49;
         --ui-muted: #657b92;
         --ui-table-head: #f5f5fa;

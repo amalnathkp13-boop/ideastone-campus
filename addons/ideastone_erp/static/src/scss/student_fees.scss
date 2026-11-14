@@ -15,7 +15,7 @@
   .pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:8px 12px;background:#eaf3ff;color:#1a5fa9;font-size:12px;font-weight:650;white-space:nowrap}
   .pill.green{background:#e8f7ef;color:#16764a}
   .pill.amber{background:#fff5df;color:#9b6408}
-  .pill.violet{background:#f0eaff;color:#6548bd}
+  .pill.violet{background:#f1f9f9;color:#117c87}
   .panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:23px 24px;box-shadow:var(--shadow);margin-bottom:22px;min-width:0}
   .panel-head{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:18px}
   .panel h2{font-size:20px;margin:0;font-weight:700;letter-spacing:-.25px}
@@ -31,7 +31,7 @@
   .kpi .kicon{width:35px;height:35px;border-radius:10px;display:grid;place-items:center;background:#eaf2ff;color:#1769e8;font-size:17px;margin-bottom:13px}
   .kpi.green .kicon{background:#e5f7ed;color:#198754}
   .kpi.amber .kicon{background:#fff3dc;color:#c28212}
-  .kpi.violet .kicon{background:#f0eaff;color:#7657d5}
+  .kpi.violet .kicon{background:#f1f9f9;color:#117c87}
   .kpi-label{font-size:12px;color:var(--muted);margin-bottom:7px}
   .kpi .value{font-size:22px;font-weight:760;letter-spacing:-.3px;margin:0;color:#103655}
   .kpi .foot{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.45}

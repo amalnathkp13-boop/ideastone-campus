@@ -71,6 +71,8 @@ class OwnerDashboard(models.AbstractModel):
                 continue
             count = None
             action = self.env.ref(item.get("action"), raise_if_not_found=False) if item.get("action") else None
+            if action:
+                action = action.sudo()  # Action metadata is system-owned; model counts still use the caller's ACLs.
             unfiltered_client = {"ideastone_erp.action_students_directory", "ideastone_erp.action_students_enrolments"}
             model_name = action.res_model if action and action._name == "ir.actions.act_window" else (
                 item.get("model") if item.get("action") in unfiltered_client else None)

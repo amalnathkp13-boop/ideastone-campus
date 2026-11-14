@@ -76,7 +76,7 @@ body.campus_faculty_workspace:has(.campus_accountant_page) {
     .accountant_stat_symbol { width: 44px; height: 44px; flex: 0 0 44px; border-radius: 13px; display: grid; place-items: center; background: #eaf2ff; color: #1769e8; font-size: 20px; }
     .accountant_stat_income .accountant_stat_symbol { background: #e6f7ef; color: #168363; }
     .accountant_stat_dues .accountant_stat_symbol { background: #fff3df; color: #b77817; }
-    .accountant_stat_spending .accountant_stat_symbol { background: #f1ebff; color: #7650c8; }
+    .accountant_stat_spending .accountant_stat_symbol { background: #f1f9f9; color: #117c87; }
     .accountant_pill { padding: 7px 12px; border-radius: 999px; background: #eaf2ff; color: var(--accountant-blue); font-size: 11px; font-weight: 600; white-space: nowrap; }
     .accountant_stat_label { color: var(--accountant-muted); font-size: 12px; }
     .accountant_stat_value { margin: 5px 0 7px; color: #0a2b47; font-size: 27px; line-height: 1.18; letter-spacing: -.7px; font-weight: 650; overflow-wrap: anywhere; }
