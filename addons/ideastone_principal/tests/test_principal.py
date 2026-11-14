@@ -142,6 +142,8 @@ class TestPrincipalWorkflow(TransactionCase):
                        for item in module["items"] if "action" in item])
         modules = {module["key"]: module for module in overview["faculty_modules"]}
         self.assertEqual(modules["staff"]["label"], "Faculty oversight")
+        self.assertEqual([item["label"] for item in modules["attendance"]["items"]],
+                         ["Overview", "Faculty attendance", "Student attendance"])
         self.assertNotIn("Payroll History", [item["label"] for item in modules["staff"]["items"]])
         self.assertNotIn("Fee structures", [item["label"] for item in modules["fees"]["items"]])
         self.assertNotIn("Enquiries", [item["label"] for item in modules["admissions"]["items"]])

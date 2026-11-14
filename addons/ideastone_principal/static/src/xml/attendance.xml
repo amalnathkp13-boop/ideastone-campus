@@ -1,0 +1,261 @@
+<templates xml:space="preserve">
+    <t t-name="ideastone_principal.AttendanceIcon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <t t-if="icon === 'students'"><path d="M2 8l10-5 10 5-10 5L2 8Z"/><path d="M6 10.5V16c4 3 8 3 12 0v-5.5M22 8v7"/></t>
+            <t t-elif="['staff', 'absent'].includes(icon)">
+                <path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                <path t-if="icon === 'staff'" d="M20 20v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                <path t-else="" d="m17 8 5 5m0-5-5 5"/>
+            </t>
+            <t t-elif="['late', 'present'].includes(icon)"><circle cx="12" cy="12" r="9"/><path t-if="icon === 'late'" d="M12 7v5l3.5 2"/><path t-else="" d="M8 12l2.6 2.6L16 9"/></t>
+            <t t-elif="icon === 'shortage'"><path d="M10.3 3.9 2.1 18a2 2 0 0 0 1.7 3h16.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4m0 4h.01"/></t>
+            <t t-elif="icon === 'trend'"><path d="M3 3v18h18"/><path d="m7 16 4-5 4 3 5-7"/><path d="M17 7h3v3"/></t>
+            <t t-elif="icon === 'departments'"><rect x="3" y="3" width="12" height="18" rx="2"/><path d="M9 21v-4h3v4M7 7h1m3 0h1M7 11h1m3 0h1"/><path d="M15 9h4a2 2 0 0 1 2 2v10h-6"/></t>
+            <t t-elif="icon === 'category'"><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9v9z"/><path d="M12 3a9 9 0 0 1 9 9h-9z"/></t>
+        </svg>
+    </t>
+    <t t-name="ideastone_principal.Attendance">
+        <main id="campus_main" class="campus_principal_attendance" t-ref="main" t-on-keydown="onKey">
+            <div class="pa-content">
+                <header class="pagehead">
+                    <div><h1 t-esc="title"/><p t-esc="subtitle"/></div>
+                    <span class="lastlogin" t-if="state.data?.last_login">Last Login: <t t-esc="state.data.last_login"/></span>
+                </header>
+                <p t-if="state.loading &amp;&amp; !state.data" role="status">Loading saved attendance…</p>
+                <div t-if="state.error" class="alert alert-danger" role="alert">
+                    <t t-esc="state.error"/> <button t-if="!state.data" class="pa-button" t-on-click="() => this.load()">Retry</button>
+                </div>
+                <t t-if="state.data">
+                    <div class="compact-toolbar">
+                        <div class="filter-anchor">
+                            <button class="pa-button filter-button" type="button" t-ref="filterButton" t-on-click="toggleFilters" t-att-aria-expanded="state.filterOpen ? 'true' : 'false'" aria-label="Open attendance filters" title="Open filters">
+                                <i class="fa fa-sliders" aria-hidden="true"/><span class="dot"/>
+                            </button>
+                            <form class="filter-pop" t-if="state.filterOpen" t-on-submit.prevent="apply" aria-label="Filter attendance">
+                                <div class="filter-head">Filter attendance <button type="button" class="close-button" t-on-click="closeFilters" aria-label="Close filters">×</button></div>
+                                <div class="filter-grid">
+                                    <label class="wide">Institution<select disabled="disabled"><option t-esc="state.data.company"/></select></label>
+                                    <label>Academic year<select t-model.number="state.draft.year_id"><option value="0">All academic years</option><option t-foreach="state.data.years" t-as="year" t-key="year.id" t-att-value="year.id" t-esc="year.name"/></select></label>
+                                    <label>Period<select t-att-value="state.draft.quick" t-on-change="setPeriod"><option value="month">This month</option><option value="week">This week</option><option value="today">Today</option><option value="custom">Custom dates</option></select></label>
+                                    <label>Department<select t-model="state.draft.department"><option value="">All departments</option><option t-foreach="state.data.departments" t-as="department" t-key="department.key" t-att-value="department.key" t-esc="department.name"/></select></label>
+                                    <label>Person type<select t-model="state.draft.type"><option value="">All</option><option value="staff">Faculty</option><option value="students">Student</option></select></label>
+                                    <label>Status<select t-model="state.draft.status"><option value="">All statuses</option><option t-foreach="['Present', 'Absent', 'Late', 'On Duty', 'Leave']" t-as="status" t-key="status" t-esc="status"/></select></label>
+                                    <label class="wide">From date<input type="date" required="required" t-att-max="state.data.today" t-model="state.draft.date_from" t-on-change="() => this.state.draft.quick = 'custom'"/></label>
+                                    <label class="wide">To date<input type="date" required="required" t-att-min="state.draft.date_from" t-att-max="state.data.today" t-model="state.draft.date_to" t-on-change="() => this.state.draft.quick = 'custom'"/></label>
+                                    <label class="wide">Search person<input type="search" placeholder="Name, register number or staff ID" t-model="state.draft.search"/></label>
+                                </div>
+                                <div class="filter-actions"><button type="button" class="pa-button" t-on-click="reset" t-att-disabled="state.loading">Reset</button><button type="submit" class="pa-button pa-primary" t-att-disabled="state.loading">Apply filters</button></div>
+                            </form>
+                        </div>
+                        <button class="pa-button" type="button" t-on-click="exportCSV" t-att-disabled="state.loading">⇩ Export CSV</button>
+                        <button class="pa-button" type="button" t-on-click="print">⎙ Print</button>
+                    </div>
+                    <nav t-if="depth" class="drill-nav" aria-label="Attendance navigation">
+                        <button type="button" class="pa-button" t-on-click="back">← Back</button>
+                        <span t-esc="title"/>
+                        <t t-foreach="state.path" t-as="crumb" t-key="crumb_index"><span aria-hidden="true">›</span><span t-att-class="{current: crumb_last}" t-esc="crumb.label"/></t>
+                    </nav>
+                    <t t-if="tab === 'overview'" t-call="ideastone_principal.AttendanceOverview"/>
+                    <t t-else="" t-call="ideastone_principal.AttendanceRegister"/>
+                    <t t-if="state.dialog" t-call="ideastone_principal.AttendanceDialog"/>
+                </t>
+            </div>
+        </main>
+    </t>
+    <t t-name="ideastone_principal.AttendanceOverview">
+        <div class="pa-grid kpis">
+            <t t-foreach="['staff', 'students']" t-as="scope" t-key="scope">
+                <t t-set="totals" t-value="scope === 'staff' ? staffToday : studentToday"/>
+                <article class="section pa-kpi">
+                    <div class="kpi-top">
+                        <span class="kpi-label" t-esc="scope === 'staff' ? 'Staff attendance' : 'Student attendance'"/>
+                        <span class="kpi-icon" t-att-class="scope === 'staff' ? 'tone-blue' : 'tone-teal'"><t t-call="ideastone_principal.AttendanceIcon"><t t-set="icon" t-value="scope"/></t></span>
+                    </div>
+                    <div class="attendance-pair-values">
+                        <div><strong class="presence-number" t-esc="number(totals.present)"/><span>Present</span></div>
+                        <div><strong class="absence-number" t-esc="number(totals.absent)"/><span>Absent</span></div>
+                    </div>
+                    <div class="kpi-foot">Recorded on <t t-esc="date(state.data.as_of)"/></div>
+                </article>
+            </t>
+            <article class="section pa-kpi">
+                <div class="kpi-top"><span class="kpi-label">Attendance shortage</span><span class="kpi-icon tone-rose"><t t-call="ideastone_principal.AttendanceIcon"><t t-set="icon" t-value="'shortage'"/></t></span></div>
+                <strong class="pa-kpi-value" t-esc="number(shortage.length)"/>
+                <div class="kpi-foot"><b class="red"><t t-esc="critical"/> critical</b> below <t t-esc="Math.min(state.data.threshold, 65)"/>% attendance</div>
+            </article>
+            <button type="button" class="section pa-kpi pa-click-kpi" t-on-click="() => this.openDialog('late')" aria-label="View late arrivals">
+                <div class="kpi-top"><span class="kpi-label">Late arrivals <t t-esc="state.data.as_of === state.data.today ? 'today' : ''"/> · View list</span><span class="kpi-icon tone-amber"><t t-call="ideastone_principal.AttendanceIcon"><t t-set="icon" t-value="'late'"/></t></span></div>
+                <strong class="pa-kpi-value" t-esc="number(lateRows.length)"/>
+                <span class="kpi-foot"><t t-esc="percent(lateShare)"/> of recorded staff statuses · Click to inspect</span>
+            </button>
+        </div>
+        <div class="pa-grid overview-top">
+            <section class="section">
+                <div class="section-head">
+                    <div><h2 class="section-title"><span class="ico"><t t-call="ideastone_principal.AttendanceIcon"><t t-set="icon" t-value="'trend'"/></t></span>Attendance trend</h2>
+                    <div class="section-sub"><t t-esc="state.period === 'weekly' ? 'Weekly' : 'Daily'"/> attendance rate · <t t-esc="date(state.data.date_from)"/> – <t t-esc="date(state.data.date_to)"/></div></div>
+                    <select class="pa-button trend-period" aria-label="Trend period" t-model="state.period"><option value="daily">Daily</option><option value="weekly">Weekly</option></select>
+                </div>
+                <t t-set="trend" t-value="chart"/>
+                <svg class="chart-svg" viewBox="0 0 720 250" role="img" aria-label="Student and faculty attendance trend">
+                    <defs>
+                        <linearGradient id="pa-student-area" x2="0" y2="1"><stop offset="0" stop-color="#1769e8" stop-opacity=".16"/><stop offset="1" stop-color="#1769e8" stop-opacity="0"/></linearGradient>
+                        <linearGradient id="pa-staff-area" x2="0" y2="1"><stop offset="0" stop-color="#0e9a70" stop-opacity=".12"/><stop offset="1" stop-color="#0e9a70" stop-opacity="0"/></linearGradient>
+                    </defs>
+                    <t t-foreach="trend.grid" t-as="line" t-key="line.value"><line class="gridline" x1="54" x2="700" t-att-y1="line.y" t-att-y2="line.y"/><text x="10" t-att-y="line.y + 4" t-esc="line.value + '%'"/></t>
+                    <line class="target" x1="54" x2="700" t-att-y1="trend.target" t-att-y2="trend.target"/>
+                    <text x="695" t-att-y="trend.target + 13" text-anchor="end" class="target-label">95% target</text>
+                    <t t-foreach="trend.lines" t-as="line" t-key="line.scope">
+                        <path t-if="line.area" t-att-d="line.area" t-att-fill="line.scope === 'students' ? 'url(#pa-student-area)' : 'url(#pa-staff-area)'"/>
+                        <polyline t-att-class="line.scope === 'students' ? 'student-line' : 'staff-line'" t-att-points="line.polyline"/>
+                        <circle t-foreach="line.points" t-as="point" t-key="point.x" t-att-cx="point.x" t-att-cy="point.y" r="3.4" t-att-fill="line.scope === 'students' ? '#1769e8' : '#0e8664'"/>
+                    </t>
+                    <text t-foreach="trend.labels" t-as="label" t-key="label.x" t-att-x="label.x" y="230" text-anchor="middle" t-esc="label.date"/>
+                </svg>
+                <div class="chart-legend"><span><i class="dot blue"/>Students</span><span><i class="dot green"/>Faculty</span><span><i class="dot amber"/>95% target</span></div>
+            </section>
+            <section class="section">
+                <div class="section-head"><div><h2 class="section-title"><span class="ico"><t t-call="ideastone_principal.AttendanceIcon"><t t-set="icon" t-value="'departments'"/></t></span>Department comparison</h2><div class="section-sub">Attendance rate by department</div></div><span class="pa-badge b-blue">Selected period</span></div>
+                <div class="dept-list"><div class="dept-row" t-foreach="departments" t-as="row" t-key="row.key"><span t-esc="row.name"/><div class="track"><div class="fill" t-att-class="row.rate &gt;= 95 ? 'green' : row.rate &lt; 90 ? 'amber' : 'blue'" t-att-style="'width:' + row.rate + '%'"/></div><strong t-esc="percent(row.rate)"/></div></div>
+                <div class="empty-note" t-if="!departments.length">No attendance recorded for this period.</div>
+            </section>
+        </div>
+        <div class="pa-grid widget-grid">
+            <t t-call="ideastone_principal.AttendanceFleet"/>
+            <section class="section">
+                <div class="section-head"><h2 class="section-title"><span class="ico" aria-hidden="true">✓</span>Transport attendance protection</h2><span class="pa-badge b-green">Policy control</span></div>
+                <div class="mini-stat"><span>Commuters assigned to delayed routes</span><b t-esc="number(fleetTotals.students + fleetTotals.staff)"/></div>
+                <div class="mini-stat"><span>Late marks suppressed</span><b class="green">—</b></div>
+                <div class="mini-stat"><span>Routes pending commuter verification</span><b class="amber" t-esc="fleet.length"/></div>
+                <div class="footnote">A route delay alone does not change attendance. Individual verification is needed to excuse a late arrival. The original check-in stays recorded.</div>
+            </section>
+        </div>
+        <div class="pa-grid midgrid">
+            <section class="section">
+                <div class="section-head"><h2 class="section-title"><span class="ico" aria-hidden="true">◉</span><t t-esc="state.data.as_of === state.data.today ? &quot;Today's attendance snapshot&quot; : 'Attendance snapshot'"/></h2><span class="pa-badge b-blue" t-esc="date(state.data.as_of)"/></div>
+                <div class="attendance-summary"><div class="summary-box" t-foreach="snapshot" t-as="row" t-key="row.label"><span t-esc="row.label"/><strong t-att-class="row.tone" t-esc="number(row.value)"/><span t-esc="row.share === null ? 'No records' : percent(row.share) + ' of total'"/></div></div>
+            </section>
+            <section class="section">
+                <div class="section-head"><h2 class="section-title"><span class="ico" aria-hidden="true">⚑</span>Attendance exceptions</h2><span class="pa-badge b-red">Needs review</span></div>
+                <div class="mini-stat"><span>Students below <t t-esc="state.data.threshold"/>% threshold</span><b class="red" t-esc="number(shortage.length)"/></div>
+                <div class="mini-stat"><span>Staff with repeated late marks</span><b class="amber" t-esc="number(repeatLate)"/></div>
+                <div class="mini-stat"><span>Missing check-out records</span><b t-esc="number(missing)"/></div>
+                <div class="mini-stat"><span>Unverified attendance corrections</span><b class="red" t-esc="number(state.data.corrections)"/></div>
+            </section>
+            <section class="section">
+                <div class="section-head"><h2 class="section-title"><span class="ico" aria-hidden="true">▣</span>Leave &amp; OD overview</h2></div>
+                <div class="mini-stat"><span>Leave requests pending</span><b class="amber" t-esc="number(state.data.leave.pending || 0)"/></div>
+                <div class="mini-stat"><span>Approved leave in this period</span><b t-esc="number(state.data.leave.approved || 0)"/></div>
+                <div class="mini-stat"><span>On-duty records in this period</span><b t-esc="number(students.filter(row => row.status === 'On Duty').length)"/></div>
+                <div class="mini-stat"><span>Leave utilization</span><b class="blue" t-esc="percent(state.data.leave.utilization)"/></div>
+            </section>
+        </div>
+        <div class="pa-grid watch-grid">
+            <section class="section">
+                <div class="section-head"><div><h2 class="section-title"><span class="ico" aria-hidden="true">⚑</span>Student attendance shortage watchlist</h2><div class="section-sub">Students requiring intervention based on attendance percentage</div></div><span class="pa-badge b-red"><t t-esc="number(critical)"/> critical cases</span></div>
+                <div class="table-wrap"><table class="watch-table"><thead><tr><th>Student</th><th>Programme / section</th><th>Attendance</th><th>Classes attended</th><th>Risk</th></tr></thead>
+                    <tbody><tr t-foreach="shortage" t-as="row" t-key="row.key"><td><b t-esc="row.name"/><div class="muted" t-esc="row.number"/></td><td><t t-esc="row.programme"/> · <t t-esc="row.section"/></td><td t-att-class="row.rate &lt; Math.min(state.data.threshold, 65) ? 'red' : 'amber'" t-esc="percent(row.rate)"/><td><t t-esc="row.present"/> / <t t-esc="row.held"/></td><td><span class="pa-badge" t-att-class="row.rate &lt; Math.min(state.data.threshold, 65) ? 'b-red' : 'b-amber'" t-esc="row.rate &lt; Math.min(state.data.threshold, 65) ? 'Critical' : 'At risk'"/></td></tr>
+                    <tr t-if="!shortage.length"><td colspan="5" class="empty-note">No students below the attendance threshold in this period.</td></tr></tbody></table></div>
+            </section>
+            <section class="section">
+                <div class="section-head"><div><h2 class="section-title"><span class="ico"><t t-call="ideastone_principal.AttendanceIcon"><t t-set="icon" t-value="'category'"/></t></span>Attendance by category</h2><div class="section-sub">Institutional attendance split for the selected date</div></div></div>
+                <div class="mini-stat" t-foreach="categories" t-as="row" t-key="row[0]"><span t-esc="row[0]"/><b t-att-class="row[2]" t-esc="row[1]"/></div>
+                <div class="footnote">Use the faculty and student drill-downs to identify where intervention is needed.</div>
+            </section>
+        </div>
+        <section class="section">
+            <div class="section-head"><div><h2 class="section-title"><span class="ico" aria-hidden="true">✧</span>AI attendance insights</h2><div class="section-sub">Decision support based on saved attendance data</div></div><span class="pa-badge b-blue">Rule-based analysis</span></div>
+            <div class="insight-list"><article class="insight-card" t-foreach="insights" t-as="insight" t-key="insight.title"><b><t t-esc="insight.icon"/> <t t-esc="insight.title"/></b><p t-esc="insight.note"/></article></div>
+        </section>
+    </t>
+    <t t-name="ideastone_principal.AttendanceFleet">
+        <section class="section">
+            <div class="section-head"><div><h2 class="section-title"><span class="ico" aria-hidden="true">🚌</span><t t-esc="tab === 'faculty' ? 'Fleet delay protection' : 'Fleet delays'"/></h2><div class="section-sub">Transport-related arrival exceptions · separate from attendance punctuality</div></div><span class="pa-badge b-amber">Transport feed</span></div>
+            <div class="fleet-widget"><div class="fleet-icon" aria-hidden="true">🚌</div><div>
+                <div class="fleet-number"><t t-esc="number(fleet.length)"/> <span>routes delayed</span></div>
+                <div class="muted"><t t-esc="number(fleetTotals.students)"/> students and <t t-esc="number(fleetTotals.staff)"/> staff assigned to delayed routes.</div>
+                <div class="fleet-actions"><button type="button" class="pa-button" t-on-click="() => this.openDialog('fleet')" t-esc="tab === 'faculty' ? 'View fleet delays' : 'View delayed routes'"/><span class="pa-badge b-green">Attendance tracked separately</span></div>
+            </div></div>
+            <div class="footnote">A saved late route arrival does not mark its commuters absent or late.</div>
+        </section>
+    </t>
+    <t t-name="ideastone_principal.AttendanceRegister">
+        <t t-if="!depth">
+            <div class="pa-grid kpis">
+                <t t-foreach="listKpis" t-as="card" t-key="card.label">
+                    <button t-if="card.action" type="button" class="section pa-kpi pa-click-kpi" t-on-click="() => this.openDialog('late')"><t t-call="ideastone_principal.AttendanceListCard"/></button>
+                    <article t-else="" class="section pa-kpi"><t t-call="ideastone_principal.AttendanceListCard"/></article>
+                </t>
+            </div>
+        </t>
+        <section class="section hierarchy-section">
+            <div class="section-head"><div><h2 class="section-title" t-esc="groupCopy[0]"/><div class="section-sub" t-esc="groupCopy[1]"/></div></div>
+            <div t-if="depth &lt; keys.length" class="pa-grid hierarchy-cards" t-att-class="{categories: depth}">
+                <button type="button" class="hierarchy-card" t-foreach="groups" t-as="group" t-key="group.key" t-on-click="() => this.go([...this.state.path, {key: group.key, label: group.label}])">
+                    <span class="hierarchy-card-top"><span t-esc="group.label"/><span class="blue" aria-hidden="true">↗</span></span>
+                    <strong t-esc="number(group.total)"/>
+                    <span class="muted" t-esc="tab === 'faculty' ? 'Staff attendance records' : 'Student attendance records'"/>
+                    <span class="card-breakdown"><span class="green"><t t-esc="group.present"/> present</span><span class="red"><t t-esc="group.absent"/> absent</span><span class="amber"><t t-esc="group.late"/> late</span></span>
+                </button>
+                <div class="empty-note" t-if="!groups.length">No attendance records match the active filters.</div>
+            </div>
+            <div t-else="" class="table-wrap">
+                <table>
+                    <thead t-if="tab === 'faculty'"><tr><th>Staff member</th><th>Staff ID</th><th>Designation</th><th>Department</th><th>Check-in</th><th>Check-out</th><th>Work hours</th><th>Late / exception</th><th>Status</th></tr></thead>
+                    <thead t-else=""><tr><th>Student</th><th>Register no.</th><th>Programme</th><th>Year / Section</th><th>Check-in</th><th>Attendance today</th><th>Overall attendance</th><th>Source / exception</th></tr></thead>
+                    <tbody>
+                        <tr t-foreach="visibleRows" t-as="row" t-key="row.key">
+                            <td><div class="person"><span class="initial" t-esc="initials(row.name)"/><div><b t-esc="row.name"/><div class="muted" t-esc="date(row.date)"/></div></div></td>
+                            <td t-esc="row.number || '—'"/>
+                            <t t-if="tab === 'faculty'"><td t-esc="row.designation || '—'"/><td t-esc="row.department"/><td t-esc="row.check_in || '—'"/><td t-esc="row.check_out || '—'"/><td t-esc="number(row.hours)"/><td t-esc="row.delay ? row.delay + ' min' : row.missing ? 'Missing check-out' : '—'"/><td><t t-call="ideastone_principal.AttendanceBadge"/></td></t>
+                            <t t-else=""><td t-esc="row.programme"/><td><t t-esc="row.year"/> / <t t-esc="row.section"/></td><td t-esc="row.check_in || '—'"/><td><t t-call="ideastone_principal.AttendanceBadge"/></td><td t-esc="percent(row.rate)"/><td t-esc="row.source"/></t>
+                        </tr>
+                        <tr t-if="!visibleRows.length"><td t-att-colspan="tab === 'faculty' ? 9 : 8" class="empty-note">No people match the selected filters.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <div t-if="!depth" class="pa-grid" t-att-class="tab === 'faculty' ? 'widget-grid' : ''">
+            <section class="section">
+                <div class="section-head"><div><h2 class="section-title"><span class="ico" aria-hidden="true" t-if="tab === 'students'">✧</span><t t-esc="tab === 'faculty' ? 'Faculty attendance insights' : 'Student attendance insights'"/></h2><div class="section-sub" t-esc="tab === 'faculty' ? 'Operational indicators for principal review' : 'Use attendance patterns to direct mentoring and intervention.'"/></div><span class="pa-badge b-blue">AI insights</span></div>
+                <div class="insight-list" t-if="tab === 'faculty'">
+                    <article class="insight-card"><b>Punctuality review</b><p><t t-esc="repeatLate"/> staff members have repeated late marks in this period.</p></article>
+                    <article class="insight-card"><b>Department follow-up</b><p>Compare absence patterns by department before faculty follow-up.</p></article>
+                    <article class="insight-card"><b>Work-hour exceptions</b><p><t t-esc="missing"/> staff records have a missing check-out on the selected date.</p></article>
+                </div>
+                <div class="insight-list" t-else="">
+                    <article class="insight-card"><b>Shortage concentration</b><p><t t-esc="shortage.length"/> students are below the attendance threshold in this period.</p></article>
+                    <article class="insight-card"><b>Section comparison</b><p>Compare sections within the same programme and year for mentoring review.</p></article>
+                    <article class="insight-card"><b>Transport exceptions</b><p>Review fleet delays separately from student attendance marks.</p></article>
+                </div>
+            </section>
+            <t t-if="tab === 'faculty'" t-call="ideastone_principal.AttendanceFleet"/>
+        </div>
+    </t>
+    <t t-name="ideastone_principal.AttendanceListCard">
+        <div class="kpi-top"><span class="kpi-label" t-esc="card.label"/><span class="kpi-icon" t-att-class="'tone-' + card.tone"><t t-call="ideastone_principal.AttendanceIcon"><t t-set="icon" t-value="card.icon"/></t></span></div>
+        <strong class="pa-kpi-value" t-att-class="card.valueTone" t-esc="number(card.value)"/><span class="kpi-foot" t-esc="card.note"/>
+    </t>
+    <t t-name="ideastone_principal.AttendanceBadge">
+        <span class="pa-badge" t-att-class="'b-' + tone(row.status)" t-esc="row.status"/>
+    </t>
+    <t t-name="ideastone_principal.AttendanceDialog">
+        <dialog class="attendance-dialog" t-ref="dialog" aria-labelledby="pa-dialog-title" t-on-close="closeDialog" t-on-click="clickDialog">
+            <div class="dialog-inner">
+                <header class="dialog-head"><h2 id="pa-dialog-title"><t t-esc="state.dialog === 'late' ? 'Faculty late arrivals' : 'Fleet delays'"/> · <t t-esc="date(state.data.as_of)"/></h2><button type="button" class="close-button" t-on-click="closeDialog" aria-label="Close">×</button></header>
+                <div class="dialog-body" t-if="state.dialog === 'late'">
+                    <p>Late check-ins and their attendance status on the selected date.</p>
+                    <div class="table-wrap"><table><thead><tr><th>Faculty</th><th>Department</th><th>Check-in</th><th>Delay</th><th>Reason / classification</th><th>Attendance impact</th></tr></thead>
+                        <tbody><tr t-foreach="lateRows" t-as="row" t-key="row.key"><td><b t-esc="row.name"/><div class="muted" t-esc="row.number"/></td><td t-esc="row.department"/><td t-esc="row.check_in"/><td class="amber"><t t-esc="row.delay"/> min</td><td>Recorded after cutoff</td><td><t t-call="ideastone_principal.AttendanceBadge"/> <span class="muted">Late mark applies</span></td></tr>
+                        <tr t-if="!lateRows.length"><td colspan="6" class="empty-note">No late arrivals recorded.</td></tr></tbody></table></div>
+                </div>
+                <div class="dialog-body" t-else="">
+                    <p>Fleet arrival times are recorded separately from student and staff attendance.</p>
+                    <div class="table-wrap"><table><thead><tr><th>Route</th><th>Vehicle</th><th>Expected arrival</th><th>Actual arrival</th><th>Delay</th><th>Affected commuters</th><th>Verification</th></tr></thead>
+                        <tbody><tr t-foreach="fleet" t-as="row" t-key="row.id"><td t-esc="row.route"/><td t-esc="row.vehicle"/><td t-esc="row.expected"/><td t-esc="row.actual"/><td><t t-esc="row.delay"/> min</td><td t-esc="number(row.students + row.staff)"/><td><span class="pa-badge b-amber">Pending commuter verification</span></td></tr>
+                        <tr t-if="!fleet.length"><td colspan="7" class="empty-note">No delayed routes recorded.</td></tr></tbody></table></div>
+                </div>
+            </div>
+        </dialog>
+    </t>
+</templates>
