@@ -1,0 +1,33 @@
+.campus_complaints_portal {
+  color: #132a44;
+  .student_panel { margin-bottom: 16px; }
+  h2 { color: #092c47; font-size: 19px; font-weight: 700; margin: 0 0 5px; }
+  p { color: #556b82; }
+  .campus_complaints_portal_cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 15px;
+    > div { padding: 13px; background: #f4f7fb; border: 1px solid #e1e9f2; border-radius: 12px; }
+    small { display: block; color: #556b82; } strong { display: block; font-size: 24px; color: #092c47; }
+  }
+  .campus_complaints_portal_form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 14px;
+    .wide { grid-column: 1 / -1; }
+    label { display: flex; flex-direction: column; gap: 5px; font-weight: 600; color: #27415e; }
+    input, select, textarea { width: 100%; padding: 9px 11px; border: 1px solid #d7e2ef; border-radius: 9px; background: #fff; color: #132a44; }
+    .campus_complaints_portal_check { flex-direction: row; align-items: center; input { width: auto; } }
+    button { justify-self: start; }
+  }
+  .campus_complaints_portal_case { border: 1px solid #e1e9f2; border-radius: 12px; padding: 13px; margin-top: 10px;
+    .campus_complaints_portal_case_head { display: flex; justify-content: space-between; gap: 10px; color: #092c47; }
+    .campus_complaints_portal_case_head span { background: #e8f0ff; color: #1769e8; border-radius: 99px; padding: 2px 9px; text-transform: capitalize; }
+    p { margin: 7px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+    form { display: grid; gap: 7px; margin-top: 10px; }
+    textarea { width: 100%; border: 1px solid #d7e2ef; border-radius: 9px; padding: 9px; }
+    button { justify-self: start; }
+  }
+  .campus_complaints_portal_empty { padding: 15px; color: #556b82; background: #f4f7fb; border-radius: 9px; margin-top: 10px; }
+  @media (max-width: 800px) {
+    .campus_complaints_portal_cards, .campus_complaints_portal_form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 560px) {
+    .campus_complaints_portal_cards, .campus_complaints_portal_form { grid-template-columns: 1fr; }
+    .campus_complaints_portal_form .wide { grid-column: auto; }
+  }
+}

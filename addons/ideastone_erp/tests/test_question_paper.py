@@ -75,7 +75,8 @@ class TestQuestionPapers(TransactionCase):
             api.get_workspace('records', dict(f, study_year=True))
         overview = self.env['campus.dashboard'].with_user(self.coe).get_overview()
         self.assertTrue(overview['is_coe_workspace'])
-        self.assertEqual(len(overview['faculty_modules']), 7)
+        self.assertEqual(len(overview['faculty_modules']), 8)
+        self.assertIn('complaints', [module['key'] for module in overview['faculty_modules']])
         for module in overview['faculty_modules']:
             for item in module['items']:
                 view = self.env.ref(item['action']).params

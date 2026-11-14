@@ -129,6 +129,7 @@ class CampusBase extends Component {
     }
     moduleItems(module) {
         if (!module) return [];
+        if (module.key === "complaints") return module.items;
         if (module.key === "students" && this.state.is_owner_workspace) {
             return module.items.filter(item => item.page !== "faculty-module");
         }
@@ -164,6 +165,10 @@ class CampusBase extends Component {
         if (this.state.hod_dashboard_enabled && module.key === "home") {
             this.state.module = "home";
             return this.go({key: "overview"});
+        }
+        if (module.key === "complaints" && module.items?.[0]?.action) {
+            this.state.module = module.key;
+            return this.open(module.items[0]);
         }
         if (module.key === "students" && this.state.is_owner_workspace && !this.state.is_accountant_workspace) {
             this.state.module = module.key;

@@ -16,6 +16,7 @@ PRINCIPAL_FOCUS = {
     "learning": ("Learning oversight", {"Assignments", "Review submissions"}),
     "calendar": ("Calendar", {"College calendar"}),
     "reports": ("Institutional reports", {"Admissions", "Students", "Attendance", "Fee collection", "Outstanding dues", "Results", "Faculty workload"}),
+    "complaints": ("Complaints", {"Dashboard", "Student complaints", "Staff complaints"}),
 }
 
 

@@ -1,0 +1,82 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.ComplaintsWorkspace">
+    <main class="campus_complaints">
+      <div class="campus_complaints_breadcrumb">VCET Campus / Complaints / <t t-esc="title"/></div>
+      <header class="campus_complaints_header">
+        <div><h1 t-esc="title"/><p>Report a concern, follow the response and keep a clear case history.</p></div>
+        <div class="campus_complaints_actions">
+          <button class="btn btn-outline-primary" t-on-click="load" t-att-disabled="state.loading"><i class="fa fa-refresh"/> Refresh</button>
+          <button t-if="canSubmit" class="btn btn-primary" t-on-click="() => state.showForm = !state.showForm"><i class="fa fa-plus"/> New case</button>
+        </div>
+      </header>
+      <div t-if="state.error" class="alert alert-danger" role="alert"><t t-esc="state.error"/></div>
+      <p t-if="state.loading" role="status">Loading complaints…</p>
+      <t t-if="state.data">
+        <section class="campus_complaints_cards" aria-label="Case summary">
+          <article><span class="campus_complaints_icon blue"><i class="fa fa-inbox"/></span><div><small>New or reopened</small><strong t-esc="state.data.counts.submitted"/></div></article>
+          <article><span class="campus_complaints_icon amber"><i class="fa fa-tasks"/></span><div><small>With an in-charge</small><strong t-esc="state.data.counts.assigned"/></div></article>
+          <article><span class="campus_complaints_icon green"><i class="fa fa-check-circle"/></span><div><small>Resolved or closed</small><strong t-esc="state.data.counts.resolved"/></div></article>
+          <article><span class="campus_complaints_icon purple"><i class="fa fa-user"/></span><div><small>Complaints about me</small><strong t-esc="state.data.counts.about_me"/></div></article>
+        </section>
+        <section t-if="state.data.owner &amp;&amp; page === 'dashboard'" class="campus_complaints_panel">
+          <div class="campus_complaints_section"><h2>Category in-charge</h2><p>New cases go to the saved in-charge. If that person is involved in the case, another eligible operator receives it.</p></div>
+          <div class="campus_complaints_routes"><div t-foreach="state.data.categories" t-as="category" t-key="category[0]"><span t-esc="category[1]"/><strong t-esc="state.data.routes.find(route => route.category === category[0])?.user || 'Default campus team'"/></div></div>
+          <div class="campus_complaints_action_row"><label>Category<select class="form-select" t-model="state.routeCategory"><option value="">Select category</option><option t-foreach="state.data.categories" t-as="category" t-key="category[0]" t-att-value="category[0]" t-esc="category[1]"/></select></label><label>In-charge<select class="form-select" t-model="state.routeUser"><option value="">Select staff</option><option t-foreach="state.data.staff_targets" t-as="person" t-key="person.id" t-att-value="person.id" t-esc="person.name"/></select></label><button class="btn btn-outline-primary" t-on-click="saveRoute" t-att-disabled="state.busy || !state.routeCategory || !state.routeUser">Save route</button></div>
+        </section>
+        <section t-if="state.showForm &amp;&amp; canSubmit" class="campus_complaints_panel campus_complaints_form">
+          <div class="campus_complaints_section"><h2>Register a case</h2><p>Give the college enough detail to route and resolve the issue.</p></div>
+          <div class="campus_complaints_fields">
+            <label>Case type<select class="form-select" t-model="state.form.kind"><option t-foreach="state.data.kinds" t-as="kind" t-key="kind[0]" t-att-value="kind[0]" t-esc="kind[1]"/></select></label>
+            <label>Category<select class="form-select" t-model="state.form.category"><option t-foreach="state.data.categories" t-as="category" t-key="category[0]" t-att-value="category[0]" t-esc="category[1]"/></select></label>
+            <label class="wide">Subject<input class="form-control" type="text" maxlength="180" t-model="state.form.subject" required="required"/></label>
+            <label class="wide">Description<textarea class="form-control" rows="4" maxlength="5000" t-model="state.form.description" required="required"/></label>
+            <label>Location, if relevant<input class="form-control" type="text" maxlength="200" t-model="state.form.location"/></label>
+            <label>Incident date, if relevant<input class="form-control" type="date" t-model="state.form.incident_date"/></label>
+            <label t-if="state.form.category === 'staff'">Staff member concerned<select class="form-select" t-model="state.form.target_user_id"><option value="">Select staff</option><option t-foreach="state.data.staff_targets" t-as="person" t-key="person.id" t-att-value="person.id" t-esc="person.name"/></select></label>
+            <label t-if="state.form.category === 'student'">Student register number<input class="form-control" type="text" maxlength="60" t-model="state.form.student_number"/></label>
+            <label>Evidence (PDF, PNG or JPEG; 5 MB max)<input class="form-control" type="file" accept=".pdf,.png,.jpg,.jpeg" t-on-change="evidenceChanged"/></label>
+            <label class="campus_complaints_check"><input type="checkbox" t-model="state.form.anonymous_to_respondent"/> Hide my account name from the person concerned</label>
+          </div>
+          <div class="campus_complaints_actions"><button class="btn btn-primary" t-on-click="submit" t-att-disabled="state.busy">Submit case</button><button class="btn btn-outline-secondary" t-on-click="() => state.showForm = false">Cancel</button></div>
+        </section>
+        <section class="campus_complaints_panel">
+          <div class="campus_complaints_section"><h2>Case register</h2><p t-esc="state.data.owner ? 'College-wide complaints, feedback and incident reports.' : 'Your submissions, assigned work and concerns involving you.'"/></div>
+          <div class="campus_complaints_toolbar">
+            <div class="campus_complaints_filters" role="group" aria-label="Case filter">
+              <button t-foreach="[['all','All visible'],['mine','My reports'],['assigned','In my charge'],['about','About me']]" t-as="filter" t-key="filter[0]" t-att-class="{active: state.filter === filter[0]}" t-on-click="() => state.filter = filter[0]" t-esc="filter[1]"/>
+            </div>
+            <label>Search cases<input class="form-control" type="search" placeholder="Reference, subject or category" t-model="state.query"/></label>
+          </div>
+          <div class="table-responsive"><table class="table campus_complaints_table">
+            <thead><tr><th>Reference</th><th>Subject</th><th>Type</th><th>Category</th><th>In-charge</th><th>Status</th><th>Opened</th></tr></thead>
+            <tbody>
+              <tr t-foreach="rows" t-as="row" t-key="row.id" t-att-class="{selected: state.selectedId === row.id}" t-on-click="() => select(row)" tabindex="0" t-on-keydown="(ev) => this.caseKeydown(ev, row)">
+                <td><strong t-esc="row.reference"/></td><td t-esc="row.subject"/><td t-esc="row.kind"/><td t-esc="row.category"/>
+                <td t-esc="row.assigned"/><td><span class="campus_complaints_status" t-att-class="row.state" t-esc="row.state"/></td><td t-esc="row.created"/>
+              </tr>
+              <tr t-if="!rows.length"><td colspan="7">No cases match this view.</td></tr>
+            </tbody>
+          </table></div>
+        </section>
+        <section t-if="selected" class="campus_complaints_panel campus_complaints_detail" aria-label="Selected case">
+          <div class="campus_complaints_section"><h2><t t-esc="selected.reference"/> · <t t-esc="selected.subject"/></h2><p><t t-esc="selected.kind"/> · <t t-esc="selected.category"/> · <t t-esc="selected.state"/></p></div>
+          <div class="campus_complaints_detail_grid"><div><small>Reported by</small><strong t-esc="selected.reporter"/></div><div><small>Person concerned</small><strong t-esc="selected.concerned || 'None named'"/></div><div><small>In-charge</small><strong t-esc="selected.assigned"/></div><div><small>Location / date</small><strong t-esc="(selected.location || '—') + ' · ' + (selected.incident_date || '—')"/></div></div>
+          <p class="campus_complaints_description" t-esc="selected.description"/>
+          <button t-if="selected.has_evidence" class="btn btn-outline-primary" t-on-click="downloadEvidence"><i class="fa fa-paperclip"/> Download evidence</button>
+          <div t-if="selected.statement" class="campus_complaints_note"><strong>Statement from person concerned</strong><p t-esc="selected.statement"/></div>
+          <div t-if="selected.resolution" class="campus_complaints_note"><strong>Resolution</strong><p t-esc="selected.resolution"/></div>
+          <div t-if="selected.can_assign &amp;&amp; selected.state !== 'closed' &amp;&amp; selected.state !== 'resolved'" class="campus_complaints_action_row"><label>Assign in-charge<select class="form-select" t-model="state.assignee"><option value="">Select staff</option><option t-foreach="state.data.staff_targets" t-as="person" t-key="person.id" t-att-value="person.id" t-esc="person.name"/></select></label><button class="btn btn-outline-primary" t-on-click="() => act('assign')" t-att-disabled="state.busy || !state.assignee">Assign</button></div>
+          <div t-if="selected.can_work &amp;&amp; ['assigned','submitted','reopened'].includes(selected.state)" class="campus_complaints_actions"><button class="btn btn-outline-primary" t-on-click="() => act('start')" t-att-disabled="state.busy">Start work</button></div>
+          <div t-if="selected.can_work &amp;&amp; ['assigned','progress','reopened'].includes(selected.state)" class="campus_complaints_action_row"><label>Resolution<textarea class="form-control" maxlength="5000" rows="3" t-model="state.note"/></label><button class="btn btn-primary" t-on-click="() => act('resolve')" t-att-disabled="state.busy || !state.note.trim()">Resolve</button></div>
+          <div t-if="selected.can_assign &amp;&amp; selected.state === 'resolved'" class="campus_complaints_actions"><button class="btn btn-outline-primary" t-on-click="() => act('close')" t-att-disabled="state.busy">Close case</button></div>
+          <div t-if="selected.can_reopen || selected.can_respond" class="campus_complaints_action_row"><label t-esc="selected.can_reopen ? 'Reason for another review' : 'Your statement'"/><textarea class="form-control" maxlength="3000" rows="3" t-model="state.note"/><button class="btn btn-outline-primary" t-on-click="() => act(selected.can_reopen ? 'reopen' : 'respond')" t-att-disabled="state.busy || !state.note.trim()" t-esc="selected.can_reopen ? 'Reopen case' : 'Submit statement'"/></div>
+          <div class="campus_complaints_history"><h3>Case history</h3><div t-foreach="selected.history" t-as="entry" t-key="entry.id"><strong t-esc="entry.action"/><span t-esc="entry.actor + ' · ' + entry.date"/><p t-if="entry.note" t-esc="entry.note"/></div></div>
+        </section>
+        <div t-if="state.data.owner &amp;&amp; page === 'dashboard'" class="campus_complaints_earlier">
+          <section class="campus_complaints_panel"><div class="campus_complaints_section"><h2>Earlier institutional feedback</h2><p>Feedback filed through the existing campus forms.</p></div><article t-foreach="state.data.earlier_feedback" t-as="item" t-key="item.id"><strong t-esc="item.subject"/><span t-esc="item.reporter + ' · ' + item.kind + ' · ' + item.score + '/5'"/><p t-esc="item.comments"/></article><p t-if="!state.data.earlier_feedback.length">No earlier feedback in this college.</p><button class="btn btn-outline-primary" t-on-click="() => openEarlier('feedback')">Open feedback register</button></section>
+          <section class="campus_complaints_panel"><div class="campus_complaints_section"><h2>Earlier grievances</h2><p>Grievances and student conduct reports from the existing service desk.</p></div><article t-foreach="state.data.earlier_requests" t-as="item" t-key="item.id"><strong t-esc="item.subject"/><span t-esc="item.reporter + ' · ' + item.kind + ' · ' + item.state"/><p t-esc="item.description"/></article><p t-if="!state.data.earlier_requests.length">No earlier grievances in this college.</p><button class="btn btn-outline-primary" t-on-click="() => openEarlier('request')">Open service register</button></section>
+        </div>
+      </t>
+    </main>
+  </t>
+</templates>
