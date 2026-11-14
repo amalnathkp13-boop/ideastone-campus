@@ -10,7 +10,7 @@ PRINCIPAL_FOCUS = {
     "students": ("Student affairs", {"Student directory", "Enrolments & transfers"}),
     "academics": ("Academic planning", {"Overview", "Departments", "Programmes", "Subjects & curriculum"}),
     "staff": ("Faculty oversight", {"Staff directory", "New staff applications", "Teaching allocation", "Faculty development and appraisal", "Leave Management"}),
-    "attendance": ("Attendance oversight", {"Staff attendance", "Attendance register", "Student summary & shortage"}),
+    "attendance": ("Attendance oversight", {"Overview", "Faculty attendance", "Student attendance"}),
     "exams": ("Examination oversight", {"Overview", "Exam sessions", "Results & missing entries", "Question papers"}),
     "fees": ("Finance oversight", {"Financial overview", "Invoices & dues", "Overdue follow-up"}),
     "learning": ("Learning oversight", {"Assignments", "Review submissions"}),
@@ -217,7 +217,10 @@ class PrincipalNavigation(models.AbstractModel):
                        "ideastone_principal.action_principal_staff_leave": "ideastone.principal.request",
                        "ideastone_principal.action_principal_student_leave": "ideastone.principal.request",
                        "ideastone_principal.action_principal_events": "ideastone.principal.request",
-                       "ideastone_principal.action_principal_notices_workspace": "ideastone.principal.notice"})
+                       "ideastone_principal.action_principal_notices_workspace": "ideastone.principal.notice",
+
+                       **{f"ideastone_principal.action_attendance_{tab}": "op.attendance.line"
+                          for tab in ("overview", "faculty", "students")}})
 
     def _owner_modules(self):
         modules = super()._owner_modules()
@@ -226,6 +229,9 @@ class PrincipalNavigation(models.AbstractModel):
         modules = [
             (key, PRINCIPAL_FOCUS[key][0], icon,
              ([("Overview", "action_admissions_overview")] if key == "admissions" else [])
+             + ([(title, f"ideastone_principal.action_attendance_{tab}") for title, tab in [
+                 ("Overview", "overview"), ("Faculty attendance", "faculty"), ("Student attendance", "students"),
+             ]] if key == "attendance" else [])
              + [(title, action) for title, action in entries if title in PRINCIPAL_FOCUS[key][1]])
             for key, _label, icon, entries in modules if key in PRINCIPAL_FOCUS
         ]
