@@ -41,6 +41,8 @@ class StudentWorkspace(CampusPortal):
             data = service.snapshot(kw.get("enrolment"), kw.get("date_from"), kw.get("date_to"))
             if section not in {item[0] for item in data["navigation"]}:
                 return request.not_found()
+            if section == "complaints":
+                data["complaints"] = request.env["campus.complaints.ui"].get_page_data()
             if section == "placements":
                 placements = service._placement_overview(kw.get("enrolment"))
         except AccessError as exc:
@@ -70,7 +72,7 @@ class StudentWorkspace(CampusPortal):
     @http.route("/my/campus/student/action", type="http", auth="user", website=True, methods=["POST"], csrf=True)
     def student_action(self, operation="", return_to="dashboard", **kw):
         placement_operation = operation in ("placement_apply", "placement_profile", "placement_consent")
-        allowed = {"dashboard", "profile", "academics", "timetable", "attendance", "exams", "fees", "notices", "requests", "on-duty", "library", "help", "account", "placements"}
+        allowed = {"dashboard", "profile", "academics", "timetable", "attendance", "exams", "fees", "notices", "requests", "complaints", "on-duty", "library", "help", "account", "placements"}
         if placement_operation:
             return_to = "placements"
         return_to = return_to if return_to in allowed else "dashboard"
@@ -93,11 +95,16 @@ class StudentWorkspace(CampusPortal):
                 # Bound before allocating/encoding untrusted multipart data.
                 raw = upload.read(10 * 1024 * 1024 + 1)
                 payload.update(file=base64.b64encode(raw), filename=upload.filename)
-            scoped = service.with_company(student.company_id)
-            if placement_operation:
-                scoped._save_placement(operation, payload, kw.get("enrolment"))
+            if operation == "complaint_submit":
+                payload["evidence"] = payload.pop("file", False)
+                payload["evidence_filename"] = payload.pop("filename", False)
+                request.env["campus.complaints.ui"].submit(payload)
+            elif operation == "complaint_act":
+                request.env["campus.complaints.ui"].act(payload.get("case_id"), payload.get("case_action"), payload)
+            elif placement_operation:
+                service.with_company(student.company_id)._save_placement(operation, payload, kw.get("enrolment"))
             else:
-                scoped.act(operation, payload)
+                service.with_company(student.company_id).act(operation, payload)
             query = {"saved": "1"}
         except (UserError, ValueError, TypeError) as exc:
             query = {"form_error": str(exc)}

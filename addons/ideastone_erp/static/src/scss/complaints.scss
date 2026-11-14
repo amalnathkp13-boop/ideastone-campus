@@ -1,0 +1,94 @@
+.campus_complaints {
+  --case-navy: #092c47;
+  --case-blue: #1769e8;
+  --case-muted: #556b82;
+  --case-line: #e1e9f2;
+  min-height: 100%;
+  padding: 24px;
+  background: #f4f7fb;
+  color: #132a44;
+  font: 14px/1.5 Inter, "Segoe UI", sans-serif;
+
+  .campus_complaints_breadcrumb { color: var(--case-muted); font-size: 12px; margin-bottom: 12px; }
+  .campus_complaints_header {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 20px;
+    h1 { font-size: 28px; line-height: 1.2; font-weight: 700; margin: 0; color: var(--case-navy); }
+    p { color: var(--case-muted); margin: 4px 0 0; }
+  }
+  .campus_complaints_actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .btn { border-radius: 9px; font-weight: 600; }
+  .btn-primary { background: var(--case-blue); border-color: var(--case-blue); }
+  .campus_complaints_cards {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px;
+    article { display: flex; align-items: center; gap: 14px; min-height: 92px; padding: 15px; border: 1px solid var(--case-line); border-radius: 15px; background: #fff; box-shadow: 0 3px 12px #1736540b; }
+    small { display: block; color: var(--case-muted); }
+    strong { display: block; color: var(--case-navy); font-size: 26px; line-height: 1.2; }
+  }
+  .campus_complaints_icon {
+    width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; font-size: 20px;
+    &.blue { background: #e8f0ff; color: #1769e8; }
+    &.amber { background: #fff3dc; color: #b76b00; }
+    &.green { background: #e2f5e9; color: #16814a; }
+    &.purple { background: #eee8ff; color: #693ad1; }
+  }
+  .campus_complaints_panel { background: #fff; border: 1px solid var(--case-line); border-radius: 15px; padding: 18px; margin-bottom: 16px; box-shadow: 0 3px 12px #1736540b; }
+  .campus_complaints_section { margin-bottom: 15px; h2 { font-size: 19px; font-weight: 700; color: var(--case-navy); margin: 0; } p { color: var(--case-muted); margin: 3px 0 0; } }
+  .campus_complaints_fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+  label { display: flex; flex-direction: column; gap: 5px; font-weight: 600; color: #27415e; }
+  .wide { grid-column: 1 / -1; }
+  .campus_complaints_check { flex-direction: row; align-items: center; }
+  .form-control, .form-select { border: 1px solid var(--case-line); border-radius: 9px; background: #fff; color: #132a44; }
+  .campus_complaints_toolbar { display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+  .campus_complaints_filters { display: flex; gap: 5px; flex-wrap: wrap;
+    button { border: 1px solid var(--case-line); border-radius: 8px; padding: 7px 11px; background: #fff; color: #27415e; font-weight: 600; }
+    button.active { background: #e8f0ff; border-color: #bed3fa; color: var(--case-blue); }
+  }
+  .campus_complaints_table {
+    margin: 0; min-width: 760px;
+    th { background: #f2f6fb; color: #335474; font-size: 12px; white-space: nowrap; }
+    td, th { padding: 11px; border-color: var(--case-line); vertical-align: middle; }
+    tbody tr { cursor: pointer; }
+    tbody tr:hover, tbody tr.selected { background: #f0f6ff; }
+    tbody tr:focus-visible { outline: 2px solid var(--case-blue); outline-offset: -2px; }
+  }
+  .campus_complaints_status { display: inline-block; border-radius: 99px; padding: 2px 9px; background: #e9f0f7; color: #335474; font-weight: 600; text-transform: capitalize; white-space: nowrap;
+    &.submitted, &.reopened { background: #fff1da; color: #925400; }
+    &.progress, &.assigned { background: #e5efff; color: #1757ae; }
+    &.resolved, &.closed { background: #e1f4e8; color: #167346; }
+  }
+  .campus_complaints_detail_grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 15px 0;
+    > div { padding: 11px; background: #f6f9fd; border-radius: 9px; }
+    small { display: block; color: var(--case-muted); }
+    strong { display: block; overflow-wrap: anywhere; }
+  }
+  .campus_complaints_description, .campus_complaints_note p { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .campus_complaints_note { border-left: 3px solid var(--case-blue); padding: 10px 14px; background: #f2f7ff; margin: 13px 0; p { margin: 4px 0 0; } }
+  .campus_complaints_action_row { display: flex; align-items: end; gap: 10px; margin-top: 14px; flex-wrap: wrap; label { min-width: 240px; max-width: 100%; flex: 1; } textarea { min-width: 240px; max-width: 100%; flex: 1; } }
+  .campus_complaints_history { border-top: 1px solid var(--case-line); margin-top: 20px; padding-top: 12px;
+    h3 { font-size: 16px; font-weight: 700; }
+    > div { display: flex; gap: 10px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--case-line); }
+    span { color: var(--case-muted); } p { width: 100%; margin: 0; white-space: pre-wrap; }
+  }
+  .campus_complaints_routes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;
+    > div { display: flex; justify-content: space-between; gap: 10px; padding: 8px 11px; background: #f6f9fd; border-radius: 8px; }
+    span { color: var(--case-muted); }
+  }
+  .campus_complaints_earlier { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;
+    article { display: grid; gap: 3px; padding: 9px 0; border-bottom: 1px solid var(--case-line); }
+    article span, article p { color: var(--case-muted); margin: 0; }
+    article p { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .btn { margin-top: 12px; }
+  }
+  @media (max-width: 920px) {
+    .campus_complaints_cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .campus_complaints_detail_grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .campus_complaints_routes { grid-template-columns: 1fr; }
+    .campus_complaints_earlier { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    padding: 16px;
+    .campus_complaints_header { flex-direction: column; }
+    .campus_complaints_cards, .campus_complaints_detail_grid, .campus_complaints_fields { grid-template-columns: 1fr; }
+    .wide { grid-column: auto; }
+  }
+}

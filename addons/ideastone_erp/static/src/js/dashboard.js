@@ -129,6 +129,7 @@ class CampusBase extends Component {
     }
     moduleItems(module) {
         if (!module) return [];
+        if (module.key === "complaints") return module.items;
         if (module.key === "students" && this.state.is_owner_workspace) {
             return module.items.filter(item => item.page !== "faculty-module");
         }
@@ -168,6 +169,10 @@ class CampusBase extends Component {
         if (module.key === "students" && this.state.is_owner_workspace && !this.state.is_accountant_workspace) {
             this.state.module = module.key;
             return this.open({action: "ideastone_erp.action_students_directory"});
+        }
+        if (module.key === "complaints" && module.items?.[0]?.action) {
+            this.state.module = module.key;
+            return this.open(module.items[0]);
         }
         if (this.state.is_principal_workspace && ["home", "decisions", "principal_notices"].includes(module.key) && module.items?.[0]?.action) {
             this.state.module = module.key;

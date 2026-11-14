@@ -10,7 +10,7 @@ NAVIGATION = [
     ("attendance", "Attendance", "calendar-check-o"), ("learning", "Learning & Homework", "book"),
     ("timetable", "Timetable & Calendar", "calendar"), ("exams", "Exams & Results", "file-text-o"),
     ("fees", "Fees & Payments", "inr"), ("notices", "School Updates", "bullhorn"),
-    ("requests", "Requests & Contact", "comments-o"), ("documents", "Documents", "folder-open-o"),
+    ("requests", "Requests & Contact", "comments-o"), ("complaints", "Complaints", "commenting-o"), ("documents", "Documents", "folder-open-o"),
 ]
 
 

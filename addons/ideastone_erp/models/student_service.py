@@ -330,7 +330,7 @@ class StudentPortal(models.AbstractModel):
         loans = self._records("op.media.movement", [("student_id", "=", student.id), ("company_id", "=", company.id)], limit=500, order="issued_date desc")
         catalogue = self.env["op.media.unit"].sudo()._read_group([("campus_company_id", "=", company.id)], ["media_id"], ["__count"], limit=200, order="media_id")
         books = self.env["op.media"].sudo().browse([media.id for media, _count in catalogue if media])
-        navigation = [("dashboard", "Student Dashboard", "home"), ("profile", "My Profile", "user"), ("academics", "Academics", "graduation-cap"), ("timetable", "Timetable", "calendar"), ("attendance", "My Attendance", "calendar-check-o"), ("exams", "Examinations & Results", "file-text-o"), ("fees", "Fees & Payments", "inr"), ("notices", "Notices & Calendar", "bullhorn"), ("requests", "Requests & Certificates", "folder-open-o")]
+        navigation = [("dashboard", "Student Dashboard", "home"), ("profile", "My Profile", "user"), ("academics", "Academics", "graduation-cap"), ("timetable", "Timetable", "calendar"), ("attendance", "My Attendance", "calendar-check-o"), ("exams", "Examinations & Results", "file-text-o"), ("fees", "Fees & Payments", "inr"), ("notices", "Notices & Calendar", "bullhorn"), ("requests", "Requests & Certificates", "folder-open-o"), ("complaints", "Complaints", "commenting-o")]
         if loans or books or materials:
             navigation.append(("library", "Library", "book"))
         navigation.append(("placements", "Campus placements", "briefcase"))
