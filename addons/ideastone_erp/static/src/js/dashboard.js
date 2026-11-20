@@ -133,7 +133,7 @@ class CampusBase extends Component {
         if (module.key === "students" && this.state.is_owner_workspace) {
             return module.items.filter(item => item.page !== "faculty-module");
         }
-        return module.key === "home" || module.items.some(item => item.label === "Overview") ? module.items :
+        return ["home", "hall-allocation"].includes(module.key) || module.items.some(item => item.label === "Overview") ? module.items :
             [{label: "Overview", page: "faculty-module"}, ...module.items];
     }
     submoduleActive(item) {
@@ -199,7 +199,7 @@ class CampusBase extends Component {
             return this.open(module.items[0]);
         }
         if ((module.items?.[0]?.label === "Overview" ||
-            ((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library", "grievances", "hod-directory"].includes(module.key) ||
+            ((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library", "grievances", "hod-directory", "hall-allocation"].includes(module.key) ||
              (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics", "fees", "calendar", "staff", "communication"].includes(module.key)))) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);

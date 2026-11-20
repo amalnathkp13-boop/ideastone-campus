@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hall_hod,campus.hall HOD,model_campus_hall,ideastone_erp.group_mvp_hod,1,0,0,0
+access_hall_manager,campus.hall manager,model_campus_hall,ideastone_erp.group_manager,1,1,1,0
+access_hall_services,campus.hall services,model_campus_hall,ideastone_erp.group_services,1,0,0,0
+access_hall_booking_hod,campus.hall.booking HOD,model_campus_hall_booking,ideastone_erp.group_mvp_hod,1,1,1,0
+access_hall_booking_manager,campus.hall.booking manager,model_campus_hall_booking,ideastone_erp.group_manager,1,1,1,0
+access_hall_booking_services,campus.hall.booking authority,model_campus_hall_booking,ideastone_erp.group_services,1,1,0,0
