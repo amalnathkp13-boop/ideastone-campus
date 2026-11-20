@@ -9,6 +9,7 @@ from . import test_admissions_ui
 from . import test_students_directory_ui
 from . import test_examinations_ui
 from . import test_student_portal
+from . import test_student_learning_studio
 from . import test_parent_portal
 from . import test_finance_learning
 from . import test_faculty_leave_ui
