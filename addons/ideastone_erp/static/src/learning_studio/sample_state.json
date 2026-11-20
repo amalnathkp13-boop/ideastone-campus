@@ -1,0 +1,74 @@
+{
+  "name": "Ananya Raman",
+  "anchor": "2026-11-19",
+  "enrolled": [
+    "ds",
+    "db",
+    "dl",
+    "net"
+  ],
+  "done": {
+    "ds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "db": [
+      0
+    ],
+    "dl": []
+  },
+  "last": [
+    "db",
+    1
+  ],
+  "stars": [],
+  "answers": {
+    "ds": 1
+  },
+  "notes": {
+    "ds-2": "Review the left subtree before the root."
+  },
+  "drafts": {},
+  "submissions": {
+    "ds": {
+      "text": "In-order: 2, 5, 7, 10, 12, 15. Pre-order: 10, 5, 2, 7, 15, 12. Search for 7 by visiting 10, 5, then 7.",
+      "ts": 1795068297065
+    }
+  },
+  "attempts": {
+    "ds": [
+      {
+        "answers": [
+          1,
+          0,
+          2
+        ],
+        "score": 3,
+        "ts": 1795068296071
+      }
+    ]
+  },
+  "posts": [
+    {
+      "name": "Ananya Raman",
+      "c": "ds",
+      "text": "An in-order traversal visits the smaller keys first.",
+      "ts": 1795068318468
+    }
+  ],
+  "bookings": {
+    "db": {
+      "off": 2,
+      "time": "11:00"
+    }
+  },
+  "noticed": false,
+  "files": [],
+  "saved": [],
+  "updated": 1795068318826,
+  "exported": 1795068347412
+}
