@@ -1,0 +1,126 @@
+<templates xml:space="preserve">
+    <t t-name="ideastone_erp.HallIcon">
+        <svg class="ha-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <t t-if="icon === 'calendar'"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></t>
+            <t t-elif="icon === 'building'"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5M9 9h.01M15 9h.01M9 12h.01M15 12h.01"/></t>
+            <t t-elif="icon === 'request'"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M9 10h6M9 14h6M9 18h4"/></t>
+            <t t-elif="icon === 'clock'"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></t>
+            <t t-elif="icon === 'lock'"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></t>
+            <t t-elif="icon === 'available'"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></t>
+        </svg>
+    </t>
+    <t t-name="ideastone_erp.HallAllocation">
+        <main id="campus_main" class="campus_hall_allocation" t-ref="main" t-on-keydown="keys">
+            <div class="ha-content">
+                <header class="ha-heading">
+                    <div><div class="ha-crumb">VCET Campus / HOD workspace</div><h1>Hall Allocation Request</h1><p>Reserve a venue for department programmes and track allocation approvals.</p></div>
+                    <div class="ha-heading-actions">
+                        <span t-if="state.data?.demo" class="ha-demo">● Sample data</span>
+                        <button t-if="state.stage !== 'history'" type="button" class="ha-button" t-on-click="history" t-att-disabled="state.loading || state.saving">My requests</button>
+                        <button t-if="state.stage !== 'schedule'" type="button" class="ha-button" t-on-click="reset" t-att-disabled="state.saving">New request</button>
+                    </div>
+                </header>
+                <div t-if="state.error" class="ha-status ha-error" role="alert"><span t-esc="state.error"/> <button t-if="!state.data" class="ha-button" t-on-click="() => this.load()">Retry</button></div>
+                <p t-if="state.loading" class="ha-loading" role="status">Loading hall availability…</p>
+                <p t-if="state.feedback" class="ha-feedback" role="status" t-esc="state.feedback"/>
+                <t t-if="state.data">
+                    <section t-if="state.stage === 'schedule'" class="ha-panel" aria-label="Select schedule">
+                        <div class="ha-panel-head"><div><h2><t t-call="ideastone_erp.HallIcon"><t t-set="icon" t-value="'calendar'"/></t>Programme schedule</h2><p>Choose the required date and time to check hall availability across the campus.</p></div></div>
+                        <div class="ha-panel-body">
+                            <form class="ha-fields" t-on-submit.prevent="availability">
+                                <label class="ha-field">Event date<input type="date" required="required" t-model="state.schedule.date" t-att-min="state.data.today"/></label>
+                                <label class="ha-field">From time<input type="time" required="required" t-model="state.schedule.start"/></label>
+                                <label class="ha-field">To time<input type="time" required="required" t-model="state.schedule.end"/></label>
+                                <button type="submit" class="ha-button ha-primary" t-att-disabled="state.loading">Check availability</button>
+                            </form>
+                        </div>
+                    </section>
+                    <div t-if="['results', 'booking'].includes(state.stage)" class="ha-panel ha-slot-summary">
+                        <div><div class="ha-helper">Selected schedule</div><strong><t t-esc="date(state.slot.date)"/> · <t t-esc="timeRange(state.slot.start, state.slot.end)"/></strong></div>
+                        <button type="button" class="ha-button" t-on-click="editSlot" t-att-disabled="state.saving">Change date &amp; time</button>
+                    </div>
+                    <t t-if="state.stage === 'results'">
+                        <section class="ha-kpis" aria-label="Hall allocation summary">
+                            <article class="ha-kpi" t-foreach="kpis" t-as="card" t-key="card.label">
+                                <div class="ha-kpi-top"><span t-esc="card.label"/><span class="ha-kpi-icon" t-att-class="'ha-tone-' + card.tone"><t t-call="ideastone_erp.HallIcon"><t t-set="icon" t-value="card.icon"/></t></span></div>
+                                <div class="ha-kpi-value" t-esc="card.value"/><div class="ha-caption" t-esc="card.note"/>
+                            </article>
+                        </section>
+                        <section class="ha-panel">
+                            <div class="ha-panel-head">
+                                <div><h2><t t-call="ideastone_erp.HallIcon"><t t-set="icon" t-value="'building'"/></t>Hall availability</h2><p><t t-esc="date(state.slot.date)"/> · <t t-esc="timeRange(state.slot.start, state.slot.end)"/></p></div>
+                                <div class="ha-legend"><span><i class="ha-green"/>Available</span><span><i class="ha-red"/>Booked</span><span><i class="ha-amber"/>Pending</span></div>
+                            </div>
+                            <div class="ha-panel-body">
+                                <div class="ha-grid">
+                                    <t t-foreach="groups" t-as="group" t-key="group.title">
+                                        <h3 class="ha-group-heading" t-esc="group.title"/>
+                                        <article class="ha-card" t-foreach="group.halls" t-as="hall" t-key="hall.id">
+                                            <div class="ha-card-top"><span class="ha-glyph"><t t-call="ideastone_erp.HallIcon"><t t-set="icon" t-value="'building'"/></t></span><span class="ha-badge" t-att-class="'ha-tone-' + tone(hall.status)" t-esc="hall.status === 'Pending' ? 'Pending hold' : hall.status"/></div>
+                                            <div><h3 t-esc="hall.name"/><div class="ha-meta"><t t-esc="hall.location"/> · <strong t-esc="hall.capacity"/> seats</div></div>
+                                            <div class="ha-features"><span t-foreach="hall.features" t-as="feature" t-key="feature_index" t-esc="feature"/></div>
+                                            <div class="ha-conflict" t-att-class="'ha-tone-' + tone(hall.status)">
+                                                <t t-if="hall.booking"><t t-esc="hall.booking.department"/> · <t t-esc="timeRange(hall.booking.start, hall.booking.end)"/><br/><t t-esc="hall.booking.programme"/></t>
+                                                <t t-else="">Free for the requested time slot.</t>
+                                            </div>
+                                            <div class="ha-card-actions">
+                                                <button type="button" class="ha-link" t-on-click="() => this.showSchedule(hall)" t-att-aria-label="'View schedule for ' + hall.name">View schedule</button>
+                                                <button type="button" class="ha-button" t-att-disabled="hall.status !== 'Available' || state.loading" t-on-click="() => this.select(hall)" t-att-aria-label="'Book ' + hall.name" t-esc="hall.status === 'Available' ? 'Book hall' : 'Unavailable'"/>
+                                            </div>
+                                        </article>
+                                    </t>
+                                    <p t-if="!halls.length" class="ha-empty">No halls are configured for this college.</p>
+                                </div>
+                                <p class="ha-context" t-esc="halls.some(hall => hall.status === 'Available') ? 'Select an available hall to continue. Booked and pending halls remain visible for reference.' : 'No halls are available for this time slot. Change the date or time to try again.'"/>
+                            </div>
+                        </section>
+                    </t>
+                    <section t-if="state.stage === 'booking' &amp;&amp; selected" class="ha-panel ha-booking">
+                        <div class="ha-panel-head"><div><h2><t t-call="ideastone_erp.HallIcon"><t t-set="icon" t-value="'request'"/></t>Allocation request</h2><p>Enter programme details and submit for approval.</p></div><button type="button" class="ha-button" t-on-click="changeHall" t-att-disabled="state.saving">← Change hall</button></div>
+                        <div class="ha-panel-body">
+                            <form class="ha-form" t-on-submit.prevent="submit">
+                                <label class="ha-field">Department<input t-att-value="state.data.department" readonly="readonly"/></label>
+                                <label class="ha-field"><span>Programme name <span class="ha-required">*</span></span><input t-ref="programme" required="required" maxlength="120" placeholder="e.g. Technical symposium" t-model="state.details.programme" t-att-disabled="state.saving"/></label>
+                                <div class="ha-form-row">
+                                    <label class="ha-field">Programme type<select required="required" t-model="state.details.type" t-att-disabled="state.saving"><option value="">Select type</option><option t-foreach="state.data.types" t-as="type" t-key="type" t-esc="type"/></select></label>
+                                    <label class="ha-field">Faculty coordinator<input required="required" maxlength="80" placeholder="Coordinator name" t-model="state.details.coordinator" t-att-disabled="state.saving"/></label>
+                                </div>
+                                <label class="ha-field">Expected attendees<input type="number" min="1" t-att-max="selected.capacity" required="required" placeholder="Enter attendee count" t-model="state.details.attendees" t-att-disabled="state.saving"/></label>
+                                <label class="ha-field">Special requirements (optional)<textarea maxlength="500" placeholder="AV setup, microphone, seating arrangement…" t-model="state.details.requirements" t-att-disabled="state.saving"/></label>
+                                <div class="ha-selected" aria-live="polite"><span>Selected hall</span><strong t-esc="selected.name"/><div><t t-esc="date(state.slot.date)"/> · <t t-esc="timeRange(state.slot.start, state.slot.end)"/> · <t t-esc="selected.capacity"/> seats</div></div>
+                                <div class="ha-helper">Requests are sent to the designated allocation authority. A pending request is a temporary hold, not a confirmed booking.</div>
+                                <div class="ha-form-footer"><button type="button" class="ha-button" t-on-click="clearDetails" t-att-disabled="state.saving">Clear details</button><button type="submit" class="ha-button ha-primary" t-att-disabled="state.saving || state.loading"><t t-esc="state.saving ? 'Submitting…' : 'Request booking'"/><svg class="ha-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div>
+                            </form>
+                        </div>
+                    </section>
+                    <section t-if="state.stage === 'history'" class="ha-panel">
+                        <div class="ha-panel-head"><div><h2><t t-call="ideastone_erp.HallIcon"><t t-set="icon" t-value="'clock'"/></t>My allocation requests</h2><p>Track requests submitted by your department.</p></div>
+                            <select class="ha-history-filter" aria-label="Filter requests by status" t-model="state.filter"><option value="all">All statuses</option><option t-foreach="['Pending', 'Approved', 'Rejected', 'Cancelled']" t-as="status" t-key="status" t-esc="status"/></select>
+                        </div>
+                        <div class="ha-table-wrap"><table><thead><tr><th>REQUEST ID / PROGRAMME</th><th>HALL</th><th>DATE</th><th>TIME</th><th>ATTENDEES</th><th>STATUS</th><th>ACTION</th></tr></thead>
+                            <tbody><tr t-foreach="filteredRequests" t-as="row" t-key="row.id"><td><strong t-esc="row.programme"/><div class="ha-caption" t-esc="row.reference"/></td><td t-esc="row.hall"/><td t-esc="date(row.date)"/><td t-esc="timeRange(row.start, row.end)"/><td t-esc="row.attendees"/><td><span class="ha-badge" t-att-class="'ha-tone-' + tone(row.status)" t-esc="row.status"/></td><td><button type="button" class="ha-link" t-on-click="() => this.details(row)" t-att-aria-label="'View details for ' + row.reference">View details</button></td></tr>
+                            <tr t-if="!filteredRequests.length"><td colspan="7" class="ha-empty">No requests match this status.</td></tr></tbody>
+                        </table></div>
+                    </section>
+                    <footer class="ha-footer">VCET Campus ERP · HOD workspace · Powered by Ideastone</footer>
+                    <dialog t-if="state.dialog" class="ha-dialog" t-ref="dialog" t-on-close="closeDialog" t-on-click="backdrop" aria-labelledby="ha-dialog-title">
+                        <div class="ha-dialog-head"><h2 id="ha-dialog-title" t-esc="state.dialog.hall ? state.dialog.hall.name + ' · Schedule' : 'Allocation request · ' + state.dialog.request.reference"/><button type="button" class="ha-dialog-close" aria-label="Close" t-on-click="closeDialog">×</button></div>
+                        <div class="ha-dialog-body">
+                            <t t-if="state.dialog.hall">
+                                <div class="ha-muted"><t t-esc="date(state.slot.date)"/> · <t t-esc="state.dialog.hall.capacity"/> seats · <t t-esc="state.dialog.hall.location"/></div>
+                                <div class="ha-dialog-row" t-foreach="scheduleRows" t-as="row" t-key="row.id"><div><strong t-esc="row.programme"/><div class="ha-caption"><t t-esc="row.department"/> · <t t-esc="timeRange(row.start, row.end)"/></div></div><span class="ha-badge" t-att-class="'ha-tone-' + tone(row.status)" t-esc="row.status"/></div>
+                                <p t-if="!scheduleRows.length">No confirmed bookings or pending holds on this date.</p>
+                                <p class="ha-helper">Only overlapping time slots block availability. Other timings on the same day may be available.</p>
+                            </t>
+                            <t t-else="">
+                                <div class="ha-dialog-row" t-foreach="requestFields" t-as="field" t-key="field[0]"><span class="ha-muted" t-esc="field[0]"/><strong t-esc="field[1]"/></div>
+                                <div t-if="state.dialog.request.status === 'Pending'" class="ha-dialog-actions"><button type="button" class="ha-button ha-danger" t-on-click="cancel" t-att-disabled="state.saving" t-esc="state.confirmCancel ? 'Confirm cancellation' : 'Cancel request'"/></div>
+                            </t>
+                            <p t-if="state.error" class="ha-error" role="alert" t-esc="state.error"/>
+                        </div>
+                    </dialog>
+                </t>
+            </div>
+        </main>
+    </t>
+</templates>

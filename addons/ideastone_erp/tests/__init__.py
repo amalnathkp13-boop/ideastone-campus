@@ -29,3 +29,4 @@ from . import test_accountant_transport
 from . import test_accountant_circulars
 from . import test_complaints
 from . import test_currency_display
+from . import test_hall_allocation
