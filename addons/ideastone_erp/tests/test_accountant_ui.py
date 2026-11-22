@@ -48,6 +48,11 @@ class TestAccountantWorkspace(OwnerMVPFixture, TransactionCase):
         self.assertEqual(data["status"]["pending"] + data["status"]["overdue"], 375)
         self.assertEqual(data["recent_invoices"][0]["status"], "Pending")
         self.assertEqual(data["by_department"][0]["id"], self.department.id)
+        other_company = self.env["res.company"].create({"name": "Other collections college"})
+        other_department = self.env["op.department"].create({
+            "name": "Other collections department", "code": "QA-COLL-OTHER", "company_id": other_company.id})
+        with self.assertRaises(AccessError):
+            dashboard.get_accountant_collections_overview({"department_id": other_department.id})
 
     def test_accountant_sees_saved_fee_balances_without_other_admin_modules(self):
         student = self.enrolled().student_id
