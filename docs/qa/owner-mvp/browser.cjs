@@ -75,11 +75,14 @@ async function markup(page) {
         await page.locator('.admin_overview .kpi').first().waitFor();
         if(await page.locator('.campus_dashboard').innerText().then(text=>/Â·|â€”|â†/.test(text))) throw Error('Owner template contains incorrectly decoded UTF-8 punctuation');
         await page.locator('.campus_dashboard').evaluate(element=>element.scrollTop=0);
-        const modules = await page.locator('.campus_sidebar nav .campus_nav_link').allTextContents();
-        // 13 base modules, plus Accounts, Complaints and the optional AI Pack.
-        const aiPack=modules.some(label=>label.trim()==='AI insights');
-        if(modules.length!==15+(aiPack?1:0) || !modules.some(label=>label.trim()==='Accounts') || !modules.some(label=>label.trim()==='Complaints')) throw Error('Owner sidebar is missing Accounts or Complaints');
         const overview=await rpc(page,'campus.dashboard','get_overview');
+        const modules=(await page.locator('.campus_sidebar nav .campus_nav_link').allTextContents()).map(label=>label.trim());
+        const expectedModules=overview.faculty_modules.map(module=>module.label);
+        const aiPack=expectedModules.includes('AI insights');
+        if (!modules.includes('Accounts') || !modules.includes('Complaints')
+            || modules.length!==expectedModules.length || expectedModules.some(label=>!modules.includes(label))) {
+            throw Error('Owner sidebar does not match its available modules');
+        }
         let checkedViews=0;
         for(const module of overview.faculty_modules) {
             for(const item of module.items.filter(item=>item.action)) {
@@ -115,7 +118,12 @@ async function markup(page) {
         }
         for (const module of overview.faculty_modules.filter(module=>module.key!=='home')) {
             await page.locator('.campus_sidebar').getByRole('button',{name:module.label,exact:true}).click();
-            await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory',staff:'Staff Directory',calendar:'College Calendar',attendance:'Attendance Overview',accounts:'Accountant overview'})[module.key]||module.label,exact:true,level:1}).waitFor();
+            if (module.key==='placements') {
+                await page.frameLocator('iframe[title="Campus Placements workspace"]')
+                    .getByRole('heading',{name:'Campus placements',exact:true,level:1}).waitFor();
+            } else {
+                await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory',staff:'Staff Directory',calendar:'College Calendar',attendance:'Attendance Overview',accounts:'Accountant overview'})[module.key]||module.label,exact:true,level:1}).waitFor();
+            }
             if(await page.locator('.campus_page_trail:visible').count()) throw Error(`Owner page trail visible in ${module.label}`);
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Attendance',exact:true}).click();
