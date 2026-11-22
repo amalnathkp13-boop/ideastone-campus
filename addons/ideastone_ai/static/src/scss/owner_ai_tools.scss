@@ -1,0 +1,68 @@
+.o_web_client:has(.campus_navigation[data-owner-workspace="true"]) {
+    .campus_ai_page:is(.radar_page, .assistant_page) {
+        height: 100%;
+        min-height: 0;
+        min-width: 0;
+        overflow: auto;
+        padding: 24px;
+
+        .ai_heading { gap: 12px; margin-bottom: 16px; }
+        .ai_heading_icon { width: 34px; height: 34px; border-radius: 9px; font-size: 17px; }
+        &.radar_page .ai_heading_icon { color: #117e8b; background: #e7f6f7; }
+        &.assistant_page .ai_heading_icon { color: #7955c7; background: #f2edff; }
+        .ai_metrics { gap: 12px; }
+        .ai_metric {
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0 3px 18px rgba(21, 54, 91, .045);
+            min-width: 0;
+            strong { font-size: 26px; margin: 10px 0 4px; line-height: 1.2; }
+        }
+        .ai_panel, .ai_filters {
+            padding: 16px 20px;
+            border: 1px solid #e1e9f2;
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 3px 18px rgba(21, 54, 91, .045);
+            min-width: 0;
+        }
+        .ai_filters {
+            gap: 12px;
+            label { min-width: 0; flex: 1 1 140px; }
+            select, input { min-width: 0; width: 100%; min-height: 32px; }
+        }
+        .ai_icon_button { width: 32px; height: 32px; border-radius: 8px; }
+        .ai_button, .ai_tab { min-height: 32px; padding: 6px 12px; border-radius: 8px; }
+        .ai_panel:has(.radar_table) { overflow-x: auto; }
+        .radar_table { display: table; min-width: 780px; }
+        .radar_factor_bar { grid-template-columns: minmax(80px, 120px) minmax(0, 1fr) auto; }
+        .ai_status { border-radius: 8px; padding: 6px 10px; }
+        .ai_privacy_grid > div { min-width: 0; overflow-wrap: anywhere; }
+
+        @media (max-width: 760px) {
+            padding: 16px 12px;
+            .ai_panel, .ai_filters { padding: 16px; }
+            .ai_heading > div { flex-basis: calc(100% - 46px); }
+            .ai_ask_options { width: 100%; }
+            .ai_ask_options label { flex: 1 1 130px; }
+            .ai_ask_options select { width: 100%; }
+        }
+        @media (max-width: 560px) {
+            .ai_privacy_grid { grid-template-columns: minmax(0, 1fr); }
+            .ai_metrics { grid-template-columns: minmax(0, 1fr); }
+            .radar_factor_bar { grid-template-columns: 82px minmax(0, 1fr) auto; gap: 8px; }
+        }
+    }
+}
+
+@layer campus-theme {
+    .o_web_client:has(.campus_navigation[data-owner-workspace="true"]) .campus_ai_page:is(.radar_page, .assistant_page) {
+        font-size: 13px !important;
+        h1 { font-size: 24px !important; }
+        h2, h3 { font-size: 16px !important; }
+        p { font-size: 13px !important; }
+        button, .ai_button, .ai_tab { font-size: 12px !important; }
+        input, select, textarea { font-size: 13px !important; }
+        .ai_metric small, .ai_metric span, .ai_note { font-size: 12px !important; }
+    }
+}

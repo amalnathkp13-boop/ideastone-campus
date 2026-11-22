@@ -218,7 +218,8 @@ class TestSuccessRadar(OwnerMVPFixture, TransactionCase):
         dashboard = self.env["campus.dashboard"]
         owner_modules = dashboard.with_user(self.owner).get_overview()["faculty_modules"]
         ai_module = next(module for module in owner_modules if module["key"] == "ai")
-        self.assertEqual([item["label"] for item in ai_module["items"]], ["Student Success Radar", "Campus Assistant"])
+        self.assertEqual([item["label"] for item in ai_module["items"]], ["Overview", "Student Success Radar", "Campus Assistant"])
+        self.assertEqual(ai_module["items"][0]["action"], "ideastone_ai.action_insights_overview")
         staff_modules = dashboard.with_user(self.mentor).get_overview()["faculty_modules"]
         self.assertIn("Student success", [module["label"] for module in staff_modules])
         teacher_modules = dashboard.with_user(self.teacher).get_overview()["faculty_modules"]
