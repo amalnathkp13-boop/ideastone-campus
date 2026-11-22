@@ -274,7 +274,7 @@ class AccountantDashboard(models.AbstractModel):
         payments, collected_month = receipts(f["date_from"], f["date_to"])
         previous_start = fields.Date.subtract(f["date_from"], months=1)
         previous_end = f["date_from"] - timedelta(days=1)
-        _, previous_collected = receipts(previous_start, previous_end)
+        previous_collected = receipts(previous_start, previous_end)[1]
         change = round((collected_month - previous_collected) / previous_collected * 100, 1) if previous_collected else None
         semester = self.env["op.academic.term"].search([
             ("company_id", "=", company_id), ("term_start_date", "<=", f["date_to"]),
@@ -282,7 +282,7 @@ class AccountantDashboard(models.AbstractModel):
         ], order="term_start_date desc", limit=1)
         semester_start = semester.term_start_date if semester else fields.Date.subtract(f["date_to"], months=6)
         semester_start = min(semester_start, f["date_to"])
-        _, collected_semester = receipts(semester_start, f["date_to"])
+        collected_semester = receipts(semester_start, f["date_to"])[1]
 
         by_department = {department.id: {"id": department.id, "name": department.name,
                          "billed": 0.0, "collected": 0.0} for department in departments}

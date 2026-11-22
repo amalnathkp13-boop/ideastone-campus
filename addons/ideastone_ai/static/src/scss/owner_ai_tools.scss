@@ -58,8 +58,6 @@
 @layer campus-theme {
     .o_web_client:has(.campus_navigation[data-owner-workspace="true"]) .campus_ai_page:is(.radar_page, .assistant_page) {
         font-size: 13px !important;
-        h1 { font-size: 24px !important; }
-        h2, h3 { font-size: 16px !important; }
         p { font-size: 13px !important; }
         button, .ai_button, .ai_tab { font-size: 12px !important; }
         input, select, textarea { font-size: 13px !important; }

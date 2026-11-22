@@ -2,9 +2,10 @@
 
 from collections import Counter
 
-from odoo import _, api, fields, models
-from odoo.exceptions import AccessError, ValidationError
 from odoo.addons.ideastone_erp.models.owner_attendance_ui import owner_access
+from odoo.exceptions import AccessError, ValidationError
+
+from odoo import _, api, fields, models
 
 
 class OwnerAIInsights(models.AbstractModel):
@@ -35,10 +36,11 @@ class OwnerAIInsights(models.AbstractModel):
         factor_counts = Counter(factor["key"] for row in rows for factor in row["factors"])
         total = len(rows)
         money = self.env.company.currency_id.round
-        attendance_below = lambda row: (
-            row["attendance"]["rate"] is not None
-            and row["attendance"]["rate"] < row["attendance"]["threshold"]
-        )
+
+        def attendance_below(row):
+            attendance = row["attendance"]
+            return attendance["rate"] is not None and attendance["rate"] < attendance["threshold"]
+
         summary = {
             "students": total,
             "high": bands["high"],
