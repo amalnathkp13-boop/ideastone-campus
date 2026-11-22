@@ -115,13 +115,9 @@ async function markup(page) {
         }
         for (const module of overview.faculty_modules.filter(module=>module.key!=='home')) {
             await page.locator('.campus_sidebar').getByRole('button',{name:module.label,exact:true}).click();
-            if(module.key==='placements') {
-                const workspace=page.frameLocator('iframe[title="Campus Placements workspace"]');
-                await workspace.getByRole('heading',{name:'Campus placements',exact:true,level:1}).waitFor();
-                for(const item of module.items) {
-                    await page.locator('.campus_faculty_subnav').getByRole('button',{name:item.label,exact:true}).click();
-                    await workspace.getByRole('region',{name:'Campus placements · '+item.label,exact:true}).waitFor();
-                }
+            if (module.key==='placements') {
+                await page.frameLocator('iframe[title="Campus Placements workspace"]')
+                    .getByRole('heading',{name:'Campus placements',exact:true,level:1}).waitFor();
             } else {
                 await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory',staff:'Staff Directory',calendar:'College Calendar',attendance:'Attendance Overview',accounts:'Accountant overview'})[module.key]||module.label,exact:true,level:1}).waitFor();
             }
@@ -144,6 +140,13 @@ async function markup(page) {
                 throw Error(`Owner ${mode} attendance does not reconcile with saved records`);
             }
             await page.screenshot({path:path.join(out,`owner-attendance-${mode}-1440.png`),fullPage:true});
+        }
+        await page.locator('.campus_sidebar').getByRole('button',{name:'Campus Placements',exact:true}).click();
+        const placements=page.frameLocator('iframe[title="Campus Placements workspace"]');
+        await placements.getByRole('heading',{name:'Campus placements',exact:true,level:1}).waitFor();
+        for(const item of overview.faculty_modules.find(module=>module.key==='placements').items) {
+            await page.locator('.campus_faculty_subnav').getByRole('button',{name:item.label,exact:true}).click();
+            await placements.getByRole('region',{name:'Campus placements · '+item.label,exact:true}).waitFor();
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Admissions',exact:true}).click();
         await page.getByRole('heading',{name:'Admissions',exact:true}).waitFor();
