@@ -1,18 +1,22 @@
 <templates xml:space="preserve">
+  <t t-name="ideastone_erp.AccountantHeaderActions">
+    <div class="accountant_top_actions">
+      <button type="button" class="accountant_top_icon" aria-label="Refresh accounts" t-on-click="loadAccountantMetrics" t-att-disabled="state.accountantLoading"><i class="fa fa-refresh"/></button>
+      <span class="accountant_top_role">Accountant</span>
+      <span class="accountant_avatar" aria-hidden="true">A</span>
+    </div>
+  </t>
   <t t-name="ideastone_erp.AccountantOverview">
     <div class="campus_accountant_overview">
-      <div class="accountant_topbar">
+      <div t-if="!ownerHeader" class="accountant_topbar">
         <div class="accountant_crumb campus_page_trail">VCET Campus <span>/</span> <strong>Accountant overview</strong></div>
-        <div class="accountant_top_actions">
-          <button type="button" class="accountant_top_icon" aria-label="Refresh accounts" t-on-click="loadAccountantMetrics" t-att-disabled="state.accountantLoading"><i class="fa fa-refresh"/></button>
-          <span class="accountant_top_role">Accountant</span>
-          <span class="accountant_avatar" aria-hidden="true">A</span>
-        </div>
+        <t t-call="ideastone_erp.AccountantHeaderActions"/>
       </div>
       <div class="accountant_content">
-        <header class="accountant_head">
-          <div><h1>Accountant overview</h1><p>A clear view of collections, spending and pending action across your campus.</p></div>
-          <div class="accountant_actions">
+        <header class="accountant_head" t-att-class="{campus_page_header: ownerHeader}">
+          <div class="campus_page_title"><h1>Accountant overview</h1><p>A clear view of collections, spending and pending action across your campus.</p></div>
+          <div t-if="ownerHeader" class="campus_page_context"><t t-call="ideastone_erp.AccountantHeaderActions"/></div>
+          <div class="accountant_actions campus_page_actions">
             <button type="button" class="accountant_btn" t-on-click="accountantExportSummary" t-att-disabled="state.accountantLoading || !state.accountantMetrics.cards.length"><i class="fa fa-download"/> Export summary</button>
             <button type="button" class="accountant_btn accountant_btn_primary" t-on-click="ownerPrint"><i class="fa fa-print"/> Print overview</button>
           </div>

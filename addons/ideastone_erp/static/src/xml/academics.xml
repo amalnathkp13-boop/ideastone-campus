@@ -5,10 +5,12 @@
         <p t-if="state.loading" class="academic-loading" role="status">Refreshing academic records…</p>
         <div t-if="state.error" class="academic-error" role="alert"><span t-esc="state.error"/><button type="button" class="refresh" t-on-click="load">Retry</button></div>
         <t t-if="d">
-          <div class="breadcrumb-row campus_page_context"><div class="breadcrumb campus_page_trail">VCET Campus / <strong t-esc="moduleTitle"/><t t-if="view !== 'overview'"> / <strong t-esc="title"/></t></div><div class="owner"><t t-esc="d.today"/> · <strong t-esc="workspaceRole"/></div></div>
-          <div class="page-head"><div><h1 t-esc="title"/><p class="subtitle" t-esc="subtitle"/></div>
-            <button t-if="view === 'overview'" type="button" class="refresh" t-on-click="load" t-att-disabled="state.loading">⟳ &#160;Refresh</button>
-            <div t-else="" class="years-actions"><button type="button" class="filter-icon" aria-label="Show filters" title="Filters" t-att-aria-expanded="state.filtersOpen ? 'true' : 'false'" t-on-click="() => state.filtersOpen = !state.filtersOpen"><t t-call="ideastone_erp.AcademicFilterIcon"/></button><button t-if="d.can_edit &amp;&amp; d.create[view]" type="button" class="primary-btn" t-on-click="() => this.open()">＋ <t t-esc="addLabel"/></button><button type="button" class="academic-reload" aria-label="Refresh academic records" title="Refresh records" t-on-click="load" t-att-disabled="state.loading">⟳</button></div>
+          <div class="campus_page_header">
+            <div class="breadcrumb-row campus_page_context"><div class="breadcrumb campus_page_trail">VCET Campus / <strong t-esc="moduleTitle"/><t t-if="view !== 'overview'"> / <strong t-esc="title"/></t></div><div class="owner"><t t-esc="d.today"/> · <strong t-esc="workspaceRole"/></div></div>
+            <div class="page-head campus_page_heading_parts"><div class="campus_page_title"><h1 t-esc="title"/><p class="subtitle" t-esc="subtitle"/></div>
+              <button t-if="view === 'overview'" type="button" class="refresh campus_page_actions" t-on-click="load" t-att-disabled="state.loading">⟳ &#160;Refresh</button>
+              <div t-else="" class="years-actions campus_page_actions"><button type="button" class="filter-icon" aria-label="Show filters" title="Filters" t-att-aria-expanded="state.filtersOpen ? 'true' : 'false'" t-on-click="() => state.filtersOpen = !state.filtersOpen"><t t-call="ideastone_erp.AcademicFilterIcon"/></button><button t-if="d.can_edit &amp;&amp; d.create[view]" type="button" class="primary-btn" t-on-click="() => this.open()">＋ <t t-esc="addLabel"/></button><button type="button" class="academic-reload" aria-label="Refresh academic records" title="Refresh records" t-on-click="load" t-att-disabled="state.loading">⟳</button></div>
+            </div>
           </div>
           <t t-if="view === 'overview'"><t t-call="ideastone_erp.AcademicOverview"/></t>
           <t t-elif="view === 'years'"><t t-call="ideastone_erp.AcademicYears"/></t>

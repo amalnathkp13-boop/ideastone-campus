@@ -51,17 +51,74 @@
 .campus_page_heading > button, .campus_side_bottom a { min-height: 44px; }
 
 // Module tabs already show the current location in the owner workspace.
+.campus_page_header { display: contents; }
+.owner-hero-aside { display: contents; }
 .o_web_client:has(.campus_navigation[data-owner-workspace="true"]) {
     .campus_page_trail,
     .campus_page_context:has(> .campus_page_trail:only-child) {
         display: none;
     }
     .campus_page_context {
-        // The shared breadcrumb rule also reads this spacing token.
-        --ui-space-3: var(--ui-space-1, 4px);
-        justify-content: flex-start;
+        --ui-space-3: 0px;
+        justify-content: flex-end;
+        align-items: flex-end;
         min-height: 0;
-        margin-bottom: var(--ui-space-3);
-        > :last-child { text-align: start; }
+        margin: 0;
+        text-align: end;
+    }
+    .campus_page_header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) fit-content(56%);
+        gap: 4px 20px;
+        align-items: start;
+        margin-bottom: 16px;
+
+        .campus_page_heading_parts { display: contents; }
+        .campus_page_title {
+            grid-area: 1 / 1 / span 2;
+            min-width: 0;
+            overflow-wrap: anywhere;
+            h1 { margin-top: 0; }
+        }
+        .campus_page_context, .campus_page_sample, .campus_page_actions {
+            grid-column: 2;
+            justify-self: end;
+            min-width: 0;
+            max-width: 100%;
+        }
+        .campus_page_context { grid-row: 1; }
+        .campus_page_sample { margin: 0; text-align: end; }
+        .campus_page_actions { justify-content: flex-end; flex-wrap: wrap; }
+        .campus_page_back { grid-column: 1 / -1; order: 1; margin: 0; }
+        .scope { flex-wrap: wrap; justify-content: flex-end; max-width: 100%; }
+    }
+    .campus_page_rich_header {
+        padding: 20px;
+        border: 1px solid var(--line, #e2eaf3);
+        border-radius: 15px;
+        background: white;
+        box-shadow: var(--shadow, none);
+    }
+    .owner-hero-aside {
+        display: grid;
+        justify-items: end;
+        align-content: center;
+        gap: 6px;
+        min-width: 0;
+        z-index: 1;
+    }
+    .owner-hero-meta {
+        text-align: end;
+        color: #d2e8f8;
+        font-size: 11px;
+        .demo-note { display: block; margin: 0; }
+    }
+    @media (max-width: 760px) {
+        .campus_page_header {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 6px 12px;
+            .campus_page_context :is(label, select) { min-width: 0; max-width: 100%; }
+            .campus_page_actions { grid-column: 1 / -1; }
+        }
     }
 }

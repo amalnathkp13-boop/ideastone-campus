@@ -3,7 +3,7 @@
     <xpath expr="//h1" position="attributes"><attribute name="t-esc">principalHeading(meta.title, view === 'overview')</attribute></xpath>
   </t>
   <t t-name="ideastone_principal.StudentsHeading" t-inherit="ideastone_erp.StudentsDirectoryWorkspace" t-inherit-mode="extension">
-    <xpath expr="//div[@class='headingrow']//h1" position="attributes"><attribute name="t-esc">principalHeading(title, state.screen === 'directory')</attribute></xpath>
+    <xpath expr="//div[hasclass('headingrow')]//h1" position="attributes"><attribute name="t-esc">principalHeading(title, state.screen === 'directory')</attribute></xpath>
   </t>
   <t t-name="ideastone_principal.StaffHeading" t-inherit="ideastone_erp.OwnerStaffDirectory" t-inherit-mode="extension">
     <xpath expr="//h1[.='Staff Directory']" position="replace"><h1 t-esc="principalHeading('Staff Directory')"/></xpath>
