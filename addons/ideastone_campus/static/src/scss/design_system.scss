@@ -210,7 +210,7 @@ $ui-pages: ".campus_dashboard, .admin_overview, .student_main, .parent_main, .st
         overflow-x: auto;
     }
 
-    :is(.panel, .card, .kpi, .stat, .metric, .mini-stat, .campus_panel, .campus_stat,
+    :is(.panel, .card, .kpi, .stat, .metric, .mini-stat, .od_token, .campus_panel, .campus_stat,
         .student_panel, .student_stat, .staff_profile_hero, .academic_card, .academic_metric, .profile_card, .profile_metric,
         .timetable_card, .timetable_stat, .attendance_panel, .attendance_kpi, .attendance_filter_card,
         .exam_panel, .exam_assessment_card, .exam_filter_card, .appraisal_panel, .appraisal_hero,
@@ -241,7 +241,7 @@ $ui-pages: ".campus_dashboard, .admin_overview, .student_main, .parent_main, .st
     }
     button:is(.kpi, .stat, .campus_stat, .student_stat, .workspace-card, .coe-browse-card, .dept) { font-weight: 400 !important; }
     :is(.kpi-value, .kpi .value, .stat-num, .stat-value, .coe-stat > b, .stat > .num, .student_stat strong,
-        .attendance_kpi strong, .attendance_metric strong, .staff_profile_metric strong, .payroll_metric strong,
+        .attendance_kpi strong, .attendance_metric strong, .od_token strong, .staff_profile_metric strong, .payroll_metric strong,
         .sa_metric strong, .academic_metric > strong, .profile_metric strong, .timetable_stat strong) {
         font-size: 28px !important; line-height: 1.2 !important; font-weight: 780 !important;
         letter-spacing: -.6px !important; color: var(--ui-ink) !important;

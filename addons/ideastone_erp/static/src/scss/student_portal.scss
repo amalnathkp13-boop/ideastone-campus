@@ -44,7 +44,9 @@
 }
 .student_main { padding: 24px; max-width: 1700px; margin: 0 auto; outline: none; }
 .student_main, .student_main section[id], .student_panel { scroll-margin-top: 120px; }
-.student_breadcrumb { display: flex; justify-content: space-between; gap: 12px; color: var(--student-muted); font-size: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.student_breadcrumb { display: flex; justify-content: flex-end; color: var(--student-muted); font-size: 12px; margin-bottom: 0;
+    > span:first-child { display: none; }
+}
 .student_page_heading { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 16px; p { color: var(--student-muted); font-size: 14px; margin-bottom: 0; } }
 .student_workspace .student_dashboard_title { font-weight: 700; }
 .student_demo { display: inline-block; font-size: 10px; letter-spacing: .8px; padding: 6px 9px; border: 1px solid #b7d2f5; color: #19548d; background: #eef6ff; border-radius: 6px; margin-bottom: 18px; }
