@@ -69,7 +69,7 @@ async function markup(page) {
             await page.setViewportSize({width,height:1000});
             if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)) throw Error(`Admin overview overflows at ${width}`);
         }
-        await page.locator('.owner-calendar-panel').getByRole('button',{name:'View events ↗',exact:true}).click();
+        await page.locator('.owner-calendar-panel').getByRole('button',{name:'View events',exact:true}).click();
         await page.locator('.campus_college_calendar').waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Dashboard',exact:true}).click();
         await page.locator('.admin_overview .kpi').first().waitFor();
