@@ -55,6 +55,7 @@
 .owner-hero-aside { display: contents; }
 .o_web_client:has(.campus_navigation[data-owner-workspace="true"]) {
     .campus_page_trail,
+    .campus_page_sample,
     .campus_page_context:has(> .campus_page_trail:only-child) {
         display: none;
     }
@@ -80,17 +81,29 @@
             overflow-wrap: anywhere;
             h1 { margin-top: 0; }
         }
-        .campus_page_context, .campus_page_sample, .campus_page_actions {
+        .campus_page_context, .campus_page_actions {
             grid-column: 2;
             justify-self: end;
             min-width: 0;
             max-width: 100%;
         }
         .campus_page_context { grid-row: 1; }
-        .campus_page_sample { margin: 0; text-align: end; }
         .campus_page_actions { justify-content: flex-end; flex-wrap: wrap; }
         .campus_page_back { grid-column: 1 / -1; order: 1; margin: 0; }
         .scope { flex-wrap: wrap; justify-content: flex-end; max-width: 100%; }
+    }
+    .campus_admissions_workspace {
+        .campus_page_header { margin-bottom: 8px; }
+        .campus_page_actions {
+            gap: 6px;
+            > .btn {
+                min-height: 32px;
+                padding: 4px 9px;
+                gap: 5px;
+                line-height: 16px;
+            }
+            > .icon-button { width: 32px; height: 32px; padding: 0; }
+        }
     }
     .campus_page_rich_header {
         padding: 20px;
@@ -111,7 +124,6 @@
         text-align: end;
         color: #d2e8f8;
         font-size: 11px;
-        .demo-note { display: block; margin: 0; }
     }
     @media (max-width: 760px) {
         .campus_page_header {
@@ -120,5 +132,19 @@
             .campus_page_context :is(label, select) { min-width: 0; max-width: 100%; }
             .campus_page_actions { grid-column: 1 / -1; }
         }
+        .campus_admissions_workspace .campus_page_title {
+            display: contents;
+            h1 { grid-area: 1 / 1; }
+            p { grid-column: 1 / -1; margin: 0; }
+        }
+    }
+    @media (max-width: 360px) {
+        .campus_admissions_workspace .campus_page_actions > .btn:not(.icon-button) { padding-inline: 6px; }
+    }
+}
+
+@layer campus-theme {
+    .o_web_client:has(.campus_navigation[data-owner-workspace="true"]) .campus_admissions_workspace .campus_page_actions > .btn {
+        font-size: 12px !important;
     }
 }

@@ -60,7 +60,7 @@
               </section>
             </div>
           </div>
-          <div class="footer"><t t-esc="state.data.company"/> · College Calendar<t t-if="events.some(e => e.is_sample)"> · Sample events are illustrative, not confirmed official college announcements.</t></div>
+          <div class="footer"><t t-esc="state.data.company"/> · College Calendar<span class="campus_page_sample" t-if="events.some(e => e.is_sample)"> · Sample events are illustrative, not confirmed official college announcements.</span></div>
         </t>
       </div>
     </main>

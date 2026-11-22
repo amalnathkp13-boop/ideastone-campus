@@ -126,7 +126,7 @@
       <button type="button" class="clear-filters" t-on-click="clearFilters">Clear filters</button>
     </div>
   </t>
-  <t t-name="ideastone_erp.AcademicFooter"><div class="table-footer"><span>Showing <t t-esc="rows.length"/> <t t-esc="title.toLowerCase()"/> records</span><span t-esc="d.is_demo ? 'Demonstration college · Sample academic records' : 'Saved academic records · Active college'"/></div></t>
+  <t t-name="ideastone_erp.AcademicFooter"><div class="table-footer"><span>Showing <t t-esc="rows.length"/> <t t-esc="title.toLowerCase()"/> records</span><span t-att-class="{'campus_page_sample': d.is_demo}" t-esc="d.is_demo ? 'Demonstration college · Sample academic records' : 'Saved academic records · Active college'"/></div></t>
   <t t-name="ideastone_erp.AcademicRecord">
     <Dialog title="title" size="'lg'" contentClass="'campus_academics_record'">
       <div class="academic-record-heading"><p t-esc="props.view === 'departments' ? 'Department overview · Current academic year' : 'Academic record details'"/></div>
