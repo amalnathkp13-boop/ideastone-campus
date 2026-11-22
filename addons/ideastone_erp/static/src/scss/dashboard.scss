@@ -49,3 +49,17 @@
 /* Keep Odoo's utility-menu spacing; wide tables scroll inside their own wrapper. */
 .campus_quick .campus_module small { margin-top: 0; }
 .campus_page_heading > button, .campus_side_bottom a { min-height: 44px; }
+
+// Module tabs already show the current location in the owner workspace.
+.o_web_client:has(.campus_navigation[data-owner-workspace="true"]) {
+    .campus_page_trail,
+    .campus_page_context:has(> .campus_page_trail:only-child) {
+        display: none;
+    }
+    .campus_page_context {
+        justify-content: flex-start;
+        min-height: 0;
+        margin-bottom: 4px;
+        > :last-child { text-align: start; }
+    }
+}

@@ -4,7 +4,7 @@
       <p t-if="state.loading" class="loading-note" role="status">Loading admissions records…</p>
       <div t-if="state.error" class="alert alert-danger" role="alert"><t t-esc="state.error"/><button type="button" class="btn" t-on-click="refresh">Retry</button></div>
       <t t-if="state.data &amp;&amp; !state.error">
-        <div class="crumb"><span>VCET Campus / Admissions / <t t-esc="view === 'overview' ? 'Overview' : meta.title"/></span><span><t t-esc="state.data.today"/> · <t t-esc="scope"/></span></div>
+        <div class="crumb campus_page_context"><span class="campus_page_trail">VCET Campus / Admissions / <t t-esc="view === 'overview' ? 'Overview' : meta.title"/></span><span><t t-esc="state.data.today"/> · <t t-esc="scope"/></span></div>
         <p t-if="state.data.is_demo" class="demo-note">Demonstration college · Sample records for preview</p>
         <div class="heading"><div><h1 t-esc="meta.title"/><p t-esc="meta.description"/></div><div class="actions">
           <button class="btn icon-button" type="button" aria-label="Filters" title="Filter academic year and programme" t-on-click="filters" t-att-disabled="state.loading"><i class="fa fa-filter" aria-hidden="true"/></button>

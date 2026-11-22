@@ -1,7 +1,7 @@
 <templates xml:space="preserve">
   <t t-name="ideastone_erp.OwnerSettings">
     <div class="owner_settings">
-      <div class="os_crumb">VCET Campus / Owner workspace / <b t-esc="screen === 'overview' ? 'Settings overview' : title"/></div>
+      <div class="os_crumb campus_page_trail">VCET Campus / Owner workspace / <b t-esc="screen === 'overview' ? 'Settings overview' : title"/></div>
       <div t-if="state.error" class="os_notice" role="alert"><t t-esc="state.error"/><button class="os_btn" t-on-click="load">Retry</button></div>
       <p t-elif="state.loading" role="status">Loading settings…</p>
       <t t-else="">

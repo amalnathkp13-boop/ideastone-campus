@@ -2,7 +2,7 @@
   <t t-name="ideastone_erp.AccountantOverview">
     <div class="campus_accountant_overview">
       <div class="accountant_topbar">
-        <div class="accountant_crumb">VCET Campus <span>/</span> <strong>Accountant overview</strong></div>
+        <div class="accountant_crumb campus_page_trail">VCET Campus <span>/</span> <strong>Accountant overview</strong></div>
         <div class="accountant_top_actions">
           <button type="button" class="accountant_top_icon" aria-label="Refresh accounts" t-on-click="loadAccountantMetrics" t-att-disabled="state.accountantLoading"><i class="fa fa-refresh"/></button>
           <span class="accountant_top_role">Accountant</span>

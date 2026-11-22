@@ -116,6 +116,7 @@ async function markup(page) {
         for (const module of overview.faculty_modules.filter(module=>module.key!=='home')) {
             await page.locator('.campus_sidebar').getByRole('button',{name:module.label,exact:true}).click();
             await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory',staff:'Staff Directory',calendar:'College Calendar',attendance:'Attendance Overview',accounts:'Accountant overview'})[module.key]||module.label,exact:true,level:1}).waitFor();
+            if(await page.locator('.campus_page_trail:visible').count()) throw Error(`Owner page trail visible in ${module.label}`);
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Attendance',exact:true}).click();
         const attendance=page.locator('.owner_attendance');

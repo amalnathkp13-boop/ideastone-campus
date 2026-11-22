@@ -1,6 +1,6 @@
 <templates xml:space="preserve">
 <t t-name="ideastone_erp.AccountantSpending"><div class="accountant_spending"><section class="content">
-  <div class="crumb">VCET Campus <span>/</span> Spending <span>/</span> <b><t t-esc="label"/> bills</b></div>
+  <div class="crumb campus_page_trail">VCET Campus <span>/</span> Spending <span>/</span> <b><t t-esc="label"/> bills</b></div>
   <div class="headingrow"><div><h1><t t-esc="label"/> bills</h1><p t-esc="description"/></div><button class="primary" t-on-click="openNew">＋ New bill</button></div>
   <p t-if="state.error" class="spend-error" role="alert"><t t-esc="state.error"/> <button t-on-click="load">Retry</button></p>
   <p t-if="state.loading" role="status">Loading spending records…</p>

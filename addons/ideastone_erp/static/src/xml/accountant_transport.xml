@@ -3,7 +3,7 @@
 <main class="campus_transport_workspace" t-ref="transportWorkspace">
   <nav class="subnav" aria-label="Transport billing views"><span class="section">Transport billing</span><button t-foreach="screens" t-as="screen" t-key="screen.key" type="button" t-att-class="state.screen === screen.key ? 'active' : ''" t-att-aria-current="state.screen === screen.key ? 'page' : undefined" t-on-click="() => this.go(screen.key)" t-esc="screen.tab"/></nav>
   <div class="content">
-    <div class="crumb">VCET Campus <span>/</span> Transport billing <span>/</span> <t t-esc="state.screen === 'overview' ? 'Overview' : config.tab"/></div>
+    <div class="crumb campus_page_trail">VCET Campus <span>/</span> Transport billing <span>/</span> <t t-esc="state.screen === 'overview' ? 'Overview' : config.tab"/></div>
     <div class="headingrow"><div><h1 t-esc="config.title"/><p t-esc="config.subtitle"/></div>
       <button t-if="state.screen === 'overview'" type="button" class="primary" t-on-click="() => this.go('routes')">＋ Manage fleet</button>
       <button t-elif="state.screen === 'routes'" type="button" class="primary" t-on-click="() => this.open('fleet')">＋ Add bus</button>

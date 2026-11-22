@@ -1,7 +1,7 @@
 <templates xml:space="preserve">
   <t t-name="ideastone_erp.OwnerStaffDirectory">
     <main class="campus_owner_staff"><div class="content">
-      <div class="crumbrow"><span>VCET Campus / Faculty &amp; Staff / <strong t-esc="state.screen === 'overview' ? 'Staff directory' : (department?.code || 'Staff directory')"/></span><span><t t-esc="date(state.data?.today)"/> · <t t-esc="props.action.context?.campus_workspace_role || 'Owner / Admin'"/></span></div>
+      <div class="crumbrow campus_page_context"><span class="campus_page_trail">VCET Campus / Faculty &amp; Staff / <strong t-esc="state.screen === 'overview' ? 'Staff directory' : (department?.code || 'Staff directory')"/></span><span><t t-esc="date(state.data?.today)"/> · <t t-esc="props.action.context?.campus_workspace_role || 'Owner / Admin'"/></span></div>
       <div t-if="state.error" class="staff_error" role="alert"><span t-esc="state.error"/><button type="button" class="btn" t-on-click="load">Retry</button></div>
       <p t-if="state.loading" role="status">Loading staff records…</p>
       <t t-elif="state.data">
@@ -51,7 +51,7 @@
 
   <t t-name="ideastone_erp.OwnerStaffOD">
     <main class="campus_owner_staff campus_owner_staff_od"><div class="content">
-      <div class="crumbrow"><span>VCET Campus / Faculty &amp; Staff / <strong>OD Staffs</strong></span><span t-if="state.data"><t t-esc="state.data.today"/> · Owner / Admin</span></div>
+      <div class="crumbrow campus_page_context"><span class="campus_page_trail">VCET Campus / Faculty &amp; Staff / <strong>OD Staffs</strong></span><span t-if="state.data"><t t-esc="state.data.today"/> · Owner / Admin</span></div>
       <header class="headingrow"><div><h1>OD Staffs</h1><p>Staff On Duty requests and approvals recorded in the college leave system.</p></div><button type="button" class="btn" t-on-click="load" t-att-disabled="state.loading"><i class="fa fa-refresh" aria-hidden="true"/> Refresh</button></header>
       <p t-if="state.loading" role="status">Loading staff On Duty records…</p><div t-if="state.error" class="staff_error" role="alert"><span t-esc="state.error"/><button type="button" class="btn" t-on-click="load">Retry</button></div>
       <t t-if="state.data">
@@ -76,7 +76,7 @@
 
   <t t-name="ideastone_erp.OwnerStaffPayroll" t-inherit="ideastone_erp.PayrollHistoryPage" t-inherit-mode="primary">
     <xpath expr="//main" position="attributes"><attribute name="t-att-class">'campus_payroll_history campus_owner_staff_payroll' + (state.isAdmin ? ' payroll_admin' : '')</attribute></xpath>
-    <xpath expr="//section[hasclass('payroll_hero')]" position="replace"><header class="staff_payroll_heading"><div><p class="staff_crumb">Campus › Faculty &amp; Staff › Payroll History</p><span class="payroll_eyebrow">STAFF · PAYROLL</span><h1>Payroll History</h1><p>A clear view of your salary, contributions and payslips.</p></div><span class="payroll_hero_note">Your payroll records</span></header></xpath>
+    <xpath expr="//section[hasclass('payroll_hero')]" position="replace"><header class="staff_payroll_heading"><div><p class="staff_crumb campus_page_trail">Campus › Faculty &amp; Staff › Payroll History</p><span class="payroll_eyebrow">STAFF · PAYROLL</span><h1>Payroll History</h1><p>A clear view of your salary, contributions and payslips.</p></div><span class="payroll_hero_note">Your payroll records</span></header></xpath>
     <xpath expr="//select[@aria-label='Report options']" position="replace"><select aria-label="Report options" t-on-change="changeMode"><option value="history">Complete History</option><option value="salary">Salary Summary</option><option value="deductions">Deductions Summary</option></select></xpath>
     <xpath expr="//div[hasclass('payroll_featured')]" position="replace"/>
     <xpath expr="//div[hasclass('payroll_bar_track')]" position="before"><strong class="payroll_bar_value" t-esc="formatMoney(bar.value)"/></xpath>

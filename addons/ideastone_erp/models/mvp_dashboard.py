@@ -149,6 +149,7 @@ class OwnerDashboard(models.AbstractModel):
                 modules.append({"key": key, "label": label, "icon": icon, "items": items})
         return {"company": self.env.company.name, "user": self.env.user.name, "today": str(fields.Date.context_today(self)),
                 "is_admin": True, "is_owner_workspace": True, "is_demo": self.env.company.campus_demo,
+                "is_owner_login": self.env.user.has_group("ideastone_erp.group_mvp_owner"),
                 "workspace_role": "Owner / Admin" if self.env.user.has_group("ideastone_erp.group_mvp_registrar") else "College staff",
                 "faculty_modules": modules, "navigation": navigation, "stats": [], "pages": [], "queues": [], "quick": [],
                 "appointments": [], "faculty_tasks": [], "faculty_schedule": [], "faculty_surveys": [],
