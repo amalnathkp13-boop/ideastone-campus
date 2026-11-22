@@ -1,16 +1,15 @@
-/* My Profile content follows the supplied reference; the shared workspace shell stays unchanged. */
+/* My Profile content follows the supplied reference. */
 .student_main:has(.student_profile_view) {
     font-family: Inter, "Segoe UI", Arial, sans-serif;
     color: #102d49;
-    .student_demo, .student_page_heading p, .student_page_heading .student_chip { display: none; }
-    .student_page_heading { margin-bottom: 0; }
+    .student_demo { display: none; }
     .student_page_heading h1 { color: #0e3151; font-size: 31px; font-weight: 760; letter-spacing: -.8px; }
 }
 .student_profile_view {
     --profile-blue: #1769d2; --profile-muted: #617b96; --profile-line: #dfe8f2;
     --profile-green: #16835d; --profile-green-bg: #eaf8f1;
     color: #102d49;
-    .profile_intro { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin: -2px 0 24px;
+    .profile_intro { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin: 0 0 24px;
         p { color: var(--profile-muted); font-size: 13px; line-height: 1.55; margin: 0; }
     }
     .profile_sample_pill { display: inline-flex; align-items: center; gap: 7px; border-radius: 99px; padding: 8px 12px; background: #eaf3ff; color: #205b98; font-size: 11px; font-weight: 700; white-space: nowrap; }
@@ -36,7 +35,7 @@
         h2 { color: #102d49; font-size: 17px; font-weight: 760; letter-spacing: -.25px; margin: 0; }
     }
     .profile_card_head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 20px;
-        a { color: var(--profile-blue); font-size: 12px; font-weight: 650; white-space: nowrap; }
+        a { color: var(--profile-blue); font-size: 12px; font-weight: 650; text-align: right; }
     }
     .profile_rows { display: grid; grid-template-columns: minmax(130px, .8fr) minmax(0, 1.2fr); column-gap: 18px; margin: 0;
         dt, dd { padding: 10px 0; border-bottom: 1px solid #edf1f6; line-height: 1.45; margin: 0; }
@@ -75,7 +74,6 @@
     .profile_progress_meta { display: flex; justify-content: space-between; color: var(--profile-muted); font-size: 11px; gap: 10px; }
     .profile_hint, .profile_empty { color: var(--profile-muted); font-size: 12px; line-height: 1.65; margin: 15px 0 0; }
     .profile_empty { padding: 10px 0; }
-    .profile_back { display: inline-flex; align-items: center; gap: 7px; color: var(--profile-blue); font-size: 12px; font-weight: 650; margin-bottom: 17px; }
     .profile_guardian_record + .profile_guardian_record { border-top: 1px solid #edf1f6; padding-top: 17px; margin-top: 17px; }
     .profile_outline_button { display: inline-block; border: 1px solid #bdd5f5; color: var(--profile-blue); background: white; border-radius: 8px; padding: 10px 14px; font-size: 12px; font-weight: 700; margin-top: 16px; }
     .profile_contact_edit { margin-top: 18px;
@@ -90,3 +88,78 @@
 @media(max-width: 1200px) { .student_profile_view .profile_layout { grid-template-columns: minmax(0, 1fr); } }
 @media(max-width: 800px) { .student_profile_view { .profile_metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profile_details_grid { grid-template-columns: minmax(0, 1fr); } .profile_card { padding: 17px; } .profile_hero { flex-wrap: wrap; padding: 19px; } .profile_hero_status { margin-left: 88px; margin-top: -7px; } .profile_contact_edit form { grid-template-columns: minmax(0, 1fr); } } }
 @media(max-width: 440px) { .student_main:has(.student_profile_view) .student_page_heading h1 { font-size: 27px; } .student_profile_view { .profile_intro { flex-wrap: wrap; } .profile_metrics { gap: 9px; } .profile_metric { padding: 13px; } .profile_metric strong { font-size: 15px; } .profile_photo { width: 58px; height: 58px; flex-basis: 58px; } .profile_hero_status { margin-left: 76px; } .profile_rows { grid-template-columns: minmax(0, 1fr); } .profile_rows dt, .profile_rows dd { padding: 7px 0; } .profile_rows dd { border-bottom: 1px solid #edf1f6; } .profile_rows > :last-child { border-bottom: 0; } } }
+
+// Keep the reference typography within the shared theme's cascade layer.
+@layer campus-theme {
+    .student_workspace .student_main:has(.student_profile_view),
+    .student_workspace .student_main .student_profile_view {
+        --ui-ink: #102d49 !important;
+        --ui-title: #0e3151 !important;
+        --ui-muted: #617b96 !important;
+        --ui-blue: #1769d2 !important;
+        --ui-line: #dfe8f2 !important;
+        --ui-green: #16835d !important;
+        --ui-shadow: 0 5px 18px rgba(19, 48, 78, .035) !important;
+    }
+    .student_workspace .student_main:has(.student_profile_view) {
+        padding: 29px 34px 35px !important;
+    }
+    .student_workspace:has(.student_profile_view) .student_subnav {
+        > strong { display: none; }
+        a[aria-current="page"] {
+            background: transparent !important;
+            color: #102f4d !important;
+            font-weight: 750 !important;
+        }
+    }
+    .student_workspace .student_main .student_profile_view {
+        .profile_intro h1 { font-size: 31px !important; font-weight: 760 !important; letter-spacing: -.8px !important; }
+        .profile_intro p { font-size: 13px !important; line-height: 1.55 !important; }
+        .profile_card h2 { font-size: 17px !important; font-weight: 760 !important; }
+        .profile_card { border-radius: 15px !important; }
+        .profile_metric { border-radius: 13px !important; box-shadow: none !important; }
+        .profile_hero {
+            background: linear-gradient(110deg, #103958, #1c5b91) !important;
+            color: white !important;
+            border: 0 !important;
+            box-shadow: none !important;
+        }
+        .profile_hero h2 { font-size: 24px !important; font-weight: 760 !important; letter-spacing: -.4px !important; color: white !important; }
+        .profile_hero p { font-size: 12px !important; color: #d7eaff !important; line-height: 1.6 !important; }
+        .profile_rows dt { font-size: 12px !important; font-weight: 400 !important; }
+        .profile_rows dd { font-size: 12px !important; font-weight: 600 !important; }
+        .profile_list_copy strong, .profile_callout strong { font-size: 12px !important; }
+        .profile_list_copy small { font-size: 11px !important; line-height: 1.45 !important; }
+        .profile_callout p { font-size: 11px !important; line-height: 1.6 !important; }
+        .profile_hint { font-size: 13px !important; line-height: 1.55 !important; }
+        .profile_empty { font-size: 12px !important; line-height: 1.65 !important; }
+        .profile_progress_meta { font-size: 11px !important; }
+        .profile_status { white-space: normal !important; }
+        .profile_status.neutral { color: #5d7289 !important; font-weight: 650 !important; }
+        .profile_outline_button { color: #1769d2 !important; }
+        .profile_intro > div, .profile_callout > div { min-width: 0; }
+        .profile_sample_pill { white-space: normal !important; }
+        .profile_hero_copy { overflow-wrap: anywhere; }
+    }
+    @media (max-width: 1200px) {
+        .student_workspace .student_main:has(.student_profile_view) { padding: 24px !important; }
+    }
+    @media (max-width: 800px) {
+        .student_workspace .student_main:has(.student_profile_view) { padding: 19px 14px !important; }
+        .student_workspace .student_main .student_profile_view {
+            .profile_intro { display: block !important; }
+            .profile_sample_pill { margin-top: 12px; }
+            .profile_hero { align-items: flex-start !important; }
+            .profile_hero h2 { font-size: 21px !important; }
+            .profile_hero_copy { flex-basis: calc(100% - 90px) !important; }
+        }
+    }
+    @media (max-width: 440px) {
+        .student_workspace .student_main .student_profile_view {
+            .profile_intro h1 { font-size: 27px !important; }
+            .profile_hero_copy { flex-basis: calc(100% - 76px) !important; }
+            .profile_document_row { flex-wrap: wrap; }
+            .profile_document_row > .profile_status { margin-left: 52px; }
+        }
+    }
+}

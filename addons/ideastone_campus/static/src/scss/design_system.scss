@@ -391,6 +391,34 @@ $ui-pages: ".campus_dashboard, .admin_overview, .student_main, .parent_main, .st
     background: var(--ui-blue-soft) !important; color: var(--ui-blue) !important;
 }
 
+.student_workspace .student_main {
+    :is(.student_stat strong, .academic_metric > strong, .timetable_stat strong,
+        .attendance_kpi strong, .od_token strong, .kpi .value, .kpi .kvalue,
+        .green_card .metric-val, .campus_complaints_cards strong,
+        .student_fee_amount, .profile_completeness strong) {
+        font-size: 24px !important; font-weight: 650 !important;
+        line-height: 1.25 !important; letter-spacing: -.3px !important;
+        overflow-wrap: anywhere;
+    }
+    .exam_kpi strong { font-size: 20px !important; font-weight: 600 !important; }
+    :is(.academic_metric > .academic_metric_text, .profile_metric strong,
+        .attendance_kpi .attendance_good_value, .attendance_kpi .attendance_bad_value) {
+        font-size: 17px !important; font-weight: 600 !important;
+        line-height: 1.35 !important; letter-spacing: -.2px !important;
+        overflow-wrap: anywhere;
+    }
+    :is(.student_stat > span:not(.student_stat_top), .academic_metric_label,
+        .timetable_stat_label, .attendance_kpi_label, .exam_kpi_label,
+        .od_token div > span, .kpi-label, .kpi-top, .metric-label) {
+        font-size: 12px !important; font-weight: 400 !important;
+    }
+    .profile_metric_label { font-size: 11px !important; font-weight: 500 !important; }
+    .profile_metric small { font-size: 11px !important; font-weight: 400 !important; }
+    @media (max-width: 440px) {
+        .student_profile_view .profile_metric strong { font-size: 15px !important; }
+    }
+}
+
 @media (max-width: 930px) {
     :is(#{$ui-pages}) :is(.kpis, .stats, .campus_stats, .student_stats, .metrics,
         .metric-grid, .stat-grid, .kpi-grid, .coe-stats) {
