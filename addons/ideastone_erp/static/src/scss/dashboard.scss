@@ -57,9 +57,11 @@
         display: none;
     }
     .campus_page_context {
+        // The shared breadcrumb rule also reads this spacing token.
+        --ui-space-3: var(--ui-space-1, 4px);
         justify-content: flex-start;
         min-height: 0;
-        margin-bottom: 4px;
+        margin-bottom: var(--ui-space-3);
         > :last-child { text-align: start; }
     }
 }
