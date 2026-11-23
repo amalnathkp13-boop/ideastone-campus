@@ -1,7 +1,7 @@
 <templates xml:space="preserve">
   <t t-name="ideastone_erp.ComplaintsWorkspace">
     <main class="campus_complaints">
-      <div class="campus_complaints_breadcrumb">VCET Campus / Complaints / <t t-esc="title"/></div>
+      <div class="campus_complaints_breadcrumb campus_page_trail">VCET Campus / Complaints / <t t-esc="title"/></div>
       <header class="campus_complaints_header">
         <div><h1 t-esc="title"/><p>Report a concern, follow the response and keep a clear case history.</p></div>
         <div class="campus_complaints_actions">

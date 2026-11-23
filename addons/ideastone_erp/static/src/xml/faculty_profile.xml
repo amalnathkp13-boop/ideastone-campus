@@ -3,7 +3,7 @@
     <main class="campus_staff_profile">
       <div class="staff_profile_topline">
         <div>
-          <div class="staff_profile_crumb">Campus <span>›</span> Staff <span>›</span> Staff Profile / Self Entry</div>
+          <div class="staff_profile_crumb campus_page_trail">Campus <span>›</span> Staff <span>›</span> Staff Profile / Self Entry</div>
           <h1>Staff Profile / Self Entry <span class="staff_profile_subtitle">Personal, academic and service information — complete faculty record.</span></h1>
         </div>
         <div class="staff_profile_controls" t-if="state.staff.length">

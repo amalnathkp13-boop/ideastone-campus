@@ -4,23 +4,28 @@ from odoo import models
 
 RADAR_ACTION = "ideastone_ai.action_success_radar"
 ASSISTANT_ACTION = "ideastone_ai.action_assistant"
+INSIGHTS_ACTION = "ideastone_ai.action_insights_overview"
 
 
 class CampusDashboardAI(models.AbstractModel):
     _inherit = "campus.dashboard"
 
-    # Owner workspace: one "AI" module with both screens.
+    # Owner workspace groups the overview with the existing AI tools.
     def _owner_modules(self):
         modules = super()._owner_modules()
         if self._accountant_only():
             return modules
-        modules.insert(1, ("ai", "AI insights", "magic", [("Student Success Radar", RADAR_ACTION), ("Campus Assistant", ASSISTANT_ACTION)]))
+        entries = [("Student Success Radar", RADAR_ACTION), ("Campus Assistant", ASSISTANT_ACTION)]
+        if self.env.user.has_group("ideastone_erp.group_mvp_owner") or self.env.user.has_group("base.group_system"):
+            entries.insert(0, ("Overview", INSIGHTS_ACTION))
+        modules.insert(1, ("ai", "AI insights", "magic", entries))
         return modules
 
     def _client_action_models(self):
         models_map = super()._client_action_models()
         models_map[RADAR_ACTION] = "op.student"
         models_map[ASSISTANT_ACTION] = "campus.ai.log"
+        models_map[INSIGHTS_ACTION] = "op.student"
         return models_map
 
     # Staff workspace (HODs and mentors): the radar appears as its own module.

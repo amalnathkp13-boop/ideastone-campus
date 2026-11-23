@@ -69,7 +69,7 @@ async function markup(page) {
             await page.setViewportSize({width,height:1000});
             if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)) throw Error(`Admin overview overflows at ${width}`);
         }
-        await page.locator('.owner-calendar-panel').getByRole('button',{name:'View events ↗',exact:true}).click();
+        await page.locator('.owner-calendar-panel').getByRole('button',{name:'View events',exact:true}).click();
         await page.locator('.campus_college_calendar').waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Dashboard',exact:true}).click();
         await page.locator('.admin_overview .kpi').first().waitFor();
@@ -125,6 +125,7 @@ async function markup(page) {
         await page.locator('.campus_sidebar').getByRole('button',{name:'Attendance',exact:true}).click();
         const attendance=page.locator('.owner_attendance');
         await attendance.getByRole('heading',{name:'Attendance Overview',exact:true,level:1}).waitFor();
+        if(await attendance.locator('.campus_page_trail:visible').count()) throw Error('Owner page trail visible in Attendance');
         for(const mode of ['staff','student']) {
             const tabName=mode==='staff'?'Staff Attendance':'Student Attendance';
             const tab=attendance.getByRole('tab',{name:tabName,exact:true});
@@ -150,6 +151,7 @@ async function markup(page) {
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Admissions',exact:true}).click();
         await page.getByRole('heading',{name:'Admissions',exact:true}).waitFor();
+        if(await page.locator('.campus_admissions_workspace .campus_page_trail:visible').count()) throw Error('Owner page trail visible in Admissions');
         if(await page.locator('.campus_admissions_workspace .stat').count()!==4) throw Error('Admissions overview does not show four live indicators');
         await assertCampusTheme(page);
         for(const [label,title] of [['Enquiries','Enquiry studio'],['Applications & review','Applications & review'],['Documents','Document verification desk'],['Admission register','Admission register']]) {
@@ -160,6 +162,7 @@ async function markup(page) {
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Students',exact:true}).click();
         await page.getByRole('heading',{name:'Student directory',exact:true,level:1}).waitFor();
+        if(await page.locator('.campus_students_workspace .campus_page_trail:visible').count()) throw Error('Owner page trail visible in Student directory');
         if(await page.locator('.campus_students_workspace .kpi').count()!==4) throw Error('Students directory does not show four indicators');
         await assertCampusTheme(page);
         const directoryDepartment=await page.locator('.campus_students_workspace .dept h3').first().innerText();

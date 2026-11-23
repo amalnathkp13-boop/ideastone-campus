@@ -15,7 +15,9 @@ export class SuccessRadarPage extends Component {
         this.action = useService("action");
         this.notification = useService("notification");
         this.requestId = 0;
-        this.state = useState({ loading: true, error: "", data: null, departmentId: "", batchId: "", band: "", query: "", open: null });
+        const context = this.props.action?.context || {};
+        this.state = useState({ loading: true, error: "", data: null,
+            departmentId: String(context.department_id || ""), batchId: "", band: context.band || "", query: "", open: null });
         this.factorLabels = FACTOR_LABELS;
         this.bandLabels = BAND_LABELS;
         onWillStart(() => this.load());
@@ -66,7 +68,14 @@ export class SuccessRadarPage extends Component {
         }
     }
     async openStudent(row) {
-        await this.action.doAction({ type: "ir.actions.act_window", res_model: "op.student", res_id: row.id, views: [[false, "form"]], target: "current" });
+        try {
+            const action = this.state.data.role === "owner"
+                ? await this.orm.call("campus.students.ui", "get_record_action", ["student", row.id])
+                : { type: "ir.actions.act_window", res_model: "op.student", res_id: row.id, views: [[false, "form"]], target: "current" };
+            await this.action.doAction(action);
+        } catch (error) {
+            this.notification.add(error.data?.message || "This student record could not be opened.", { type: "danger" });
+        }
     }
     exportCsv() {
         const rows = [["Student", "Number", "Programme", "Class", "Semester", "Mentor", "Score", "Band", "Attendance %", "Results %", "Overdue fees (₹)", "Top factor", "Suggested action"],

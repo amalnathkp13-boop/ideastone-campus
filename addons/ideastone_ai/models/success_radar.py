@@ -236,16 +236,20 @@ class SuccessRadar(models.AbstractModel):
             "attendance": att, "academics": acad, "fees": fees, "engagement": eng,
         }
 
-    # ------------------------------------------------------------------ API
-    @api.model
-    def get_workspace(self, filters=None):
+    def _assessment_rows(self):
+        """Assess the permitted students once, before display filters or limits."""
         role, domain = self._scope()
-        filters = filters if isinstance(filters, dict) else {}
         today = fields.Date.context_today(self)
         students = self.env["op.student"].sudo().search(domain, order="name")
         if role == "hod":
             students = students.filtered(lambda student: self._placement(student).course_id.department_id == self.env.user.dept_id)
-        rows = [self._assess(student, today) for student in students]
+        return role, today, [self._assess(student, today) for student in students]
+
+    # ------------------------------------------------------------------ API
+    @api.model
+    def get_workspace(self, filters=None):
+        role, today, rows = self._assessment_rows()
+        filters = filters if isinstance(filters, dict) else {}
         all_rows = rows
         for key in ("department_id", "batch_id"):
             value = filters.get(key)

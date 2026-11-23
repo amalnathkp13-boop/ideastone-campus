@@ -1,0 +1,101 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_ai.OwnerInsights">
+    <main class="campus_ai_page owner_ai_insights">
+      <header class="insights-heading">
+        <div><h1>AI insights</h1><p>Priority follow-ups and department signals from your college records.</p></div>
+        <div class="insights-heading-actions">
+          <span t-if="data" class="insights-updated"><t t-esc="data.today"/> · Owner / Admin</span>
+          <div class="insights-controls">
+            <label for="owner-ai-department">Department</label>
+            <select id="owner-ai-department" t-att-value="state.departmentId" t-on-change="changeDepartment" t-att-disabled="state.loading">
+              <option value="">All departments</option>
+              <option t-foreach="data ? data.departments : []" t-as="department" t-key="department.id" t-att-value="department.id" t-esc="department.name"/>
+            </select>
+            <button class="insights-button" type="button" t-on-click="load" t-att-disabled="state.loading"><i class="fa fa-refresh" aria-hidden="true"/> Refresh</button>
+          </div>
+        </div>
+      </header>
+      <div t-if="state.error" class="insights-error" role="alert"><span t-esc="state.error"/><button class="insights-button" type="button" t-on-click="load">Retry</button></div>
+      <p t-if="state.loading" class="insights-loading" role="status"><i class="fa fa-circle-o-notch fa-spin" aria-hidden="true"/> Reviewing saved college records…</p>
+      <t t-if="data &amp;&amp; !state.loading &amp;&amp; !state.error">
+        <section class="insights-metrics" aria-label="College insights summary">
+          <article class="insights-metric" t-foreach="metrics" t-as="metric" t-key="metric.label">
+            <div class="insights-metric-top"><span t-esc="metric.label"/><span t-att-class="'insights-icon ' + metric.tone"><i t-att-class="'fa fa-' + metric.icon" aria-hidden="true"/></span></div>
+            <strong t-esc="metric.value"/><p t-esc="metric.detail"/>
+          </article>
+        </section>
+
+        <div class="insights-main-grid">
+          <section class="insights-panel insights-priorities">
+            <div class="insights-panel-head"><div><h2>Priority follow-ups</h2><p>Students ranked by their recorded risk score.</p></div><button class="insights-link" type="button" t-on-click="() => this.radar()">View radar <i class="fa fa-arrow-right" aria-hidden="true"/></button></div>
+            <div class="insights-priority-list" t-if="data.priorities.length">
+              <article class="insights-priority" t-foreach="data.priorities" t-as="row" t-key="row.id">
+                <span t-att-class="'insights-score ' + row.band" t-att-title="'Recorded score ' + row.score + ' out of 100'" t-esc="row.score"/>
+                <div class="insights-priority-copy">
+                  <div class="insights-priority-title"><button class="insights-student" type="button" t-on-click="() => this.student(row.id)" t-esc="row.name"/><span t-att-class="'insights-status ' + row.band" t-esc="row.band === 'high' ? 'Needs attention' : 'Watch'"/></div>
+                  <span class="insights-detail"><t t-esc="row.department || 'Department unassigned'"/> · <t t-esc="row.mentor ? 'Mentor ' + row.mentor : 'Mentor unassigned'"/></span>
+                  <div class="insights-reasons"><span t-foreach="row.factors" t-as="factor" t-key="factor.key" t-att-title="factor.detail" t-att-class="'insights-factor-chip ' + factor.key" t-esc="factor.label"/></div>
+                  <p class="insights-next-step" t-esc="row.action"/>
+                </div>
+              </article>
+            </div>
+            <div t-else="" class="insights-empty"><i class="fa fa-check-circle-o" aria-hidden="true"/><h3>No scored priority follow-ups</h3><p>Review data coverage to see which records are available for assessment.</p></div>
+            <div class="insights-panel-foot"><span>Showing <t t-esc="data.priorities.length"/> of <t t-esc="number(summary.attention)"/> priority students</span><span>Attendance · Results · Fees · Mentoring</span></div>
+          </section>
+
+          <div class="insights-side-stack">
+            <section class="insights-panel">
+              <div class="insights-panel-head"><div><h2>Reasons for follow-up</h2><p>Students with each recorded scoring factor.</p></div></div>
+              <div class="insights-factors" t-if="data.factors.length">
+                <div t-foreach="data.factors" t-as="factor" t-key="factor.key" class="insights-factor-row">
+                  <div><span t-esc="factor.label"/><strong t-esc="number(factor.count)"/></div>
+                  <div class="insights-track"><span t-att-class="'factor-' + factor.key" t-att-style="'width:' + percentage(factor.count, summary.students) + '%'"/></div>
+                </div>
+              </div>
+              <p t-else="" class="insights-empty-text">No scoring factors were recorded in this scope.</p>
+              <p class="insights-note">A student can appear under more than one factor.</p>
+            </section>
+            <section class="insights-panel insights-followups">
+              <div class="insights-panel-head"><div><h2>Mentor follow-ups</h2><p>Saved counselling follow-up dates that have passed.</p></div><span class="insights-icon teal"><i class="fa fa-comments-o" aria-hidden="true"/></span></div>
+              <strong class="insights-followup-count" t-esc="number(summary.followups)"/><p>Students awaiting a recorded follow-up</p>
+              <button class="insights-link" type="button" t-on-click="() => this.radar()">Review student details <i class="fa fa-arrow-right" aria-hidden="true"/></button>
+            </section>
+          </div>
+        </div>
+
+        <section class="insights-panel insights-departments">
+          <div class="insights-panel-head"><div><h2>Department summary</h2><p>Compare follow-up needs across the selected departments.</p></div></div>
+          <div class="insights-department-grid" t-if="data.department_summaries.length">
+            <article class="insights-department" t-foreach="data.department_summaries" t-as="department" t-key="department.id">
+              <div class="insights-department-title"><span class="insights-icon blue"><i class="fa fa-building-o" aria-hidden="true"/></span><div><h3 t-esc="department.name"/><span><t t-esc="number(department.students)"/> students reviewed</span></div></div>
+              <div class="insights-department-counts"><div><strong class="tone-red" t-esc="number(department.high)"/><span>Needs attention</span></div><div><strong class="tone-amber" t-esc="number(department.watch)"/><span>On watch</span></div><div><strong t-esc="number(department.attendance_below)"/><span>Below attendance limit</span></div></div>
+              <div class="insights-department-footer"><span>Overdue fees <b t-esc="money(department.overdue_amount)"/></span><button t-if="department.id" class="insights-link" type="button" t-on-click="() => this.radar(department.id)" t-att-aria-label="'View radar for ' + department.name">View radar <i class="fa fa-arrow-right" aria-hidden="true"/></button></div>
+            </article>
+          </div>
+          <p t-else="" class="insights-empty-text">No active students are assigned to departments in this scope.</p>
+        </section>
+
+        <div class="insights-bottom-grid">
+          <section class="insights-panel">
+            <div class="insights-panel-head"><div><h2>Data coverage</h2><p>Check the evidence available before deciding on a follow-up.</p></div><span class="insights-icon teal"><i class="fa fa-database" aria-hidden="true"/></span></div>
+            <div class="insights-coverage">
+              <div class="insights-coverage-row" t-foreach="data.coverage" t-as="item" t-key="item.key">
+                <div><strong t-esc="item.label"/><span t-esc="item.detail"/></div><span><b t-esc="number(item.recorded)"/> / <t t-esc="number(item.total)"/> students</span>
+                <div class="insights-track"><span t-att-style="'width:' + percentage(item.recorded, item.total) + '%'"/></div>
+              </div>
+            </div>
+            <p class="insights-note">Low scores can include incomplete records. <t t-esc="number(summary.provisional)"/> students have fewer than five recorded attendance sessions.</p>
+          </section>
+          <section class="insights-panel insights-assistant">
+            <div class="insights-panel-head"><div><h2>Campus Assistant</h2><p>Ask about college totals, prepare notices and summarise feedback.</p></div><span class="insights-icon purple"><i class="fa fa-commenting-o" aria-hidden="true"/></span></div>
+            <span t-att-class="'insights-status ' + (data.assistant.configured ? 'ready' : 'watch')" t-esc="data.assistant.configured ? 'Available' : 'Setup required'"/>
+            <p t-if="data.assistant.configured" class="insights-assistant-detail"><t t-esc="number(data.assistant.used)"/> calls used this month<t t-if="data.assistant.limit"> of <t t-esc="number(data.assistant.limit)"/></t>. Open the assistant to review its available tools.</p>
+            <p t-else="" class="insights-assistant-detail">Configure the college’s assistant connection to enable questions, notice drafts and feedback summaries.</p>
+            <button class="insights-button primary" type="button" t-on-click="assistant">Open Campus Assistant <i class="fa fa-arrow-right" aria-hidden="true"/></button>
+          </section>
+        </div>
+        <footer class="insights-footer"><span>Insights use recorded attendance, results, fee and mentoring rules.</span><span t-if="data.updated_at">Updated <t t-esc="updatedAt"/></span></footer>
+      </t>
+    </main>
+  </t>
+</templates>

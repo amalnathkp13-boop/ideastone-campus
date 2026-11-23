@@ -1,12 +1,18 @@
 <templates xml:space="preserve">
+  <t t-name="ideastone_erp.OwnerStaffDirectoryContext">
+    <div class="crumbrow campus_page_context"><span class="campus_page_trail">VCET Campus / Faculty &amp; Staff / <strong t-esc="state.screen === 'overview' ? 'Staff directory' : (department?.code || 'Staff directory')"/></span><span><t t-esc="date(state.data?.today)"/> · <t t-esc="staffWorkspaceRole || props.action.context?.campus_workspace_role || 'Owner / Admin'"/></span></div>
+  </t>
   <t t-name="ideastone_erp.OwnerStaffDirectory">
     <main class="campus_owner_staff"><div class="content">
-      <div class="crumbrow"><span>VCET Campus / Faculty &amp; Staff / <strong t-esc="state.screen === 'overview' ? 'Staff directory' : (department?.code || 'Staff directory')"/></span><span><t t-esc="date(state.data?.today)"/> · <t t-esc="props.action.context?.campus_workspace_role || 'Owner / Admin'"/></span></div>
+      <t t-if="state.loading || !state.data" t-call="ideastone_erp.OwnerStaffDirectoryContext"/>
       <div t-if="state.error" class="staff_error" role="alert"><span t-esc="state.error"/><button type="button" class="btn" t-on-click="load">Retry</button></div>
       <p t-if="state.loading" role="status">Loading staff records…</p>
       <t t-elif="state.data">
         <t t-if="state.screen === 'overview'">
-          <header class="headingrow"><div><h1>Staff Directory</h1><p>A campus-wide overview of faculty strength, department teams and staff records.</p></div><button type="button" class="btn" t-on-click="load"><i aria-hidden="true" class="fa fa-refresh"/> Refresh</button></header>
+          <div class="campus_page_header">
+            <t t-call="ideastone_erp.OwnerStaffDirectoryContext"/>
+            <header class="headingrow campus_page_heading_parts"><div class="campus_page_title"><h1>Staff Directory</h1><p>A campus-wide overview of faculty strength, department teams and staff records.</p></div><button type="button" class="btn campus_page_actions" t-on-click="load"><i aria-hidden="true" class="fa fa-refresh"/> Refresh</button></header>
+          </div>
           <section class="kpis" aria-label="Staff summary">
             <article class="kpi"><div class="kpi-top">Total staff <span class="kpi-icon"><i aria-hidden="true" class="fa fa-users"/></span></div><strong t-esc="rows.length"/><div class="kpi-foot">Across all departments</div></article>
             <article class="kpi"><div class="kpi-top">Teaching staff <span class="kpi-icon"><i aria-hidden="true" class="fa fa-graduation-cap"/></span></div><strong t-esc="teaching"/><div class="kpi-foot">Faculty and academic team</div></article>
@@ -25,19 +31,28 @@
           <div t-if="!state.data.departments.length" class="panel empty">No staff records yet. Add staff records to populate this directory.</div>
         </t>
         <t t-if="state.screen === 'categories' &amp;&amp; department">
-          <div class="backline"><button type="button" t-on-click="() => state.screen = 'overview'">← All departments</button><span>Department staff</span></div>
-          <section class="detailhero"><div><span class="eyebrow">Department directory</span><h2 t-esc="department.name"/><p>Choose a staff category to browse its members.</p></div><div class="detailstats"><div><strong t-esc="department.total"/><span>Total staff</span></div><div><strong t-esc="department.teaching"/><span>Teaching</span></div><div><strong t-esc="department.non_teaching"/><span>Non-teaching</span></div></div></section>
+          <div class="campus_page_header campus_page_rich_header">
+            <t t-call="ideastone_erp.OwnerStaffDirectoryContext"/>
+            <div class="backline campus_page_back"><button type="button" t-on-click="() => state.screen = 'overview'">← All departments</button><span>Department staff</span></div>
+            <section class="detailhero campus_page_heading_parts"><div class="campus_page_title"><span class="eyebrow">Department directory</span><h2 t-esc="department.name"/><p>Choose a staff category to browse its members.</p></div><div class="detailstats campus_page_actions"><div><strong t-esc="department.total"/><span>Total staff</span></div><div><strong t-esc="department.teaching"/><span>Teaching</span></div><div><strong t-esc="department.non_teaching"/><span>Non-teaching</span></div></div></section>
+          </div>
           <div class="deptgrid categories"><article class="dept"><div class="dept-head"><span class="dept-icon"><i aria-hidden="true" class="fa fa-graduation-cap"/></span><span class="countpill"><t t-esc="department.teaching"/> staff</span></div><h3>Teaching staff</h3><p class="dept-sub">Faculty members responsible for teaching, academic delivery and student guidance.</p><button type="button" class="dept-actions" t-on-click="() => this.selectCategory('teaching')"><span>View teaching staff</span><i aria-hidden="true" class="fa fa-arrow-right"/></button></article><article class="dept"><div class="dept-head"><span class="dept-icon"><i aria-hidden="true" class="fa fa-id-card-o"/></span><span class="countpill"><t t-esc="department.non_teaching"/> staff</span></div><h3>Non-teaching staff</h3><p class="dept-sub">Technical, laboratory, administrative and support staff.</p><button type="button" class="dept-actions" t-on-click="() => this.selectCategory('non_teaching')"><span>View non-teaching staff</span><i aria-hidden="true" class="fa fa-arrow-right"/></button></article></div>
         </t>
         <t t-if="state.screen === 'list' &amp;&amp; department">
-          <div class="backline"><button type="button" t-on-click="() => state.screen = 'categories'">← Department categories</button></div>
-          <header class="headingrow"><div><span class="eyebrow" t-esc="categoryLabel"/><h1><t t-esc="categoryLabel"/> · <t t-esc="department.name"/></h1><p>Search staff records and select a person to view their detailed profile.</p></div><span class="countpill"><t t-esc="categoryRows.length"/> staff</span></header>
+          <div class="campus_page_header">
+            <t t-call="ideastone_erp.OwnerStaffDirectoryContext"/>
+            <div class="backline campus_page_back"><button type="button" t-on-click="() => state.screen = 'categories'">← Department categories</button></div>
+            <header class="headingrow campus_page_heading_parts"><div class="campus_page_title"><span class="eyebrow" t-esc="categoryLabel"/><h1><t t-esc="categoryLabel"/> · <t t-esc="department.name"/></h1><p>Search staff records and select a person to view their detailed profile.</p></div><span class="countpill campus_page_actions"><t t-esc="categoryRows.length"/> staff</span></header>
+          </div>
           <div class="toolbar"><label class="search"><i aria-hidden="true" class="fa fa-search"/><input aria-label="Search staff" placeholder="Search name, code, designation or email…" t-model="state.query"/></label><select class="select" aria-label="Designation" t-model="state.designation"><option value="">All designations</option><option t-foreach="designations" t-as="title" t-key="title" t-att-value="title" t-esc="title"/></select><select class="select" aria-label="Staff status" t-model="state.status"><option value="">All statuses</option><option>Active</option><option>On leave</option><option>Inactive</option></select></div>
           <div class="tablewrap" tabindex="0" aria-label="Staff directory table"><table><thead><tr><th>STAFF MEMBER</th><th>STAFF CODE</th><th>DESIGNATION</th><th>DEPARTMENT</th><th>EMAIL</th><th>STATUS</th><th>PROFILE</th></tr></thead><tbody><tr t-foreach="filteredRows" t-as="person" t-key="person.key"><td><div class="person"><span class="person-avatar" t-esc="initials(person.name)"/><div><b t-esc="person.name"/><small t-esc="categoryLabel"/></div></div></td><td t-esc="person.code"/><td t-esc="person.designation"/><td t-esc="person.department_code"/><td t-esc="person.email"/><td><span class="status" t-att-class="person.status === 'Active' ? '' : 'pending'" t-esc="person.status"/></td><td><button type="button" class="view" t-att-aria-label="'View profile of ' + person.name" t-on-click="() => this.openProfile(person)">View profile</button></td></tr><tr t-if="!filteredRows.length"><td colspan="7" class="empty">No staff match these filters.</td></tr></tbody></table></div>
         </t>
         <t t-if="state.screen === 'profile' &amp;&amp; selectedPerson">
-          <div class="backline"><button type="button" t-on-click="() => state.screen = 'list'">← Staff list</button><span>Detailed profile</span></div>
-          <section class="detailhero"><div class="detailperson"><span class="detailavatar" t-esc="initials(selectedPerson.name)"/><div><span class="eyebrow" t-esc="categoryLabel"/><h2 t-esc="selectedPerson.name"/><p><t t-esc="selectedPerson.designation"/> · <t t-esc="selectedPerson.department"/></p><span class="status" t-att-class="selectedPerson.status === 'Active' ? '' : 'pending'" t-esc="selectedPerson.status"/></div></div><div class="detailstats"><div><strong t-esc="selectedPerson.code"/><span>Staff code</span></div><div><strong t-esc="selectedPerson.joining_date ? selectedPerson.joining_date.slice(0,4) : '—'"/><span>Joined</span></div></div></section>
+          <div class="campus_page_header campus_page_rich_header">
+            <t t-call="ideastone_erp.OwnerStaffDirectoryContext"/>
+            <div class="backline campus_page_back"><button type="button" t-on-click="() => state.screen = 'list'">← Staff list</button><span>Detailed profile</span></div>
+            <section class="detailhero campus_page_heading_parts"><div class="detailperson campus_page_title"><span class="detailavatar" t-esc="initials(selectedPerson.name)"/><div><span class="eyebrow" t-esc="categoryLabel"/><h2 t-esc="selectedPerson.name"/><p><t t-esc="selectedPerson.designation"/> · <t t-esc="selectedPerson.department"/></p><span class="status" t-att-class="selectedPerson.status === 'Active' ? '' : 'pending'" t-esc="selectedPerson.status"/></div></div><div class="detailstats campus_page_actions"><div><strong t-esc="selectedPerson.code"/><span>Staff code</span></div><div><strong t-esc="selectedPerson.joining_date ? selectedPerson.joining_date.slice(0,4) : '—'"/><span>Joined</span></div></div></section>
+          </div>
           <div class="profilegrid"><section class="panel" t-foreach="profileSections" t-as="group" t-key="group.title"><h3 t-esc="group.title"/><div class="fieldgrid"><div class="info" t-foreach="group.fields" t-as="field" t-key="field[0]"><label t-esc="field[0]"/><strong t-esc="field[1]"/></div></div></section></div>
           <p t-if="state.profileLoading" role="status">Loading detailed staff information…</p><p t-if="state.profileError" class="staff_error" role="alert" t-esc="state.profileError"/>
           <div t-if="state.profile" class="profilegrid staff_extended_profile"><section class="panel" t-foreach="state.profile.fields" t-as="group" t-key="group.title"><h3 t-esc="group.title"/><div class="fieldgrid"><div class="info" t-foreach="group.items" t-as="field" t-key="field[0]"><label t-esc="field[0]"/><strong t-esc="field[1]"/></div></div></section>
@@ -51,8 +66,10 @@
 
   <t t-name="ideastone_erp.OwnerStaffOD">
     <main class="campus_owner_staff campus_owner_staff_od"><div class="content">
-      <div class="crumbrow"><span>VCET Campus / Faculty &amp; Staff / <strong>OD Staffs</strong></span><span t-if="state.data"><t t-esc="state.data.today"/> · Owner / Admin</span></div>
-      <header class="headingrow"><div><h1>OD Staffs</h1><p>Staff On Duty requests and approvals recorded in the college leave system.</p></div><button type="button" class="btn" t-on-click="load" t-att-disabled="state.loading"><i class="fa fa-refresh" aria-hidden="true"/> Refresh</button></header>
+      <div class="campus_page_header">
+        <div class="crumbrow campus_page_context"><span class="campus_page_trail">VCET Campus / Faculty &amp; Staff / <strong>OD Staffs</strong></span><span t-if="state.data"><t t-esc="state.data.today"/> · Owner / Admin</span></div>
+        <header class="headingrow campus_page_heading_parts"><div class="campus_page_title"><h1>OD Staffs</h1><p>Staff On Duty requests and approvals recorded in the college leave system.</p></div><button type="button" class="btn campus_page_actions" t-on-click="load" t-att-disabled="state.loading"><i class="fa fa-refresh" aria-hidden="true"/> Refresh</button></header>
+      </div>
       <p t-if="state.loading" role="status">Loading staff On Duty records…</p><div t-if="state.error" class="staff_error" role="alert"><span t-esc="state.error"/><button type="button" class="btn" t-on-click="load">Retry</button></div>
       <t t-if="state.data">
         <section class="kpis" aria-label="Staff On Duty summary"><article class="kpi"><div class="kpi-top">OD requests <span class="kpi-icon"><i class="fa fa-list-alt" aria-hidden="true"/></span></div><strong t-esc="state.data.rows.length"/><div class="kpi-foot">Saved requests</div></article><article class="kpi"><div class="kpi-top">On Duty today <span class="kpi-icon"><i class="fa fa-user" aria-hidden="true"/></span></div><strong t-esc="state.data.active"/><div class="kpi-foot">Approved and in date range</div></article><article class="kpi"><div class="kpi-top">Pending approval <span class="kpi-icon"><i class="fa fa-clock-o" aria-hidden="true"/></span></div><strong t-esc="state.data.pending"/><div class="kpi-foot">Awaiting decision</div></article><article class="kpi"><div class="kpi-top">Approved <span class="kpi-icon"><i class="fa fa-check-circle" aria-hidden="true"/></span></div><strong t-esc="state.data.approved"/><div class="kpi-foot">Recorded approvals</div></article></section>
@@ -76,7 +93,7 @@
 
   <t t-name="ideastone_erp.OwnerStaffPayroll" t-inherit="ideastone_erp.PayrollHistoryPage" t-inherit-mode="primary">
     <xpath expr="//main" position="attributes"><attribute name="t-att-class">'campus_payroll_history campus_owner_staff_payroll' + (state.isAdmin ? ' payroll_admin' : '')</attribute></xpath>
-    <xpath expr="//section[hasclass('payroll_hero')]" position="replace"><header class="staff_payroll_heading"><div><p class="staff_crumb">Campus › Faculty &amp; Staff › Payroll History</p><span class="payroll_eyebrow">STAFF · PAYROLL</span><h1>Payroll History</h1><p>A clear view of your salary, contributions and payslips.</p></div><span class="payroll_hero_note">Your payroll records</span></header></xpath>
+    <xpath expr="//section[hasclass('payroll_hero')]" position="replace"><header class="staff_payroll_heading"><div><p class="staff_crumb campus_page_trail">Campus › Faculty &amp; Staff › Payroll History</p><span class="payroll_eyebrow">STAFF · PAYROLL</span><h1>Payroll History</h1><p>A clear view of your salary, contributions and payslips.</p></div><span class="payroll_hero_note">Your payroll records</span></header></xpath>
     <xpath expr="//select[@aria-label='Report options']" position="replace"><select aria-label="Report options" t-on-change="changeMode"><option value="history">Complete History</option><option value="salary">Salary Summary</option><option value="deductions">Deductions Summary</option></select></xpath>
     <xpath expr="//div[hasclass('payroll_featured')]" position="replace"/>
     <xpath expr="//div[hasclass('payroll_bar_track')]" position="before"><strong class="payroll_bar_value" t-esc="formatMoney(bar.value)"/></xpath>
