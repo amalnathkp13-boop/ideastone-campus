@@ -1,0 +1,7 @@
+<templates xml:space="preserve">
+  <t t-name="ideastone_erp.OwnerPlacements">
+    <div class="o_action owner_placements_action">
+      <iframe t-ref="workspace" t-att-src="url" title="Campus Placements workspace" t-on-load="navigate"/>
+    </div>
+  </t>
+</templates>
