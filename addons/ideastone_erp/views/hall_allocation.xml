@@ -1,0 +1,39 @@
+<odoo>
+    <record id="action_hod_hall_allocation" model="ir.actions.client">
+        <field name="name">Hall Allocation</field><field name="tag">ideastone_erp.hod_hall_allocation</field>
+        <field name="context">{'campus_module': 'hall-allocation'}</field>
+    </record>
+    <record id="view_hall_list" model="ir.ui.view">
+        <field name="name">campus.hall.list</field><field name="model">campus.hall</field>
+        <field name="arch" type="xml"><tree delete="false"><field name="sequence" widget="handle"/><field name="name"/><field name="location"/><field name="capacity"/><field name="authority_id"/><field name="company_id" groups="base.group_multi_company"/></tree></field>
+    </record>
+    <record id="view_hall_form" model="ir.ui.view">
+        <field name="name">campus.hall.form</field><field name="model">campus.hall</field>
+        <field name="arch" type="xml">
+            <form string="Campus hall" delete="false"><sheet><group><group><field name="name"/><field name="capacity"/><field name="location"/><field name="features"/></group><group><field name="company_id" groups="base.group_multi_company"/><field name="authority_id"/><field name="active"/></group></group></sheet><div class="oe_chatter"><field name="message_ids"/><field name="message_follower_ids"/></div></form>
+        </field>
+    </record>
+    <record id="view_hall_booking_list" model="ir.ui.view">
+        <field name="name">campus.hall.booking.list</field><field name="model">campus.hall.booking</field>
+        <field name="arch" type="xml">
+            <tree create="false" delete="false" decoration-warning="state == 'pending'" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'"><field name="name"/><field name="programme"/><field name="department_id"/><field name="hall_id"/><field name="event_date"/><field name="start_time"/><field name="end_time"/><field name="attendees"/><field name="state" widget="badge"/></tree>
+        </field>
+    </record>
+    <record id="view_hall_booking_form" model="ir.ui.view">
+        <field name="name">campus.hall.booking.form</field><field name="model">campus.hall.booking</field>
+        <field name="arch" type="xml">
+            <form string="Hall allocation request" create="false" delete="false">
+                <header><button name="action_approve" type="object" string="Approve" class="oe_highlight" invisible="state != 'pending'" groups="ideastone_erp.group_services"/><button name="action_reject" type="object" string="Reject" invisible="state != 'pending'" groups="ideastone_erp.group_services"/><field name="state" widget="statusbar"/></header>
+                <sheet><div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group><group><field name="programme" readonly="True"/><field name="programme_type" readonly="True"/><field name="department_id" readonly="True"/><field name="hall_id" readonly="True"/><field name="requester_id"/></group>
+                    <group><field name="event_date" readonly="True"/><field name="start_time" readonly="True"/><field name="end_time" readonly="True"/><field name="attendees" readonly="True"/><field name="coordinator" readonly="True"/></group></group>
+                    <group><field name="requirements" readonly="True"/><field name="decision_note" readonly="state != 'pending'" groups="ideastone_erp.group_services"/><field name="reason"/><field name="decided_by_id"/><field name="decided_on"/></group>
+                </sheet><div class="oe_chatter"><field name="message_ids"/><field name="message_follower_ids"/></div>
+            </form>
+        </field>
+    </record>
+    <record id="action_hall_inventory" model="ir.actions.act_window"><field name="name">Hall inventory</field><field name="res_model">campus.hall</field><field name="view_mode">tree,form</field></record>
+    <record id="action_hall_allocation_approvals" model="ir.actions.act_window"><field name="name">Hall allocation approvals</field><field name="res_model">campus.hall.booking</field><field name="view_mode">tree,form</field></record>
+    <menuitem id="menu_hall_inventory" name="Hall inventory" parent="menu_category_2" action="action_hall_inventory" groups="group_manager" sequence="80"/>
+    <menuitem id="menu_hall_allocation_approvals" name="Hall allocation approvals" parent="menu_category_2" action="action_hall_allocation_approvals" groups="group_services" sequence="81"/>
+</odoo>

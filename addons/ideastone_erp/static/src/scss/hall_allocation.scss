@@ -1,0 +1,148 @@
+// VCET SOP v1.0, scoped to the hall workflow inside the existing authenticated shell.
+@layer campus-theme {
+.o_web_client .campus_hall_allocation {
+    --ui-font: Inter, "Segoe UI", Arial, sans-serif;
+    --ui-ink: #132a44;
+    --ui-title: #132a44;
+    --ui-muted: #556b82;
+    --ui-blue: #1769e8;
+    --ui-canvas: #f4f7fb;
+    --ui-line: #e1e9f2;
+    --hall-green: #0e8664;
+    --hall-green-bg: #e8f7f1;
+    --hall-amber: #9a6015;
+    --hall-amber-bg: #fff4df;
+    --hall-red: #b4473a;
+    --hall-red-bg: #fff0ef;
+    --hall-gap: 12px;
+    --hall-radius: 15px;
+    --hall-shadow: 0 3px 18px rgba(21,54,91,.045);
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    min-height: 0;
+    overflow: auto;
+    color: var(--ui-ink);
+    background: var(--ui-canvas);
+    font: 14px/1.45 var(--ui-font) !important;
+    &, * { box-sizing: border-box; }
+    :is(h1, h2, h3, p, div, span, button, label, input, select, textarea, strong, td, th) {
+        font-family: var(--ui-font) !important;
+    }
+    h1 { margin: 0 !important; font-size: 26px !important; line-height: 1.2 !important; letter-spacing: -.45px !important; font-weight: 780 !important; color: var(--ui-title) !important; }
+    h2 { display: flex; align-items: center; gap: 8px; margin: 0 !important; font-size: 16px !important; line-height: 1.3 !important; font-weight: 750 !important; color: var(--ui-title) !important; }
+    h3 { margin: 0 !important; font-size: 14px !important; font-weight: 750 !important; line-height: 1.3 !important; color: var(--ui-title) !important; }
+    p { margin: 0 !important; color: var(--ui-muted) !important; font-size: 14px !important; font-weight: 400 !important; line-height: 1.45 !important; }
+    strong { font-weight: 650 !important; }
+    .ha-content { max-width: 1800px; padding: 20px 24px 28px; margin: auto; }
+    .ha-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px; }
+    .ha-heading > div { min-width: 0; }
+    .ha-crumb { margin-bottom: 6px; color: var(--ui-muted); font-size: 12px; }
+    .ha-heading p { margin-top: 5px !important; }
+    .ha-heading-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: none; }
+    .ha-demo { color: var(--ui-muted); font-size: 11px; padding: 6px 9px; border: 1px solid var(--ui-line); border-radius: 7px; background: #fff; white-space: nowrap; }
+    .ha-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; min-height: 40px; padding: 8px 13px; border: 1px solid var(--ui-line); border-radius: 8px !important; background: #fff; color: var(--ui-title); font-size: 13px !important; font-weight: 600 !important; line-height: 1.35; cursor: pointer; }
+    .ha-button:hover:not(:disabled) { border-color: #91b6eb; background: #f7faff; }
+    .ha-primary { color: #fff; background: var(--ui-blue); border-color: var(--ui-blue); }
+    .ha-primary:hover:not(:disabled) { color: #fff; background: #0e58c7; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    :is(button, input, select, textarea):focus-visible { outline: 2px solid #76a8f5; outline-offset: 2px; }
+    .ha-svg { display: inline-block; flex: 0 0 18px; vertical-align: middle; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    h2 .ha-svg { color: var(--ui-blue); }
+    .ha-panel, .ha-kpi { min-width: 0; background: #fff; border: 1px solid var(--ui-line); border-radius: var(--hall-radius); box-shadow: var(--hall-shadow); }
+    .ha-panel { margin-bottom: 12px; }
+    .ha-panel-head { padding: 16px 20px 12px; border-bottom: 1px solid #edf1f6; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .ha-panel-head > div { min-width: 0; }
+    .ha-panel-head p { margin-top: 4px !important; }
+    .ha-panel-body { padding: 16px 20px; }
+    .ha-fields { display: grid; grid-template-columns: 1.15fr 1fr 1fr auto; align-items: end; gap: 12px; }
+    .ha-field { display: grid; gap: 6px; min-width: 0; color: var(--ui-muted) !important; font-size: 12px !important; font-weight: 600 !important; }
+    .ha-field :is(input, select, textarea) { min-width: 0; width: 100%; height: 40px; border: 1px solid var(--ui-line); border-radius: 8px; padding: 8px 11px; background: #fff; color: var(--ui-ink) !important; font-size: 13px !important; font-weight: 400 !important; }
+    .ha-field textarea { height: auto; min-height: 72px; resize: vertical; }
+    .ha-field input[readonly] { background: var(--ui-canvas); color: var(--ui-muted) !important; }
+    .ha-required { color: var(--hall-red); }
+    .ha-status, .ha-loading { margin-bottom: 12px; }
+    .ha-error { color: var(--hall-red) !important; }
+    .ha-feedback { border: 1px solid #c7e8d9; background: #f0faf5; color: #14664e !important; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px !important; }
+    .ha-slot-summary { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; }
+    .ha-slot-summary strong { display: block; margin-top: 3px; font-size: 14px; }
+    .ha-helper { color: var(--ui-muted); font-size: 12px; font-weight: 400; line-height: 1.5; }
+    .ha-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .ha-kpi { padding: 16px; }
+    .ha-kpi-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--ui-muted); font-size: 12px; font-weight: 500; }
+    .ha-kpi-icon { width: 32px; height: 32px; flex: 0 0 32px; display: grid; place-items: center; border-radius: 8px; }
+    .ha-kpi-value { font-size: 28px; font-weight: 780; letter-spacing: -.4px; line-height: 1.15; margin: 8px 0 4px; }
+    .ha-caption { color: var(--ui-muted); font-size: 12px; font-weight: 400; margin-top: 3px; }
+    .ha-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .ha-group-heading { grid-column: 1 / -1; font-size: 14px !important; font-weight: 700 !important; margin: 2px 0 0; }
+    .ha-group-heading:not(:first-child) { margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--ui-line); }
+    .ha-card { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 16px; border: 1px solid var(--ui-line); border-radius: 12px; background: #fff; }
+    .ha-card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .ha-glyph { width: 34px; height: 34px; flex: 0 0 34px; display: grid; place-items: center; border-radius: 8px; color: var(--ui-blue); background: #eaf2ff; }
+    .ha-badge { display: inline-flex; align-items: center; max-width: 100%; border-radius: 7px; padding: 5px 8px; font-size: 12px; font-weight: 650; line-height: 1.3; }
+    .ha-tone-green { background: var(--hall-green-bg); color: var(--hall-green); }
+    .ha-tone-amber { background: var(--hall-amber-bg); color: var(--hall-amber); }
+    .ha-tone-red { background: var(--hall-red-bg); color: var(--hall-red); }
+    .ha-tone-blue { background: #eaf2ff; color: var(--ui-blue); }
+    .ha-meta { color: var(--ui-muted); font-size: 12px; margin-top: 2px; }
+    .ha-features { display: flex; gap: 4px; flex-wrap: wrap; color: var(--ui-muted); font-size: 12px; }
+    .ha-features span { background: #f1f5f9; padding: 3px 6px; border-radius: 5px; }
+    .ha-conflict { min-height: 44px; padding: 8px; border-radius: 7px; font-size: 12px; overflow-wrap: anywhere; }
+    .ha-card-actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: auto; }
+    .ha-link { color: var(--ui-blue); background: transparent; border: 0; font-size: 13px !important; font-weight: 600 !important; min-height: 40px; padding: 5px 0; cursor: pointer; text-align: left; }
+    .ha-link:hover { text-decoration: underline; }
+    .ha-context { margin-top: 8px !important; color: var(--ui-muted); font-size: 12px !important; }
+    .ha-booking { max-width: 780px; }
+    .ha-form { display: grid; gap: 12px; }
+    .ha-form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .ha-selected { padding: 12px; border: 1px solid #d5e6ff; border-radius: 8px; background: #f2f7ff; color: var(--ui-muted); font-size: 12px; }
+    .ha-selected strong { display: block; margin: 3px 0; font-size: 14px; color: var(--ui-title); }
+    .ha-form-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 4px; }
+    .ha-legend { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; color: var(--ui-muted); font-size: 12px; }
+    .ha-legend i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; }
+    .ha-green { background: var(--hall-green); }
+    .ha-red { background: var(--hall-red); }
+    .ha-amber { background: var(--hall-amber); }
+    .ha-history-filter { min-width: 0; border: 1px solid var(--ui-line); border-radius: 8px; background: #fff; min-height: 40px; padding: 0 10px; font-size: 13px !important; color: var(--ui-ink); width: auto !important; flex: 0 0 auto; }
+    .ha-table-wrap { max-width: 100%; overflow: auto; }
+    table { width: 100%; min-width: 740px; border-collapse: collapse; }
+    th { text-align: left; background: #f3f7fb !important; color: var(--ui-muted) !important; font-size: 11px !important; font-weight: 600 !important; padding: 12px 11px; border-bottom: 1px solid var(--ui-line); white-space: nowrap; }
+    td { padding: 12px 11px; min-height: 44px; height: 44px; font-size: 13px !important; color: var(--ui-ink); border-bottom: 1px solid #edf1f6; }
+    tr:last-child td { border-bottom: 0; }
+    .ha-empty { padding: 24px; text-align: center; color: var(--ui-muted); grid-column: 1 / -1; }
+    .ha-footer { padding: 20px 0 4px; text-align: center; font-size: 11px; color: var(--ui-muted); }
+    .ha-dialog { width: 560px; max-width: calc(100vw - 24px); max-height: calc(100dvh - 32px); border: 1px solid var(--ui-line); border-radius: 15px; padding: 0; background: #fff; color: var(--ui-ink); box-shadow: 0 18px 50px #0a27452b; }
+    .ha-dialog::backdrop { background: #092c4766; }
+    .ha-dialog-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--ui-line); position: sticky; top: 0; background: #fff; }
+    .ha-dialog-body { padding: 20px; font-size: 14px; }
+    .ha-dialog-body > p { margin-top: 12px !important; }
+    .ha-dialog-close { width: 40px; height: 40px; flex: 0 0 40px; border: 1px solid var(--ui-line); border-radius: 8px; background: #fff; color: var(--ui-muted); font-size: 20px !important; cursor: pointer; }
+    .ha-dialog-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--ui-line); }
+    .ha-dialog-row > * { min-width: 0; overflow-wrap: anywhere; }
+    .ha-dialog-row > strong { text-align: right; max-width: 65%; }
+    .ha-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+    .ha-muted { color: var(--ui-muted); }
+    .ha-danger { color: var(--hall-red); }
+    @media (max-width: 1249px) {
+        .ha-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .ha-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .ha-fields > button { grid-column: 1 / -1; justify-self: end; }
+    }
+    @media (max-width: 930px) {
+        .ha-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .ha-content { padding: 18px; }
+    }
+    @media (max-width: 620px) {
+        .ha-content { padding: 16px 12px; }
+        .ha-heading { align-items: flex-start; flex-direction: column; }
+        .ha-heading-actions { width: 100%; }
+        .ha-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .ha-fields > .ha-field:first-child { grid-column: 1 / -1; }
+        .ha-fields > button, .ha-slot-summary > button { width: 100%; }
+        .ha-grid, .ha-form-row { grid-template-columns: minmax(0, 1fr); }
+        .ha-panel-head { flex-wrap: wrap; padding: 16px; }
+        .ha-panel-body, .ha-dialog-body, .ha-dialog-head { padding: 16px; }
+        .ha-form-footer { flex-wrap: wrap; }
+    }
+}
+}
