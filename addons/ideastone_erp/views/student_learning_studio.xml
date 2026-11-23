@@ -10,7 +10,7 @@
       <attribute name="t-if">d['demo'] and section not in ('placements', 'lms')</attribute>
     </xpath>
     <xpath expr="//header[@class='student_page_heading']/.." position="attributes">
-      <attribute name="t-if">section not in ('placements', 'lms')</attribute>
+      <attribute name="t-if">section not in ('placements', 'profile', 'lms')</attribute>
     </xpath>
     <xpath expr="//footer[@class='student_footer']" position="attributes">
       <attribute name="t-if">section not in ('placements', 'lms')</attribute>
