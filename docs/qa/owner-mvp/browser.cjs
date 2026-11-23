@@ -76,9 +76,9 @@ async function markup(page) {
         if(await page.locator('.campus_dashboard').innerText().then(text=>/Â·|â€”|â†/.test(text))) throw Error('Owner template contains incorrectly decoded UTF-8 punctuation');
         await page.locator('.campus_dashboard').evaluate(element=>element.scrollTop=0);
         const modules = await page.locator('.campus_sidebar nav .campus_nav_link').allTextContents();
-        // 13 base modules, plus Accounts, Complaints and the optional AI Pack.
+        // 13 base modules, plus Campus Placements, Accounts, Complaints and the optional AI Pack.
         const aiPack=modules.some(label=>label.trim()==='AI insights');
-        if(modules.length!==15+(aiPack?1:0) || !modules.some(label=>label.trim()==='Accounts') || !modules.some(label=>label.trim()==='Complaints')) throw Error('Owner sidebar is missing Accounts or Complaints');
+        if(modules.length!==16+(aiPack?1:0) || !['Accounts','Complaints','Campus Placements'].every(expected=>modules.some(label=>label.trim()===expected))) throw Error('Owner sidebar is missing Accounts, Complaints, or Campus Placements');
         const overview=await rpc(page,'campus.dashboard','get_overview');
         let checkedViews=0;
         for(const module of overview.faculty_modules) {
@@ -115,7 +115,12 @@ async function markup(page) {
         }
         for (const module of overview.faculty_modules.filter(module=>module.key!=='home')) {
             await page.locator('.campus_sidebar').getByRole('button',{name:module.label,exact:true}).click();
-            await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory',staff:'Staff Directory',calendar:'College Calendar',attendance:'Attendance Overview',accounts:'Accountant overview'})[module.key]||module.label,exact:true,level:1}).waitFor();
+            if (module.key==='placements') {
+                await page.frameLocator('iframe[title="Campus Placements workspace"]')
+                    .getByRole('heading',{name:'Campus placements',exact:true,level:1}).waitFor();
+            } else {
+                await page.getByRole('heading',{name:({admissions:'Admissions',students:'Student directory',staff:'Staff Directory',calendar:'College Calendar',attendance:'Attendance Overview',accounts:'Accountant overview'})[module.key]||module.label,exact:true,level:1}).waitFor();
+            }
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Attendance',exact:true}).click();
         const attendance=page.locator('.owner_attendance');
@@ -135,6 +140,13 @@ async function markup(page) {
                 throw Error(`Owner ${mode} attendance does not reconcile with saved records`);
             }
             await page.screenshot({path:path.join(out,`owner-attendance-${mode}-1440.png`),fullPage:true});
+        }
+        await page.locator('.campus_sidebar').getByRole('button',{name:'Campus Placements',exact:true}).click();
+        const placements=page.frameLocator('iframe[title="Campus Placements workspace"]');
+        await placements.getByRole('heading',{name:'Campus placements',exact:true,level:1}).waitFor();
+        for(const item of overview.faculty_modules.find(module=>module.key==='placements').items) {
+            await page.locator('.campus_faculty_subnav').getByRole('button',{name:item.label,exact:true}).click();
+            await placements.getByRole('region',{name:'Campus placements · '+item.label,exact:true}).waitFor();
         }
         await page.locator('.campus_sidebar').getByRole('button',{name:'Admissions',exact:true}).click();
         await page.getByRole('heading',{name:'Admissions',exact:true}).waitFor();
@@ -266,6 +278,9 @@ async function markup(page) {
         await Promise.all([page.waitForResponse(r=>r.url().includes('/campus.dashboard/save_owner_settings')), page.getByRole('button',{name:'Save changes',exact:true}).click()]);
         savedPolicy=await rpc(page,'res.company','read',[[collegeAction.res_id]],{fields:['campus_attendance_threshold']});
         if(savedPolicy[0].campus_attendance_threshold!==75) throw Error('College policy was not restored');
+        // Hover pauses notifications, which can cover the next tab.
+        await page.mouse.move(1,1);
+        await page.locator('.o_notification.border-success').first().waitFor({state:'hidden'});
         await page.locator('.campus_faculty_subnav').getByRole('button',{name:'ID & numbering',exact:true}).click();
         await page.getByRole('heading',{name:'Sequence register',exact:true}).waitFor();
         await page.locator('.campus_sidebar').getByRole('button',{name:'Dashboard',exact:true}).click();

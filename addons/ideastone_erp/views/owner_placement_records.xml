@@ -1,0 +1,49 @@
+<odoo>
+  <record id="owner_placement_department_fields" model="ir.ui.view">
+    <field name="name">Department placement coordinator and display order</field><field name="model">op.department</field>
+    <field name="inherit_id" ref="mvp_departments_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='code']" position="after"><field name="placement_coordinator"/><field name="placement_sequence"/></xpath>
+    </field>
+  </record>
+  <record id="owner_placement_profile_fields" model="ir.ui.view">
+    <field name="name">Placement cohort and verified readiness</field><field name="model">campus.placement.profile</field>
+    <field name="inherit_id" ref="view_placement_profile_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='consent']" position="after">
+        <field name="graduation_year"/><field name="placement_enrolment_id" domain="[('student_id','=',student_id)]"/>
+        <field name="cgpa_recorded"/><field name="cgpa" invisible="not cgpa_recorded"/>
+        <field name="non_willing_reason" invisible="consent != 'declined'"/>
+      </xpath>
+      <xpath expr="//field[@name='verbal']" position="after"><field name="technical_recorded"/><field name="technical" invisible="not technical_recorded"/></xpath>
+    </field>
+  </record>
+  <record id="owner_placement_drive_fields" model="ir.ui.view">
+    <field name="name">Placement drive cohort and delivery</field><field name="model">campus.placement.drive</field>
+    <field name="inherit_id" ref="view_placement_drive_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='job_description']" position="before">
+        <field name="graduation_year" readonly="state in ('approved','done')"/><field name="minimum_cgpa" readonly="state in ('approved','done')"/>
+        <field name="placement_mode" readonly="state in ('approved','done')"/><field name="coordinator_name" readonly="state in ('approved','done')"/>
+      </xpath>
+    </field>
+  </record>
+  <record id="owner_placement_offer_fields" model="ir.ui.view">
+    <field name="name">Placement offer acceptance and joining</field><field name="model">campus.placement.candidate</field>
+    <field name="inherit_id" ref="view_placement_candidate_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='offered_salary']" position="after"><field name="offer_decision"/><field name="offer_accepted_on"/><field name="joined_on"/></xpath>
+    </field>
+  </record>
+  <record id="owner_placement_plan_tree" model="ir.ui.view">
+    <field name="name">Placement improvement plans</field><field name="model">campus.placement.improvement.plan</field>
+    <field name="arch" type="xml"><tree><field name="name"/><field name="graduation_year"/><field name="department_id"/><field name="owner_label"/><field name="state"/></tree></field>
+  </record>
+  <record id="owner_placement_plan_form" model="ir.ui.view">
+    <field name="name">Placement improvement plan</field><field name="model">campus.placement.improvement.plan</field>
+    <field name="arch" type="xml"><form><sheet><group><field name="name"/><field name="company_id" invisible="1"/><field name="kind"/><field name="graduation_year"/><field name="department_id"/><field name="student_id"/><field name="owner_label"/><field name="state"/><field name="note"/><field name="student_ids" widget="many2many_tags"/></group></sheet></form></field>
+  </record>
+  <record id="action_owner_placement_plans" model="ir.actions.act_window">
+    <field name="name">Placement improvement plans</field><field name="res_model">campus.placement.improvement.plan</field><field name="view_mode">tree,form</field>
+  </record>
+</odoo>

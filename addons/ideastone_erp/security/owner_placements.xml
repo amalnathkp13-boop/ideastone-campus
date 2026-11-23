@@ -1,0 +1,34 @@
+<odoo>
+  <record id="owner_placements_drive_access" model="ir.model.access">
+    <field name="name">Owner placement drives</field><field name="model_id" ref="model_campus_placement_drive"/>
+    <field name="group_id" ref="group_mvp_owner"/><field name="perm_read" eval="True"/><field name="perm_write" eval="True"/><field name="perm_create" eval="True"/>
+  </record>
+  <record id="owner_placements_candidate_access" model="ir.model.access">
+    <field name="name">Owner placement outcomes</field><field name="model_id" ref="model_campus_placement_candidate"/>
+    <field name="group_id" ref="group_mvp_owner"/><field name="perm_read" eval="True"/><field name="perm_write" eval="True"/><field name="perm_create" eval="True"/>
+  </record>
+  <record id="owner_placements_profile_access" model="ir.model.access">
+    <field name="name">Owner placement profiles</field><field name="model_id" ref="model_campus_placement_profile"/>
+    <field name="group_id" ref="group_mvp_owner"/><field name="perm_read" eval="True"/><field name="perm_write" eval="True"/><field name="perm_create" eval="True"/>
+  </record>
+  <record id="owner_placements_milestone_access" model="ir.model.access">
+    <field name="name">Owner placement milestones</field><field name="model_id" ref="model_campus_placement_milestone"/>
+    <field name="group_id" ref="group_mvp_owner"/><field name="perm_read" eval="True"/><field name="perm_write" eval="True"/><field name="perm_create" eval="True"/>
+  </record>
+  <record id="owner_placements_plan_access" model="ir.model.access">
+    <field name="name">Owner placement improvement plans</field><field name="model_id" ref="model_campus_placement_improvement_plan"/>
+    <field name="group_id" ref="group_mvp_owner"/><field name="perm_read" eval="True"/><field name="perm_write" eval="True"/><field name="perm_create" eval="True"/>
+  </record>
+  <record id="owner_placements_plan_company" model="ir.rule">
+    <field name="name">Placement plans college boundary</field><field name="model_id" ref="model_campus_placement_improvement_plan"/>
+    <field name="domain_force">[('company_id','in',company_ids)]</field>
+  </record>
+  <record id="owner_placements_drive_rule" model="ir.rule">
+    <field name="name">Owner placement drive records</field><field name="model_id" ref="model_campus_placement_drive"/>
+    <field name="groups" eval="[(4,ref('group_mvp_owner'))]"/><field name="domain_force">[(1,'=',1)]</field>
+  </record>
+  <record id="owner_placements_candidate_rule" model="ir.rule">
+    <field name="name">Owner placement candidate records</field><field name="model_id" ref="model_campus_placement_candidate"/>
+    <field name="groups" eval="[(4,ref('group_mvp_owner'))]"/><field name="domain_force">[(1,'=',1)]</field>
+  </record>
+</odoo>

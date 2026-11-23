@@ -62,7 +62,13 @@ class CampusBase extends Component {
         useExternalListener(window, "keydown", (event) => {
             if (event.key === "Escape" && this.state.open && !document.querySelector(".campus_nav_dialog[open]")) { this.closeNav(); event.stopPropagation(); }
         }, { capture: true });
-        useBus(this.env.bus, "CAMPUS:PAGE", (event) => { this.state.page = event.detail; });
+        useBus(this.env.bus, "CAMPUS:PAGE", (event) => {
+            this.state.page = event.detail;
+            if (this.state.module === "placements") {
+                const item = this.facultyModule?.items.find(item => item.action === "ideastone_erp.action_owner_placements_" + event.detail);
+                if (item) this.state.activeAction = item.action_id;
+            }
+        });
         useBus(this.env.bus, "CAMPUS:ROUTE", async (event) => {
             const {page, module} = event.detail;
             this.state.module = module;
@@ -219,6 +225,12 @@ class CampusBase extends Component {
     }
     async open(item) {
         if (item.allowed === false) return;
+        if (this.action.currentController?.action.tag === "ideastone_erp.owner_placements" &&
+                item.action?.startsWith("ideastone_erp.action_owner_placements_")) {
+            this.env.bus.trigger("CAMPUS:PLACEMENTS:NAVIGATE", item.action.slice("ideastone_erp.action_owner_placements_".length));
+            this.state.open = false;
+            return;
+        }
         try {
             if (["ideastone_erp.action_students_directory", "ideastone_erp.action_students_enrolments"].includes(item.action)) {
                 this.router.pushState({students_screen: item.action.endsWith("enrolments") ? "enrolments" : "directory", students_department_id: "", students_batch_id: ""});
@@ -821,6 +833,10 @@ export class CampusNavigation extends CampusBase {
             const module = this.state.faculty_modules.find(module => module.items.some(item => item.action_id && item.action_id === action.id)) ||
                 this.state.faculty_modules.find(module => module.items.some(item => item.model && item.model === action.res_model));
             if (module) this.state.module = module.key;
+        }
+        if (action.tag === "ideastone_erp.owner_placements") {
+            const screen = this.router.current.hash.placements_screen || action.context?.placements_screen || "overview";
+            this.env.bus.trigger("CAMPUS:PAGE", screen);
         }
     }
 }
