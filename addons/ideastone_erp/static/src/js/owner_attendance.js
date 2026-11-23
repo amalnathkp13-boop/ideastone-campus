@@ -54,15 +54,15 @@ export class OwnerAttendance extends Component {
         const t = this.d.totals;
         return this.staff ? [
             ["Staff Attendance", this.rate(t.rate), "Present / scheduled excluding leave", "blue", "bar-chart"],
-            ["Present Today", t.present, "Recorded check-ins", "green", "users"],
-            ["Delayed Arrivals", t.late, "Existing staff calendar policy", "amber", "clock-o"],
-            ["Approved Leave", t.leave, "Verified in leave module", "purple", "calendar"],
-            ["Unverified Absences", t.absent, "Elapsed workdays · HR review", "red", "exclamation-triangle"],
-            ["Missing Punches", t.missing, "After the scheduled workday", "amber", "clock-o"]] : [
-            ["Student Attendance", this.rate(t.rate), "Submitted eligible sessions", "blue", "bar-chart"],
-            ["Enrolled Students", t.students, "Across selected departments", "green", "users"],
-            ["Below Limit", t.below, `College threshold ${this.d.threshold}%`, "red", "exclamation-triangle"],
-            ["Pending Sessions", t.pending, "Faculty submission pending", "amber", "clock-o"],
+            ["Present Today", t.present, "Recorded check-ins", "green", "check-circle-o"],
+            ["Delayed Arrivals", t.late, "Existing staff calendar policy", "amber", "hourglass-half"],
+            ["Approved Leave", t.leave, "Verified in leave module", "purple", "calendar-check-o"],
+            ["Unverified Absences", t.absent, "Elapsed workdays · HR review", "red", "user-times"],
+            ["Missing Punches", t.missing, "After the scheduled workday", "teal", "sign-in"]] : [
+            ["Student Attendance", this.rate(t.rate), "Submitted eligible sessions", "blue", "line-chart"],
+            ["Enrolled Students", t.students, "Across selected departments", "green", "graduation-cap"],
+            ["Below Limit", t.below, `College threshold ${this.d.threshold}%`, "red", "exclamation-circle"],
+            ["Pending Sessions", t.pending, "Faculty submission pending", "amber", "clipboard"],
             ["Departments", this.d.departments.length, "In selected scope", "purple", "building-o"]];
     }
     async mode(mode) { Object.assign(this.state, {mode, department: "", search: "", detail: null}); await this.load(); }

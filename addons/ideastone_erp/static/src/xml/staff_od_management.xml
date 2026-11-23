@@ -6,7 +6,7 @@
       <t t-elif="state.data">
         <t t-if="state.data.role === 'hod'"><t t-call="ideastone_erp.HodODManagement"/></t>
         <div t-else="" class="od-content">
-          <div class="od-breadcrumb">Campus home / My task list / OD Management</div>
+          <div class="od-breadcrumb campus_page_trail">Campus home / My task list / OD Management</div>
           <header class="od-page-heading">
             <div><h1>On Duty (OD) Management</h1><p>Review and manage student OD requests for your assigned mentorship class.</p></div>
             <div class="d-flex gap-2"><button type="button" class="od-btn" t-on-click="openStaffOD">My Staff On Duty</button><button type="button" class="od-btn" t-on-click="load" t-att-disabled="state.saving"><i class="fa fa-refresh" aria-hidden="true"/> Refresh</button></div>

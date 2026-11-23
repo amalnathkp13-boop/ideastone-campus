@@ -1,6 +1,6 @@
 <templates xml:space="preserve">
   <t t-name="ideastone_erp.Navigation">
-    <div class="campus_navigation">
+    <div class="campus_navigation" t-att-data-owner-workspace="navigationScope === 'owner' &amp;&amp; state.is_owner_login ? 'true' : undefined">
       <button t-ref="navToggle" class="campus_mobile_toggle" t-on-click="() => state.open = !state.open" t-att-aria-expanded="state.open ? 'true' : 'false'" aria-controls="campus_sidebar" aria-label="Toggle campus navigation"><i class="fa fa-bars"/></button>
       <button type="button" class="campus_desktop_toggle" t-on-click="toggleDesktopSidebar" t-att-aria-expanded="sidebar.collapsed ? 'false' : 'true'" aria-controls="campus_sidebar" t-att-title="sidebar.collapsed ? 'Expand campus navigation' : 'Collapse campus navigation'" t-att-aria-label="sidebar.collapsed ? 'Expand campus navigation' : 'Collapse campus navigation'"><i class="fa fa-bars" aria-hidden="true"/></button>
       <button t-if="state.open" class="campus_nav_backdrop" t-on-click="closeNav" aria-label="Close campus navigation"/>
@@ -21,11 +21,23 @@
       </nav>
     </div>
   </t>
+  <t t-name="ideastone_erp.DashboardContext">
+    <div class="campus_crumb campus_page_context"><span class="campus_page_trail">VCET Campus / <t t-esc="pageTitle"/></span><span><t t-esc="state.today"/> · <strong t-esc="state.workspace_role"/></span></div>
+  </t>
+  <t t-name="ideastone_erp.DashboardTitle">
+    <header class="campus_page_heading campus_page_heading_parts"><div class="campus_page_title"><h1 t-esc="pageTitle"/><p t-esc="state.company"/></div><button class="btn btn-outline-primary campus_page_actions" t-on-click="load" t-att-disabled="state.loading"><i class="fa fa-refresh me-2"/>Refresh</button></header>
+  </t>
   <t t-name="ideastone_erp.Dashboard">
     <main t-if="state.hod_dashboard_enabled &amp;&amp; state.page === 'overview'" class="campus_hod_dashboard" id="campus_main"><HodDashboard/></main>
     <main t-else="" class="campus_dashboard" id="campus_main" t-att-class="{campus_communication_dashboard: state.page.startsWith('communication-') &amp;&amp; state.module === 'engagement', campus_services_dashboard: state.page.startsWith('campus-services-') &amp;&amp; state.module === 'services', campus_accountant_page: state.page === 'accountant-overview' &amp;&amp; state.is_owner_workspace, campus_collections_page: state.page.startsWith('accountant-collections-') &amp;&amp; state.is_accountant_workspace}">
-      <div t-if="!((state.page.startsWith('communication-') &amp;&amp; state.module === 'engagement') || (state.page.startsWith('campus-services-') &amp;&amp; state.module === 'services') || (state.page.startsWith('settings-') &amp;&amp; state.is_owner_workspace) || (state.page === 'accountant-overview' &amp;&amp; state.is_owner_workspace) || (state.page.startsWith('accountant-collections-') &amp;&amp; state.is_accountant_workspace))" class="campus_crumb"><span>VCET Campus / <t t-esc="pageTitle"/></span><span><t t-esc="state.today"/> · <strong t-esc="state.workspace_role"/></span></div>
-      <header t-if="!((state.page.startsWith('communication-') &amp;&amp; state.module === 'engagement') || (state.page.startsWith('campus-services-') &amp;&amp; state.module === 'services') || (state.page.startsWith('settings-') &amp;&amp; state.is_owner_workspace) || (state.page === 'accountant-overview' &amp;&amp; state.is_owner_workspace) || (state.page.startsWith('accountant-collections-') &amp;&amp; state.is_accountant_workspace))" class="campus_page_heading"><div><h1 t-esc="pageTitle"/><p t-esc="state.company"/></div><button class="btn btn-outline-primary" t-on-click="load" t-att-disabled="state.loading"><i class="fa fa-refresh me-2"/>Refresh</button></header>
+      <t t-set="ownerHeader" t-value="state.is_owner_login &amp;&amp; state.is_owner_workspace &amp;&amp; !state.is_principal_workspace &amp;&amp; !state.is_accountant_workspace &amp;&amp; !state.is_coe_workspace"/>
+      <t t-if="!((state.page.startsWith('communication-') &amp;&amp; state.module === 'engagement') || (state.page.startsWith('campus-services-') &amp;&amp; state.module === 'services') || (state.page.startsWith('settings-') &amp;&amp; state.is_owner_workspace) || (state.page === 'accountant-overview' &amp;&amp; state.is_owner_workspace) || (state.page.startsWith('accountant-collections-') &amp;&amp; state.is_accountant_workspace))">
+        <t t-if="!ownerHeader"><t t-call="ideastone_erp.DashboardContext"/><t t-call="ideastone_erp.DashboardTitle"/></t>
+        <div t-elif="state.page !== 'owner-overview' &amp;&amp; !(state.page === 'faculty-module' &amp;&amp; facultyModule)" class="campus_page_header">
+          <t t-call="ideastone_erp.DashboardContext"/><t t-call="ideastone_erp.DashboardTitle"/>
+        </div>
+      </t>
+
       <div t-if="state.error" class="alert alert-danger" role="alert"><span t-esc="state.error"/><button class="btn btn-outline-danger ms-2" t-on-click="load">Retry</button></div>
       <p t-if="state.loading" role="status"><i class="fa fa-spinner fa-spin me-2"/>Loading your campus…</p>
       <t t-elif="!state.error">
@@ -49,7 +61,7 @@
           <div class="campus_overview_grid"><section class="campus_panel"><h2>Upcoming classes · next 7 days</h2><div t-foreach="state.faculty_schedule" t-as="session" t-key="session.id" class="campus_queue"><span><strong t-esc="session.subject"/><small t-esc="session.batch"/></span><span t-esc="session.when"/></div><p t-if="!state.faculty_schedule.length" class="campus_empty">No confirmed upcoming classes in your timetable.</p></section><section class="campus_panel"><h2>My open tasks</h2><button t-foreach="state.faculty_tasks" t-as="task" t-key="task.id" class="campus_queue" t-on-click="() => this.open({action:'ideastone_erp.action_faculty_task'})"><span><strong t-esc="task.name"/><small t-esc="task.state"/></span><span t-esc="task.due"/></button><p t-if="!state.faculty_tasks.length" class="campus_empty">No open tasks.</p></section></div>
         </t>
         <t t-elif="state.page === 'faculty-module' &amp;&amp; facultyModule">
-          <section class="campus_module_overview"><div class="campus_module_overview_head"><div><h1 t-esc="facultyModule.label"/><p>Workspace activity and available submodules in your college.</p></div><button class="btn btn-outline-primary" t-on-click="load"><i class="fa fa-refresh me-2"/>Refresh</button></div>
+          <section class="campus_module_overview"><div class="campus_module_overview_head" t-att-class="{campus_page_header: ownerHeader}"><div class="campus_page_title"><h1 t-esc="facultyModule.label"/><p>Workspace activity and available submodules in your college.</p></div><t t-if="ownerHeader" t-call="ideastone_erp.DashboardContext"/><button class="btn btn-outline-primary campus_page_actions" t-on-click="load"><i class="fa fa-refresh me-2"/>Refresh</button></div>
             <div class="campus_module_overview_stats"><article t-foreach="state.moduleOverview.rows.slice(0,4)" t-as="row" t-key="row.label"><small t-esc="row.label"/><strong t-esc="row.count === null ? '—' : row.count"/><span t-esc="row.count === null ? 'Open workspace for details' : 'Records in your scope'"/></article></div>
             <div class="campus_module_overview_panels"><section><h3>Submodules</h3><p>Choose a workspace to review or update its records.</p><div class="campus_module_overview_links"><button t-foreach="facultyModule.items.filter(item => item.page !== 'faculty-module')" t-as="item" t-key="item.label" t-on-click="() => this.facultyGo(item)"><span><i t-att-class="'fa fa-' + facultyModule.icon"/><b t-esc="item.label"/></span><i class="fa fa-arrow-right"/></button></div></section><section><h3>Workspace summary</h3><p>Counts follow your account permissions and active college.</p><div class="campus_module_overview_rows"><div t-foreach="state.moduleOverview.rows" t-as="row" t-key="row.label"><span t-esc="row.label"/><b t-esc="row.count === null ? 'Available' : row.count"/></div></div></section></div>
           </section>

@@ -1,6 +1,6 @@
 <templates xml:space="preserve">
 <t t-name="ideastone_erp.AccountantDirectory"><div class="fee_directory"><div class="content">
-<div class="crumb">Campus home / Students &amp; dues</div>
+<div class="crumb campus_page_trail">Campus home / Students &amp; dues</div>
 <div class="headrow"><div class="heading"><h1 t-esc="title"/><p>Browse students by department, academic year and section.</p></div><div class="actions"><t t-if="!filterBarVisible"><div class="search"><span>⌕</span><input aria-label="Search fee directory" placeholder="Search…" t-model="state.search"/></div><button class="btn" t-on-click="reset">↻ Reset</button></t><button t-if="state.mode !== 'directory' || state.student" class="btn" t-on-click="exportRows">⇩ Export list</button><button t-if="state.mode === 'pending'" class="btn primary" t-on-click="reminders">✉ Send fee reminders</button></div></div>
 <p t-if="state.error" role="alert" t-esc="state.error"/>
 <div class="metrics"><article class="metric" t-foreach="metrics" t-as="m" t-key="m.label"><div class="metric-top"><t t-esc="m.label"/><span class="metric-icon" t-esc="m.icon"/></div><strong t-esc="m.value"/><small t-esc="m.note"/></article></div>
