@@ -1,0 +1,27 @@
+<odoo>
+  <!-- Portal users access only identity-scoped service methods, never these models directly. -->
+  <record id="learning_studio_state_system" model="ir.model.access">
+    <field name="name">Learning Studio state system administration</field>
+    <field name="model_id" ref="model_campus_student_learning_state"/>
+    <field name="group_id" ref="base.group_system"/>
+    <field name="perm_read" eval="True"/><field name="perm_write" eval="True"/>
+    <field name="perm_create" eval="True"/><field name="perm_unlink" eval="True"/>
+  </record>
+  <record id="learning_studio_file_system" model="ir.model.access">
+    <field name="name">Learning Studio file system administration</field>
+    <field name="model_id" ref="model_campus_student_learning_file"/>
+    <field name="group_id" ref="base.group_system"/>
+    <field name="perm_read" eval="True"/><field name="perm_write" eval="True"/>
+    <field name="perm_create" eval="True"/><field name="perm_unlink" eval="True"/>
+  </record>
+  <record id="learning_studio_state_company" model="ir.rule">
+    <field name="name">Learning Studio state permitted college</field>
+    <field name="model_id" ref="model_campus_student_learning_state"/>
+    <field name="domain_force">[('company_id','in',company_ids)]</field>
+  </record>
+  <record id="learning_studio_file_company" model="ir.rule">
+    <field name="name">Learning Studio files permitted college</field>
+    <field name="model_id" ref="model_campus_student_learning_file"/>
+    <field name="domain_force">[('company_id','in',company_ids)]</field>
+  </record>
+</odoo>

@@ -31,6 +31,7 @@
         "security/coe_workspace.xml", "views/coe_workspace.xml",
         "views/academics_ui.xml", "views/owner_communication.xml", "data/owner_communication.xml",
         "views/owner_staff_ui.xml", "views/owner_attendance.xml",
+        "security/student_learning_studio.xml", "views/student_learning_studio.xml",
         "views/complaints.xml", "views/complaints_portal.xml",
         "security/college_calendar.xml", "views/college_calendar.xml", "views/owner_fees.xml", "views/faculty_library.xml", "views/hod_directory.xml",
     ],
@@ -64,6 +65,8 @@
             "ideastone_erp/static/src/js/student_od.js",
             "ideastone_erp/static/src/scss/student_placements.scss",
             "ideastone_erp/static/src/js/student_placements.js",
+            "ideastone_erp/static/src/scss/student_learning_studio.scss",
+            ("before", "ideastone_erp/static/src/js/student_portal.js", "ideastone_erp/static/src/js/student_learning_studio.js"),
         ],
         "web.assets_backend": [
             "ideastone_erp/static/src/js/hall_allocation.js",

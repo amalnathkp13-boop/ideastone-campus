@@ -31,7 +31,8 @@ async function visit(page, section) {
         await page.locator(`.student_subnav a[href*="/student/${section}"]`).first().click();
     }
     await page.waitForURL(new RegExp(`/student/${section}`));
-    await page.locator('#student_main h1:visible').waitFor();
+    const content=section==='lms'?page.frameLocator('#student_learning_studio'):page;
+    await content.locator('#student_main h1:visible').waitFor();
     assert.equal(await page.locator('.student_network_error:visible').count(),0);
 }
 async function snapshot(page) {return rpc(page,'campus.student.portal','snapshot');}

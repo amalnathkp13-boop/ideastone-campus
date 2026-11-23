@@ -1,0 +1,21 @@
+/* The supplied learning theme is isolated from ERP styles inside its own document. */
+#campus_student_workspace:has(#student_learning_studio) > .student_main_wrap {
+    > .student_header,
+    > .student_subnav {
+        display: none !important;
+    }
+}
+.student_workspace .student_main.student_lms_main {
+    padding: 0 !important;
+    max-width: none;
+    min-width: 0;
+    overflow: hidden;
+}
+#student_learning_studio {
+    display: block;
+    width: 100%;
+    height: 100dvh;
+    min-height: 280px;
+    border: 0;
+    background: #f8fafc;
+}
