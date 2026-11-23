@@ -1,0 +1,28 @@
+<odoo>
+  <template id="student_learning_studio_shell" inherit_id="ideastone_erp.student_workspace" name="Student LMS">
+    <xpath expr="//main[@id='student_main']" position="attributes">
+      <attribute name="t-attf-class">student_main #{'student_placement_main' if section == 'placements' else ''} #{'student_lms_main' if section == 'lms' else ''}</attribute>
+    </xpath>
+    <xpath expr="//t[@t-if=&quot;section != 'placements'&quot;]" position="attributes">
+      <attribute name="t-if">section not in ('placements', 'lms')</attribute>
+    </xpath>
+    <xpath expr="//div[contains(@class, 'student_demo')]" position="attributes">
+      <attribute name="t-if">d['demo'] and section not in ('placements', 'lms')</attribute>
+    </xpath>
+    <xpath expr="//header[@class='student_page_heading']/.." position="attributes">
+      <attribute name="t-if">section not in ('placements', 'lms')</attribute>
+    </xpath>
+    <xpath expr="//footer[@class='student_footer']" position="attributes">
+      <attribute name="t-if">section not in ('placements', 'lms')</attribute>
+    </xpath>
+    <xpath expr="//nav[@class='student_subnav']/t[@t-elif=&quot;section == 'placements'&quot;]" position="before">
+      <t t-elif="section == 'lms'"><a href="#lms/dashboard">Learning Studio</a></t>
+    </xpath>
+    <xpath expr="//t[@t-call='ideastone_erp.student_placements']" position="before">
+      <t t-elif="section == 'lms'">
+        <iframe id="student_learning_studio" src="/my/campus/student/lms/workspace" title="LMS — Learning Studio" allow="fullscreen"/>
+        <noscript><p>Enable JavaScript to open the interactive Learning Studio.</p></noscript>
+      </t>
+    </xpath>
+  </template>
+</odoo>

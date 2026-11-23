@@ -1,0 +1,318 @@
+[
+  {
+    "id": "ds",
+    "code": "CS201",
+    "title": "Data Structures & Algorithms",
+    "short": "Data structures",
+    "mentor": "Meera Raman",
+    "unit": [
+      "Trees and search",
+      "Traversal and analysis"
+    ],
+    "intro": "Use order and structure to find information efficiently.",
+    "reading": "Ordering a binary search tree",
+    "video": "Searching for a key",
+    "lesson": "Traversing a binary tree",
+    "first": [
+      "A binary search tree stores a key at each node. Every key in its left subtree is smaller, and every key in its right subtree is larger. Our example uses distinct keys.",
+      "Insert 8, then 4, then 12. The first key becomes the root. Compare each later key with 8 to decide which side to use. Try inserting 6. It belongs to the right of 4."
+    ],
+    "transcript": [
+      "Start at 8 and look for 6.",
+      "6 is smaller than 8, so visit its left child, 4.",
+      "6 is larger than 4, so visit its right child, 6. The search succeeds."
+    ],
+    "body": [
+      "A traversal is an order for visiting every node exactly once. In-order traversal visits the left subtree, the current node, and then the right subtree. In a binary search tree, this produces sorted keys.",
+      "Start with the root 8. Follow left children until you reach 2. Visit 2, return to 4, then visit 6. Only after the whole left subtree is finished do you visit 8. Repeat the same rule on the right.",
+      "Pre-order visits the current node first. Post-order visits it last. The tree stays the same. The position of the visit changes the sequence."
+    ],
+    "example": "In-order     2, 4, 6, 8, 10, 12, 14\nPre-order    8, 4, 2, 6, 12, 10, 14\nPost-order   2, 6, 4, 10, 14, 12, 8",
+    "practice": [
+      "Which key follows 6 in the in-order example?",
+      [
+        "4",
+        "8",
+        "12"
+      ],
+      1,
+      "The left subtree is finished after 6, so the traversal returns to the root, 8."
+    ],
+    "quiz": [
+      [
+        "What does in-order traversal return for a binary search tree with distinct keys?",
+        [
+          "Keys in insertion order",
+          "Keys in ascending order",
+          "Only leaf keys"
+        ],
+        1,
+        "The left subtree, node, right subtree order yields ascending keys."
+      ],
+      [
+        "A search takes one branch at each node. What bounds the comparisons?",
+        [
+          "Tree height plus one",
+          "Number of leaves only",
+          "Always exactly two"
+        ],
+        0,
+        "A root-to-leaf search can visit one node per level."
+      ],
+      [
+        "Which traversal visits both children before their parent?",
+        [
+          "Pre-order",
+          "In-order",
+          "Post-order"
+        ],
+        2,
+        "Post-order processes both subtrees before the current node."
+      ]
+    ],
+    "task": "Tree traversal lab",
+    "brief": "Build the tree produced by inserting 10, 5, 15, 2, 7 and 12. Give its in-order and pre-order traversals, then explain how you would search for 7.",
+    "rubric": [
+      "Correct tree structure",
+      "Two labelled traversal sequences",
+      "A step-by-step search trace"
+    ]
+  },
+  {
+    "id": "db",
+    "code": "CS202",
+    "title": "Database Management Systems",
+    "short": "Database systems",
+    "mentor": "Arun Menon",
+    "unit": [
+      "Relational modelling",
+      "Queries and integrity"
+    ],
+    "intro": "Connect records through keys and turn related tables into useful answers.",
+    "reading": "Keys and relationships",
+    "video": "Joining two tables",
+    "lesson": "Writing an inner join",
+    "first": [
+      "A relation stores one kind of fact per row. A primary key uniquely identifies that row. A foreign key refers to a key in another table.",
+      "Keep a course title in the course catalogue. An enrolment row only needs the learner ID and course code. Updating the course title now requires a change in one place."
+    ],
+    "transcript": [
+      "A learner with ID 17 has an enrolment for CS202.",
+      "Find CS202 in the course catalogue.",
+      "Return the learner ID together with the matching course title."
+    ],
+    "body": [
+      "An inner join pairs rows that satisfy its join condition. Write down the two tables and identify the matching keys before choosing the columns to return.",
+      "For an enrolment list, compare enrolment.course_code with course.code. A course with no enrolments has no matching pair and is absent from this result.",
+      "If you need every course, including empty ones, start with course and use a left join to enrolment. Missing matches produce null enrolment fields."
+    ],
+    "example": "SELECT e.learner_id, c.title\nFROM enrolment AS e\nJOIN course AS c\n  ON c.code = e.course_code;",
+    "practice": [
+      "What happens to a course without a matching enrolment in an inner join?",
+      [
+        "It is omitted",
+        "It appears twice",
+        "Its title changes"
+      ],
+      0,
+      "An inner join only returns matching pairs."
+    ],
+    "quiz": [
+      [
+        "What identifies a row uniquely?",
+        [
+          "A primary key",
+          "Any description",
+          "A column alias"
+        ],
+        0,
+        "A primary key enforces row identity."
+      ],
+      [
+        "Which join retains every row from the left table?",
+        [
+          "Inner join",
+          "Left join",
+          "Cross join only"
+        ],
+        1,
+        "Unmatched left rows are retained with nulls on the right."
+      ],
+      [
+        "Why store a title in the course table?",
+        [
+          "To remove the course key",
+          "To hide titles",
+          "To avoid repeated updates"
+        ],
+        2,
+        "One authoritative title avoids inconsistent copies."
+      ]
+    ],
+    "task": "Enrolment query lab",
+    "brief": "Design a course table and an enrolment table. Identify their keys. Write a query that lists every course and its learner count, including courses with zero learners.",
+    "rubric": [
+      "Keys are identified",
+      "Empty courses are preserved",
+      "Count excludes null enrolments"
+    ]
+  },
+  {
+    "id": "dl",
+    "code": "EC203",
+    "title": "Digital Logic Design",
+    "short": "Digital logic",
+    "mentor": "Priya Nair",
+    "unit": [
+      "Logic gates",
+      "Circuit reasoning"
+    ],
+    "intro": "Translate binary inputs into predictable circuit behaviour.",
+    "reading": "Signals and truth tables",
+    "video": "Following a NAND gate",
+    "lesson": "Building a truth table",
+    "first": [
+      "A digital circuit models a signal as one of two values, 0 or 1. A truth table lists the output for each possible combination of inputs.",
+      "With two independent binary inputs, there are four possible input pairs. List them systematically as 00, 01, 10 and 11."
+    ],
+    "transcript": [
+      "Both inputs are high: A equals 1 and B equals 1.",
+      "The AND gate therefore outputs 1.",
+      "An inverter changes that output to 0. This is NAND."
+    ],
+    "body": [
+      "Break a circuit into named intermediate signals. Evaluate one gate at a time for each row. This makes it easier to find a mistaken inversion or swapped input.",
+      "To evaluate NAND, first write a column for A AND B. Then invert each entry to obtain the output column.",
+      "Check the 11 row separately. It is the only input pair that makes the AND gate high, so it is the only pair that makes NAND low."
+    ],
+    "example": "A   B   AND   NAND\n0   0    0      1\n0   1    0      1\n1   0    0      1\n1   1    1      0",
+    "practice": [
+      "What is NAND(0, 1)?",
+      [
+        "0",
+        "1",
+        "Undefined"
+      ],
+      1,
+      "AND produces 0 and the inversion produces 1."
+    ],
+    "quiz": [
+      [
+        "How many rows cover three binary inputs?",
+        [
+          "3",
+          "6",
+          "8"
+        ],
+        2,
+        "There are two choices for each of three inputs."
+      ],
+      [
+        "Which gate inverts its input?",
+        [
+          "NOT",
+          "OR",
+          "AND"
+        ],
+        0,
+        "NOT maps 0 to 1 and 1 to 0."
+      ],
+      [
+        "When is a two-input AND high?",
+        [
+          "If either input is high",
+          "When both are high",
+          "When both are low"
+        ],
+        1,
+        "Both conditions must hold."
+      ]
+    ],
+    "task": "Logic verification lab",
+    "brief": "Construct a truth table for NOT(A OR B). Include the intermediate OR column. Compare your outputs with a NAND table and identify one input pair where they differ.",
+    "rubric": [
+      "All four input pairs",
+      "Correct intermediate outputs",
+      "A justified comparison"
+    ]
+  },
+  {
+    "id": "net",
+    "code": "OE204",
+    "title": "Computer Networks",
+    "short": "Computer networks",
+    "mentor": "Kiran Rao",
+    "unit": [
+      "Packets and frames",
+      "Routing decisions"
+    ],
+    "intro": "Follow a message as it travels between local and remote networks.",
+    "reading": "Packets, frames and addresses",
+    "video": "Following a packet",
+    "lesson": "Choosing a next hop",
+    "first": [
+      "A packet carries network-layer addresses. A link-layer frame carries a packet across a single link. The frame changes as the packet moves between links.",
+      "When a destination is on the local network, the sender can deliver a frame directly. A remote destination requires a router."
+    ],
+    "transcript": [
+      "The destination lies outside the local subnet.",
+      "The routing table selects the default gateway.",
+      "The sender addresses the frame to the gateway."
+    ],
+    "body": [
+      "Routers choose a next hop by matching the destination against their routing table. If several entries match, the most specific prefix wins.",
+      "A route for 10.1.0.0/16 is more specific than 10.0.0.0/8. A packet for 10.1.2.3 uses the /16 route if both are available.",
+      "A default route matches all destinations and is used when no more specific route matches."
+    ],
+    "example": "Destination     Next hop\n10.1.0.0/16     Router B\n10.0.0.0/8      Router A\n0.0.0.0/0       Gateway",
+    "practice": [
+      "Where is a packet for 10.1.4.8 sent in the example?",
+      [
+        "Router A",
+        "Router B",
+        "Gateway"
+      ],
+      1,
+      "The /16 prefix is the most specific matching entry."
+    ],
+    "quiz": [
+      [
+        "Which address helps choose a network route?",
+        [
+          "Destination IP",
+          "Font name",
+          "Frame colour"
+        ],
+        0,
+        "Routers match the destination IP prefix."
+      ],
+      [
+        "Which prefix is more specific?",
+        [
+          "/0",
+          "/8",
+          "/24"
+        ],
+        2,
+        "More fixed prefix bits make a route more specific."
+      ],
+      [
+        "What carries a packet over one link?",
+        [
+          "A directory",
+          "A frame",
+          "A hostname"
+        ],
+        1,
+        "A link-layer frame encloses the packet."
+      ]
+    ],
+    "task": "Route selection lab",
+    "brief": "Use the example table to choose routes for 10.1.2.3, 10.4.0.5 and 192.0.2.8. Justify each choice using prefix length.",
+    "rubric": [
+      "Three correct next hops",
+      "Prefix lengths identified",
+      "Default route explained"
+    ]
+  }
+]

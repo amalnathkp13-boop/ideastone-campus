@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#4f46e5"><title>VCET Learning Studio</title><link id="learning-studio-style" rel="stylesheet" href="/ideastone_erp/static/src/learning_studio/workspace.css"></head>
+<body class="vcet-ui"><div id="campus_student_workspace" class="student_workspace"><a class="student_skip" href="#student_main">Skip to content</a><div class="student_main_wrap">
+<header class="lms-tools" aria-label="Learning Studio header"><div class="lms-heading"><button class="iconbtn lms-campus-menu" aria-label="Toggle campus navigation" data-act="campus-menu"><span data-icon="menu"></span></button><strong>LMS</strong><a href="#dashboard">Learning Studio</a></div><span class="online" id="network"></span><button class="searchbutton" aria-label="Search learning studio" data-act="search"><span data-icon="search"></span><span>Search learning studio</span><kbd>/</kbd></button><button class="iconbtn notice" aria-label="Announcements" data-act="notices"><span data-icon="bell"></span><span id="unread" class="unread"></span></button><button class="avatar" id="avatar" data-act="account" aria-label="Learner profile"></button></header>
+<nav id="nav" class="lms-section-nav" aria-label="LMS sections"></nav>
+<div id="save-status" class="save-status" role="alert" hidden><span></span><button class="btn" data-act="retry-save">Retry save</button><button class="btn" data-act="reload-state" hidden>Reload saved record</button><button class="btn" data-act="portable">Download current copy</button></div>
+<main id="student_main" class="student_main" tabindex="-1"></main></div></div>
+<dialog id="modal" aria-labelledby="dialogtitle"><div class="modalhead"><h2 id="dialogtitle"></h2><button class="iconbtn" data-act="close" aria-label="Close dialog"><span data-icon="close"></span></button></div><div class="modalbody" id="modalbody"></div></dialog><div id="toast" role="status" aria-live="polite" class="toast"></div><noscript>Enable JavaScript to open the interactive learning workspace.</noscript>
+<script id="portable-state" type="application/json">{}</script>
+<!-- LEARNING_STUDIO_BOOTSTRAP -->
+<script id="learning-studio-script" src="/ideastone_erp/static/src/learning_studio/workspace.js"></script></body></html>
