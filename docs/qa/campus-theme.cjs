@@ -8,10 +8,25 @@ async function assertCampusTheme(page) {
         const headings = [...document.querySelectorAll('h1,h2,h3')].filter(visible).map(el => {
             const style = getComputedStyle(el);
             const panelTitle = el.matches(':is(.panel-head,.panelhead,.section-head,.sectionhead,.academic_card_head,.profile_card_head,.timetable_card_head,.attendance_panel_head,.exam_panel_head,.coe-panel-head) h3:first-child');
+            const profile = !!el.closest('.student_profile_view');
+            const profileHero = profile && !!el.closest('.profile_hero');
+            let expectedSize = el.tagName === 'H1' ? (innerWidth < 768 ? '24px' : '26px') : el.tagName === 'H3' ? (panelTitle ? '17px' : '15px') : '17px';
+            let expectedWeight = el.tagName === 'H1' ? '780' : el.tagName === 'H3' && !panelTitle ? '650' : '760';
+            let expectedColor = null;
+            if (profile) {
+                expectedWeight = '760';
+                expectedColor = 'rgb(16, 45, 73)';
+                if (el.tagName === 'H1') {
+                    expectedSize = innerWidth <= 440 ? '27px' : '31px';
+                    expectedColor = 'rgb(14, 49, 81)';
+                } else if (profileHero) {
+                    expectedSize = innerWidth <= 800 ? '21px' : '24px';
+                    expectedColor = 'rgb(255, 255, 255)';
+                }
+            }
             return {text:el.textContent.trim().slice(0,80), font:style.fontFamily, size:style.fontSize,
-                weight:style.fontWeight, color:style.color, tag:el.tagName,
-                expectedSize:el.tagName === 'H1' ? (innerWidth < 768 ? '24px' : '26px') : el.tagName === 'H3' ? (panelTitle ? '17px' : '15px') : '17px',
-                expectedWeight:el.tagName === 'H1' ? '780' : el.tagName === 'H3' && !panelTitle ? '650' : '760'};
+                weight:style.fontWeight, color:style.color, tag:el.tagName, profile,
+                expectedSize, expectedWeight, expectedColor};
         });
         const workspace = document.querySelector('.o_web_client:has(.campus_navigation),.campus_portal,.student_workspace,.parent_workspace,.vcet_login,.qp-faculty,.qp-hod,.coe-workspace');
         const root = getComputedStyle(workspace || document.documentElement);
@@ -27,16 +42,18 @@ async function assertCampusTheme(page) {
         return {headings, blue:root.getPropertyValue('--ui-blue').trim(), canvas:root.getPropertyValue('--ui-canvas').trim(), icon:icon ? getComputedStyle(icon).fontFamily : null,
             metadata,
             card:cardStyle ? {background:cardStyle.backgroundColor, radius:cardStyle.borderRadius} : null,
-            button:buttonStyle ? {background:buttonStyle.backgroundColor, size:buttonStyle.fontSize, weight:buttonStyle.fontWeight} : null};
+            button:buttonStyle ? {background:buttonStyle.backgroundColor, size:buttonStyle.fontSize, weight:buttonStyle.fontWeight,
+                profile:!!primary.closest('.student_profile_view')} : null};
     });
     assert.equal(result.blue, '#1769e8', 'Shared theme missing from the asset bundle');
     assert.equal(result.canvas, '#f4f7fb');
     for (const h of result.headings) {
         assert.match(h.font, /^Inter,/, `${h.text}: font family`);
-        if (h.tag === 'H2') assert(['17px', '21px'].includes(h.size), `${h.text}: size drifted: ${h.size}`);
+        if (h.tag === 'H2' && !h.profile) assert(['17px', '21px'].includes(h.size), `${h.text}: size drifted: ${h.size}`);
         else assert.equal(h.size, h.expectedSize, `${h.text}: size`);
         assert.equal(h.weight, h.expectedWeight, `${h.text}: weight`);
-        assert(['rgb(19, 42, 68)', 'rgb(255, 255, 255)'].includes(h.color), `${h.text}: theme color drifted: ${h.color}`);
+        if (h.profile) assert.equal(h.color, h.expectedColor, `${h.text}: reference color`);
+        else assert(['rgb(19, 42, 68)', 'rgb(255, 255, 255)'].includes(h.color), `${h.text}: theme color drifted: ${h.color}`);
     }
     if (result.icon) assert.match(result.icon, /FontAwesome/, 'Text rules overwrote the icon font');
     for (const meta of result.metadata) {
@@ -49,7 +66,8 @@ async function assertCampusTheme(page) {
         assert.equal(result.card.radius, '15px', 'Card radius drifted');
     }
     if (result.button) {
-        assert(['rgb(23, 105, 232)', 'rgb(17, 83, 168)'].includes(result.button.background), `Primary or hover color drifted: ${result.button.background}`);
+        const primaryColor = result.button.profile ? 'rgb(23, 105, 210)' : 'rgb(23, 105, 232)';
+        assert([primaryColor, 'rgb(17, 83, 168)'].includes(result.button.background), `Primary or hover color drifted: ${result.button.background}`);
         assert.equal(result.button.size, '14px', 'Primary font size drifted');
         assert(['700', '750'].includes(result.button.weight), 'Primary font weight drifted');
     }

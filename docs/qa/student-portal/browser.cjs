@@ -141,6 +141,10 @@ async function save(page, control) {
         await page.locator('.student_subnav').getByRole('link',{name:'Overview',exact:true}).click();
         assert(await page.locator('#student_timetable_overview').isVisible());
         await page.getByRole('button',{name:'Timetable',exact:true}).click();
+        const timetableBackground = await page.locator('.student_timetable_view').evaluate(el=>getComputedStyle(el).backgroundColor);
+        await visit(page,'on-duty');
+        assert.equal(await page.locator('.student_od_view').evaluate(el=>getComputedStyle(el).backgroundColor),timetableBackground);
+        assert.equal(await page.locator('.student_main').evaluate(el=>getComputedStyle(el).backgroundColor),timetableBackground);
         await visit(page,'attendance');
         assert.equal(await page.locator('.attendance_kpi:visible').count(),4);
         assert.equal(await page.locator('.attendance_register_row').count(),initial.attendance.rows.length);
@@ -160,7 +164,7 @@ async function save(page, control) {
         assert.equal(await hourly.getByLabel('Student',{exact:true}).getAttribute('readonly'),'readonly');
         assert.equal(await hourly.locator('h1').evaluate(el=>getComputedStyle(el).fontSize),'26px');
         assert.equal(await hourly.locator('h1').evaluate(el=>getComputedStyle(el).fontWeight),'780');
-        assert.equal(await hourly.locator('.attendance_kpi strong').first().evaluate(el=>getComputedStyle(el).fontWeight),'780');
+        assert.equal(await hourly.locator('.attendance_kpi strong').first().evaluate(el=>getComputedStyle(el).fontWeight),'650');
         const slotCounts=await hourly.locator('[data-attendance-hourly-slots] tr').evaluateAll(rows=>rows.map(row=>Number(row.cells[1]?.textContent || 0)));
         assert.equal(slotCounts.reduce((sum,value)=>sum+value,0),initial.attendance.rows.length);
         await hourly.getByLabel('Attendance status',{exact:true}).selectOption('absent');
@@ -184,10 +188,16 @@ async function save(page, control) {
         await page.setViewportSize({width:1440,height:1000});
         await visit(page,'profile');
         assert.equal(await page.locator('.profile_metric').count(),3);
+        assert.deepEqual(await page.locator('.profile_metric strong').first().evaluate(el=>({
+            size:getComputedStyle(el).fontSize, weight:getComputedStyle(el).fontWeight,
+        })),{size:'17px',weight:'600'});
         assert.match(await page.locator('.profile_completeness').innerText(),new RegExp(`${initial.profile.percent}%`));
-        assert.equal(await page.locator('.profile_status.good').first().evaluate(element=>getComputedStyle(element).color),'rgb(14, 134, 100)');
+        assert.equal(await page.locator('.profile_status.good').first().evaluate(element=>getComputedStyle(element).color),'rgb(22, 131, 93)');
         await page.locator('.student_subnav').getByRole('link',{name:'Documents',exact:true}).click();
         assert(await page.locator('#student_documents').isVisible());
+        await page.locator('.student_subnav').getByRole('link',{name:'My Profile',exact:true}).click();
+        assert(await page.locator('#student_profile_overview').isVisible());
+        await page.locator('.student_subnav').getByRole('link',{name:'Documents',exact:true}).click();
         assert(await page.locator('#student_documents').evaluate(element=>element.getBoundingClientRect().top>=128),'Sticky header obscures the document anchor');
         await page.locator('.student_subnav').getByRole('link',{name:'Personal details',exact:true}).click();
         await page.locator('.profile_contact_edit summary').click();
