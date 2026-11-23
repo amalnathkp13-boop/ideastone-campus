@@ -133,7 +133,7 @@ class CampusBase extends Component {
         if (module.key === "students" && this.state.is_owner_workspace) {
             return module.items.filter(item => item.page !== "faculty-module");
         }
-        return module.key === "home" || module.items.some(item => item.label === "Overview") ? module.items :
+        return ["home", "hall-allocation"].includes(module.key) || module.items.some(item => item.label === "Overview") ? module.items :
             [{label: "Overview", page: "faculty-module"}, ...module.items];
     }
     submoduleActive(item) {
@@ -199,7 +199,7 @@ class CampusBase extends Component {
             return this.open(module.items[0]);
         }
         if ((module.items?.[0]?.label === "Overview" ||
-            ((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library", "grievances", "hod-directory"].includes(module.key) ||
+            ((module.key === "staff" && this.state.faculty_profile_enabled) || ["teaching", "od", "attendance", "library", "grievances", "hod-directory", "hall-allocation"].includes(module.key) ||
              (this.state.is_owner_workspace && ["admissions", "students", "exams", "academics", "fees", "calendar", "staff", "communication"].includes(module.key)))) && module.items?.[0]?.action) {
             this.state.module = module.key;
             return this.open(module.items[0]);
@@ -627,14 +627,14 @@ class CampusBase extends Component {
             .reduce((parts, point) => { if (point === null) parts.push([]); else parts[parts.length - 1].push(point); return parts; }, [[]]).filter(part => part.length).map(part => part.join(" "));
     }
     get ownerQuickActions() {
-        return [{label: "Admissions", detail: "Applications & decisions", icon: "envelope-o", action: "ideastone_erp.mvp_applications"},
-            {label: "Fee collections", detail: "Student fee accounts", icon: "inr", action: "ideastone_erp.action_owner_fees_overview"},
-            {label: "Attendance", detail: "Completed class registers", icon: "check", action: "ideastone_erp.mvp_attendance"},
-            {label: "College calendar", detail: "Campus activities", icon: "calendar", action: "ideastone_erp.action_college_calendar"},
-            {label: "Exams", detail: "Schedules & results", icon: "file-text-o", action: "ideastone_erp.mvp_exams"},
-            {label: "Faculty", detail: "Staff directory", icon: "users", action: "ideastone_erp.action_owner_staff_directory"},
-            {label: "Fleet", detail: "Bus routes", icon: "bus", kind: "fleet", allowed: this.ownerUI.kpis.some(card => card.kind === "fleet_delayed" && card.allowed)},
-            {label: "Reports", detail: "Campus analytics", icon: "bar-chart", module: "reports"}]
+        return [{label: "Admissions", detail: "Applications & decisions", icon: "folder-open-o", tone: "violet", action: "ideastone_erp.mvp_applications"},
+            {label: "Fee collections", detail: "Student fee accounts", icon: "inr", tone: "emerald", action: "ideastone_erp.action_owner_fees_overview"},
+            {label: "Attendance", detail: "Completed class registers", icon: "calendar-check-o", tone: "teal", action: "ideastone_erp.mvp_attendance"},
+            {label: "College calendar", detail: "Campus activities", icon: "calendar-o", tone: "blue", action: "ideastone_erp.action_college_calendar"},
+            {label: "Exams", detail: "Schedules & results", icon: "pencil-square-o", tone: "amber", action: "ideastone_erp.mvp_exams"},
+            {label: "Faculty", detail: "Staff directory", icon: "id-card-o", tone: "indigo", action: "ideastone_erp.action_owner_staff_directory"},
+            {label: "Fleet", detail: "Bus routes", icon: "bus", tone: "orange", kind: "fleet", allowed: this.ownerUI.kpis.some(card => card.kind === "fleet_delayed" && card.allowed)},
+            {label: "Reports", detail: "Campus analytics", icon: "bar-chart", tone: "slate", module: "reports"}]
             .filter(item => item.action ? this.ownerCanOpen(item.action) : item.module ? this.state.faculty_modules.some(module => module.key === item.module) : item.allowed);
     }
     ownerQuick(item) { return item.action ? this.ownerOpenAction(item.action) : item.kind ? this.ownerOverviewAction(item.kind) : this.chooseModule({key: item.module}); }

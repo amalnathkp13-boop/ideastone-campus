@@ -11,7 +11,7 @@ Ideastone Campus AI Pack
   and feedback summaries. Uses any OpenAI-compatible provider (OpenAI, Groq, a self-hosted
   Ollama server...). Off until the college configures it; every call is logged.
 """,
-    "version": "17.0.1.0.3",
+    "version": "17.0.1.0.4",
     "category": "Education",
     "author": "Ideastone Technologies Pvt Ltd",
     "license": "OPL-1",
@@ -27,11 +27,15 @@ Ideastone Campus AI Pack
     ],
     "assets": {
         "web.assets_backend": [
+            "ideastone_ai/static/src/js/owner_insights.js",
+            "ideastone_ai/static/src/xml/owner_insights.xml",
             "ideastone_ai/static/src/js/success_radar.js",
             "ideastone_ai/static/src/xml/success_radar.xml",
             "ideastone_ai/static/src/js/assistant.js",
             "ideastone_ai/static/src/xml/assistant.xml",
             "ideastone_ai/static/src/scss/ai_pack.scss",
+            "ideastone_ai/static/src/scss/owner_insights.scss",
+            "ideastone_ai/static/src/scss/owner_ai_tools.scss",
         ],
         "web.assets_frontend": [
             "ideastone_ai/static/src/scss/portal_nudge.scss",

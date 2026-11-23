@@ -2,7 +2,7 @@
   <t t-name="ideastone_erp.OwnerFeesWorkspace">
     <main class="campus_owner_fees_workspace" tabindex="0">
       <div class="content">
-        <div class="crumb">Campus / <t t-esc="props.action.context?.campus_workspace_role || 'Owner'"/> workspace / Fees &amp; Payments / <strong t-esc="title"/>
+        <div class="crumb campus_page_trail">Campus / <t t-esc="props.action.context?.campus_workspace_role || 'Owner'"/> workspace / Fees &amp; Payments / <strong t-esc="title"/>
         </div>
         <p t-if="state.loading" role="status">Refreshing finance records…</p>
         <div t-if="state.error" class="finance-error" role="alert">
@@ -424,7 +424,7 @@
                 <strong>No departments match these filters.</strong>Try another department name, quota type or status.</div>
             </div>
             <div class="notice">
-              <strong>Sample data:</strong> Department names, fee amounts and statuses are illustrative only. Replace them with approved VCET fee schedules. GQ/MQ amounts should be versioned by academic year and approval date.</div>
+              <span class="campus_page_sample"><strong>Sample data:</strong> Department names, fee amounts and statuses are illustrative only. Replace them with approved VCET fee schedules. </span>GQ/MQ amounts should be versioned by academic year and approval date.</div>
           </section>
           <section id="page-accounts" class="page" t-if="page === 'accounts'">
             <div class="title-row">
@@ -891,7 +891,7 @@
           </section>
         </t>
         <div class="footer" t-if="d">
-          <t t-esc="d.company"/> · College finance workspace · <t t-esc="d.demo ? 'Sample records' : 'Saved ledger records'"/>
+          <t t-esc="d.company"/> · College finance workspace<span t-att-class="{'campus_page_sample': d.demo}"> · <t t-esc="d.demo ? 'Sample records' : 'Saved ledger records'"/></span>
         </div>
       </div>
     </main>

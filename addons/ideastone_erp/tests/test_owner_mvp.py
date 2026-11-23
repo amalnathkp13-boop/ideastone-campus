@@ -248,6 +248,7 @@ class TestOwnerMVP(OwnerMVPFixture, TransactionCase):
         with self.assertRaises(AccessError):
             self.env["op.result.line"].with_user(self.accountant).create({"marks": 50})
         overview = self.env["campus.dashboard"].with_user(self.readonly).get_overview()
+        self.assertFalse(overview["is_owner_login"])
         self.assertEqual(overview["faculty_modules"][0]["label"], "Dashboard")
         self.env["campus.dashboard"].with_user(self.readonly).get_owner_metrics()
         with self.assertRaises(AccessError):
@@ -286,6 +287,7 @@ class TestOwnerMVP(OwnerMVPFixture, TransactionCase):
         detail.action_verify()
         self.assertEqual(detail.reviewer_id, self.owner)
         overview = self.env["campus.dashboard"].with_user(self.owner).get_overview()
+        self.assertTrue(overview["is_owner_login"])
         actions = {item.get("action") for module in overview["faculty_modules"] for item in module["items"]}
         self.assertIn("ideastone_erp.action_owner_staff_directory", actions)
         self.assertIn("ideastone_erp.action_owner_staff_od", actions)

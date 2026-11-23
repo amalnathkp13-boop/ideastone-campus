@@ -1,7 +1,7 @@
 <templates xml:space="preserve">
   <t t-name="ideastone_erp.OwnerCommunication">
     <main class="owner-communication"><div class="oc-content">
-      <div class="oc-crumb">VCET Campus / Communication / <strong t-esc="label"/></div>
+      <div class="oc-crumb campus_page_trail">VCET Campus / Communication / <strong t-esc="label"/></div>
       <p t-if="state.loading" class="oc-loading" role="status">Loading communication records…</p>
       <div t-if="state.error" class="oc-note" role="alert"><span t-esc="state.error"/> <button class="oc-btn" t-on-click="load">Retry</button></div>
       <t t-if="state.data &amp;&amp; !state.error">

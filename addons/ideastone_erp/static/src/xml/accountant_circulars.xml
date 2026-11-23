@@ -3,7 +3,7 @@
 <main class="campus_fee_circulars">
   <nav class="topnav" aria-label="Fee circular navigation"><span class="module">Fee circulars</span><button type="button" class="arrow" aria-label="Previous circular page" title="Previous circular page" t-att-disabled="state.page === 0" t-on-click="() => this.page(-1)">‹</button><button type="button" class="tab active" t-on-click="scrollRegister">Fee related circulars</button><button type="button" class="arrow" aria-label="Next circular page" title="Next circular page" t-att-disabled="state.page &gt;= pageCount - 1" t-on-click="() => this.page(1)">›</button></nav>
   <section class="content">
-    <div class="breadcrumb">VCET Campus <span>/</span> Fee circulars</div>
+    <div class="breadcrumb campus_page_trail">VCET Campus <span>/</span> Fee circulars</div>
     <header class="pagehead"><div><h1>Fee circulars</h1><p class="subtitle">Create, publish and track fee-related announcements for students and guardians.</p></div><div class="actions"><button type="button" class="btn" t-on-click="archiveView">View archive</button><button type="button" class="btn primary" t-ref="newCircularButton" t-on-click="() => this.open()">＋ New circular</button></div></header>
     <div t-if="state.error" class="fee_error" role="alert"><span t-esc="state.error"/><button type="button" class="btn" t-on-click="load">Retry</button></div>
     <p t-if="state.loading" role="status" class="fee_loading">Loading fee circulars…</p>

@@ -2,7 +2,7 @@
   <t t-name="ideastone_erp.AccountantCollectionsOverview">
     <div class="campus_accountant_collections">
       <t t-if="state.page === 'accountant-collections-overview'">
-      <div class="collections_crumb"><span>VCET Campus / Collections</span><span><t t-esc="state.today.slice(0, 4)"/> · Accountant</span></div>
+      <div class="collections_crumb campus_page_context"><span class="campus_page_trail">VCET Campus / Collections</span><span><t t-esc="state.today.slice(0, 4)"/> · Accountant</span></div>
       <div class="collections_head">
         <div><h1>Collections overview</h1><p>Monitor fee collection, outstanding balances and recent activity.</p></div>
         <div class="collections_actions">
@@ -61,7 +61,7 @@
       </t>
       </t>
       <t t-else="">
-        <div class="collections_crumb"><span>VCET Campus / Collections / <t t-esc="collectionPage.title"/></span><span><t t-esc="state.today.slice(0, 4)"/> · Accountant</span></div>
+        <div class="collections_crumb campus_page_context"><span class="campus_page_trail">VCET Campus / Collections / <t t-esc="collectionPage.title"/></span><span><t t-esc="state.today.slice(0, 4)"/> · Accountant</span></div>
         <div class="collections_head">
           <div><h1 t-esc="collectionPage.title"/><p t-esc="collectionPage.description"/></div>
           <div class="collections_actions">

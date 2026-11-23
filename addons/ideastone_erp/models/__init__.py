@@ -87,3 +87,4 @@ from . import complaints
 from . import hod_dashboard
 from . import hod_directory
 from . import fleet_management
+from . import hall_allocation

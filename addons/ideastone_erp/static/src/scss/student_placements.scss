@@ -40,10 +40,11 @@
 
     .crumb {
         display:flex;
-        justify-content:space-between;
+        justify-content:flex-end;
         color:var(--muted);
         font-size:13px;
-        margin-bottom:22px;
+        margin-bottom:0;
+        > span:first-child { display: none; }
     }
 
     .crumb b {

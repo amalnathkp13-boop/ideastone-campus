@@ -284,7 +284,7 @@ class AdminOverviewUI(models.AbstractModel):
         for request in decisions[:3]:
             days = (request.date_to - today).days if request.date_to else None
             name = request.name.lower()
-            tone, icon = ("cultural", "♫") if "cultur" in name else ("campaign", "⚑") if "campaign" in name else ("sponsor", "♧")
+            tone, icon = ("rose", "music") if "cultur" in name else ("orange", "bullhorn") if "campaign" in name else ("indigo", "briefcase")
             decision_rows.append({"id": request.id, "name": request.name, "amount": request.amount,
                 "deadline": request.date_to.strftime("%d %b %Y") if request.date_to else None, "days": days,
                 "impact": request.description, "tone": tone, "icon": icon})
@@ -332,10 +332,10 @@ class AdminOverviewUI(models.AbstractModel):
                 breakdowns=len(breakdowns), total=len(all_buses)) if fleet_allowed else _("Reporting access required")}
         stats["complaints"] = {"kind": "complaints", "value": len(complaints) if complaint_allowed else "—",
             "allowed": complaint_allowed, "detail": _("Open complaints · current college") if complaint_allowed else _("Reporting access required")}
-        specs = [("active_students", "Active students", "users", "blue"), ("admissions", "Admissions pipeline", "envelope-o", "blue"),
-                 ("attendance_today", "Attendance today", "check", "blue"), ("collection", "Fee collection", "inr", "blue"),
-                 ("dues", "Outstanding fees", "inr", "amber"), ("faculty", "Faculty & staff", "users", "green"),
-                 ("fleet_delayed", "Fleet delayed", "bus", "amber"), ("complaints", "Complaints", "flag-o", "red")]
+        specs = [("active_students", "Active students", "graduation-cap", "blue"), ("admissions", "Admissions pipeline", "folder-open-o", "violet"),
+                 ("attendance_today", "Attendance today", "calendar-check-o", "teal"), ("collection", "Fee collection", "inr", "emerald"),
+                 ("dues", "Outstanding fees", "hourglass-half", "amber"), ("faculty", "Faculty & staff", "id-card-o", "indigo"),
+                 ("fleet_delayed", "Fleet delayed", "bus", "orange"), ("complaints", "Complaints", "commenting-o", "rose")]
         kpis = [dict(stats[kind], label=label, icon=icon, tone=tone) for kind, label, icon, tone in specs]
         fleet = None
         user = self.env.user
@@ -349,18 +349,18 @@ class AdminOverviewUI(models.AbstractModel):
         insights = []
         shortage = sum(row["value"] < threshold for row in department_rows)
         if shortage:
-            insights.append({"title": _("Attendance needs attention"), "text": _("%(count)s departments are below the %(rate)s%% attendance threshold in this period.", count=shortage, rate=threshold), "tag": _("ACADEMICS"), "icon": "line-chart", "source": "attendance"})
+            insights.append({"title": _("Attendance needs attention"), "text": _("%(count)s departments are below the %(rate)s%% attendance threshold in this period.", count=shortage, rate=threshold), "tag": _("ACADEMICS"), "icon": "line-chart", "tone": "teal", "source": "attendance"})
         elif pending:
-            insights.append({"title": _("Attendance registers need completion"), "text": _("%(count)s elapsed sessions in this period have no completed attendance register. Ask the responsible faculty to submit attendance.", count=len(pending)), "tag": _("ACADEMICS"), "icon": "calendar-check-o", "source": "attendance_pending"})
+            insights.append({"title": _("Attendance registers need completion"), "text": _("%(count)s elapsed sessions in this period have no completed attendance register. Ask the responsible faculty to submit attendance.", count=len(pending)), "tag": _("ACADEMICS"), "icon": "calendar-check-o", "tone": "teal", "source": "attendance_pending"})
         if overdue_dues:
-            insights.append({"title": _("Fee follow-up opportunity"), "text": _("%(count)s posted invoices have an outstanding balance past their due date as of %(date)s.", count=len(overdue_dues), date=str(f["date_to"])), "tag": _("FINANCE"), "icon": "inr", "source": "dues"})
+            insights.append({"title": _("Fee follow-up opportunity"), "text": _("%(count)s posted invoices have an outstanding balance past their due date as of %(date)s.", count=len(overdue_dues), date=str(f["date_to"])), "tag": _("FINANCE"), "icon": "hourglass-half", "tone": "amber", "source": "dues"})
         if stats["review"]["allowed"] and stats["review"]["value"]:
-            insights.append({"title": _("Applications awaiting review"), "text": _("%(count)s applications in this period are awaiting a decision. Review the admissions register for the next action.", count=stats["review"]["value"]), "tag": _("ADMISSIONS"), "icon": "clock-o", "source": "review"})
+            insights.append({"title": _("Applications awaiting review"), "text": _("%(count)s applications in this period are awaiting a decision. Review the admissions register for the next action.", count=stats["review"]["value"]), "tag": _("ADMISSIONS"), "icon": "folder-open-o", "tone": "violet", "source": "review"})
         overdue_complaints = complaints.filtered(lambda request: request.date_to and request.date_to < today)
-        watches = [{"kind": "overdue_complaints", "label": _("Overdue complaints"), "count": len(overdue_complaints), "detail": _("Open complaints past their requested response date"), "icon": "flag-o", "tone": "red", "allowed": complaint_allowed},
-            {"kind": "overdue_dues", "label": _("Overdue fee invoices"), "count": len(overdue_dues), "detail": _("Outstanding invoices past due in the selected academic scope"), "icon": "inr", "tone": "amber", "allowed": stats["dues"]["allowed"]},
-            {"kind": "attendance_pending", "label": _("Attendance not submitted"), "count": len(pending), "detail": _("Elapsed sessions in this period without completed attendance"), "icon": "check", "tone": "blue", "allowed": self.env["op.attendance.sheet"].check_access_rights("read", raise_exception=False)},
-            {"kind": "fleet_delayed", "label": _("Delayed buses"), "count": len(delayed_buses), "detail": _("Current fleet status"), "icon": "bus", "tone": "amber", "allowed": fleet_allowed}]
+        watches = [{"kind": "overdue_complaints", "label": _("Overdue complaints"), "count": len(overdue_complaints), "detail": _("Open complaints past their requested response date"), "icon": "commenting-o", "tone": "rose", "allowed": complaint_allowed},
+            {"kind": "overdue_dues", "label": _("Overdue fee invoices"), "count": len(overdue_dues), "detail": _("Outstanding invoices past due in the selected academic scope"), "icon": "hourglass-half", "tone": "amber", "allowed": stats["dues"]["allowed"]},
+            {"kind": "attendance_pending", "label": _("Attendance not submitted"), "count": len(pending), "detail": _("Elapsed sessions in this period without completed attendance"), "icon": "calendar-check-o", "tone": "teal", "allowed": self.env["op.attendance.sheet"].check_access_rights("read", raise_exception=False)},
+            {"kind": "fleet_delayed", "label": _("Delayed buses"), "count": len(delayed_buses), "detail": _("Current fleet status"), "icon": "bus", "tone": "orange", "allowed": fleet_allowed}]
         calendar = self._owner_calendar()
         data["overview_ui"] = {"kpis": kpis, "fleet": fleet, "activity": activity, "departments": department_rows, "threshold": threshold, "currency_symbol": "₹",
             "chart_months": chart_months, "annual_fees": self._owner_annual_fees(fee_year_id),

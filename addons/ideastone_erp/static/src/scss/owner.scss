@@ -154,3 +154,42 @@ font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif
   .admin_overview .field {min-width:140px;}
   .modal-footer .admin_overview {display:flex;justify-content:flex-end;gap:9px;width:100%;}
 }
+/* Owner overview icons use the same category colors across cards and shortcuts. */
+.admin_overview .owner-icon {
+  --owner-icon-color: #2563eb;
+  --owner-icon-background: #eff6ff;
+
+  flex-shrink: 0;
+  line-height: 1;
+  border: 1px solid currentColor;
+  border-color: color-mix(in srgb, var(--owner-icon-color) 14%, transparent);
+  border-radius: 10px;
+
+  &.violet { --owner-icon-color: #7c3aed; --owner-icon-background: #f5f3ff; }
+  &.teal { --owner-icon-color: #0f766e; --owner-icon-background: #f0fdfa; }
+  &.emerald { --owner-icon-color: #15803d; --owner-icon-background: #f0fdf4; }
+  &.amber { --owner-icon-color: #b45309; --owner-icon-background: #fffbeb; }
+  &.indigo { --owner-icon-color: #4f46e5; --owner-icon-background: #eef2ff; }
+  &.orange { --owner-icon-color: #c2410c; --owner-icon-background: #fff7ed; }
+  &.rose { --owner-icon-color: #be123c; --owner-icon-background: #fff1f2; }
+  &.slate { --owner-icon-color: #475569; --owner-icon-background: #f1f5f9; }
+
+  > .fa { color: inherit; font-size: inherit; line-height: 1; }
+}
+
+/* Match the shared theme's layer so its generic blue KPI rule cannot mask these colors. */
+@layer campus-theme {
+  body.o_web_client .campus_dashboard .admin_overview .owner-icon {
+    color: var(--owner-icon-color) !important;
+    background: var(--owner-icon-background) !important;
+  }
+}
+.admin_overview {
+  .hero-illustration { color: #dbeafe; opacity: 1; }
+  .owner-filter-icon { color: #4f46e5; }
+  .owner-refresh-icon { color: #0f766e; }
+  .owner-export-icon { color: #475569; }
+  .owner-link-icon { margin-left: 4px; font-size: 11px; }
+  .decision-deadline > .fa { color: #64748b; }
+  .quick-icon { width: 34px; height: 34px; }
+}

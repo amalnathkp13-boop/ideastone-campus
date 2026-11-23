@@ -17,6 +17,7 @@
         "security/faculty_tools.xml", "views/faculty_tools.xml", "views/student_leave.xml", "views/faculty_reports.xml",
         "security/mvp.xml", "security/accountant.xml", "security/accountant_transport.xml", "security/hod_od.xml", "data/mvp.xml", "data/hod_od.xml", "views/mvp.xml", "views/mvp_search.xml", "views/mvp_reports.xml", "views/accountant.xml", "views/accountant_transport.xml", "views/accountant_circulars.xml",
         "views/fleet_management.xml",
+        "security/hall_allocation.xml", "security/hall/ir.model.access.csv", "views/hall_allocation.xml",
         "views/accountant_directory.xml",
         "views/accountant_spending.xml",
         "security/student_portal.xml", "data/student_portal.xml", "views/student_operations.xml", "views/student_portal.xml", "views/student_academics.xml", "views/student_timetable.xml", "views/student_examinations.xml", "views/student_attendance.xml",
@@ -68,6 +69,9 @@
             ("before", "ideastone_erp/static/src/js/student_portal.js", "ideastone_erp/static/src/js/student_learning_studio.js"),
         ],
         "web.assets_backend": [
+            "ideastone_erp/static/src/js/hall_allocation.js",
+            "ideastone_erp/static/src/xml/hall_allocation.xml",
+            "ideastone_erp/static/src/scss/hall_allocation.scss",
             "ideastone_erp/static/src/js/accountant_transport.js",
             "ideastone_erp/static/src/xml/accountant_transport.xml",
             ("before", "ideastone_campus/static/src/scss/design_system.scss", "ideastone_erp/static/src/scss/accountant_transport.scss"),
